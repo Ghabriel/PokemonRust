@@ -1,0 +1,4 @@
+(
+  title: "PokemonRust",
+  dimensions: Some((800, 600)),
+)

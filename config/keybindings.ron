@@ -1,0 +1,10 @@
+(
+    axes: {
+        "horizontal": Emulated(pos: Key(Right), neg: Key(Left)),
+        "vertical": Emulated(pos: Key(Up), neg: Key(Down)),
+    },
+    actions: {
+        "action": [[Key(Z)]],
+        "cancel": [[Key(X)]],
+    },
+)
