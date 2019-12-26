@@ -5,6 +5,7 @@ use amethyst::{
         AnimationControlSet,
         AnimationSet,
         AnimationSetPrefab,
+        ControlState,
         EndControl,
         get_animation_set,
     },
@@ -26,11 +27,12 @@ use amethyst::{
         Entity,
         Join,
         ReadStorage,
-        world::Builder,
+        world::{Builder, EntitiesRes},
         World,
         WriteStorage,
     },
     Error,
+    input::InputEvent,
     prelude::*,
     renderer::{
         Camera,
@@ -81,6 +83,7 @@ pub fn load_sprite_sheet(world: &World) -> Handle<SpriteSheet> {
 #[derive(Eq, PartialOrd, PartialEq, Hash, Debug, Copy, Clone, Deserialize, Serialize)]
 enum AnimationId {
     Walk,
+    Run,
 }
 
 #[derive(Debug, Clone, Deserialize, PrefabData)]
@@ -92,7 +95,7 @@ struct MyPrefabData {
 #[derive(Default)]
 pub struct OverworldState<'a, 'b> {
     pub dispatcher: Option<Dispatcher<'a, 'b>>,
-    pub progress_counter: ProgressCounter,
+    pub progress_counter: Option<ProgressCounter>,
 }
 
 impl SimpleState for OverworldState<'_, '_> {
@@ -117,15 +120,17 @@ impl SimpleState for OverworldState<'_, '_> {
         dispatcher.setup(data.world);
         self.dispatcher = Some(dispatcher);
 
+        let mut progress_counter = ProgressCounter::new();
         let player_prefab = data.world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
             loader.load(
                 "sprites/player.ron",
                 RonFormat,
-                &mut self.progress_counter,
+                &mut progress_counter,
             )
         });
         // Creates new entities with components from MyPrefabData
         data.world.create_entity().with(player_prefab).build();
+        self.progress_counter = Some(progress_counter);
 
         // data.world.register::<Player>();
         // let sprite_sheet = load_sprite_sheet(data.world);
@@ -134,29 +139,83 @@ impl SimpleState for OverworldState<'_, '_> {
     }
 
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
+        let world = &mut data.world;
+
         if let Some(dispatcher) = &mut self.dispatcher {
-            dispatcher.dispatch(data.world);
+            dispatcher.dispatch(world);
         }
 
-        if self.progress_counter.is_complete() {
-            data.world.exec(
-                |(entities, animation_sets, mut control_sets): (
-                    Entities,
-                    ReadStorage<AnimationSet<AnimationId, SpriteRender>>,
-                    WriteStorage<AnimationControlSet<AnimationId, SpriteRender>>,
-                )| {
-                    for (entity, animation_set) in (&entities, &animation_sets).join() {
-                        let control_set = get_animation_set(&mut control_sets, entity).unwrap();
-                        control_set.add_animation(
+        if let Some(progress_counter) = &self.progress_counter {
+            if progress_counter.is_complete() {
+                let entities = world.read_resource::<EntitiesRes>();
+                let animation_sets = world.read_storage::<AnimationSet<AnimationId, SpriteRender>>();
+                let mut control_sets = world.write_storage::<AnimationControlSet<AnimationId, SpriteRender>>();
+
+                for (entity, animation_set) in (&entities, &animation_sets).join() {
+                    get_animation_set(&mut control_sets, entity)
+                        .unwrap()
+                        .add_animation(
                             AnimationId::Walk,
                             &animation_set.get(&AnimationId::Walk).unwrap(),
                             EndControl::Loop(None),
                             1.0,
-                            AnimationCommand::Start,
+                            AnimationCommand::Init,
+                        )
+                        .add_animation(
+                            AnimationId::Run,
+                            &animation_set.get(&AnimationId::Run).unwrap(),
+                            EndControl::Loop(None),
+                            1.0,
+                            AnimationCommand::Init,
                         );
+                }
+
+                self.progress_counter = None;
+            }
+        }
+
+        Trans::None
+    }
+
+    fn handle_event(&mut self, data: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
+        if let StateEvent::Input(event) = event {
+            match event {
+                InputEvent::ActionPressed(action) if action == "action" => {
+                    let entities = data.world.read_resource::<EntitiesRes>();
+                    let animation_sets = data.world.read_storage::<AnimationSet<AnimationId, SpriteRender>>();
+                    let mut control_sets = data.world.write_storage::<AnimationControlSet<AnimationId, SpriteRender>>();
+
+                    for (_, _, control_set) in (&entities, &animation_sets, &mut control_sets).join() {
+                        control_set.pause(AnimationId::Walk);
+
+                        control_set.animations
+                            .iter_mut()
+                            .filter(|a| a.0 == AnimationId::Run)
+                            .for_each(|a| {
+                                a.1.state = ControlState::Requested;
+                                a.1.command = AnimationCommand::Start;
+                            });
                     }
                 },
-            );
+                InputEvent::ActionReleased(action) if action == "action" => {
+                    let entities = data.world.read_resource::<EntitiesRes>();
+                    let animation_sets = data.world.read_storage::<AnimationSet<AnimationId, SpriteRender>>();
+                    let mut control_sets = data.world.write_storage::<AnimationControlSet<AnimationId, SpriteRender>>();
+
+                    for (_, _, control_set) in (&entities, &animation_sets, &mut control_sets).join() {
+                        control_set.pause(AnimationId::Run);
+
+                        control_set.animations
+                            .iter_mut()
+                            .filter(|a| a.0 == AnimationId::Walk)
+                            .for_each(|a| {
+                                a.1.state = ControlState::Requested;
+                                a.1.command = AnimationCommand::Start;
+                            });
+                    }
+                },
+                _ => {},
+            }
         }
 
         Trans::None
