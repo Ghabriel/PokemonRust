@@ -1,0 +1,102 @@
+(
+    texture_width: 128,
+    texture_height: 192,
+    sprites: [
+        (
+            x: 0,
+            y: 0,
+            width: 32,
+            height: 48,
+        ),
+        (
+            x: 32,
+            y: 0,
+            width: 32,
+            height: 48,
+        ),
+        (
+            x: 64,
+            y: 0,
+            width: 32,
+            height: 48,
+        ),
+        (
+            x: 96,
+            y: 0,
+            width: 32,
+            height: 48,
+        ),
+        (
+            x: 0,
+            y: 48,
+            width: 32,
+            height: 48,
+        ),
+        (
+            x: 32,
+            y: 48,
+            width: 32,
+            height: 48,
+        ),
+        (
+            x: 64,
+            y: 48,
+            width: 32,
+            height: 48,
+        ),
+        (
+            x: 96,
+            y: 48,
+            width: 32,
+            height: 48,
+        ),
+        (
+            x: 0,
+            y: 96,
+            width: 32,
+            height: 48,
+        ),
+        (
+            x: 32,
+            y: 96,
+            width: 32,
+            height: 48,
+        ),
+        (
+            x: 64,
+            y: 96,
+            width: 32,
+            height: 48,
+        ),
+        (
+            x: 96,
+            y: 96,
+            width: 32,
+            height: 48,
+        ),
+        (
+            x: 0,
+            y: 144,
+            width: 32,
+            height: 48,
+        ),
+        (
+            x: 32,
+            y: 144,
+            width: 32,
+            height: 48,
+        ),
+        (
+            x: 64,
+            y: 144,
+            width: 32,
+            height: 48,
+        ),
+        (
+            x: 96,
+            y: 144,
+            width: 32,
+            height: 48,
+        ),
+    ]
+)
