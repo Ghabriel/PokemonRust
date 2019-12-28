@@ -4,7 +4,6 @@ use amethyst::{
         AnimationCommand,
         AnimationControlSet,
         AnimationSet,
-        ControlState,
         EndControl,
         get_animation_set,
     },
@@ -25,7 +24,7 @@ use amethyst::{
 };
 
 use crate::{
-    entities::player::{AnimationId, Player, initialise_player},
+    entities::player::{AnimationId, initialise_player, Player, player_run, player_walk},
 };
 
 use std::ops::Deref;
@@ -111,14 +110,14 @@ impl SimpleState for OverworldState<'_, '_> {
                     EndControl::Loop(None),
                     1.0,
                     AnimationCommand::Init,
+                )
+                .add_animation(
+                    AnimationId::Run,
+                    &animation_set.get(&AnimationId::Run).unwrap(),
+                    EndControl::Loop(None),
+                    1.0,
+                    AnimationCommand::Init,
                 );
-                // .add_animation(
-                //     AnimationId::Run,
-                //     &animation_set.get(&AnimationId::Run).unwrap(),
-                //     EndControl::Loop(None),
-                //     1.0,
-                //     AnimationCommand::Init,
-                // );
         }
 
         Trans::None
@@ -128,47 +127,11 @@ impl SimpleState for OverworldState<'_, '_> {
         if let StateEvent::Input(event) = event {
             match event {
                 InputEvent::ActionPressed(action) if action == "action" => {
-                    let entities = data.world.read_resource::<EntitiesRes>();
-                    let animation_sets = data.world.read_storage::<AnimationSet<AnimationId, SpriteRender>>();
-                    let mut control_sets = data.world.write_storage::<AnimationControlSet<AnimationId, SpriteRender>>();
-
-                    for (_, _, control_set) in (&entities, &animation_sets, &mut control_sets).join() {
-                        // control_set.pause(AnimationId::Walk);
-
-                        let (_, animation) = control_set.animations
-                            .iter_mut()
-                            .find(|(id, _)| *id == AnimationId::Walk)
-                            .unwrap();
-                        animation.state = ControlState::Requested;
-                        animation.command = AnimationCommand::Start;
-
-                        // control_set.animations
-                        //     .iter_mut()
-                        //     .find(|(id, _)| *id == AnimationId::Run)
-                        //     .map(|(_, animation)| {
-                        //         animation.state = ControlState::Requested;
-                        //         animation.command = AnimationCommand::Start;
-                        //         animation
-                        //     })
-                        //     .unwrap();
-                    }
+                    player_walk(data.world);
                 },
-                // InputEvent::ActionReleased(action) if action == "action" => {
-                //     let entities = data.world.read_resource::<EntitiesRes>();
-                //     let animation_sets = data.world.read_storage::<AnimationSet<AnimationId, SpriteRender>>();
-                //     let mut control_sets = data.world.write_storage::<AnimationControlSet<AnimationId, SpriteRender>>();
-
-                //     for (_, _, control_set) in (&entities, &animation_sets, &mut control_sets).join() {
-                //         control_set.pause(AnimationId::Run);
-
-                //         let (_, animation) = control_set.animations
-                //             .iter_mut()
-                //             .find(|(id, _)| *id == AnimationId::Walk)
-                //             .unwrap();
-                //         animation.state = ControlState::Requested;
-                //         animation.command = AnimationCommand::Start;
-                //     }
-                // },
+                InputEvent::ActionReleased(action) if action == "action" => {
+                    player_run(data.world);
+                },
                 InputEvent::ActionPressed(action) if action == "cancel" => {
                     let entities = data.world.read_resource::<EntitiesRes>();
                     let animation_sets = data.world.read_storage::<AnimationSet<AnimationId, SpriteRender>>();

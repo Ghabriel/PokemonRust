@@ -1,7 +1,10 @@
 use amethyst::{
     animation::{
         Animation,
+        AnimationCommand,
+        AnimationControlSet,
         AnimationSet,
+        ControlState,
         InterpolationFunction,
         Sampler,
         SpriteRenderChannel,
@@ -13,6 +16,7 @@ use amethyst::{
         Component,
         DenseVecStorage,
         Entity,
+        Join,
         Read,
         ReadExpect,
         world::Builder,
@@ -48,6 +52,58 @@ pub enum AnimationId {
 pub struct PlayerSpriteSheets {
     walking: Handle<SpriteSheet>,
     running: Handle<SpriteSheet>,
+}
+
+pub fn player_walk(world: &mut World) {
+    let sprite_sheets = world.read_resource::<PlayerSpriteSheets>();
+    let players = world.read_storage::<Player>();
+    let mut sprite_renders = world.write_storage::<SpriteRender>();
+    let mut control_sets = world.write_storage::<AnimationControlSet<AnimationId, SpriteRender>>();
+
+    for (_, sprite_render, control_set) in (&players, &mut sprite_renders, &mut control_sets).join() {
+        sprite_render.sprite_sheet = sprite_sheets.walking.clone();
+        sprite_render.sprite_number = 0;
+
+        control_set.animations
+            .iter_mut()
+            .filter(|(id, _)| *id != AnimationId::Walk)
+            .for_each(|(_, animation)| {
+                animation.command = AnimationCommand::Pause;
+            });
+
+        let (_, animation) = control_set.animations
+            .iter_mut()
+            .find(|(id, _)| *id == AnimationId::Walk)
+            .unwrap();
+        animation.state = ControlState::Requested;
+        animation.command = AnimationCommand::Start;
+    }
+}
+
+pub fn player_run(world: &mut World) {
+    let sprite_sheets = world.read_resource::<PlayerSpriteSheets>();
+    let players = world.read_storage::<Player>();
+    let mut sprite_renders = world.write_storage::<SpriteRender>();
+    let mut control_sets = world.write_storage::<AnimationControlSet<AnimationId, SpriteRender>>();
+
+    for (_, sprite_render, control_set) in (&players, &mut sprite_renders, &mut control_sets).join() {
+        sprite_render.sprite_sheet = sprite_sheets.running.clone();
+        sprite_render.sprite_number = 0;
+
+        control_set.animations
+            .iter_mut()
+            .filter(|(id, _)| *id != AnimationId::Run)
+            .for_each(|(_, animation)| {
+                animation.command = AnimationCommand::Pause;
+            });
+
+        let (_, animation) = control_set.animations
+            .iter_mut()
+            .find(|(id, _)| *id == AnimationId::Run)
+            .unwrap();
+        animation.state = ControlState::Requested;
+        animation.command = AnimationCommand::Start;
+    }
 }
 
 pub fn initialise_player(world: &mut World) -> Entity {
@@ -90,6 +146,49 @@ pub fn initialise_player(world: &mut World) -> Entity {
                             SpriteRenderPrimitive::SpriteIndex(1),
                             SpriteRenderPrimitive::SpriteIndex(2),
                             SpriteRenderPrimitive::SpriteIndex(3),
+                        ],
+                        function: InterpolationFunction::Step,
+                    }
+                )
+            ];
+
+            let animation = Animation::<SpriteRender> {
+                nodes: samplers
+                    .iter()
+                    .map(|(node_index, channel, sampler)| {
+                        (
+                            *node_index,
+                            channel.clone(),
+                            loader.load_from_data(sampler.clone(), &mut progress_counter, &sampler_storage),
+                        )
+                    })
+                    .collect(),
+            };
+
+            loader.load_from_data(animation, &mut progress_counter, &animation_storage)
+        })
+    });
+    animation_set.insert(AnimationId::Run, {
+        let mut progress_counter = ProgressCounter::new();
+
+        world.exec(|
+            (loader, sampler_storage, animation_storage): (
+                ReadExpect<Loader>,
+                Read<AssetStorage<Sampler<SpriteRenderPrimitive>>>,
+                Read<AssetStorage<Animation<SpriteRender>>>,
+            )
+        | {
+            let samplers: Vec<(usize, SpriteRenderChannel, Sampler<SpriteRenderPrimitive>)> = vec![
+                (
+                    0,
+                    SpriteRenderChannel::SpriteIndex,
+                    Sampler {
+                        input: vec![0.0, 0.25, 0.5, 0.75, 1.0],
+                        output: vec![
+                            SpriteRenderPrimitive::SpriteIndex(4),
+                            SpriteRenderPrimitive::SpriteIndex(5),
+                            SpriteRenderPrimitive::SpriteIndex(6),
+                            SpriteRenderPrimitive::SpriteIndex(7),
                         ],
                         function: InterpolationFunction::Step,
                     }
