@@ -39,7 +39,7 @@ fn load_sprite_sheet(world: &World, image_name: &str, ron_name: &str) -> Handle<
     loader.load(ron_name, SpriteSheetFormat(texture_handle), (), &world.read_resource())
 }
 
-#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum AnimationId {
     Walk,
     Run,

@@ -1,5 +1,6 @@
 use amethyst::{
     animation::{
+        AnimationBundle,
         AnimationCommand,
         AnimationControlSet,
         AnimationSet,
@@ -7,7 +8,7 @@ use amethyst::{
         EndControl,
         get_animation_set,
     },
-    core::{ArcThreadPool, Transform},
+    core::{ArcThreadPool, bundle::SystemBundle, Transform},
     ecs::{
         Dispatcher,
         DispatcherBuilder,
@@ -58,11 +59,11 @@ impl SimpleState for OverworldState<'_, '_> {
             // )
             .with_pool(data.world.read_resource::<ArcThreadPool>().deref().clone());
 
-        // AnimationBundle::<AnimationId, SpriteRender>::new(
-        //     "sprite_animation_control",
-        //     "sprite_sampler_interpolation",
-        // ).build(data.world, &mut dispatcher_builder)
-        //     .expect("Failed to build AnimationBundle");
+        AnimationBundle::<AnimationId, SpriteRender>::new(
+            "sprite_animation_control",
+            "sprite_sampler_interpolation",
+        ).build(data.world, &mut dispatcher_builder)
+            .expect("Failed to build AnimationBundle");
 
         let mut dispatcher = dispatcher_builder.build();
         dispatcher.setup(data.world);
