@@ -143,7 +143,7 @@ pub fn initialise_player(world: &mut World) -> Entity {
                     0,
                     SpriteRenderChannel::SpriteIndex,
                     Sampler {
-                        input: vec![0.0, 0.25, 0.5, 0.75, 1.0],
+                        input: vec![0.0, 0.1, 0.2, 0.3, 0.4],
                         output: vec![
                             SpriteRenderPrimitive::SpriteIndex(4),
                             SpriteRenderPrimitive::SpriteIndex(5),
