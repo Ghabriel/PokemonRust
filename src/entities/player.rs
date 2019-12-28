@@ -1,10 +1,7 @@
 use amethyst::{
     animation::{
         Animation,
-        AnimationCommand,
-        AnimationControlSet,
         AnimationSet,
-        ControlState,
         InterpolationFunction,
         Sampler,
         SpriteRenderChannel,
@@ -16,7 +13,6 @@ use amethyst::{
         Component,
         DenseVecStorage,
         Entity,
-        Join,
         Read,
         ReadExpect,
         world::Builder,
@@ -28,7 +24,19 @@ use amethyst::{
 
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug)]
+pub enum Direction {
+    North,
+    South,
+    West,
+    East,
+}
+
+#[derive(Debug)]
 pub struct Player {
+    pub action: PlayerAction,
+    pub facing_direction: Direction,
+    pub temp_flag: bool,
     pub velocity: [f32; 2],
 }
 
@@ -44,67 +52,16 @@ fn load_sprite_sheet(world: &World, image_name: &str, ron_name: &str) -> Handle<
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
-pub enum AnimationId {
+pub enum PlayerAction {
     Walk,
     Run,
 }
 
 pub struct PlayerSpriteSheets {
-    walking: Handle<SpriteSheet>,
-    running: Handle<SpriteSheet>,
+    pub walking: Handle<SpriteSheet>,
+    pub running: Handle<SpriteSheet>,
 }
 
-pub fn player_walk(world: &mut World) {
-    let sprite_sheets = world.read_resource::<PlayerSpriteSheets>();
-    let players = world.read_storage::<Player>();
-    let mut sprite_renders = world.write_storage::<SpriteRender>();
-    let mut control_sets = world.write_storage::<AnimationControlSet<AnimationId, SpriteRender>>();
-
-    for (_, sprite_render, control_set) in (&players, &mut sprite_renders, &mut control_sets).join() {
-        sprite_render.sprite_sheet = sprite_sheets.walking.clone();
-        sprite_render.sprite_number = 0;
-
-        control_set.animations
-            .iter_mut()
-            .filter(|(id, _)| *id != AnimationId::Walk)
-            .for_each(|(_, animation)| {
-                animation.command = AnimationCommand::Pause;
-            });
-
-        let (_, animation) = control_set.animations
-            .iter_mut()
-            .find(|(id, _)| *id == AnimationId::Walk)
-            .unwrap();
-        animation.state = ControlState::Requested;
-        animation.command = AnimationCommand::Start;
-    }
-}
-
-pub fn player_run(world: &mut World) {
-    let sprite_sheets = world.read_resource::<PlayerSpriteSheets>();
-    let players = world.read_storage::<Player>();
-    let mut sprite_renders = world.write_storage::<SpriteRender>();
-    let mut control_sets = world.write_storage::<AnimationControlSet<AnimationId, SpriteRender>>();
-
-    for (_, sprite_render, control_set) in (&players, &mut sprite_renders, &mut control_sets).join() {
-        sprite_render.sprite_sheet = sprite_sheets.running.clone();
-        sprite_render.sprite_number = 0;
-
-        control_set.animations
-            .iter_mut()
-            .filter(|(id, _)| *id != AnimationId::Run)
-            .for_each(|(_, animation)| {
-                animation.command = AnimationCommand::Pause;
-            });
-
-        let (_, animation) = control_set.animations
-            .iter_mut()
-            .find(|(id, _)| *id == AnimationId::Run)
-            .unwrap();
-        animation.state = ControlState::Requested;
-        animation.command = AnimationCommand::Start;
-    }
-}
 
 pub fn initialise_player(world: &mut World) -> Entity {
     let sprite_sheets = PlayerSpriteSheets {
@@ -113,6 +70,9 @@ pub fn initialise_player(world: &mut World) -> Entity {
     };
 
     let player = Player {
+        action: PlayerAction::Walk,
+        facing_direction: Direction::South,
+        temp_flag: true,
         velocity: [0., 0.],
     };
 
@@ -125,7 +85,7 @@ pub fn initialise_player(world: &mut World) -> Entity {
     };
 
     let mut animation_set = AnimationSet::new();
-    animation_set.insert(AnimationId::Walk, {
+    animation_set.insert(PlayerAction::Walk, {
         let mut progress_counter = ProgressCounter::new();
 
         world.exec(|
@@ -168,7 +128,7 @@ pub fn initialise_player(world: &mut World) -> Entity {
             loader.load_from_data(animation, &mut progress_counter, &animation_storage)
         })
     });
-    animation_set.insert(AnimationId::Run, {
+    animation_set.insert(PlayerAction::Run, {
         let mut progress_counter = ProgressCounter::new();
 
         world.exec(|

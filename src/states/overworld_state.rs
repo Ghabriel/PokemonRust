@@ -24,7 +24,8 @@ use amethyst::{
 };
 
 use crate::{
-    entities::player::{AnimationId, initialise_player, Player, player_run, player_walk},
+    entities::player::{PlayerAction, initialise_player, Player},
+    systems::PlayerMovementSystem,
 };
 
 use std::ops::Deref;
@@ -56,9 +57,10 @@ impl SimpleState for OverworldState<'_, '_> {
             //     "scene_loader",
             //     &[],
             // )
+            .with(PlayerMovementSystem, "player_movement_system", &[])
             .with_pool(data.world.read_resource::<ArcThreadPool>().deref().clone());
 
-        AnimationBundle::<AnimationId, SpriteRender>::new(
+        AnimationBundle::<PlayerAction, SpriteRender>::new(
             "sprite_animation_control",
             "sprite_sampler_interpolation",
         ).build(data.world, &mut dispatcher_builder)
@@ -84,8 +86,8 @@ impl SimpleState for OverworldState<'_, '_> {
         // self.progress_counter = Some(progress_counter);
 
         data.world.register::<Player>();
-        data.world.register::<AnimationSet<AnimationId, SpriteRender>>();
-        data.world.register::<AnimationControlSet<AnimationId, SpriteRender>>();
+        data.world.register::<AnimationSet<PlayerAction, SpriteRender>>();
+        data.world.register::<AnimationControlSet<PlayerAction, SpriteRender>>();
         initialise_player(data.world);
         initialise_camera(data.world);
     }
@@ -98,22 +100,22 @@ impl SimpleState for OverworldState<'_, '_> {
         }
 
         let entities = world.read_resource::<EntitiesRes>();
-        let animation_sets = world.read_storage::<AnimationSet<AnimationId, SpriteRender>>();
-        let mut control_sets = world.write_storage::<AnimationControlSet<AnimationId, SpriteRender>>();
+        let animation_sets = world.read_storage::<AnimationSet<PlayerAction, SpriteRender>>();
+        let mut control_sets = world.write_storage::<AnimationControlSet<PlayerAction, SpriteRender>>();
 
         for (entity, animation_set) in (&entities, &animation_sets).join() {
             get_animation_set(&mut control_sets, entity)
                 .unwrap()
                 .add_animation(
-                    AnimationId::Walk,
-                    &animation_set.get(&AnimationId::Walk).unwrap(),
+                    PlayerAction::Walk,
+                    &animation_set.get(&PlayerAction::Walk).unwrap(),
                     EndControl::Loop(None),
                     1.0,
                     AnimationCommand::Init,
                 )
                 .add_animation(
-                    AnimationId::Run,
-                    &animation_set.get(&AnimationId::Run).unwrap(),
+                    PlayerAction::Run,
+                    &animation_set.get(&PlayerAction::Run).unwrap(),
                     EndControl::Loop(None),
                     1.0,
                     AnimationCommand::Init,
@@ -127,15 +129,25 @@ impl SimpleState for OverworldState<'_, '_> {
         if let StateEvent::Input(event) = event {
             match event {
                 InputEvent::ActionPressed(action) if action == "action" => {
-                    player_walk(data.world);
+                    let mut players = data.world.write_storage::<Player>();
+
+                    for player in (&mut players).join() {
+                        player.action = PlayerAction::Run;
+                        player.temp_flag = true;
+                    }
                 },
                 InputEvent::ActionReleased(action) if action == "action" => {
-                    player_run(data.world);
+                    let mut players = data.world.write_storage::<Player>();
+
+                    for player in (&mut players).join() {
+                        player.action = PlayerAction::Walk;
+                        player.temp_flag = true;
+                    }
                 },
                 InputEvent::ActionPressed(action) if action == "cancel" => {
                     let entities = data.world.read_resource::<EntitiesRes>();
-                    let animation_sets = data.world.read_storage::<AnimationSet<AnimationId, SpriteRender>>();
-                    let mut control_sets = data.world.write_storage::<AnimationControlSet<AnimationId, SpriteRender>>();
+                    let animation_sets = data.world.read_storage::<AnimationSet<PlayerAction, SpriteRender>>();
+                    let mut control_sets = data.world.write_storage::<AnimationControlSet<PlayerAction, SpriteRender>>();
 
                     for (_, _, control_set) in (&entities, &animation_sets, &mut control_sets).join() {
                         println!("{:#?}", control_set);

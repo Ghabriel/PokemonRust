@@ -1,6 +1,7 @@
 mod config;
 mod entities;
 mod states;
+mod systems;
 
 use amethyst::{
     audio::AudioBundle,
