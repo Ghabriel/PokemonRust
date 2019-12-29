@@ -5,8 +5,12 @@ use amethyst::{
         ControlState,
     },
     ecs::{
+        BitSet,
         Join,
+        ReaderId,
         ReadExpect,
+        ReadStorage,
+        storage::ComponentEvent,
         System,
         WriteStorage,
     },
@@ -23,37 +27,56 @@ use crate::{
     },
 };
 
-pub struct PlayerMovementSystem;
+pub struct PlayerMovementSystem {
+    player_events_id: ReaderId<ComponentEvent>,
+}
+
+impl PlayerMovementSystem {
+    pub fn new(storage: &mut WriteStorage<Player>) -> Self {
+        PlayerMovementSystem {
+            player_events_id: storage.register_reader(),
+        }
+    }
+}
 
 impl<'a> System<'a> for PlayerMovementSystem {
     type SystemData = (
         WriteStorage<'a, AnimationControlSet<PlayerAnimation, SpriteRender>>,
-        WriteStorage<'a, Player>,
+        ReadStorage<'a, Player>,
         WriteStorage<'a, SpriteRender>,
         ReadExpect<'a, PlayerSpriteSheets>,
     );
 
     fn run(&mut self, (
         mut control_sets,
-        mut players,
+        players,
         mut sprite_renders,
         sprite_sheets,
     ): Self::SystemData) {
+        let mut modified = BitSet::new();
+
+        for event in players.channel().read(&mut self.player_events_id) {
+            match event {
+                ComponentEvent::Inserted(id) | ComponentEvent::Modified(id) => {
+                    modified.add(*id);
+                },
+                ComponentEvent::Removed(_) => {},
+            }
+        }
+
         for (
             control_set,
             player,
             sprite_render,
-        ) in (&mut control_sets, &mut players, &mut sprite_renders).join() {
-            if player.temp_flag {
-                match player.action {
-                    PlayerAction::Walk => player_walk(sprite_render, &sprite_sheets),
-                    PlayerAction::Run => player_run(sprite_render, &sprite_sheets),
-                }
-
-                let new_animation = get_new_animation(&player.action, &player.facing_direction);
-                change_player_animation(&new_animation, control_set);
-                player.temp_flag = false;
+            _,
+        ) in (&mut control_sets, &players, &mut sprite_renders, &modified).join() {
+            match player.action {
+                PlayerAction::Walk => player_walk(sprite_render, &sprite_sheets),
+                PlayerAction::Run => player_run(sprite_render, &sprite_sheets),
             }
+
+            let new_animation = get_new_animation(&player.action, &player.facing_direction);
+            change_player_animation(&new_animation, control_set);
         }
     }
 }

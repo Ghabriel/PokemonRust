@@ -13,6 +13,7 @@ use amethyst::{
         Component,
         DenseVecStorage,
         Entity,
+        FlaggedStorage,
         Read,
         ReadExpect,
         world::Builder,
@@ -36,12 +37,11 @@ pub enum Direction {
 pub struct Player {
     pub action: PlayerAction,
     pub facing_direction: Direction,
-    pub temp_flag: bool,
     pub velocity: [f32; 2],
 }
 
 impl Component for Player {
-    type Storage = DenseVecStorage<Self>;
+    type Storage = FlaggedStorage<Self, DenseVecStorage<Self>>;
 }
 
 fn load_sprite_sheet(world: &World, image_name: &str, ron_name: &str) -> Handle<SpriteSheet> {
@@ -127,7 +127,6 @@ pub fn initialise_player(world: &mut World) -> Entity {
     let player = Player {
         action: PlayerAction::Walk,
         facing_direction: Direction::Down,
-        temp_flag: true,
         velocity: [0., 0.],
     };
 

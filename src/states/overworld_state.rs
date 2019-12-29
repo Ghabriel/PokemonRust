@@ -51,13 +51,20 @@ impl SimpleState for OverworldState<'_, '_> {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         println!("Welcome to Pokémon Rust!");
 
+        data.world.register::<Player>();
+        data.world.register::<AnimationSet<PlayerAnimation, SpriteRender>>();
+        data.world.register::<AnimationControlSet<PlayerAnimation, SpriteRender>>();
+
         let mut dispatcher_builder = DispatcherBuilder::new()
             // .with(
             //     PrefabLoaderSystemDesc::<MyPrefabData>::default().build(data.world),
             //     "scene_loader",
             //     &[],
             // )
-            .with(PlayerMovementSystem, "player_movement_system", &[])
+            .with({
+                let mut player_storage = data.world.write_storage::<Player>();
+                PlayerMovementSystem::new(&mut player_storage)
+            }, "player_movement_system", &[])
             .with_pool(data.world.read_resource::<ArcThreadPool>().deref().clone());
 
         AnimationBundle::<PlayerAnimation, SpriteRender>::new(
@@ -85,9 +92,6 @@ impl SimpleState for OverworldState<'_, '_> {
         //     .build();
         // self.progress_counter = Some(progress_counter);
 
-        data.world.register::<Player>();
-        data.world.register::<AnimationSet<PlayerAnimation, SpriteRender>>();
-        data.world.register::<AnimationControlSet<PlayerAnimation, SpriteRender>>();
         initialise_player(data.world);
         initialise_camera(data.world);
     }
@@ -215,6 +219,5 @@ where
 
     for player in (&mut players).join() {
         callback(player);
-        player.temp_flag = true;
     }
 }
