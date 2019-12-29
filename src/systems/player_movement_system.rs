@@ -71,7 +71,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
             _,
         ) in (&mut control_sets, &players, &mut sprite_renders, &modified).join() {
             match player.action {
-                PlayerAction::Walk => player_walk(sprite_render, &sprite_sheets),
+                PlayerAction::Idle | PlayerAction::Walk => player_walk(sprite_render, &sprite_sheets),
                 PlayerAction::Run => player_run(sprite_render, &sprite_sheets),
             }
 
@@ -83,6 +83,10 @@ impl<'a> System<'a> for PlayerMovementSystem {
 
 pub fn get_new_animation(action: &PlayerAction, direction: &Direction) -> PlayerAnimation {
     match (action, direction) {
+        (PlayerAction::Idle, Direction::Up) => PlayerAnimation::IdleUp,
+        (PlayerAction::Idle, Direction::Down) => PlayerAnimation::IdleDown,
+        (PlayerAction::Idle, Direction::Left) => PlayerAnimation::IdleLeft,
+        (PlayerAction::Idle, Direction::Right) => PlayerAnimation::IdleRight,
         (PlayerAction::Walk, Direction::Up) => PlayerAnimation::WalkUp,
         (PlayerAction::Walk, Direction::Down) => PlayerAnimation::WalkDown,
         (PlayerAction::Walk, Direction::Left) => PlayerAnimation::WalkLeft,

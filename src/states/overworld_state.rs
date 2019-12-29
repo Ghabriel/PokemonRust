@@ -111,6 +111,34 @@ impl SimpleState for OverworldState<'_, '_> {
             get_animation_set(&mut control_sets, entity)
                 .unwrap()
                 .add_animation(
+                    PlayerAnimation::IdleUp,
+                    &animation_set.get(&PlayerAnimation::IdleUp).unwrap(),
+                    EndControl::Loop(None),
+                    1.0,
+                    AnimationCommand::Init,
+                )
+                .add_animation(
+                    PlayerAnimation::IdleDown,
+                    &animation_set.get(&PlayerAnimation::IdleDown).unwrap(),
+                    EndControl::Loop(None),
+                    1.0,
+                    AnimationCommand::Init,
+                )
+                .add_animation(
+                    PlayerAnimation::IdleLeft,
+                    &animation_set.get(&PlayerAnimation::IdleLeft).unwrap(),
+                    EndControl::Loop(None),
+                    1.0,
+                    AnimationCommand::Init,
+                )
+                .add_animation(
+                    PlayerAnimation::IdleRight,
+                    &animation_set.get(&PlayerAnimation::IdleRight).unwrap(),
+                    EndControl::Loop(None),
+                    1.0,
+                    AnimationCommand::Init,
+                )
+                .add_animation(
                     PlayerAnimation::WalkUp,
                     &animation_set.get(&PlayerAnimation::WalkUp).unwrap(),
                     EndControl::Loop(None),
@@ -183,13 +211,7 @@ impl SimpleState for OverworldState<'_, '_> {
                     mutate_player(world, |player| player.action = PlayerAction::Walk);
                 },
                 InputEvent::ActionPressed(action) if action == "cancel" => {
-                    let entities = world.read_resource::<EntitiesRes>();
-                    let animation_sets = world.read_storage::<AnimationSet<PlayerAnimation, SpriteRender>>();
-                    let mut control_sets = world.write_storage::<AnimationControlSet<PlayerAnimation, SpriteRender>>();
-
-                    for (_, _, control_set) in (&entities, &animation_sets, &mut control_sets).join() {
-                        println!("{:#?}", control_set);
-                    }
+                    mutate_player(world, |player| player.action = PlayerAction::Idle);
                 },
                 InputEvent::AxisMoved { axis, value } if axis == "vertical" && value < -0.2 => {
                     mutate_player(world, |player| player.facing_direction = Direction::Down);

@@ -53,12 +53,17 @@ fn load_sprite_sheet(world: &World, image_name: &str, ron_name: &str) -> Handle<
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum PlayerAction {
+    Idle,
     Walk,
     Run,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum PlayerAnimation {
+    IdleUp,
+    IdleDown,
+    IdleLeft,
+    IdleRight,
     WalkUp,
     WalkDown,
     WalkLeft,
@@ -140,6 +145,32 @@ pub fn initialise_player(world: &mut World) -> Entity {
 
     let mut progress_counter = ProgressCounter::new();
     let mut animation_set = AnimationSet::new();
+
+    animation_set.insert(PlayerAnimation::IdleDown, make_sprite_animation(
+        world,
+        vec![0.0, 1.0],
+        vec![0],
+        &mut progress_counter,
+    ));
+    animation_set.insert(PlayerAnimation::IdleLeft, make_sprite_animation(
+        world,
+        vec![0.0, 1.0],
+        vec![4],
+        &mut progress_counter,
+    ));
+    animation_set.insert(PlayerAnimation::IdleRight, make_sprite_animation(
+        world,
+        vec![0.0, 1.0],
+        vec![8],
+        &mut progress_counter,
+    ));
+    animation_set.insert(PlayerAnimation::IdleUp, make_sprite_animation(
+        world,
+        vec![0.0, 1.0],
+        vec![12],
+        &mut progress_counter,
+    ));
+
     animation_set.insert(PlayerAnimation::WalkDown, make_sprite_animation(
         world,
         vec![0.0, 0.25, 0.5, 0.75, 1.0],
