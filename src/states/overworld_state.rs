@@ -24,7 +24,7 @@ use amethyst::{
 };
 
 use crate::{
-    entities::player::{PlayerAction, initialise_player, Player},
+    entities::player::{Direction, PlayerAction, PlayerAnimation, initialise_player, Player},
     systems::PlayerMovementSystem,
 };
 
@@ -60,7 +60,7 @@ impl SimpleState for OverworldState<'_, '_> {
             .with(PlayerMovementSystem, "player_movement_system", &[])
             .with_pool(data.world.read_resource::<ArcThreadPool>().deref().clone());
 
-        AnimationBundle::<PlayerAction, SpriteRender>::new(
+        AnimationBundle::<PlayerAnimation, SpriteRender>::new(
             "sprite_animation_control",
             "sprite_sampler_interpolation",
         ).build(data.world, &mut dispatcher_builder)
@@ -86,8 +86,8 @@ impl SimpleState for OverworldState<'_, '_> {
         // self.progress_counter = Some(progress_counter);
 
         data.world.register::<Player>();
-        data.world.register::<AnimationSet<PlayerAction, SpriteRender>>();
-        data.world.register::<AnimationControlSet<PlayerAction, SpriteRender>>();
+        data.world.register::<AnimationSet<PlayerAnimation, SpriteRender>>();
+        data.world.register::<AnimationControlSet<PlayerAnimation, SpriteRender>>();
         initialise_player(data.world);
         initialise_camera(data.world);
     }
@@ -100,22 +100,64 @@ impl SimpleState for OverworldState<'_, '_> {
         }
 
         let entities = world.read_resource::<EntitiesRes>();
-        let animation_sets = world.read_storage::<AnimationSet<PlayerAction, SpriteRender>>();
-        let mut control_sets = world.write_storage::<AnimationControlSet<PlayerAction, SpriteRender>>();
+        let animation_sets = world.read_storage::<AnimationSet<PlayerAnimation, SpriteRender>>();
+        let mut control_sets = world.write_storage::<AnimationControlSet<PlayerAnimation, SpriteRender>>();
 
         for (entity, animation_set) in (&entities, &animation_sets).join() {
             get_animation_set(&mut control_sets, entity)
                 .unwrap()
                 .add_animation(
-                    PlayerAction::Walk,
-                    &animation_set.get(&PlayerAction::Walk).unwrap(),
+                    PlayerAnimation::WalkUp,
+                    &animation_set.get(&PlayerAnimation::WalkUp).unwrap(),
                     EndControl::Loop(None),
                     1.0,
                     AnimationCommand::Init,
                 )
                 .add_animation(
-                    PlayerAction::Run,
-                    &animation_set.get(&PlayerAction::Run).unwrap(),
+                    PlayerAnimation::WalkDown,
+                    &animation_set.get(&PlayerAnimation::WalkDown).unwrap(),
+                    EndControl::Loop(None),
+                    1.0,
+                    AnimationCommand::Init,
+                )
+                .add_animation(
+                    PlayerAnimation::WalkLeft,
+                    &animation_set.get(&PlayerAnimation::WalkLeft).unwrap(),
+                    EndControl::Loop(None),
+                    1.0,
+                    AnimationCommand::Init,
+                )
+                .add_animation(
+                    PlayerAnimation::WalkRight,
+                    &animation_set.get(&PlayerAnimation::WalkRight).unwrap(),
+                    EndControl::Loop(None),
+                    1.0,
+                    AnimationCommand::Init,
+                )
+                .add_animation(
+                    PlayerAnimation::RunUp,
+                    &animation_set.get(&PlayerAnimation::RunUp).unwrap(),
+                    EndControl::Loop(None),
+                    1.0,
+                    AnimationCommand::Init,
+                )
+                .add_animation(
+                    PlayerAnimation::RunDown,
+                    &animation_set.get(&PlayerAnimation::RunDown).unwrap(),
+                    EndControl::Loop(None),
+                    1.0,
+                    AnimationCommand::Init,
+                )
+                .add_animation(
+                    PlayerAnimation::RunLeft,
+                    &animation_set.get(&PlayerAnimation::RunLeft).unwrap(),
+                    EndControl::Loop(None),
+                    1.0,
+                    AnimationCommand::Init,
+                )
+                .add_animation(
+                    PlayerAnimation::RunRight,
+                    &animation_set.get(&PlayerAnimation::RunRight).unwrap(),
                     EndControl::Loop(None),
                     1.0,
                     AnimationCommand::Init,
@@ -126,37 +168,53 @@ impl SimpleState for OverworldState<'_, '_> {
     }
 
     fn handle_event(&mut self, data: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
+        let world = data.world;
+
         if let StateEvent::Input(event) = event {
             match event {
                 InputEvent::ActionPressed(action) if action == "action" => {
-                    let mut players = data.world.write_storage::<Player>();
-
-                    for player in (&mut players).join() {
-                        player.action = PlayerAction::Run;
-                        player.temp_flag = true;
-                    }
+                    mutate_player(world, |player| player.action = PlayerAction::Run);
                 },
                 InputEvent::ActionReleased(action) if action == "action" => {
-                    let mut players = data.world.write_storage::<Player>();
-
-                    for player in (&mut players).join() {
-                        player.action = PlayerAction::Walk;
-                        player.temp_flag = true;
-                    }
+                    mutate_player(world, |player| player.action = PlayerAction::Walk);
                 },
                 InputEvent::ActionPressed(action) if action == "cancel" => {
-                    let entities = data.world.read_resource::<EntitiesRes>();
-                    let animation_sets = data.world.read_storage::<AnimationSet<PlayerAction, SpriteRender>>();
-                    let mut control_sets = data.world.write_storage::<AnimationControlSet<PlayerAction, SpriteRender>>();
+                    let entities = world.read_resource::<EntitiesRes>();
+                    let animation_sets = world.read_storage::<AnimationSet<PlayerAnimation, SpriteRender>>();
+                    let mut control_sets = world.write_storage::<AnimationControlSet<PlayerAnimation, SpriteRender>>();
 
                     for (_, _, control_set) in (&entities, &animation_sets, &mut control_sets).join() {
                         println!("{:#?}", control_set);
                     }
-                }
+                },
+                InputEvent::AxisMoved { axis, value } if axis == "vertical" && value < -0.2 => {
+                    mutate_player(world, |player| player.facing_direction = Direction::Down);
+                },
+                InputEvent::AxisMoved { axis, value } if axis == "vertical" && value > 0.2 => {
+                    mutate_player(world, |player| player.facing_direction = Direction::Up);
+                },
+                InputEvent::AxisMoved { axis, value } if axis == "horizontal" && value < -0.2 => {
+                    mutate_player(world, |player| player.facing_direction = Direction::Left);
+                },
+                InputEvent::AxisMoved { axis, value } if axis == "horizontal" && value > 0.2 => {
+                    mutate_player(world, |player| player.facing_direction = Direction::Right);
+                },
                 _ => {},
             }
         }
 
         Trans::None
+    }
+}
+
+fn mutate_player<F>(world: &mut World, callback: F)
+where
+    F: Fn(&mut Player) -> ()
+{
+    let mut players = world.write_storage::<Player>();
+
+    for player in (&mut players).join() {
+        callback(player);
+        player.temp_flag = true;
     }
 }
