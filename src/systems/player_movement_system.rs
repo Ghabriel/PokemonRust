@@ -70,12 +70,18 @@ impl<'a> System<'a> for PlayerMovementSystem {
             sprite_render,
             _,
         ) in (&mut control_sets, &players, &mut sprite_renders, &modified).join() {
-            match player.action {
+            let actual_action = if player.moving {
+                player.action
+            } else {
+                PlayerAction::Idle
+            };
+
+            match actual_action {
                 PlayerAction::Idle | PlayerAction::Walk => player_walk(sprite_render, &sprite_sheets),
                 PlayerAction::Run => player_run(sprite_render, &sprite_sheets),
             }
 
-            let new_animation = get_new_animation(&player.action, &player.facing_direction);
+            let new_animation = get_new_animation(&actual_action, &player.facing_direction);
             change_player_animation(&new_animation, control_set);
         }
     }

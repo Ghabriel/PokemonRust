@@ -37,7 +37,7 @@ pub enum Direction {
 pub struct Player {
     pub action: PlayerAction,
     pub facing_direction: Direction,
-    pub velocity: [f32; 2],
+    pub moving: bool,
 }
 
 impl Component for Player {
@@ -132,7 +132,7 @@ pub fn initialise_player(world: &mut World) -> Entity {
     let player = Player {
         action: PlayerAction::Walk,
         facing_direction: Direction::Down,
-        velocity: [0., 0.],
+        moving: false,
     };
 
     let mut transform = Transform::default();

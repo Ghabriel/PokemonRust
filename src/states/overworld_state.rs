@@ -15,7 +15,7 @@ use amethyst::{
         world::{Builder, EntitiesRes},
         World,
     },
-    input::InputEvent,
+    input::{InputEvent, InputHandler, StringBindings},
     prelude::*,
     renderer::{
         Camera,
@@ -204,26 +204,55 @@ impl SimpleState for OverworldState<'_, '_> {
 
         if let StateEvent::Input(event) = event {
             match event {
-                InputEvent::ActionPressed(action) if action == "action" => {
+                InputEvent::ActionPressed(action) if action == "cancel" => {
                     mutate_player(world, |player| player.action = PlayerAction::Run);
                 },
-                InputEvent::ActionReleased(action) if action == "action" => {
+                InputEvent::ActionReleased(action) if action == "cancel" => {
                     mutate_player(world, |player| player.action = PlayerAction::Walk);
                 },
-                InputEvent::ActionPressed(action) if action == "cancel" => {
-                    mutate_player(world, |player| player.action = PlayerAction::Idle);
-                },
                 InputEvent::AxisMoved { axis, value } if axis == "vertical" && value < -0.2 => {
-                    mutate_player(world, |player| player.facing_direction = Direction::Down);
+                    mutate_player(world, |player| {
+                        player.facing_direction = Direction::Down;
+                        player.moving = true;
+                    });
                 },
                 InputEvent::AxisMoved { axis, value } if axis == "vertical" && value > 0.2 => {
-                    mutate_player(world, |player| player.facing_direction = Direction::Up);
+                    mutate_player(world, |player| {
+                        player.facing_direction = Direction::Up;
+                        player.moving = true;
+                    });
+                },
+                InputEvent::AxisMoved { axis, value: _ } if axis == "vertical" => {
+                    let horizontal_value = world
+                        .read_resource::<InputHandler<StringBindings>>()
+                        .axis_value("horizontal")
+                        .unwrap_or(0.);
+
+                    if horizontal_value > -0.2 && horizontal_value < 0.2 {
+                        mutate_player(world, |player| player.moving = false);
+                    }
                 },
                 InputEvent::AxisMoved { axis, value } if axis == "horizontal" && value < -0.2 => {
-                    mutate_player(world, |player| player.facing_direction = Direction::Left);
+                    mutate_player(world, |player| {
+                        player.facing_direction = Direction::Left;
+                        player.moving = true;
+                    });
                 },
                 InputEvent::AxisMoved { axis, value } if axis == "horizontal" && value > 0.2 => {
-                    mutate_player(world, |player| player.facing_direction = Direction::Right);
+                    mutate_player(world, |player| {
+                        player.facing_direction = Direction::Right;
+                        player.moving = true;
+                    });
+                },
+                InputEvent::AxisMoved { axis, value: _ } if axis == "horizontal" => {
+                    let vertical_value = world
+                        .read_resource::<InputHandler<StringBindings>>()
+                        .axis_value("vertical")
+                        .unwrap_or(0.);
+
+                    if vertical_value > -0.2 && vertical_value < 0.2 {
+                        mutate_player(world, |player| player.moving = false);
+                    }
                 },
                 _ => {},
             }
