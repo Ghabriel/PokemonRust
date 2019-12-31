@@ -26,9 +26,12 @@ pub fn initialise_map(world: &mut World) -> Entity {
         Some(sprite_sheet),
     );
 
+    let mut transform = Transform::default();
+    transform.set_translation_xyz(386., 386., 0.);
+
     world
         .create_entity()
         .with(map)
-        .with(Transform::default())
+        .with(transform)
         .build()
 }
