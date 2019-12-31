@@ -20,8 +20,10 @@ use amethyst::{
         World,
         WorldExt,
     },
-    renderer::{ImageFormat, SpriteRender, SpriteSheet, SpriteSheetFormat},
+    renderer::{SpriteRender, SpriteSheet},
 };
+
+use super::load_sprite_sheet;
 
 use serde::{Deserialize, Serialize};
 
@@ -42,13 +44,6 @@ pub struct Player {
 
 impl Component for Player {
     type Storage = FlaggedStorage<Self, DenseVecStorage<Self>>;
-}
-
-fn load_sprite_sheet(world: &World, image_name: &str, ron_name: &str) -> Handle<SpriteSheet> {
-    let loader = world.read_resource::<Loader>();
-    let texture_handle = loader.load(image_name, ImageFormat::default(), (), &world.read_resource());
-
-    loader.load(ron_name, SpriteSheetFormat(texture_handle), (), &world.read_resource())
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]

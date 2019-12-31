@@ -5,8 +5,6 @@ authors = ["Ghabriel <ghabriel.nunes@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+amethyst = { version = "0.13", features = ["nightly", "sdl_controller", "vulkan"] }
+amethyst_tiles = { version = "0.1", features = ["nightly"] }
 serde = "1.0"
-
-[dependencies.amethyst]
-version = "0.13"
-features = ["nightly", "sdl_controller", "vulkan"]

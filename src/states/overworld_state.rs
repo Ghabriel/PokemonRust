@@ -24,7 +24,10 @@ use amethyst::{
 };
 
 use crate::{
-    entities::player::{Direction, PlayerAction, PlayerAnimation, initialise_player, Player},
+    entities::{
+        player::{Direction, PlayerAction, PlayerAnimation, initialise_player, Player},
+        map::initialise_map,
+    },
     systems::PlayerMovementSystem,
 };
 
@@ -93,6 +96,7 @@ impl SimpleState for OverworldState<'_, '_> {
         // self.progress_counter = Some(progress_counter);
 
         initialise_player(data.world);
+        initialise_map(data.world);
         initialise_camera(data.world);
     }
 
