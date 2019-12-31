@@ -7,10 +7,11 @@ use amethyst::{
         EndControl,
         get_animation_set,
     },
-    core::{ArcThreadPool, bundle::SystemBundle, Transform},
+    core::{ArcThreadPool, bundle::SystemBundle, Parent, Transform},
     ecs::{
         Dispatcher,
         DispatcherBuilder,
+        Entity,
         Join,
         world::{Builder, EntitiesRes},
         World,
@@ -33,13 +34,14 @@ use crate::{
 
 use std::ops::Deref;
 
-pub fn initialise_camera(world: &mut World) {
+pub fn initialise_camera(world: &mut World, player: Entity) {
     let mut transform = Transform::default();
-    transform.set_translation_xyz(400., 300., 1.0);
+    transform.set_translation_xyz(0., 0., 1.0);
 
     world
         .create_entity()
         .with(Camera::standard_2d(800., 600.))
+        .with(Parent { entity: player })
         .with(transform)
         .build();
 }
@@ -96,9 +98,9 @@ impl SimpleState for OverworldState<'_, '_> {
         //     .build();
         // self.progress_counter = Some(progress_counter);
 
-        initialise_player(data.world);
+        let player = initialise_player(data.world);
         initialise_map(data.world);
-        initialise_camera(data.world);
+        initialise_camera(data.world, player);
     }
 
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
