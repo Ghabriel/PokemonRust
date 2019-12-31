@@ -27,19 +27,19 @@ use crate::{
     },
 };
 
-pub struct PlayerMovementSystem {
+pub struct PlayerAnimationSystem {
     player_events_id: ReaderId<ComponentEvent>,
 }
 
-impl PlayerMovementSystem {
+impl PlayerAnimationSystem {
     pub fn new(storage: &mut WriteStorage<Player>) -> Self {
-        PlayerMovementSystem {
+        PlayerAnimationSystem {
             player_events_id: storage.register_reader(),
         }
     }
 }
 
-impl<'a> System<'a> for PlayerMovementSystem {
+impl<'a> System<'a> for PlayerAnimationSystem {
     type SystemData = (
         WriteStorage<'a, AnimationControlSet<PlayerAnimation, SpriteRender>>,
         ReadStorage<'a, Player>,

@@ -28,7 +28,7 @@ use crate::{
         player::{Direction, PlayerAction, PlayerAnimation, initialise_player, Player},
         map::initialise_map,
     },
-    systems::PlayerMovementSystem,
+    systems::PlayerAnimationSystem,
 };
 
 use std::ops::Deref;
@@ -66,7 +66,7 @@ impl SimpleState for OverworldState<'_, '_> {
             // )
             .with({
                 let mut player_storage = data.world.write_storage::<Player>();
-                PlayerMovementSystem::new(&mut player_storage)
+                PlayerAnimationSystem::new(&mut player_storage)
             }, "player_movement_system", &[])
             .with_pool(data.world.read_resource::<ArcThreadPool>().deref().clone());
 

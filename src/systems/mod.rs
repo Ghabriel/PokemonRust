@@ -1,3 +1,3 @@
-pub mod player_movement_system;
+pub mod player_animation_system;
 
-pub use player_movement_system::PlayerMovementSystem;
+pub use player_animation_system::PlayerAnimationSystem;
