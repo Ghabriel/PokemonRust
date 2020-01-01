@@ -38,8 +38,8 @@ impl<'a> System<'a> for PlayerMovementSystem {
 
             let velocity = match player.action {
                 PlayerAction::Idle => unreachable!(),
-                PlayerAction::Walk => 150.,
-                PlayerAction::Run => 250.,
+                PlayerAction::Walk => 160.,
+                PlayerAction::Run => 256.,
             };
 
             transform.prepend_translation_x(offset_x * velocity * time.delta_seconds());

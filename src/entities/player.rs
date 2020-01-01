@@ -168,50 +168,50 @@ pub fn initialise_player(world: &mut World) -> Entity {
 
     animation_set.insert(PlayerAnimation::WalkDown, make_sprite_animation(
         world,
-        vec![0.0, 0.25, 0.5, 0.75, 1.0],
+        vec![0.0, 0.1, 0.2, 0.3, 0.4],
         vec![0, 1, 2, 3],
         &mut progress_counter,
     ));
     animation_set.insert(PlayerAnimation::WalkLeft, make_sprite_animation(
         world,
-        vec![0.0, 0.25, 0.5, 0.75, 1.0],
+        vec![0.0, 0.1, 0.2, 0.3, 0.4],
         vec![4, 5, 6, 7],
         &mut progress_counter,
     ));
     animation_set.insert(PlayerAnimation::WalkRight, make_sprite_animation(
         world,
-        vec![0.0, 0.25, 0.5, 0.75, 1.0],
+        vec![0.0, 0.1, 0.2, 0.3, 0.4],
         vec![8, 9, 10, 11],
         &mut progress_counter,
     ));
     animation_set.insert(PlayerAnimation::WalkUp, make_sprite_animation(
         world,
-        vec![0.0, 0.25, 0.5, 0.75, 1.0],
+        vec![0.0, 0.1, 0.2, 0.3, 0.4],
         vec![12, 13, 14, 15],
         &mut progress_counter,
     ));
 
     animation_set.insert(PlayerAnimation::RunDown, make_sprite_animation(
         world,
-        vec![0.0, 0.1, 0.2, 0.3, 0.4],
+        vec![0.0, 0.0625, 0.125, 0.1875, 0.25],
         vec![0, 1, 2, 3],
         &mut progress_counter,
     ));
     animation_set.insert(PlayerAnimation::RunLeft, make_sprite_animation(
         world,
-        vec![0.0, 0.1, 0.2, 0.3, 0.4],
+        vec![0.0, 0.0625, 0.125, 0.1875, 0.25],
         vec![4, 5, 6, 7],
         &mut progress_counter,
     ));
     animation_set.insert(PlayerAnimation::RunRight, make_sprite_animation(
         world,
-        vec![0.0, 0.1, 0.2, 0.3, 0.4],
+        vec![0.0, 0.0625, 0.125, 0.1875, 0.25],
         vec![8, 9, 10, 11],
         &mut progress_counter,
     ));
     animation_set.insert(PlayerAnimation::RunUp, make_sprite_animation(
         world,
-        vec![0.0, 0.1, 0.2, 0.3, 0.4],
+        vec![0.0, 0.0625, 0.125, 0.1875, 0.25],
         vec![12, 13, 14, 15],
         &mut progress_counter,
     ));
