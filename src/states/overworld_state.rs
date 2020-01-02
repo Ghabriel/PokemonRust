@@ -8,20 +8,10 @@ use amethyst::{
         get_animation_set,
     },
     core::{ArcThreadPool, bundle::SystemBundle, Parent, Transform},
-    ecs::{
-        Dispatcher,
-        DispatcherBuilder,
-        Entity,
-        Join,
-        world::{Builder, EntitiesRes},
-        World,
-    },
+    ecs::{Dispatcher, DispatcherBuilder, Entity, Join, world::{Builder, EntitiesRes}, World},
     input::{InputEvent, InputHandler, StringBindings},
     prelude::*,
-    renderer::{
-        Camera,
-        SpriteRender,
-    },
+    renderer::{Camera, SpriteRender},
 };
 
 use crate::{

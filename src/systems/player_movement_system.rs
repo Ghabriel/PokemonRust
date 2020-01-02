@@ -1,17 +1,9 @@
 use amethyst::{
     core::{Time, Transform},
-    ecs::{
-        Join,
-        Read,
-        ReadStorage,
-        System,
-        WriteStorage,
-    },
+    ecs::{Join, Read, ReadStorage, System, WriteStorage},
 };
 
-use crate::{
-    entities::player::{Direction, Player, PlayerAction},
-};
+use crate::entities::player::{Direction, Player, PlayerAction};
 
 #[derive(Default)]
 pub struct PlayerMovementSystem;
