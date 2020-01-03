@@ -1,5 +1,5 @@
 use amethyst::{
-    core::{Time, Transform},
+    core::{math::Vector3, Time, Transform},
     ecs::{Entities, Entity, Join, Read, ReadStorage, System, WriteStorage},
 };
 
@@ -10,6 +10,9 @@ use std::collections::HashMap;
 struct MovementTimingData {
     /// Stores how much time it will take for the player to reach the next tile.
     estimated_time: f32,
+    /// Stores where the player will be after he reaches the next tile. This
+    /// is used to compensate for rounding errors.
+    final_position: Vector3<f32>,
 }
 
 #[derive(Default)]
@@ -44,6 +47,13 @@ impl<'a> System<'a> for PlayerMovementSystem {
                 PlayerAction::Run => 256.,
             };
 
+            let (offset_x, offset_y) = match player.facing_direction {
+                Direction::Up => (0., 1.),
+                Direction::Down => (0., -1.),
+                Direction::Left => (-1., 0.),
+                Direction::Right => (1., 0.),
+            };
+
             let timing_data = self.timing_data.get_mut(&entity);
 
             match timing_data {
@@ -51,8 +61,8 @@ impl<'a> System<'a> for PlayerMovementSystem {
                     let delta_seconds = time.delta_seconds();
 
                     if timing_data.estimated_time <= delta_seconds {
+                        transform.set_translation(timing_data.final_position);
                         self.timing_data.remove(&entity);
-
                         static_players.push(entity);
                         continue;
                     }
@@ -66,16 +76,19 @@ impl<'a> System<'a> for PlayerMovementSystem {
                     }
 
                     let estimated_time = TILE_SIZE / velocity;
-                    self.timing_data.insert(entity, MovementTimingData { estimated_time });
+
+                    let final_position = transform.translation() + Vector3::new(
+                        offset_x * TILE_SIZE,
+                        offset_y * TILE_SIZE,
+                        0.,
+                    );
+
+                    self.timing_data.insert(entity, MovementTimingData {
+                        estimated_time,
+                        final_position,
+                    });
                 },
             }
-
-            let (offset_x, offset_y) = match player.facing_direction {
-                Direction::Up => (0., 1.),
-                Direction::Down => (0., -1.),
-                Direction::Left => (-1., 0.),
-                Direction::Right => (1., 0.),
-            };
 
             transform.prepend_translation_x(offset_x * velocity * time.delta_seconds());
             transform.prepend_translation_y(offset_y * velocity * time.delta_seconds());
