@@ -128,94 +128,33 @@ impl SimpleState for OverworldState<'_, '_> {
         let entities = world.read_resource::<EntitiesRes>();
         let animation_sets = world.read_storage::<AnimationSet<PlayerAnimation, SpriteRender>>();
         let mut control_sets = world.write_storage::<AnimationControlSet<PlayerAnimation, SpriteRender>>();
+        let animations = [
+            PlayerAnimation::IdleUp,
+            PlayerAnimation::IdleDown,
+            PlayerAnimation::IdleLeft,
+            PlayerAnimation::IdleRight,
+            PlayerAnimation::WalkUp,
+            PlayerAnimation::WalkDown,
+            PlayerAnimation::WalkLeft,
+            PlayerAnimation::WalkRight,
+            PlayerAnimation::RunUp,
+            PlayerAnimation::RunDown,
+            PlayerAnimation::RunLeft,
+            PlayerAnimation::RunRight,
+        ];
 
         for (entity, animation_set) in (&entities, &animation_sets).join() {
-            get_animation_set(&mut control_sets, entity)
-                .unwrap()
-                .add_animation(
-                    PlayerAnimation::IdleUp,
-                    &animation_set.get(&PlayerAnimation::IdleUp).unwrap(),
-                    EndControl::Loop(None),
-                    1.0,
-                    AnimationCommand::Init,
-                )
-                .add_animation(
-                    PlayerAnimation::IdleDown,
-                    &animation_set.get(&PlayerAnimation::IdleDown).unwrap(),
-                    EndControl::Loop(None),
-                    1.0,
-                    AnimationCommand::Init,
-                )
-                .add_animation(
-                    PlayerAnimation::IdleLeft,
-                    &animation_set.get(&PlayerAnimation::IdleLeft).unwrap(),
-                    EndControl::Loop(None),
-                    1.0,
-                    AnimationCommand::Init,
-                )
-                .add_animation(
-                    PlayerAnimation::IdleRight,
-                    &animation_set.get(&PlayerAnimation::IdleRight).unwrap(),
-                    EndControl::Loop(None),
-                    1.0,
-                    AnimationCommand::Init,
-                )
-                .add_animation(
-                    PlayerAnimation::WalkUp,
-                    &animation_set.get(&PlayerAnimation::WalkUp).unwrap(),
-                    EndControl::Loop(None),
-                    1.0,
-                    AnimationCommand::Init,
-                )
-                .add_animation(
-                    PlayerAnimation::WalkDown,
-                    &animation_set.get(&PlayerAnimation::WalkDown).unwrap(),
-                    EndControl::Loop(None),
-                    1.0,
-                    AnimationCommand::Init,
-                )
-                .add_animation(
-                    PlayerAnimation::WalkLeft,
-                    &animation_set.get(&PlayerAnimation::WalkLeft).unwrap(),
-                    EndControl::Loop(None),
-                    1.0,
-                    AnimationCommand::Init,
-                )
-                .add_animation(
-                    PlayerAnimation::WalkRight,
-                    &animation_set.get(&PlayerAnimation::WalkRight).unwrap(),
-                    EndControl::Loop(None),
-                    1.0,
-                    AnimationCommand::Init,
-                )
-                .add_animation(
-                    PlayerAnimation::RunUp,
-                    &animation_set.get(&PlayerAnimation::RunUp).unwrap(),
-                    EndControl::Loop(None),
-                    1.0,
-                    AnimationCommand::Init,
-                )
-                .add_animation(
-                    PlayerAnimation::RunDown,
-                    &animation_set.get(&PlayerAnimation::RunDown).unwrap(),
-                    EndControl::Loop(None),
-                    1.0,
-                    AnimationCommand::Init,
-                )
-                .add_animation(
-                    PlayerAnimation::RunLeft,
-                    &animation_set.get(&PlayerAnimation::RunLeft).unwrap(),
-                    EndControl::Loop(None),
-                    1.0,
-                    AnimationCommand::Init,
-                )
-                .add_animation(
-                    PlayerAnimation::RunRight,
-                    &animation_set.get(&PlayerAnimation::RunRight).unwrap(),
+            let animation_control_set = get_animation_set(&mut control_sets, entity).unwrap();
+
+            for &animation in animations.iter() {
+                animation_control_set.add_animation(
+                    animation,
+                    &animation_set.get(&animation).unwrap(),
                     EndControl::Loop(None),
                     1.0,
                     AnimationCommand::Init,
                 );
+            }
         }
 
         Trans::None

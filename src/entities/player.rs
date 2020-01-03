@@ -147,77 +147,81 @@ pub fn initialise_player(world: &mut World) -> Entity {
     let mut progress_counter = ProgressCounter::new();
     let mut animation_set = AnimationSet::new();
 
+    let idle_animation_timing = vec![0.0, 1.0];
+    let walk_animation_timing = vec![0.0, 0.1, 0.2, 0.3, 0.4];
+    let run_animation_timing = vec![0.0, 0.0625, 0.125, 0.1875, 0.25];
+
     animation_set.insert(PlayerAnimation::IdleDown, make_sprite_animation(
         world,
-        vec![0.0, 1.0],
+        idle_animation_timing.clone(),
         vec![0],
         &mut progress_counter,
     ));
     animation_set.insert(PlayerAnimation::IdleLeft, make_sprite_animation(
         world,
-        vec![0.0, 1.0],
+        idle_animation_timing.clone(),
         vec![4],
         &mut progress_counter,
     ));
     animation_set.insert(PlayerAnimation::IdleRight, make_sprite_animation(
         world,
-        vec![0.0, 1.0],
+        idle_animation_timing.clone(),
         vec![8],
         &mut progress_counter,
     ));
     animation_set.insert(PlayerAnimation::IdleUp, make_sprite_animation(
         world,
-        vec![0.0, 1.0],
+        idle_animation_timing.clone(),
         vec![12],
         &mut progress_counter,
     ));
 
     animation_set.insert(PlayerAnimation::WalkDown, make_sprite_animation(
         world,
-        vec![0.0, 0.1, 0.2, 0.3, 0.4],
+        walk_animation_timing.clone(),
         vec![0, 1, 2, 3],
         &mut progress_counter,
     ));
     animation_set.insert(PlayerAnimation::WalkLeft, make_sprite_animation(
         world,
-        vec![0.0, 0.1, 0.2, 0.3, 0.4],
+        walk_animation_timing.clone(),
         vec![4, 5, 6, 7],
         &mut progress_counter,
     ));
     animation_set.insert(PlayerAnimation::WalkRight, make_sprite_animation(
         world,
-        vec![0.0, 0.1, 0.2, 0.3, 0.4],
+        walk_animation_timing.clone(),
         vec![8, 9, 10, 11],
         &mut progress_counter,
     ));
     animation_set.insert(PlayerAnimation::WalkUp, make_sprite_animation(
         world,
-        vec![0.0, 0.1, 0.2, 0.3, 0.4],
+        walk_animation_timing.clone(),
         vec![12, 13, 14, 15],
         &mut progress_counter,
     ));
 
     animation_set.insert(PlayerAnimation::RunDown, make_sprite_animation(
         world,
-        vec![0.0, 0.0625, 0.125, 0.1875, 0.25],
+        run_animation_timing.clone(),
         vec![0, 1, 2, 3],
         &mut progress_counter,
     ));
     animation_set.insert(PlayerAnimation::RunLeft, make_sprite_animation(
         world,
-        vec![0.0, 0.0625, 0.125, 0.1875, 0.25],
+        run_animation_timing.clone(),
         vec![4, 5, 6, 7],
         &mut progress_counter,
     ));
     animation_set.insert(PlayerAnimation::RunRight, make_sprite_animation(
         world,
-        vec![0.0, 0.0625, 0.125, 0.1875, 0.25],
+        run_animation_timing.clone(),
         vec![8, 9, 10, 11],
         &mut progress_counter,
     ));
     animation_set.insert(PlayerAnimation::RunUp, make_sprite_animation(
         world,
-        vec![0.0, 0.0625, 0.125, 0.1875, 0.25],
+        run_animation_timing.clone(),
         vec![12, 13, 14, 15],
         &mut progress_counter,
     ));
