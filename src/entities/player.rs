@@ -27,7 +27,7 @@ use super::load_sprite_sheet;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Direction {
     Up,
     Down,
@@ -35,7 +35,13 @@ pub enum Direction {
     Right,
 }
 
-#[derive(Debug)]
+pub struct SimulatedPlayer(pub Player);
+
+impl Component for SimulatedPlayer {
+    type Storage = DenseVecStorage<Self>;
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Player {
     pub action: PlayerAction,
     pub facing_direction: Direction,
@@ -220,6 +226,7 @@ pub fn initialise_player(world: &mut World) -> Entity {
 
     world
         .create_entity()
+        .with(SimulatedPlayer(player.clone()))
         .with(player)
         .with(transform)
         .with(sprite_render)

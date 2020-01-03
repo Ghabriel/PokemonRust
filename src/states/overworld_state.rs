@@ -16,8 +16,15 @@ use amethyst::{
 
 use crate::{
     entities::{
-        player::{Direction, PlayerAction, PlayerAnimation, initialise_player, Player},
-        map::initialise_map,
+        player::{
+            Direction,
+            initialise_player,
+            PlayerAction,
+            PlayerAnimation,
+            Player,
+            SimulatedPlayer,
+        },
+        map::{initialise_map, Map},
     },
     systems::{PlayerAnimationSystem, PlayerMovementSystem},
 };
@@ -39,7 +46,22 @@ pub fn initialise_camera(world: &mut World, player: Entity) {
 #[derive(Default)]
 pub struct OverworldState<'a, 'b> {
     pub dispatcher: Option<Dispatcher<'a, 'b>>,
+    pub player_entity: Option<Entity>,
     // pub progress_counter: Option<ProgressCounter>,
+}
+
+impl OverworldState<'_, '_> {
+    fn mutate_player<F>(&self, world: &mut World, callback: F)
+    where
+        F: Fn(&mut Player) -> ()
+    {
+        let mut players = world.write_storage::<SimulatedPlayer>();
+        let player = players
+            .get_mut(self.player_entity.unwrap())
+            .expect("Failed to retrieve Player");
+
+        callback(&mut player.0);
+    }
 }
 
 impl SimpleState for OverworldState<'_, '_> {
@@ -49,6 +71,8 @@ impl SimpleState for OverworldState<'_, '_> {
         data.world.register::<Player>();
         data.world.register::<AnimationSet<PlayerAnimation, SpriteRender>>();
         data.world.register::<AnimationControlSet<PlayerAnimation, SpriteRender>>();
+        data.world.register::<Map>();
+        data.world.register::<SimulatedPlayer>();
 
         let mut dispatcher_builder = DispatcherBuilder::new()
             // .with(
@@ -91,6 +115,7 @@ impl SimpleState for OverworldState<'_, '_> {
         let player = initialise_player(data.world);
         initialise_map(data.world);
         initialise_camera(data.world, player);
+        self.player_entity = Some(player);
     }
 
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
@@ -202,19 +227,19 @@ impl SimpleState for OverworldState<'_, '_> {
         if let StateEvent::Input(event) = event {
             match event {
                 InputEvent::ActionPressed(action) if action == "cancel" => {
-                    mutate_player(world, |player| player.action = PlayerAction::Run);
+                    self.mutate_player(world, |player| player.action = PlayerAction::Run);
                 },
                 InputEvent::ActionReleased(action) if action == "cancel" => {
-                    mutate_player(world, |player| player.action = PlayerAction::Walk);
+                    self.mutate_player(world, |player| player.action = PlayerAction::Walk);
                 },
                 InputEvent::AxisMoved { axis, value } if axis == "vertical" && value < -0.2 => {
-                    mutate_player(world, |player| {
+                    self.mutate_player(world, |player| {
                         player.facing_direction = Direction::Down;
                         player.moving = true;
                     });
                 },
                 InputEvent::AxisMoved { axis, value } if axis == "vertical" && value > 0.2 => {
-                    mutate_player(world, |player| {
+                    self.mutate_player(world, |player| {
                         player.facing_direction = Direction::Up;
                         player.moving = true;
                     });
@@ -226,17 +251,17 @@ impl SimpleState for OverworldState<'_, '_> {
                         .unwrap_or(0.);
 
                     if horizontal_value > -0.2 && horizontal_value < 0.2 {
-                        mutate_player(world, |player| player.moving = false);
+                        self.mutate_player(world, |player| player.moving = false);
                     }
                 },
                 InputEvent::AxisMoved { axis, value } if axis == "horizontal" && value < -0.2 => {
-                    mutate_player(world, |player| {
+                    self.mutate_player(world, |player| {
                         player.facing_direction = Direction::Left;
                         player.moving = true;
                     });
                 },
                 InputEvent::AxisMoved { axis, value } if axis == "horizontal" && value > 0.2 => {
-                    mutate_player(world, |player| {
+                    self.mutate_player(world, |player| {
                         player.facing_direction = Direction::Right;
                         player.moving = true;
                     });
@@ -248,7 +273,7 @@ impl SimpleState for OverworldState<'_, '_> {
                         .unwrap_or(0.);
 
                     if vertical_value > -0.2 && vertical_value < 0.2 {
-                        mutate_player(world, |player| player.moving = false);
+                        self.mutate_player(world, |player| player.moving = false);
                     }
                 },
                 _ => {},
@@ -256,16 +281,5 @@ impl SimpleState for OverworldState<'_, '_> {
         }
 
         Trans::None
-    }
-}
-
-fn mutate_player<F>(world: &mut World, callback: F)
-where
-    F: Fn(&mut Player) -> ()
-{
-    let mut players = world.write_storage::<Player>();
-
-    for player in (&mut players).join() {
-        callback(player);
     }
 }
