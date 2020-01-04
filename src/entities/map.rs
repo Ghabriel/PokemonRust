@@ -1,19 +1,17 @@
 use amethyst::{
-    core::{math::{Point3, Vector3}, Transform},
+    core::Transform,
     ecs::{Component, DenseVecStorage, Entity, world::Builder, World, WorldExt},
-    // tiles::{MortonEncoder, Tile, TileMap},
+    renderer::SpriteRender,
 };
-
-use amethyst_tiles::{MortonEncoder, Tile, TileMap};
 
 use std::collections::HashMap;
 
 use super::load_sprite_sheet;
 
 pub struct Map {
-    terrains: Vec<GameTile>,
-    solids: HashMap<MapPosition, GameTile>,
-    decorations: HashMap<MapPosition, GameTile>,
+    terrains: Vec<Entity>,
+    solids: HashMap<MapPosition, Entity>,
+    decorations: HashMap<MapPosition, Entity>,
     actions: HashMap<MapPosition, GameAction>,
     scripts: Vec<MapScript>,
 }
@@ -23,14 +21,10 @@ impl Component for Map {
 }
 
 #[derive(Clone, Default)]
-pub struct GameTile {
-    sprite_number: usize,
-}
+pub struct Tile;
 
-impl Tile for GameTile {
-    fn sprite(&self, _coordinates: Point3<u32>, _world: &World) -> Option<usize> {
-        Some(self.sprite_number)
-    }
+impl Component for Tile {
+    type Storage = DenseVecStorage<Self>;
 }
 
 /**
@@ -75,37 +69,53 @@ pub enum MapScriptKind {
     OnTileChange,
 }
 
+const TILE_SIZE: f32 = 32.;
+
 pub fn initialise_map(world: &mut World) -> Entity {
     let sprite_sheet = load_sprite_sheet(world, "sprites/terrain.png", "sprites/terrain.ron");
 
-    let num_tiles_x: u32 = 48;
-    let num_tiles_y: u32 = 48;
+    let num_tiles_x: usize = 15;
+    let num_tiles_y: usize = 15;
 
-    let map = Map {
-        terrains: {
-            let mut vec = Vec::new();
-            vec.resize_with((num_tiles_x * num_tiles_y) as usize, GameTile::default);
-            vec
-        },
+    let mut map = Map {
+        terrains: Vec::new(),
         solids: HashMap::new(),
         decorations: HashMap::new(),
         actions: HashMap::new(),
         scripts: Vec::new(),
     };
 
-    let tile_map = TileMap::<GameTile, MortonEncoder>::new(
-        Vector3::new(num_tiles_x, num_tiles_y, 1),
-        Vector3::new(32, 32, 1),
-        Some(sprite_sheet),
-    );
+    map.terrains.reserve(num_tiles_x * num_tiles_y);
 
-    let mut transform = Transform::default();
-    transform.set_translation_xyz(386., 386., 0.);
+    for x in 0..num_tiles_x {
+        for y in 0..num_tiles_y {
+            let tile = Tile::default();
+
+            let mut transform = Transform::default();
+            transform.set_translation_xyz(
+                TILE_SIZE * x as f32,
+                TILE_SIZE * y as f32,
+                -1.,
+            );
+
+            let sprite_render = SpriteRender {
+                sprite_sheet: sprite_sheet.clone(),
+                sprite_number: 0,
+            };
+
+            let entity = world
+                .create_entity()
+                .with(tile)
+                .with(transform)
+                .with(sprite_render)
+                .build();
+
+            map.terrains.push(entity);
+        }
+    }
 
     world
         .create_entity()
         .with(map)
-        .with(tile_map)
-        .with(transform)
         .build()
 }

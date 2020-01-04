@@ -7,11 +7,12 @@ use amethyst::{
         EndControl,
         get_animation_set,
     },
-    core::{ArcThreadPool, bundle::SystemBundle, Parent, Transform},
+    core::{ArcThreadPool, bundle::SystemBundle, math::Vector3, Parent, Transform},
     ecs::{Dispatcher, DispatcherBuilder, Entity, Join, world::{Builder, EntitiesRes}, World},
     input::{InputEvent, InputHandler, StringBindings},
     prelude::*,
     renderer::{Camera, SpriteRender},
+    utils::fps_counter::FpsCounterSystem,
 };
 
 use crate::{
@@ -24,7 +25,7 @@ use crate::{
             Player,
             SimulatedPlayer,
         },
-        map::{initialise_map, Map},
+        map::{initialise_map, Map, Tile},
     },
     systems::{PlayerAnimationSystem, PlayerMovementSystem},
 };
@@ -34,6 +35,9 @@ use std::ops::Deref;
 pub fn initialise_camera(world: &mut World, player: Entity) {
     let mut transform = Transform::default();
     transform.set_translation_xyz(0., 0., 1.0);
+    transform.set_scale(
+        transform.scale() - Vector3::new(0.2, 0.2, 0.2),
+    );
 
     world
         .create_entity()
@@ -73,6 +77,7 @@ impl SimpleState for OverworldState<'_, '_> {
         data.world.register::<AnimationControlSet<PlayerAnimation, SpriteRender>>();
         data.world.register::<Map>();
         data.world.register::<SimulatedPlayer>();
+        data.world.register::<Tile>();
 
         let mut dispatcher_builder = DispatcherBuilder::new()
             // .with(
@@ -85,6 +90,7 @@ impl SimpleState for OverworldState<'_, '_> {
                 PlayerAnimationSystem::new(&mut player_storage)
             }, "player_animation_system", &[])
             .with(PlayerMovementSystem::default(), "player_movement_system", &[])
+            .with(FpsCounterSystem, "fps_counter_system", &[])
             .with_pool(data.world.read_resource::<ArcThreadPool>().deref().clone());
 
         AnimationBundle::<PlayerAnimation, SpriteRender>::new(

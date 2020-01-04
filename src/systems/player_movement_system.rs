@@ -1,6 +1,7 @@
 use amethyst::{
     core::{math::Vector3, Time, Transform},
     ecs::{Entities, Entity, Join, Read, ReadStorage, System, WriteStorage},
+    utils::fps_counter::FpsCounter,
 };
 
 use crate::entities::player::{Direction, Player, PlayerAction, SimulatedPlayer};
@@ -29,6 +30,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
         WriteStorage<'a, Transform>,
         Entities<'a>,
         Read<'a, Time>,
+        Read<'a, FpsCounter>,
     );
 
     fn run(&mut self, (
@@ -37,7 +39,10 @@ impl<'a> System<'a> for PlayerMovementSystem {
         mut transforms,
         entities,
         time,
+        fps_counter,
     ): Self::SystemData) {
+        println!("FPS: {}", fps_counter.sampled_fps());
+
         let mut static_players = Vec::new();
 
         for (entity, player, transform) in (&entities, &players, &mut transforms).join() {
