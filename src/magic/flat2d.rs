@@ -6,14 +6,16 @@ use amethyst::{
         Transform,
     },
     ecs::{
+        Join,
         Read,
         ReadExpect,
         ReadStorage,
+        SystemData,
         World,
     },
     renderer::{
         Backend,
-        batch::OneLevelBatch,
+        batch::{GroupIterator, OneLevelBatch},
         Factory,
         pipeline::{PipelineDescBuilder, PipelinesBuilder},
         pod::SpriteArgs,
@@ -25,11 +27,13 @@ use amethyst::{
                 GraphContext, NodeBuffer, NodeImage,
             },
             hal::{
+                device::Device,
                 image::Layout::ShaderReadOnlyOptimal,
                 pass::Subpass,
                 Primitive,
                 pso,
             },
+            util::types::vertex::AsVertex,
         },
         resources::Tint,
         SpriteRender,
@@ -243,40 +247,44 @@ fn build_sprite_pipeline<B: Backend>(
             .create_pipeline_layout(layouts, None as Option<(_, _)>)
     }?;
 
-    let shader_vertex = unsafe { super::SPRITE_VERTEX.module(factory).unwrap() };
-    let shader_fragment = unsafe { super::SPRITE_FRAGMENT.module(factory).unwrap() };
+    // let shader_vertex = unsafe { super::SPRITE_VERTEX.module(factory).unwrap() };
+    // let shader_fragment = unsafe { super::SPRITE_FRAGMENT.module(factory).unwrap() };
 
     let pipes = PipelinesBuilder::new()
         .with_pipeline(
             PipelineDescBuilder::new()
                 .with_vertex_desc(&[(SpriteArgs::vertex(), pso::VertexInputRate::Instance(1))])
                 .with_input_assembler(pso::InputAssemblerDesc::new(Primitive::TriangleStrip))
-                .with_shaders(simple_shader_set(
-                    &shader_vertex,
-                    Some(&shader_fragment),
-                ))
+                // .with_shaders(simple_shader_set(
+                //     &shader_vertex,
+                //     Some(&shader_fragment),
+                // ))
                 .with_layout(&pipeline_layout)
                 .with_subpass(subpass)
                 .with_framebuffer_size(framebuffer_width, framebuffer_height)
-                .with_blend_targets(vec![pso::ColorBlendDesc {
-                    mask: pso::ColorMask::ALL,
-                    blend: if transparent {
-                        Some(pso::BlendState::PREMULTIPLIED_ALPHA)
-                    } else {
-                        None
-                    },
-                }])
-                .with_depth_test(pso::DepthTest {
+                .with_blend_targets(vec![pso::ColorBlendDesc(
+                    pso::ColorMask::ALL,
+                    pso::BlendState::PREMULTIPLIED_ALPHA,
+                )])
+                // .with_blend_targets(vec![pso::ColorBlendDesc {
+                //     mask: pso::ColorMask::ALL,
+                //     blend: if transparent {
+                //         Some(pso::BlendState::PREMULTIPLIED_ALPHA)
+                //     } else {
+                //         None
+                //     },
+                // }])
+                .with_depth_test(pso::DepthTest::On {
                     fun: pso::Comparison::Less,
                     write: !transparent,
                 }),
         )
         .build(factory, None);
 
-    unsafe {
-        factory.destroy_shader_module(shader_vertex);
-        factory.destroy_shader_module(shader_fragment);
-    }
+    // unsafe {
+    //     factory.destroy_shader_module(shader_vertex);
+    //     factory.destroy_shader_module(shader_fragment);
+    // }
 
     match pipes {
         Err(e) => {

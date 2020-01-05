@@ -7,4 +7,5 @@ edition = "2018"
 [dependencies]
 amethyst = { version = "0.13", features = ["nightly", "sdl_controller", "vulkan", "profiler"] }
 amethyst_tiles = { version = "0.1", features = ["nightly"] }
+failure = "0.1"
 serde = "1.0"
