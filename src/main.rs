@@ -1,5 +1,6 @@
 mod config;
 mod entities;
+mod magic;
 mod states;
 mod systems;
 
@@ -40,7 +41,8 @@ fn main() -> amethyst::Result<()> {
                     RenderToWindow::from_config_path(display_config_path)
                         .with_clear([0.0, 0.0, 0.0, 1.0]),
                 )
-                .with_plugin(RenderFlat2D::default())
+                // .with_plugin(RenderFlat2D::default())
+                .with_plugin(magic::renderer::PokeRenderer::default())
                 .with_plugin(RenderUi::default())
         )?
         .with_bundle(TransformBundle::new())?

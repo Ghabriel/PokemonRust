@@ -74,8 +74,8 @@ const TILE_SIZE: f32 = 32.;
 pub fn initialise_map(world: &mut World) -> Entity {
     let sprite_sheet = load_sprite_sheet(world, "sprites/terrain.png", "sprites/terrain.ron");
 
-    let num_tiles_x: usize = 15;
-    let num_tiles_y: usize = 15;
+    let num_tiles_x: usize = 30;
+    let num_tiles_y: usize = 30;
 
     let mut map = Map {
         terrains: Vec::new(),
