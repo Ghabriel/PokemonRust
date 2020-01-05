@@ -12,6 +12,7 @@ use amethyst::{
     input::{InputEvent, InputHandler, StringBindings},
     prelude::*,
     renderer::{Camera, SpriteRender},
+    utils::fps_counter::{FpsCounter, FpsCounterSystem},
 };
 
 use crate::{
@@ -85,6 +86,7 @@ impl SimpleState for OverworldState<'_, '_> {
                 PlayerAnimationSystem::new(&mut player_storage)
             }, "player_animation_system", &[])
             .with(PlayerMovementSystem::default(), "player_movement_system", &[])
+            .with(FpsCounterSystem, "fps_counter_system", &[])
             .with_pool(data.world.read_resource::<ArcThreadPool>().deref().clone());
 
         AnimationBundle::<PlayerAnimation, SpriteRender>::new(
@@ -156,6 +158,8 @@ impl SimpleState for OverworldState<'_, '_> {
                 );
             }
         }
+
+        println!("FPS: {}", world.read_resource::<FpsCounter>().sampled_fps());
 
         Trans::None
     }
