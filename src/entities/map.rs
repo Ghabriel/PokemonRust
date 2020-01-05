@@ -6,6 +6,8 @@ use amethyst::{
 
 use amethyst_tiles::{MortonEncoder, Tile, TileMap};
 
+use crate::constants::TILE_SIZE;
+
 use std::collections::HashMap;
 
 use super::load_sprite_sheet;
@@ -93,9 +95,11 @@ pub fn initialise_map(world: &mut World) -> Entity {
         scripts: Vec::new(),
     };
 
+    let tile_size = TILE_SIZE as u32;
+
     let tile_map = TileMap::<GameTile, MortonEncoder>::new(
         Vector3::new(num_tiles_x, num_tiles_y, 1),
-        Vector3::new(32, 32, 1),
+        Vector3::new(tile_size, tile_size, 1),
         Some(sprite_sheet),
     );
 

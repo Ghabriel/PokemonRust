@@ -3,7 +3,10 @@ use amethyst::{
     ecs::{Entities, Entity, Join, Read, ReadStorage, System, WriteStorage},
 };
 
-use crate::entities::player::{Direction, Player, PlayerAction, SimulatedPlayer};
+use crate::{
+    constants::TILE_SIZE,
+    entities::player::{Direction, Player, PlayerAction, SimulatedPlayer},
+};
 
 use std::collections::HashMap;
 
@@ -19,8 +22,6 @@ struct MovementTimingData {
 pub struct PlayerMovementSystem {
     timing_data: HashMap<Entity, MovementTimingData>,
 }
-
-const TILE_SIZE: f32 = 32.;
 
 impl<'a> System<'a> for PlayerMovementSystem {
     type SystemData = (
@@ -75,11 +76,12 @@ impl<'a> System<'a> for PlayerMovementSystem {
                         continue;
                     }
 
-                    let estimated_time = TILE_SIZE / velocity;
+                    let tile_size = TILE_SIZE as f32;
+                    let estimated_time = tile_size / velocity;
 
                     let final_position = transform.translation() + Vector3::new(
-                        offset_x * TILE_SIZE,
-                        offset_y * TILE_SIZE,
+                        offset_x * tile_size,
+                        offset_y * tile_size,
                         0.,
                     );
 
