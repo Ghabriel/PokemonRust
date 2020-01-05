@@ -137,7 +137,7 @@ impl<B: Backend> RenderGroup<B, World> for DrawFlat2D<B> {
         world: &World,
     ) -> PrepareResult {
         #[cfg(feature = "profiler")]
-        profile_scope!("prepare opaque");
+        profile_scope!("magic - prepare opaque");
 
         let (
             sprite_sheet_storage,
@@ -168,7 +168,7 @@ impl<B: Backend> RenderGroup<B, World> for DrawFlat2D<B> {
 
         {
             #[cfg(feature = "profiler")]
-            profile_scope!("gather_visibility");
+            profile_scope!("magic - gather_visibility");
 
             (
                 &sprite_renders,
@@ -224,7 +224,7 @@ impl<B: Backend> RenderGroup<B, World> for DrawFlat2D<B> {
         _world: &World,
     ) {
         #[cfg(feature = "profiler")]
-        profile_scope!("draw opaque");
+        profile_scope!("magic - draw opaque");
 
         let layout = &self.pipeline_layout;
         encoder.bind_graphics_pipeline(&self.pipeline);

@@ -102,7 +102,7 @@ impl<'a> System<'a> for PokeVisibility {
         #[cfg(feature = "profiler")]
         profile_scope!("poke_visibility");
 
-        let a = std::time::Instant::now();
+        // let a = std::time::Instant::now();
 
         let origin = Point3::origin();
 
@@ -173,8 +173,8 @@ impl<'a> System<'a> for PokeVisibility {
             .visible_ordered
             .extend(self.transparent.iter().map(|c| c.entity));
 
-        let b = std::time::Instant::now();
-        println!("Delay: {}", (b - a).as_millis());
+        // let b = std::time::Instant::now();
+        // println!("Delay: {}", (b - a).as_millis());
     }
 }
 
