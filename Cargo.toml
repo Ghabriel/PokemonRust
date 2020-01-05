@@ -8,4 +8,5 @@ edition = "2018"
 amethyst = { version = "0.13", features = ["nightly", "sdl_controller", "vulkan", "profiler"] }
 amethyst_tiles = { version = "0.1", features = ["nightly"] }
 failure = "0.1"
+lazy_static = "1.3"
 serde = "1.0"

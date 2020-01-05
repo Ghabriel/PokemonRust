@@ -33,6 +33,7 @@ use amethyst::{
                 Primitive,
                 pso,
             },
+            shader::{Shader, SpirvShader},
             util::types::vertex::AsVertex,
         },
         resources::Tint,
@@ -45,8 +46,24 @@ use amethyst::{
     },
 };
 
+use lazy_static::lazy_static;
+
 #[cfg(feature = "profiler")]
 use thread_profiler::profile_scope;
+
+lazy_static! {
+    static ref SPRITE_VERTEX: SpirvShader = SpirvShader::new(
+        include_bytes!("../../assets/compiled/sprite.vert.spv").to_vec(),
+        pso::ShaderStageFlags::VERTEX,
+        "main",
+    );
+
+    static ref SPRITE_FRAGMENT: SpirvShader = SpirvShader::new(
+        include_bytes!("../../assets/compiled/sprite.frag.spv").to_vec(),
+        pso::ShaderStageFlags::FRAGMENT,
+        "main",
+    );
+}
 
 /// Draw opaque sprites without lighting.
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -247,24 +264,28 @@ fn build_sprite_pipeline<B: Backend>(
             .create_pipeline_layout(layouts, None as Option<(_, _)>)
     }?;
 
-    // let shader_vertex = unsafe { super::SPRITE_VERTEX.module(factory).unwrap() };
-    // let shader_fragment = unsafe { super::SPRITE_FRAGMENT.module(factory).unwrap() };
+    let shader_vertex = unsafe { SPRITE_VERTEX.module(factory).unwrap() };
+    let shader_fragment = unsafe { SPRITE_FRAGMENT.module(factory).unwrap() };
 
     let pipes = PipelinesBuilder::new()
         .with_pipeline(
             PipelineDescBuilder::new()
                 .with_vertex_desc(&[(SpriteArgs::vertex(), pso::VertexInputRate::Instance(1))])
                 .with_input_assembler(pso::InputAssemblerDesc::new(Primitive::TriangleStrip))
-                // .with_shaders(simple_shader_set(
-                //     &shader_vertex,
-                //     Some(&shader_fragment),
-                // ))
+                .with_shaders(simple_shader_set(
+                    &shader_vertex,
+                    Some(&shader_fragment),
+                ))
                 .with_layout(&pipeline_layout)
                 .with_subpass(subpass)
                 .with_framebuffer_size(framebuffer_width, framebuffer_height)
                 .with_blend_targets(vec![pso::ColorBlendDesc(
                     pso::ColorMask::ALL,
-                    pso::BlendState::PREMULTIPLIED_ALPHA,
+                    if transparent {
+                        pso::BlendState::PREMULTIPLIED_ALPHA
+                    } else {
+                        pso::BlendState::Off
+                    }
                 )])
                 // .with_blend_targets(vec![pso::ColorBlendDesc {
                 //     mask: pso::ColorMask::ALL,
@@ -281,10 +302,10 @@ fn build_sprite_pipeline<B: Backend>(
         )
         .build(factory, None);
 
-    // unsafe {
-    //     factory.destroy_shader_module(shader_vertex);
-    //     factory.destroy_shader_module(shader_fragment);
-    // }
+    unsafe {
+        factory.destroy_shader_module(shader_vertex);
+        factory.destroy_shader_module(shader_fragment);
+    }
 
     match pipes {
         Err(e) => {
