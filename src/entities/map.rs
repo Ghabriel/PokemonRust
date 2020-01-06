@@ -11,7 +11,7 @@ use std::collections::HashMap;
 use super::load_sprite_sheet;
 
 pub struct Map {
-    bottom_left_corner: Vector3<f32>,
+    bottom_left_corner: Vector3<i32>,
     num_tiles_x: u32,
     num_tiles_y: u32,
     // terrains: Vec<Tile>,
@@ -29,11 +29,20 @@ impl Component for Map {
 
 impl Map {
     pub fn is_tile_blocked(&self, position: &Vector3<f32>) -> bool {
-        let tile_offset = (position - Vector3::new(0., 12., 0.)) / (TILE_SIZE as f32);
-        let tile_x = (tile_offset.x + ((self.num_tiles_x / 2) as f32)) as u32;
-        let tile_y = (tile_offset.y + ((self.num_tiles_y / 2) as f32)) as u32;
+        let position = Vector3::new(
+            position.x as i32,
+            position.y as i32,
+            position.z as i32,
+        );
+        let tile_size = TILE_SIZE as i32;
+        let half_tile = tile_size / 2;
+        let target_corner = position - Vector3::new(half_tile, half_tile + 12, 0);
+        let normalized_position = (target_corner - self.bottom_left_corner) / tile_size;
 
-        self.solids.contains_key(&Vector2::new(tile_x, tile_y))
+        self.solids.contains_key(&Vector2::new(
+            normalized_position.x as u32,
+            normalized_position.y as u32,
+        ))
     }
 }
 
@@ -91,7 +100,7 @@ pub fn initialise_map(world: &mut World) {
     let decoration_entity = initialise_decoration_layer(world, "test_map");
 
     let mut map = Map {
-        bottom_left_corner: Vector3::new(-480., -480., 0.),
+        bottom_left_corner: Vector3::new(-464, -464, 0),
         num_tiles_x: 29,
         num_tiles_y: 29,
         // terrains: Vec::new(),
