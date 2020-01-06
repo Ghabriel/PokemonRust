@@ -18,11 +18,8 @@ use amethyst::{
     utils::application_root_dir,
 };
 
-use amethyst_tiles::{MortonEncoder, RenderTiles2D};
-
 use crate::{
     config::GameConfig,
-    entities::map::GameTile,
     states::OverworldState,
 };
 
@@ -46,7 +43,6 @@ fn main() -> amethyst::Result<()> {
                 )
                 .with_plugin(RenderFlat2D::default())
                 .with_plugin(RenderUi::default())
-                .with_plugin(RenderTiles2D::<GameTile, MortonEncoder>::default()),
         )?
         .with_bundle(TransformBundle::new())?
         .with_bundle(

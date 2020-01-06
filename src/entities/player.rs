@@ -137,7 +137,7 @@ pub fn initialise_player(world: &mut World) -> Entity {
     };
 
     let mut transform = Transform::default();
-    transform.set_translation_xyz(200., 300., 0.);
+    transform.set_translation_xyz(18., -4., 0.);
 
     let sprite_render = SpriteRender {
         sprite_sheet: sprite_sheets.walking.clone(),

@@ -1,10 +1,8 @@
 use amethyst::{
-    core::{math::{Point3, Vector3}, Transform},
+    core::Transform,
     ecs::{Component, DenseVecStorage, Entity, world::Builder, World, WorldExt},
-    // tiles::{MortonEncoder, Tile, TileMap},
+    renderer::SpriteRender,
 };
-
-use amethyst_tiles::{MortonEncoder, Tile, TileMap};
 
 use crate::constants::TILE_SIZE;
 
@@ -13,9 +11,9 @@ use std::collections::HashMap;
 use super::load_sprite_sheet;
 
 pub struct Map {
-    terrains: Vec<GameTile>,
-    solids: HashMap<MapPosition, GameTile>,
-    decorations: HashMap<MapPosition, GameTile>,
+    terrains: Vec<Tile>,
+    solids: HashMap<MapPosition, Tile>,
+    decorations: HashMap<MapPosition, Tile>,
     actions: HashMap<MapPosition, GameAction>,
     scripts: Vec<MapScript>,
 }
@@ -25,14 +23,10 @@ impl Component for Map {
 }
 
 #[derive(Clone, Default)]
-pub struct GameTile {
-    sprite_number: usize,
-}
+pub struct Tile;
 
-impl Tile for GameTile {
-    fn sprite(&self, _coordinates: Point3<u32>, _world: &World) -> Option<usize> {
-        Some(self.sprite_number)
-    }
+impl Component for Tile {
+    type Storage = DenseVecStorage<Self>;
 }
 
 /**
@@ -78,15 +72,13 @@ pub enum MapScriptKind {
 }
 
 pub fn initialise_map(world: &mut World) -> Entity {
-    let sprite_sheet = load_sprite_sheet(world, "sprites/terrain.png", "sprites/terrain.ron");
-
     let num_tiles_x: u32 = 48;
     let num_tiles_y: u32 = 48;
 
     let map = Map {
         terrains: {
             let mut vec = Vec::new();
-            vec.resize_with((num_tiles_x * num_tiles_y) as usize, GameTile::default);
+            vec.resize_with((num_tiles_x * num_tiles_y) as usize, Tile::default);
             vec
         },
         solids: HashMap::new(),
@@ -95,21 +87,19 @@ pub fn initialise_map(world: &mut World) -> Entity {
         scripts: Vec::new(),
     };
 
-    let tile_size = TILE_SIZE as u32;
+    let sprite_sheet = load_sprite_sheet(world, "test_map.png", "test_map.ron");
 
-    let tile_map = TileMap::<GameTile, MortonEncoder>::new(
-        Vector3::new(num_tiles_x, num_tiles_y, 1),
-        Vector3::new(tile_size, tile_size, 1),
-        Some(sprite_sheet),
-    );
+    let sprite_render = SpriteRender {
+        sprite_sheet,
+        sprite_number: 0,
+    };
 
     let mut transform = Transform::default();
-    transform.set_translation_xyz(386., 386., 0.);
+    transform.set_translation_xyz(0., 0., -1.);
 
     world
         .create_entity()
-        .with(map)
-        .with(tile_map)
         .with(transform)
+        .with(sprite_render)
         .build()
 }
