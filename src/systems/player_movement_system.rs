@@ -1,11 +1,14 @@
 use amethyst::{
     core::{math::Vector3, Time, Transform},
-    ecs::{Entities, Entity, Join, Read, ReadStorage, System, WriteStorage},
+    ecs::{Entities, Entity, Join, Read, ReadExpect, ReadStorage, System, WriteStorage},
 };
 
 use crate::{
     constants::TILE_SIZE,
-    entities::player::{Direction, Player, PlayerAction, SimulatedPlayer},
+    entities::{
+        map::Map,
+        player::{Direction, Player, PlayerAction, SimulatedPlayer},
+    },
 };
 
 use std::collections::HashMap;
@@ -29,6 +32,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
         ReadStorage<'a, SimulatedPlayer>,
         WriteStorage<'a, Transform>,
         Entities<'a>,
+        ReadExpect<'a, Map>,
         Read<'a, Time>,
     );
 
@@ -37,6 +41,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
         simulated_players,
         mut transforms,
         entities,
+        map,
         time,
     ): Self::SystemData) {
         let mut static_players = Vec::new();
@@ -77,13 +82,19 @@ impl<'a> System<'a> for PlayerMovementSystem {
                     }
 
                     let tile_size = TILE_SIZE as f32;
-                    let estimated_time = tile_size / velocity;
 
                     let final_position = transform.translation() + Vector3::new(
                         offset_x * tile_size,
                         offset_y * tile_size,
                         0.,
                     );
+
+                    if map.is_tile_blocked(&final_position) {
+                        static_players.push(entity);
+                        continue;
+                    }
+
+                    let estimated_time = tile_size / velocity;
 
                     self.timing_data.insert(entity, MovementTimingData {
                         estimated_time,

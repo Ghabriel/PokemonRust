@@ -1,5 +1,5 @@
 use amethyst::{
-    core::Transform,
+    core::{math::{Vector2, Vector3}, Transform},
     ecs::{Component, DenseVecStorage, Entity, world::Builder, World, WorldExt},
     renderer::SpriteRender,
 };
@@ -11,17 +11,30 @@ use std::collections::HashMap;
 use super::load_sprite_sheet;
 
 pub struct Map {
+    bottom_left_corner: Vector3<f32>,
+    num_tiles_x: u32,
+    num_tiles_y: u32,
     // terrains: Vec<Tile>,
     terrain_entity: Entity,
-    solids: HashMap<MapPosition, Tile>,
-    // decorations: HashMap<MapPosition, Tile>,
+    solids: HashMap<Vector2<u32>, Tile>,
+    // decorations: HashMap<Vector2<u32>, Tile>,
     decoration_entity: Entity,
-    actions: HashMap<MapPosition, GameAction>,
+    actions: HashMap<Vector2<u32>, GameAction>,
     scripts: Vec<MapScript>,
 }
 
 impl Component for Map {
     type Storage = DenseVecStorage<Self>;
+}
+
+impl Map {
+    pub fn is_tile_blocked(&self, position: &Vector3<f32>) -> bool {
+        let tile_offset = (position - Vector3::new(0., 12., 0.)) / (TILE_SIZE as f32);
+        let tile_x = (tile_offset.x + ((self.num_tiles_x / 2) as f32)) as u32;
+        let tile_y = (tile_offset.y + ((self.num_tiles_y / 2) as f32)) as u32;
+
+        self.solids.contains_key(&Vector2::new(tile_x, tile_y))
+    }
 }
 
 #[derive(Clone, Default)]
@@ -73,11 +86,14 @@ pub enum MapScriptKind {
     OnTileChange,
 }
 
-pub fn initialise_map(world: &mut World) -> Entity {
+pub fn initialise_map(world: &mut World) {
     let terrain_entity = initialise_terrain_layer(world, "test_map");
     let decoration_entity = initialise_decoration_layer(world, "test_map");
 
-    let map = Map {
+    let mut map = Map {
+        bottom_left_corner: Vector3::new(-480., -480., 0.),
+        num_tiles_x: 29,
+        num_tiles_y: 29,
         // terrains: Vec::new(),
         terrain_entity,
         solids: HashMap::new(),
@@ -87,10 +103,12 @@ pub fn initialise_map(world: &mut World) -> Entity {
         scripts: Vec::new(),
     };
 
-    world
-        .create_entity()
-        .with(map)
-        .build()
+    map.solids.insert(Vector2::new(9, 17), Tile);
+    map.solids.insert(Vector2::new(9, 18), Tile);
+    map.solids.insert(Vector2::new(10, 17), Tile);
+    map.solids.insert(Vector2::new(10, 18), Tile);
+
+    world.insert(map);
 }
 
 fn initialise_terrain_layer(world: &mut World, map_name: &str) -> Entity {
