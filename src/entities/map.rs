@@ -63,15 +63,6 @@ impl Component for Tile {
     type Storage = DenseVecStorage<Self>;
 }
 
-/**
- * A position in a map, expressed in tile units.
- */
-#[derive(Eq, Hash, PartialEq)]
-pub struct MapPosition {
-    x: usize,
-    y: usize,
-}
-
 pub struct GameAction {
     when: GameActionKind,
     // script: TODO,
