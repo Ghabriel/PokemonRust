@@ -4,6 +4,7 @@ use amethyst::{
 };
 
 use crate::{
+    common::get_forward_tile_position,
     constants::TILE_SIZE,
     entities::{
         map::Map,
@@ -81,27 +82,14 @@ impl<'a> System<'a> for PlayerMovementSystem {
                         continue;
                     }
 
-                    let (offset_x, offset_y) = match player.facing_direction {
-                        Direction::Up => (0., 1.),
-                        Direction::Down => (0., -1.),
-                        Direction::Left => (-1., 0.),
-                        Direction::Right => (1., 0.),
-                    };
-
-                    let tile_size = TILE_SIZE as f32;
-
-                    let final_position = transform.translation() + Vector3::new(
-                        offset_x * tile_size,
-                        offset_y * tile_size,
-                        0.,
-                    );
+                    let final_position = get_forward_tile_position(&player, &transform);
 
                     if map.is_tile_blocked(&final_position) {
                         static_players.push(entity);
                         continue;
                     }
 
-                    let estimated_time = tile_size / velocity;
+                    let estimated_time = (TILE_SIZE as f32) / velocity;
 
                     self.timing_data.insert(entity, MovementTimingData {
                         estimated_time,

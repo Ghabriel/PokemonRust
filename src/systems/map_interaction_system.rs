@@ -5,6 +5,7 @@ use amethyst::{
 };
 
 use crate::{
+    common::get_forward_tile_position,
     constants::TILE_SIZE,
     entities::{
         map::{Map, MapEvent},
@@ -27,22 +28,9 @@ impl MapInteractionSystem {
 
     fn interact(&mut self, (players, transforms, map, _): &<Self as System<'_>>::SystemData) {
         for (player, transform) in (players, transforms).join() {
-            let (offset_x, offset_y) = match player.facing_direction {
-                Direction::Up => (0., 1.),
-                Direction::Down => (0., -1.),
-                Direction::Left => (-1., 0.),
-                Direction::Right => (1., 0.),
-            };
-
-            let tile_size = TILE_SIZE as f32;
-
-            let interacted_position = transform.translation() + Vector3::new(
-                offset_x * tile_size,
-                offset_y * tile_size,
-                0.,
-            );
-
+            let interacted_position = get_forward_tile_position(&player, &transform);
             let tile_coordinates = map.world_to_tile_coordinates(&interacted_position);
+
             println!("Coordinates: {:?}", tile_coordinates);
         }
     }
