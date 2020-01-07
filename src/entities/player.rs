@@ -14,6 +14,7 @@ use amethyst::{
         DenseVecStorage,
         Entity,
         FlaggedStorage,
+        NullStorage,
         Read,
         ReadExpect,
         world::Builder,
@@ -39,6 +40,13 @@ pub struct SimulatedPlayer(pub Player);
 
 impl Component for SimulatedPlayer {
     type Storage = DenseVecStorage<Self>;
+}
+
+#[derive(Default)]
+pub struct StaticPlayer;
+
+impl Component for StaticPlayer {
+    type Storage = NullStorage<Self>;
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

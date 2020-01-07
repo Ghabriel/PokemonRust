@@ -28,7 +28,12 @@ use crate::{
         },
         map::{initialise_map, Map, MapEvent},
     },
-    systems::{MapInteractionSystem, PlayerAnimationSystem, PlayerMovementSystem},
+    systems::{
+        MapInteractionSystem,
+        PlayerAnimationSystem,
+        PlayerMovementSystem,
+        StaticPlayerSystem,
+    },
 };
 
 use std::ops::Deref;
@@ -90,6 +95,7 @@ impl SimpleState for OverworldState<'_, '_> {
                 PlayerAnimationSystem::new(&mut player_storage)
             }, "player_animation_system", &[])
             .with(PlayerMovementSystem::default(), "player_movement_system", &[])
+            .with(StaticPlayerSystem, "static_player_system", &["player_movement_system"])
             .with(FpsCounterSystem, "fps_counter_system", &[])
             .with_pool(data.world.read_resource::<ArcThreadPool>().deref().clone());
 

@@ -8,7 +8,7 @@ use crate::{
     constants::TILE_SIZE,
     entities::{
         map::Map,
-        player::{Direction, Player, PlayerAction, SimulatedPlayer},
+        player::{Direction, Player, PlayerAction, SimulatedPlayer, StaticPlayer},
     },
 };
 
@@ -29,8 +29,9 @@ pub struct PlayerMovementSystem {
 
 impl<'a> System<'a> for PlayerMovementSystem {
     type SystemData = (
-        WriteStorage<'a, Player>,
+        ReadStorage<'a, Player>,
         ReadStorage<'a, SimulatedPlayer>,
+        WriteStorage<'a, StaticPlayer>,
         WriteStorage<'a, Transform>,
         Entities<'a>,
         ReadExpect<'a, Map>,
@@ -38,15 +39,14 @@ impl<'a> System<'a> for PlayerMovementSystem {
     );
 
     fn run(&mut self, (
-        mut players,
+        players,
         simulated_players,
+        mut static_players,
         mut transforms,
         entities,
         map,
         time,
     ): Self::SystemData) {
-        let mut static_players = Vec::new();
-
         for (entity, player, transform) in (&entities, &players, &mut transforms).join() {
             let velocity = match player.action {
                 PlayerAction::Idle => unreachable!(),
@@ -70,7 +70,9 @@ impl<'a> System<'a> for PlayerMovementSystem {
                     if timing_data.estimated_time <= delta_seconds {
                         transform.set_translation(timing_data.final_position);
                         self.timing_data.remove(&entity);
-                        static_players.push(entity);
+                        static_players
+                            .insert(entity, StaticPlayer)
+                            .expect("Failed to attach StaticPlayer");
                         continue;
                     }
 
@@ -78,14 +80,18 @@ impl<'a> System<'a> for PlayerMovementSystem {
                 },
                 None => {
                     if !player.moving {
-                        static_players.push(entity);
+                        static_players
+                            .insert(entity, StaticPlayer)
+                            .expect("Failed to attach StaticPlayer");
                         continue;
                     }
 
                     let final_position = get_forward_tile_position(&player, &transform);
 
                     if map.is_tile_blocked(&final_position) {
-                        static_players.push(entity);
+                        static_players
+                            .insert(entity, StaticPlayer)
+                            .expect("Failed to attach StaticPlayer");
                         continue;
                     }
 
@@ -98,26 +104,9 @@ impl<'a> System<'a> for PlayerMovementSystem {
                 },
             }
 
+            static_players.remove(entity);
             transform.prepend_translation_x(offset_x * velocity * time.delta_seconds());
             transform.prepend_translation_y(offset_y * velocity * time.delta_seconds());
-        }
-
-        for entity in static_players {
-            let simulated_player = simulated_players
-                .get(entity)
-                .expect("Failed to retrieve SimulatedPlayer");
-
-            let player = players
-                .get(entity)
-                .expect("Failed to retrieve Player");
-
-            if simulated_player.0 != *player {
-                let player = players
-                    .get_mut(entity)
-                    .expect("Failed to retrieve Player");
-
-                *player = simulated_player.0.clone();
-            }
         }
     }
 }
