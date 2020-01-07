@@ -8,7 +8,15 @@ use amethyst::{
         get_animation_set,
     },
     core::{ArcThreadPool, bundle::SystemBundle, Parent, Transform},
-    ecs::{Dispatcher, DispatcherBuilder, Entity, Join, world::{Builder, EntitiesRes}, World},
+    ecs::{
+        Dispatcher,
+        DispatcherBuilder,
+        Entity,
+        Join,
+        ReaderId,
+        world::{Builder, EntitiesRes},
+        World,
+    },
     input::{InputEvent, InputHandler, StringBindings},
     prelude::*,
     renderer::{Camera, SpriteRender},
@@ -27,7 +35,7 @@ use crate::{
             SimulatedPlayer,
             StaticPlayer,
         },
-        map::{initialise_map, Map, MapEvent},
+        map::{GameScript, initialise_map, Map, MapEvent, ScriptEvent},
     },
     systems::{
         MapInteractionSystem,
@@ -55,6 +63,7 @@ pub fn initialise_camera(world: &mut World, player: Entity) {
 pub struct OverworldState<'a, 'b> {
     pub dispatcher: Option<Dispatcher<'a, 'b>>,
     pub player_entity: Option<Entity>,
+    pub script_event_reader: Option<ReaderId<ScriptEvent>>,
     // pub progress_counter: Option<ProgressCounter>,
 }
 
@@ -83,6 +92,10 @@ impl SimpleState for OverworldState<'_, '_> {
         data.world.register::<SimulatedPlayer>();
 
         data.world.insert(EventChannel::<MapEvent>::new());
+
+        let mut script_event_channel = EventChannel::<ScriptEvent>::new();
+        self.script_event_reader = Some(script_event_channel.register_reader());
+        data.world.insert(script_event_channel);
 
         let mut dispatcher_builder = DispatcherBuilder::new()
             // .with(
@@ -138,35 +151,56 @@ impl SimpleState for OverworldState<'_, '_> {
             dispatcher.dispatch(world);
         }
 
-        let entities = world.read_resource::<EntitiesRes>();
-        let animation_sets = world.read_storage::<AnimationSet<PlayerAnimation, SpriteRender>>();
-        let mut control_sets = world.write_storage::<AnimationControlSet<PlayerAnimation, SpriteRender>>();
-        let animations = [
-            PlayerAnimation::IdleUp,
-            PlayerAnimation::IdleDown,
-            PlayerAnimation::IdleLeft,
-            PlayerAnimation::IdleRight,
-            PlayerAnimation::WalkUp,
-            PlayerAnimation::WalkDown,
-            PlayerAnimation::WalkLeft,
-            PlayerAnimation::WalkRight,
-            PlayerAnimation::RunUp,
-            PlayerAnimation::RunDown,
-            PlayerAnimation::RunLeft,
-            PlayerAnimation::RunRight,
-        ];
+        {
+            let entities = world.read_resource::<EntitiesRes>();
+            let animation_sets = world.read_storage::<AnimationSet<PlayerAnimation, SpriteRender>>();
+            let mut control_sets = world.write_storage::<AnimationControlSet<PlayerAnimation, SpriteRender>>();
+            let animations = [
+                PlayerAnimation::IdleUp,
+                PlayerAnimation::IdleDown,
+                PlayerAnimation::IdleLeft,
+                PlayerAnimation::IdleRight,
+                PlayerAnimation::WalkUp,
+                PlayerAnimation::WalkDown,
+                PlayerAnimation::WalkLeft,
+                PlayerAnimation::WalkRight,
+                PlayerAnimation::RunUp,
+                PlayerAnimation::RunDown,
+                PlayerAnimation::RunLeft,
+                PlayerAnimation::RunRight,
+            ];
 
-        for (entity, animation_set) in (&entities, &animation_sets).join() {
-            let animation_control_set = get_animation_set(&mut control_sets, entity).unwrap();
+            for (entity, animation_set) in (&entities, &animation_sets).join() {
+                let animation_control_set = get_animation_set(&mut control_sets, entity).unwrap();
 
-            for &animation in animations.iter() {
-                animation_control_set.add_animation(
-                    animation,
-                    &animation_set.get(&animation).unwrap(),
-                    EndControl::Loop(None),
-                    1.0,
-                    AnimationCommand::Init,
-                );
+                for &animation in animations.iter() {
+                    animation_control_set.add_animation(
+                        animation,
+                        &animation_set.get(&animation).unwrap(),
+                        EndControl::Loop(None),
+                        1.0,
+                        AnimationCommand::Init,
+                    );
+                }
+            }
+        }
+
+        let mut script_event_reader = self.script_event_reader.as_mut().unwrap();
+        let events = world
+            .read_resource::<EventChannel<ScriptEvent>>()
+            .read(&mut script_event_reader)
+            .into_iter()
+            .map(Clone::clone)
+            .collect::<Vec<ScriptEvent>>();
+
+        for ScriptEvent(script_index) in events {
+            let game_script = world
+                .read_resource::<Map>()
+                .script_repository[script_index]
+                .clone();
+
+            if let GameScript::Native(script) = game_script {
+                script(world);
             }
         }
 

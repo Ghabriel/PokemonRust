@@ -1,6 +1,17 @@
 use amethyst::{
     core::{math::Vector3, Transform},
-    ecs::{Join, Read, ReaderId, ReadExpect, ReadStorage, System, SystemData, World, WorldExt},
+    ecs::{
+        Join,
+        Read,
+        ReaderId,
+        ReadExpect,
+        ReadStorage,
+        System,
+        SystemData,
+        World,
+        WorldExt,
+        Write,
+    },
     shrev::EventChannel,
 };
 
@@ -8,10 +19,12 @@ use crate::{
     common::get_forward_tile_position,
     constants::TILE_SIZE,
     entities::{
-        map::{Map, MapEvent},
+        map::{GameAction, GameActionKind, Map, MapEvent, ScriptEvent},
         player::{Direction, Player},
     },
 };
+
+use std::ops::DerefMut;
 
 pub struct MapInteractionSystem {
     event_reader: ReaderId<MapEvent>,
@@ -26,12 +39,20 @@ impl MapInteractionSystem {
         }
     }
 
-    fn interact(&mut self, (players, transforms, map, _): &<Self as System<'_>>::SystemData) {
-        for (player, transform) in (players, transforms).join() {
+    fn interact(&mut self, system_data: &mut <Self as System<'_>>::SystemData) {
+        let (players, transforms, map, _, script_event_channel) = system_data;
+
+        for (player, transform) in (&*players, &*transforms).join() {
             let interacted_position = get_forward_tile_position(&player, &transform);
             let tile_coordinates = map.world_to_tile_coordinates(&interacted_position);
 
-            println!("Coordinates: {:?}", tile_coordinates);
+            match map.actions.get(&tile_coordinates) {
+                Some(GameAction { when, script_index }) if when == &GameActionKind::OnInteraction => {
+                    // println!("Script: {:?}", script);
+                    script_event_channel.single_write(ScriptEvent(*script_index));
+                },
+                _ => {},
+            }
         }
     }
 }
@@ -42,14 +63,21 @@ impl<'a> System<'a> for MapInteractionSystem {
         ReadStorage<'a, Transform>,
         ReadExpect<'a, Map>,
         Read<'a, EventChannel<MapEvent>>,
+        Write<'a, EventChannel<ScriptEvent>>,
     );
 
-    fn run(&mut self, system_data: Self::SystemData) {
-        let (_, _, _, event_channel) = &system_data;
+    fn run(&mut self, mut system_data: Self::SystemData) {
+        let (_, _, _, map_event_channel, _) = &system_data;
 
-        for event in event_channel.read(&mut self.event_reader) {
+        let events = map_event_channel
+            .read(&mut self.event_reader)
+            .into_iter()
+            .map(Clone::clone)
+            .collect::<Vec<_>>();
+
+        for event in events {
             match event {
-                MapEvent::Interaction => self.interact(&system_data),
+                MapEvent::Interaction => self.interact(&mut system_data),
             }
         }
     }

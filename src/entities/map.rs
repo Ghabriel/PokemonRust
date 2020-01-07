@@ -6,11 +6,14 @@ use amethyst::{
 
 use crate::constants::TILE_SIZE;
 
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    fmt::{Debug, Error, Formatter},
+};
 
 use super::load_sprite_sheet;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum MapEvent {
     Interaction,
 }
@@ -24,8 +27,9 @@ pub struct Map {
     solids: HashMap<Vector2<u32>, Tile>,
     // decorations: HashMap<Vector2<u32>, Tile>,
     decoration_entity: Entity,
-    actions: HashMap<Vector2<u32>, GameAction>,
-    scripts: Vec<MapScript>,
+    pub script_repository: Vec<GameScript>,
+    pub actions: HashMap<Vector2<u32>, GameAction>,
+    map_scripts: Vec<MapScript>,
 }
 
 impl Component for Map {
@@ -63,11 +67,13 @@ impl Component for Tile {
     type Storage = DenseVecStorage<Self>;
 }
 
+#[derive(Debug)]
 pub struct GameAction {
-    when: GameActionKind,
-    // script: TODO,
+    pub when: GameActionKind,
+    pub script_index: usize,
 }
 
+#[derive(Debug, Eq, PartialEq)]
 pub enum GameActionKind {
     /**
      * Triggered when the player presses Z on a tile.
@@ -85,8 +91,8 @@ pub enum GameActionKind {
 }
 
 pub struct MapScript {
-    when: MapScriptKind,
-    // script: TODO,
+    pub when: MapScriptKind,
+    pub script_index: usize,
 }
 
 pub enum MapScriptKind {
@@ -95,6 +101,22 @@ pub enum MapScriptKind {
      */
     OnTileChange,
 }
+
+#[derive(Clone)]
+pub enum GameScript {
+    Native(fn(&mut World) -> ()),
+}
+
+impl Debug for GameScript {
+    fn fmt(&self, formatter: &mut Formatter) -> Result<(), Error> {
+        match self {
+            GameScript::Native(_) => write!(formatter, "Native Script"),
+        }
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct ScriptEvent(pub usize);
 
 pub fn initialise_map(world: &mut World) {
     let terrain_entity = initialise_terrain_layer(world, "test_map");
@@ -109,14 +131,25 @@ pub fn initialise_map(world: &mut World) {
         solids: HashMap::new(),
         // decorations: HashMap::new(),
         decoration_entity,
+        script_repository: Vec::new(),
         actions: HashMap::new(),
-        scripts: Vec::new(),
+        map_scripts: Vec::new(),
     };
 
     map.solids.insert(Vector2::new(9, 17), Tile);
     map.solids.insert(Vector2::new(9, 18), Tile);
     map.solids.insert(Vector2::new(10, 17), Tile);
     map.solids.insert(Vector2::new(10, 18), Tile);
+
+    map.script_repository.push(GameScript::Native(|world| {
+        let map = world.read_resource::<Map>();
+        println!("Bottom left corner: {}", map.bottom_left_corner);
+    }));
+
+    map.actions.insert(Vector2::new(9, 17), GameAction {
+        when: GameActionKind::OnInteraction,
+        script_index: 0,
+    });
 
     world.insert(map);
 }
