@@ -10,6 +10,11 @@ use std::collections::HashMap;
 
 use super::load_sprite_sheet;
 
+#[derive(Debug)]
+pub enum MapEvent {
+    Interaction,
+}
+
 pub struct Map {
     bottom_left_corner: Vector3<i32>,
     num_tiles_x: u32,
@@ -28,7 +33,7 @@ impl Component for Map {
 }
 
 impl Map {
-    pub fn is_tile_blocked(&self, position: &Vector3<f32>) -> bool {
+    pub fn world_to_tile_coordinates(&self, position: &Vector3<f32>) -> Vector2<u32> {
         let position = Vector3::new(
             position.x as i32,
             position.y as i32,
@@ -39,10 +44,15 @@ impl Map {
         let target_corner = position - Vector3::new(half_tile, half_tile + 12, 0);
         let normalized_position = (target_corner - self.bottom_left_corner) / tile_size;
 
-        self.solids.contains_key(&Vector2::new(
+        Vector2::new(
             normalized_position.x as u32,
             normalized_position.y as u32,
-        ))
+        )
+    }
+
+    pub fn is_tile_blocked(&self, position: &Vector3<f32>) -> bool {
+        let tile = self.world_to_tile_coordinates(&position);
+        self.solids.contains_key(&tile)
     }
 }
 

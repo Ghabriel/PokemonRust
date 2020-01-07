@@ -12,6 +12,7 @@ use amethyst::{
     input::{InputEvent, InputHandler, StringBindings},
     prelude::*,
     renderer::{Camera, SpriteRender},
+    shrev::EventChannel,
     utils::fps_counter::{FpsCounter, FpsCounterSystem},
 };
 
@@ -25,9 +26,9 @@ use crate::{
             Player,
             SimulatedPlayer,
         },
-        map::{initialise_map, Map},
+        map::{initialise_map, Map, MapEvent},
     },
-    systems::{PlayerAnimationSystem, PlayerMovementSystem},
+    systems::{MapInteractionSystem, PlayerAnimationSystem, PlayerMovementSystem},
 };
 
 use std::ops::Deref;
@@ -75,12 +76,15 @@ impl SimpleState for OverworldState<'_, '_> {
         data.world.register::<Map>();
         data.world.register::<SimulatedPlayer>();
 
+        data.world.insert(EventChannel::<MapEvent>::new());
+
         let mut dispatcher_builder = DispatcherBuilder::new()
             // .with(
             //     PrefabLoaderSystemDesc::<MyPrefabData>::default().build(data.world),
             //     "scene_loader",
             //     &[],
             // )
+            .with(MapInteractionSystem::new(data.world), "map_interaction_system", &[])
             .with({
                 let mut player_storage = data.world.write_storage::<Player>();
                 PlayerAnimationSystem::new(&mut player_storage)
@@ -159,7 +163,7 @@ impl SimpleState for OverworldState<'_, '_> {
             }
         }
 
-        println!("FPS: {}", world.read_resource::<FpsCounter>().sampled_fps());
+        // println!("FPS: {}", world.read_resource::<FpsCounter>().sampled_fps());
 
         Trans::None
     }
@@ -169,6 +173,11 @@ impl SimpleState for OverworldState<'_, '_> {
 
         if let StateEvent::Input(event) = event {
             match event {
+                InputEvent::ActionPressed(action) if action == "action" => {
+                    world
+                        .write_resource::<EventChannel<MapEvent>>()
+                        .single_write(MapEvent::Interaction);
+                },
                 InputEvent::ActionPressed(action) if action == "cancel" => {
                     self.mutate_player(world, |player| player.action = PlayerAction::Run);
                 },

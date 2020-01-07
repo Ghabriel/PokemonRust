@@ -81,6 +81,13 @@ impl<'a> System<'a> for PlayerMovementSystem {
                         continue;
                     }
 
+                    let (offset_x, offset_y) = match player.facing_direction {
+                        Direction::Up => (0., 1.),
+                        Direction::Down => (0., -1.),
+                        Direction::Left => (-1., 0.),
+                        Direction::Right => (1., 0.),
+                    };
+
                     let tile_size = TILE_SIZE as f32;
 
                     let final_position = transform.translation() + Vector3::new(
