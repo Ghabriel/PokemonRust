@@ -25,6 +25,7 @@ use crate::{
             PlayerAnimation,
             Player,
             SimulatedPlayer,
+            StaticPlayer,
         },
         map::{initialise_map, Map, MapEvent},
     },
@@ -180,9 +181,15 @@ impl SimpleState for OverworldState<'_, '_> {
         if let StateEvent::Input(event) = event {
             match event {
                 InputEvent::ActionPressed(action) if action == "action" => {
-                    world
-                        .write_resource::<EventChannel<MapEvent>>()
-                        .single_write(MapEvent::Interaction);
+                    let is_player_static = world
+                        .read_storage::<StaticPlayer>()
+                        .contains(self.player_entity.unwrap());
+
+                    if is_player_static {
+                        world
+                            .write_resource::<EventChannel<MapEvent>>()
+                            .single_write(MapEvent::Interaction);
+                    }
                 },
                 InputEvent::ActionPressed(action) if action == "cancel" => {
                     self.mutate_player(world, |player| player.action = PlayerAction::Run);
