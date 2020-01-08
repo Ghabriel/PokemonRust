@@ -1,4 +1,5 @@
 use amethyst::{
+    core::Time,
     ecs::{
         Entities,
         Entity,
@@ -11,7 +12,7 @@ use amethyst::{
         WriteStorage,
     },
     shrev::EventChannel,
-    ui::{Anchor, UiText, UiTransform},
+    ui::{Anchor, LineMode, UiText, UiTransform},
 };
 
 use crate::{
@@ -23,11 +24,14 @@ use crate::{
 
 use std::collections::VecDeque;
 
+pub const TEXT_DELAY: f32 = 0.03;
+
 pub struct TextBox {
     full_text: String,
     displayed_text_start: usize,
     displayed_text_end: usize,
     awaiting_keypress: bool,
+    cooldown: f32,
     entity: Entity,
 }
 
@@ -48,12 +52,26 @@ impl TextSystem {
         }
     }
 
-    fn advance_text(&mut self, ui_texts: &mut WriteStorage<UiText>) {
+    fn advance_text(&mut self, time: &Time, ui_texts: &mut WriteStorage<UiText>) {
         if let Some(text_box) = self.text_box.as_mut() {
+            if text_box.cooldown >= time.delta_seconds() {
+                text_box.cooldown -= time.delta_seconds();
+            } else {
+                text_box.cooldown = TEXT_DELAY;
+
+                if text_box.displayed_text_end < text_box.full_text.len() {
+                    text_box.displayed_text_end += 1;
+                } else {
+                    text_box.awaiting_keypress = true;
+                }
+            }
+
             ui_texts
                 .get_mut(text_box.entity)
                 .expect("Failed to retrieve UiText")
-                .text = text_box.full_text.clone();
+                .text = text_box.full_text[
+                    text_box.displayed_text_start..text_box.displayed_text_end
+                ].to_string();
         }
     }
 }
@@ -64,6 +82,7 @@ impl<'a> System<'a> for TextSystem {
         WriteStorage<'a, UiTransform>,
         Entities<'a>,
         ReadExpect<'a, Resources>,
+        Read<'a, Time>,
         Read<'a, EventChannel<TextEvent>>,
     );
 
@@ -72,6 +91,7 @@ impl<'a> System<'a> for TextSystem {
         mut ui_transforms,
         entities,
         resources,
+        time,
         event_channel,
     ): Self::SystemData) {
         for event in event_channel.read(&mut self.event_reader) {
@@ -85,8 +105,9 @@ impl<'a> System<'a> for TextSystem {
                     TextBox {
                         full_text: event.text,
                         displayed_text_start: 0,
-                        displayed_text_end: 5,
+                        displayed_text_end: 0,
                         awaiting_keypress: false,
+                        cooldown: TEXT_DELAY,
                         entity: initialise_text_box_entity(
                             &entities,
                             &mut ui_texts,
@@ -97,7 +118,7 @@ impl<'a> System<'a> for TextSystem {
                 });
         }
 
-        self.advance_text(&mut ui_texts);
+        self.advance_text(&time, &mut ui_texts);
     }
 }
 
@@ -107,19 +128,23 @@ fn initialise_text_box_entity(
     ui_transforms: &mut WriteStorage<UiTransform>,
     resources: &Resources,
 ) -> Entity {
+    let mut ui_text = UiText::new(
+        resources.font.clone(),
+        "".to_string(),
+        [1., 1., 1., 1.],
+        30.,
+    );
+    ui_text.line_mode = LineMode::Wrap;
+    ui_text.align = Anchor::TopLeft;
+
     let ui_transform = UiTransform::new(
         "Text Box".to_string(), Anchor::BottomMiddle, Anchor::BottomLeft,
-        -320., 70., 0., 640., 70.
+        -320., 0., 0., 640., 100.
     );
 
     entities
         .build_entity()
-        .with(UiText::new(
-            resources.font.clone(),
-            "".to_string(),
-            [1., 1., 1., 1.],
-            30.,
-        ), ui_texts)
+        .with(ui_text, ui_texts)
         .with(ui_transform, ui_transforms)
         .build()
 }

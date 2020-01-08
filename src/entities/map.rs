@@ -147,7 +147,7 @@ pub fn initialise_map(world: &mut World) {
 
         world
             .write_resource::<EventChannel<TextEvent>>()
-            .single_write(TextEvent::new("Hello, world!"));
+            .single_write(TextEvent::new("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."));
     }));
 
     map.actions.insert(Vector2::new(9, 17), GameAction {
