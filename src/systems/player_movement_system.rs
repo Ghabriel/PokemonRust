@@ -8,7 +8,7 @@ use crate::{
     constants::TILE_SIZE,
     entities::{
         map::Map,
-        player::{Direction, Player, PlayerAction, SimulatedPlayer, StaticPlayer},
+        player::{Direction, Player, PlayerAction, StaticPlayer},
     },
 };
 
@@ -30,7 +30,6 @@ pub struct PlayerMovementSystem {
 impl<'a> System<'a> for PlayerMovementSystem {
     type SystemData = (
         ReadStorage<'a, Player>,
-        ReadStorage<'a, SimulatedPlayer>,
         WriteStorage<'a, StaticPlayer>,
         WriteStorage<'a, Transform>,
         Entities<'a>,
@@ -40,7 +39,6 @@ impl<'a> System<'a> for PlayerMovementSystem {
 
     fn run(&mut self, (
         players,
-        simulated_players,
         mut static_players,
         mut transforms,
         entities,

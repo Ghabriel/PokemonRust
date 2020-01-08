@@ -1,5 +1,5 @@
 use amethyst::{
-    core::{math::Vector3, Transform},
+    core::Transform,
     ecs::{
         Join,
         Read,
@@ -17,14 +17,11 @@ use amethyst::{
 
 use crate::{
     common::get_forward_tile_position,
-    constants::TILE_SIZE,
     entities::{
         map::{GameAction, GameActionKind, Map, MapEvent, ScriptEvent},
-        player::{Direction, Player},
+        player::Player,
     },
 };
-
-use std::ops::DerefMut;
 
 pub struct MapInteractionSystem {
     event_reader: ReaderId<MapEvent>,
@@ -48,7 +45,6 @@ impl MapInteractionSystem {
 
             match map.actions.get(&tile_coordinates) {
                 Some(GameAction { when, script_index }) if when == &GameActionKind::OnInteraction => {
-                    // println!("Script: {:?}", script);
                     script_event_channel.single_write(ScriptEvent(*script_index));
                 },
                 _ => {},
