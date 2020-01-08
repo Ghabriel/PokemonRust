@@ -142,8 +142,12 @@ pub fn initialise_map(world: &mut World) {
     map.solids.insert(Vector2::new(10, 18), Tile);
 
     map.script_repository.push(GameScript::Native(|world| {
-        let map = world.read_resource::<Map>();
-        println!("Bottom left corner: {}", map.bottom_left_corner);
+        use amethyst::shrev::EventChannel;
+        use crate::entities::text::TextEvent;
+
+        world
+            .write_resource::<EventChannel<TextEvent>>()
+            .single_write(TextEvent::new("Hello, world!"));
     }));
 
     map.actions.insert(Vector2::new(9, 17), GameAction {

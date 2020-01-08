@@ -1,5 +1,7 @@
 pub mod map;
 pub mod player;
+pub mod resources;
+pub mod text;
 
 use amethyst::{
     assets::{Handle, Loader},

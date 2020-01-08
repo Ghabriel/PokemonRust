@@ -7,6 +7,7 @@ use amethyst::{
         EndControl,
         get_animation_set,
     },
+    assets::Loader,
     core::{ArcThreadPool, bundle::SystemBundle, Parent, Transform},
     ecs::{
         Dispatcher,
@@ -36,12 +37,15 @@ use crate::{
             StaticPlayer,
         },
         map::{GameScript, initialise_map, Map, MapEvent, ScriptEvent},
+        resources::initialise_resources,
+        text::TextEvent,
     },
     systems::{
         MapInteractionSystem,
         PlayerAnimationSystem,
         PlayerMovementSystem,
         StaticPlayerSystem,
+        TextSystem,
     },
 };
 
@@ -92,6 +96,7 @@ impl SimpleState for OverworldState<'_, '_> {
         data.world.register::<SimulatedPlayer>();
 
         data.world.insert(EventChannel::<MapEvent>::new());
+        data.world.insert(EventChannel::<TextEvent>::new());
 
         let mut script_event_channel = EventChannel::<ScriptEvent>::new();
         self.script_event_reader = Some(script_event_channel.register_reader());
@@ -110,6 +115,7 @@ impl SimpleState for OverworldState<'_, '_> {
             }, "player_animation_system", &[])
             .with(PlayerMovementSystem::default(), "player_movement_system", &[])
             .with(StaticPlayerSystem, "static_player_system", &["player_movement_system"])
+            .with(TextSystem::new(data.world), "text_system", &[])
             .with(FpsCounterSystem, "fps_counter_system", &[])
             .with_pool(data.world.read_resource::<ArcThreadPool>().deref().clone());
 
@@ -138,6 +144,7 @@ impl SimpleState for OverworldState<'_, '_> {
         //     .build();
         // self.progress_counter = Some(progress_counter);
 
+        initialise_resources(data.world);
         let player = initialise_player(data.world);
         initialise_map(data.world);
         initialise_camera(data.world, player);
