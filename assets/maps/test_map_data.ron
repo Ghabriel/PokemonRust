@@ -1,0 +1,24 @@
+(
+    map_name: "Test Map",
+    base_file_name: "maps/test_map.png",
+    layer3_file_name: "maps/test_map_layer3.png",
+    spritesheet_file_name: "maps/test_map_spritesheet.ron",
+    bottom_left_corner: [-784, -784, 0],
+    num_tiles_x: 49,
+    num_tiles_y: 49,
+    solids: [
+        [23, 32],
+        [24, 32],
+        [19, 28],
+        [20, 28],
+        [19, 27],
+        [20, 27],
+    ],
+    actions: {
+        [19, 27]: (
+            when: OnInteraction,
+            script_index: 0,
+        ),
+    },
+    map_scripts: [],
+)

@@ -2,13 +2,19 @@ use amethyst::{
     core::{math::{Vector2, Vector3}, Transform},
     ecs::{Component, DenseVecStorage, Entity, world::Builder, World, WorldExt},
     renderer::SpriteRender,
+    utils::application_root_dir,
 };
 
 use crate::constants::TILE_SIZE;
 
+use ron::de::from_reader;
+
+use serde::{Deserialize, Serialize};
+
 use std::{
     collections::HashMap,
     fmt::{Debug, Error, Formatter},
+    fs::File,
 };
 
 use super::load_sprite_sheet;
@@ -18,7 +24,22 @@ pub enum MapEvent {
     Interaction,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct SerializableMap {
+    map_name: String,
+    base_file_name: String,
+    layer3_file_name: String,
+    spritesheet_file_name: String,
+    bottom_left_corner: Vector3<i32>,
+    num_tiles_x: u32,
+    num_tiles_y: u32,
+    solids: Vec<Vector2<u32>>,
+    actions: HashMap<Vector2<u32>, GameAction>,
+    map_scripts: Vec<MapScript>,
+}
+
 pub struct Map {
+    map_name: String,
     bottom_left_corner: Vector3<i32>,
     num_tiles_x: u32,
     num_tiles_y: u32,
@@ -65,13 +86,13 @@ impl Component for Tile {
     type Storage = DenseVecStorage<Self>;
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct GameAction {
     pub when: GameActionKind,
     pub script_index: usize,
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum GameActionKind {
     /**
      * Triggered when the player presses Z on a tile.
@@ -88,11 +109,13 @@ pub enum GameActionKind {
     OnStepAttempt,
 }
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct MapScript {
     pub when: MapScriptKind,
     pub script_index: usize,
 }
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum MapScriptKind {
     /**
      * Triggered when the player steps on a new tile.
@@ -117,27 +140,58 @@ impl Debug for GameScript {
 pub struct ScriptEvent(pub usize);
 
 pub fn initialise_map(world: &mut World) {
-    let terrain_entity = initialise_terrain_layer(world, "test_map");
-    let decoration_entity = initialise_decoration_layer(world, "test_map");
+    let map_data: SerializableMap = {
+        let map_file = application_root_dir()
+            .unwrap()
+            .join("assets")
+            .join("maps")
+            .join("test_map_data.ron");
+        let file = File::open(map_file).expect("Failed opening map file");
 
-    let mut map = Map {
-        bottom_left_corner: Vector3::new(-784, -784, 0),
-        num_tiles_x: 49,
-        num_tiles_y: 49,
-        terrain_entity,
-        solids: HashMap::new(),
-        decoration_entity,
-        script_repository: Vec::new(),
-        actions: HashMap::new(),
-        map_scripts: Vec::new(),
+        from_reader(file).expect("Failed deserializing map")
     };
 
-    map.solids.insert(Vector2::new(23, 32), Tile);
-    map.solids.insert(Vector2::new(24, 32), Tile);
-    map.solids.insert(Vector2::new(19, 28), Tile);
-    map.solids.insert(Vector2::new(20, 28), Tile);
-    map.solids.insert(Vector2::new(19, 27), Tile);
-    map.solids.insert(Vector2::new(20, 27), Tile);
+    let SerializableMap {
+        map_name,
+        base_file_name,
+        layer3_file_name,
+        spritesheet_file_name,
+        bottom_left_corner,
+        num_tiles_x,
+        num_tiles_y,
+        solids,
+        actions,
+        map_scripts,
+    } = map_data;
+
+    let terrain_entity = initialise_map_layer(
+        world,
+        -1.,
+        &base_file_name,
+        &spritesheet_file_name,
+    );
+    let decoration_entity = initialise_map_layer(
+        world,
+        0.5,
+        &layer3_file_name,
+        &spritesheet_file_name,
+    );
+
+    let mut map = Map {
+        map_name,
+        bottom_left_corner,
+        num_tiles_x,
+        num_tiles_y,
+        terrain_entity,
+        solids: solids
+            .into_iter()
+            .map(|tile_position| (tile_position, Tile))
+            .collect(),
+        decoration_entity,
+        script_repository: Vec::new(),
+        actions,
+        map_scripts,
+    };
 
     map.script_repository.push(GameScript::Native(|world| {
         use amethyst::shrev::EventChannel;
@@ -148,44 +202,17 @@ pub fn initialise_map(world: &mut World) {
             .single_write(TextEvent::new("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."));
     }));
 
-    map.actions.insert(Vector2::new(19, 27), GameAction {
-        when: GameActionKind::OnInteraction,
-        script_index: 0,
-    });
-
     world.insert(map);
 }
 
-fn initialise_terrain_layer(world: &mut World, map_name: &str) -> Entity {
-    let image_name = format!("maps/{}.png", map_name);
-    let ron_name = format!("maps/{}.ron", map_name);
-
+fn initialise_map_layer(world: &mut World, depth: f32, image_name: &str, ron_name: &str) -> Entity {
     let sprite_render = SpriteRender {
         sprite_sheet: load_sprite_sheet(world, &image_name, &ron_name),
         sprite_number: 0,
     };
 
     let mut transform = Transform::default();
-    transform.set_translation_xyz(0., 0., -1.);
-
-    world
-        .create_entity()
-        .with(transform)
-        .with(sprite_render)
-        .build()
-}
-
-fn initialise_decoration_layer(world: &mut World, map_name: &str) -> Entity {
-    let image_name = format!("maps/{}_layer3.png", map_name);
-    let ron_name = format!("maps/{}.ron", map_name);
-
-    let sprite_render = SpriteRender {
-        sprite_sheet: load_sprite_sheet(world, &image_name, &ron_name),
-        sprite_number: 0,
-    };
-
-    let mut transform = Transform::default();
-    transform.set_translation_xyz(0., 0., 0.5);
+    transform.set_translation_xyz(0., 0., depth);
 
     world
         .create_entity()
