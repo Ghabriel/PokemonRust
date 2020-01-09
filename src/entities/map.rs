@@ -30,7 +30,6 @@ pub struct SerializableMap {
     base_file_name: String,
     layer3_file_name: String,
     spritesheet_file_name: String,
-    bottom_left_corner: Vector3<i32>,
     num_tiles_x: u32,
     num_tiles_y: u32,
     solids: Vec<Vector2<u32>>,
@@ -156,7 +155,6 @@ pub fn initialise_map(world: &mut World) {
         base_file_name,
         layer3_file_name,
         spritesheet_file_name,
-        bottom_left_corner,
         num_tiles_x,
         num_tiles_y,
         solids,
@@ -179,7 +177,11 @@ pub fn initialise_map(world: &mut World) {
 
     let mut map = Map {
         map_name,
-        bottom_left_corner,
+        bottom_left_corner: Vector3::new(
+            -(num_tiles_x as i32) * ((TILE_SIZE / 2) as i32),
+            -(num_tiles_y as i32) * ((TILE_SIZE / 2) as i32),
+            0,
+        ),
         num_tiles_x,
         num_tiles_y,
         terrain_entity,

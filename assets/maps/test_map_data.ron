@@ -3,7 +3,6 @@
     base_file_name: "maps/test_map.png",
     layer3_file_name: "maps/test_map_layer3.png",
     spritesheet_file_name: "maps/test_map_spritesheet.ron",
-    bottom_left_corner: [-784, -784, 0],
     num_tiles_x: 49,
     num_tiles_y: 49,
     solids: [
