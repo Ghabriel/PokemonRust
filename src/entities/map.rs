@@ -123,9 +123,9 @@ pub fn initialise_map(world: &mut World) {
     let decoration_entity = initialise_decoration_layer(world, "test_map");
 
     let mut map = Map {
-        bottom_left_corner: Vector3::new(-464, -464, 0),
-        num_tiles_x: 29,
-        num_tiles_y: 29,
+        bottom_left_corner: Vector3::new(-784, -784, 0),
+        num_tiles_x: 49,
+        num_tiles_y: 49,
         // terrains: Vec::new(),
         terrain_entity,
         solids: HashMap::new(),
@@ -136,10 +136,12 @@ pub fn initialise_map(world: &mut World) {
         map_scripts: Vec::new(),
     };
 
-    map.solids.insert(Vector2::new(9, 17), Tile);
-    map.solids.insert(Vector2::new(9, 18), Tile);
-    map.solids.insert(Vector2::new(10, 17), Tile);
-    map.solids.insert(Vector2::new(10, 18), Tile);
+    map.solids.insert(Vector2::new(23, 32), Tile);
+    map.solids.insert(Vector2::new(24, 32), Tile);
+    map.solids.insert(Vector2::new(19, 28), Tile);
+    map.solids.insert(Vector2::new(20, 28), Tile);
+    map.solids.insert(Vector2::new(19, 27), Tile);
+    map.solids.insert(Vector2::new(20, 27), Tile);
 
     map.script_repository.push(GameScript::Native(|world| {
         use amethyst::shrev::EventChannel;
@@ -150,7 +152,7 @@ pub fn initialise_map(world: &mut World) {
             .single_write(TextEvent::new("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."));
     }));
 
-    map.actions.insert(Vector2::new(9, 17), GameAction {
+    map.actions.insert(Vector2::new(19, 27), GameAction {
         when: GameActionKind::OnInteraction,
         script_index: 0,
     });
