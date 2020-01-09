@@ -11,6 +11,7 @@ use amethyst::{
         WorldExt,
         WriteStorage,
     },
+    input::{InputEvent, StringBindings},
     renderer::SpriteRender,
     shrev::EventChannel,
     ui::{Anchor, LineMode, UiImage, UiText, UiTransform},
@@ -37,8 +38,15 @@ pub struct TextBox {
     text_entity: Entity,
 }
 
+#[derive(Debug, Eq, PartialEq)]
+enum TextState {
+    Running,
+    Closed,
+}
+
 pub struct TextSystem {
-    event_reader: ReaderId<TextEvent>,
+    text_event_reader: ReaderId<TextEvent>,
+    input_event_reader: ReaderId<InputEvent<StringBindings>>,
     text_queue: VecDeque<TextEvent>,
     text_box: Option<TextBox>,
 }
@@ -46,25 +54,46 @@ pub struct TextSystem {
 impl TextSystem {
     pub fn new(world: &mut World) -> TextSystem {
         TextSystem {
-            event_reader: world
+            text_event_reader: world
                 .write_resource::<EventChannel<TextEvent>>()
+                .register_reader(),
+            input_event_reader: world
+                .write_resource::<EventChannel<InputEvent<StringBindings>>>()
                 .register_reader(),
             text_queue: VecDeque::new(),
             text_box: None,
         }
     }
 
-    fn advance_text(&mut self, time: &Time, ui_texts: &mut WriteStorage<UiText>) {
+    fn advance_text(
+        &mut self,
+        pressed_action_key: bool,
+        time: &Time,
+        ui_texts: &mut WriteStorage<UiText>,
+    ) -> TextState {
         if let Some(text_box) = self.text_box.as_mut() {
+            let is_showing_full_text = text_box.displayed_text_end == text_box.full_text.len();
+
+            if text_box.awaiting_keypress && pressed_action_key {
+                if is_showing_full_text {
+                    return TextState::Closed;
+                } else {
+                    text_box.displayed_text_start = text_box.displayed_text_end;
+                    text_box.awaiting_keypress = false;
+                }
+            }
+
             if text_box.cooldown >= time.delta_seconds() {
                 text_box.cooldown -= time.delta_seconds();
             } else {
                 text_box.cooldown = TEXT_DELAY;
 
-                if text_box.displayed_text_end < text_box.full_text.len() {
-                    text_box.displayed_text_end += 1;
-                } else {
+                let displayed_length = text_box.displayed_text_end - text_box.displayed_text_start;
+
+                if is_showing_full_text || displayed_length == 150 {
                     text_box.awaiting_keypress = true;
+                } else {
+                    text_box.displayed_text_end += 1;
                 }
             }
 
@@ -74,6 +103,17 @@ impl TextSystem {
                 .text = text_box.full_text[
                     text_box.displayed_text_start..text_box.displayed_text_end
                 ].to_string();
+
+            TextState::Running
+        } else {
+            TextState::Closed
+        }
+    }
+
+    fn close_text_box(&mut self, entities: &Entities) {
+        if let Some(text_box) = self.text_box.take() {
+            entities.delete(text_box.box_entity).expect("Failed to delete text box");
+            entities.delete(text_box.text_entity).expect("Failed to delete text");
         }
     }
 }
@@ -87,6 +127,7 @@ impl<'a> System<'a> for TextSystem {
         ReadExpect<'a, Resources>,
         Read<'a, Time>,
         Read<'a, EventChannel<TextEvent>>,
+        Read<'a, EventChannel<InputEvent<StringBindings>>>,
     );
 
     fn run(&mut self, (
@@ -96,10 +137,21 @@ impl<'a> System<'a> for TextSystem {
         entities,
         resources,
         time,
-        event_channel,
+        text_event_channel,
+        input_event_channel,
     ): Self::SystemData) {
-        for event in event_channel.read(&mut self.event_reader) {
+        for event in text_event_channel.read(&mut self.text_event_reader) {
             self.text_queue.push_front(event.clone());
+        }
+
+        let mut pressed_action_key = false;
+        for event in input_event_channel.read(&mut self.input_event_reader) {
+            match event {
+                InputEvent::ActionPressed(action) if action == "action" => {
+                    pressed_action_key = true;
+                },
+                _ => {},
+            }
         }
 
         if self.text_box.is_none() {
@@ -128,7 +180,11 @@ impl<'a> System<'a> for TextSystem {
                 });
         }
 
-        self.advance_text(&time, &mut ui_texts);
+        let state = self.advance_text(pressed_action_key, &time, &mut ui_texts);
+
+        if state == TextState::Closed {
+            self.close_text_box(&entities);
+        }
     }
 }
 
