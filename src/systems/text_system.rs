@@ -1,5 +1,5 @@
 use amethyst::{
-    core::Time,
+    core::{Time, Transform},
     ecs::{
         Entities,
         Entity,
@@ -11,8 +11,9 @@ use amethyst::{
         WorldExt,
         WriteStorage,
     },
+    renderer::SpriteRender,
     shrev::EventChannel,
-    ui::{Anchor, LineMode, UiText, UiTransform},
+    ui::{Anchor, LineMode, UiImage, UiText, UiTransform},
 };
 
 use crate::{
@@ -32,7 +33,8 @@ pub struct TextBox {
     displayed_text_end: usize,
     awaiting_keypress: bool,
     cooldown: f32,
-    entity: Entity,
+    box_entity: Entity,
+    text_entity: Entity,
 }
 
 pub struct TextSystem {
@@ -67,7 +69,7 @@ impl TextSystem {
             }
 
             ui_texts
-                .get_mut(text_box.entity)
+                .get_mut(text_box.text_entity)
                 .expect("Failed to retrieve UiText")
                 .text = text_box.full_text[
                     text_box.displayed_text_start..text_box.displayed_text_end
@@ -78,6 +80,7 @@ impl TextSystem {
 
 impl<'a> System<'a> for TextSystem {
     type SystemData = (
+        WriteStorage<'a, UiImage>,
         WriteStorage<'a, UiText>,
         WriteStorage<'a, UiTransform>,
         Entities<'a>,
@@ -87,6 +90,7 @@ impl<'a> System<'a> for TextSystem {
     );
 
     fn run(&mut self, (
+        mut ui_images,
         mut ui_texts,
         mut ui_transforms,
         entities,
@@ -108,7 +112,13 @@ impl<'a> System<'a> for TextSystem {
                         displayed_text_end: 0,
                         awaiting_keypress: false,
                         cooldown: TEXT_DELAY,
-                        entity: initialise_text_box_entity(
+                        box_entity: initialise_box_entity(
+                            &entities,
+                            &mut ui_images,
+                            &mut ui_transforms,
+                            &resources,
+                        ),
+                        text_entity: initialise_text_entity(
                             &entities,
                             &mut ui_texts,
                             &mut ui_transforms,
@@ -122,7 +132,31 @@ impl<'a> System<'a> for TextSystem {
     }
 }
 
-fn initialise_text_box_entity(
+fn initialise_box_entity(
+    entities: &Entities,
+    // sprite_renders: &mut WriteStorage<SpriteRender>,
+    ui_images: &mut WriteStorage<UiImage>,
+    ui_transforms: &mut WriteStorage<UiTransform>,
+    resources: &Resources,
+) -> Entity {
+    let sprite_render = SpriteRender {
+        sprite_sheet: resources.text_box.clone(),
+        sprite_number: 0,
+    };
+
+    let ui_transform = UiTransform::new(
+        "Text Box".to_string(), Anchor::BottomMiddle, Anchor::BottomMiddle,
+        0., 20., 2., 800., 100.
+    );
+
+    entities
+        .build_entity()
+        .with(UiImage::Sprite(sprite_render), ui_images)
+        .with(ui_transform, ui_transforms)
+        .build()
+}
+
+fn initialise_text_entity(
     entities: &Entities,
     ui_texts: &mut WriteStorage<UiText>,
     ui_transforms: &mut WriteStorage<UiTransform>,
@@ -138,8 +172,8 @@ fn initialise_text_box_entity(
     ui_text.align = Anchor::TopLeft;
 
     let ui_transform = UiTransform::new(
-        "Text Box".to_string(), Anchor::BottomMiddle, Anchor::BottomLeft,
-        -320., 0., 0., 640., 100.
+        "Text".to_string(), Anchor::BottomMiddle, Anchor::BottomLeft,
+        -320., 17., 3., 640., 100.
     );
 
     entities
