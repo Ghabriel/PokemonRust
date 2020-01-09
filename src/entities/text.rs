@@ -1,7 +1,3 @@
-use amethyst::{
-    ecs::{Component, DenseVecStorage},
-};
-
 #[derive(Clone, Debug)]
 pub struct TextEvent {
     pub text: String,

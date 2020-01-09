@@ -1,5 +1,5 @@
 use amethyst::{
-    core::{Time, Transform},
+    core::Time,
     ecs::{
         Entities,
         Entity,

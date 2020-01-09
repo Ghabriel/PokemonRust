@@ -7,7 +7,6 @@ use amethyst::{
         EndControl,
         get_animation_set,
     },
-    assets::Loader,
     core::{ArcThreadPool, bundle::SystemBundle, Parent, Transform},
     ecs::{
         Dispatcher,
@@ -68,7 +67,6 @@ pub struct OverworldState<'a, 'b> {
     pub dispatcher: Option<Dispatcher<'a, 'b>>,
     pub player_entity: Option<Entity>,
     pub script_event_reader: Option<ReaderId<ScriptEvent>>,
-    // pub progress_counter: Option<ProgressCounter>,
 }
 
 impl OverworldState<'_, '_> {
@@ -103,11 +101,6 @@ impl SimpleState for OverworldState<'_, '_> {
         data.world.insert(script_event_channel);
 
         let mut dispatcher_builder = DispatcherBuilder::new()
-            // .with(
-            //     PrefabLoaderSystemDesc::<MyPrefabData>::default().build(data.world),
-            //     "scene_loader",
-            //     &[],
-            // )
             .with(MapInteractionSystem::new(data.world), "map_interaction_system", &[])
             .with({
                 let mut player_storage = data.world.write_storage::<Player>();
@@ -128,21 +121,6 @@ impl SimpleState for OverworldState<'_, '_> {
         let mut dispatcher = dispatcher_builder.build();
         dispatcher.setup(data.world);
         self.dispatcher = Some(dispatcher);
-
-        // let mut progress_counter = ProgressCounter::new();
-        // let player_prefab = data.world.exec(|loader: PrefabLoader<'_, MyPrefabData>| {
-        //     loader.load(
-        //         "sprites/player-walking.ron",
-        //         RonFormat,
-        //         &mut progress_counter,
-        //     )
-        // });
-        // // Creates new entities with components from MyPrefabData
-        // data.world
-        //     .create_entity()
-        //     .with(player_prefab)
-        //     .build();
-        // self.progress_counter = Some(progress_counter);
 
         initialise_resources(data.world);
         let player = initialise_player(data.world);
