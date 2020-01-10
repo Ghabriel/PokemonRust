@@ -5,7 +5,11 @@ use amethyst::{
     utils::application_root_dir,
 };
 
-use crate::constants::TILE_SIZE;
+use crate::{
+    common::{Direction, load_sprite_sheet},
+    constants::TILE_SIZE,
+    entities::player::Player,
+};
 
 use ron::de::from_reader;
 
@@ -16,8 +20,6 @@ use std::{
     fmt::{Debug, Error, Formatter},
     fs::File,
 };
-
-use super::load_sprite_sheet;
 
 #[derive(Clone, Debug)]
 pub enum MapEvent {
@@ -35,7 +37,82 @@ pub struct SerializableMap {
     solids: Vec<Vector2<u32>>,
     actions: HashMap<Vector2<u32>, GameAction>,
     map_scripts: Vec<MapScript>,
+    connections: HashMap<Vector2<u32>, MapConnection>,
 }
+
+// TODO: find a better name
+pub struct MapHandler {
+    loaded_maps: HashMap<String, Map>,
+    current_map: String,
+}
+// M.bottom_left_corner += M0.bottom_left_corner;
+
+impl MapHandler {
+    pub fn get_forward_tile(
+        &self,
+        player: &Player,
+        player_position: &Transform,
+    ) -> TileData {
+        let (offset_x, offset_y) = match player.facing_direction {
+            Direction::Up => (0., 1.),
+            Direction::Down => (0., -1.),
+            Direction::Left => (-1., 0.),
+            Direction::Right => (1., 0.),
+        };
+
+        let tile_size = TILE_SIZE as f32;
+
+        let current_map = &self.loaded_maps[&self.current_map];
+        let current_tile = current_map.world_to_tile_coordinates(&player_position.translation());
+        let connection = current_map.connections.get(&current_tile);
+        let target_map = if let Some(connection) = connection {
+            if connection.directions.contains_key(&player.facing_direction) {
+                connection.map.clone()
+            } else {
+                self.current_map.clone()
+            }
+        } else {
+            self.current_map.clone()
+        };
+
+        let position = player_position.translation() + Vector3::new(
+            offset_x * tile_size,
+            offset_y * tile_size,
+            0.,
+        );
+
+        TileData {
+            position,
+            map_id: MapId(target_map),
+        }
+    }
+
+    pub fn is_tile_blocked(&self, tile_data: &TileData) -> bool {
+        self.loaded_maps[&tile_data.map_id.0]
+            .is_tile_blocked(&tile_data.position)
+    }
+
+    pub fn get_action_at(&self, tile_data: &TileData) -> Option<&GameAction> {
+        let map = &self.loaded_maps[&tile_data.map_id.0];
+        let tile_coordinates = map.world_to_tile_coordinates(&tile_data.position);
+
+        map.actions.get(&tile_coordinates)
+    }
+
+    pub fn get_script_from_event(&self, script_event: &ScriptEvent) -> &GameScript {
+        let map = &self.loaded_maps[&(script_event.0).0];
+
+        &map.script_repository[script_event.1]
+    }
+}
+
+pub struct TileData {
+    pub position: Vector3<f32>,
+    pub map_id: MapId,
+}
+
+#[derive(Clone, Debug)]
+pub struct MapId(String);
 
 pub struct Map {
     map_name: String,
@@ -48,6 +125,7 @@ pub struct Map {
     pub script_repository: Vec<GameScript>,
     pub actions: HashMap<Vector2<u32>, GameAction>,
     map_scripts: Vec<MapScript>,
+    connections: HashMap<Vector2<u32>, MapConnection>,
 }
 
 impl Component for Map {
@@ -135,8 +213,14 @@ impl Debug for GameScript {
     }
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+pub struct MapConnection {
+    map: String,
+    directions: HashMap<Direction, Vector2<u32>>,
+}
+
 #[derive(Clone, Debug)]
-pub struct ScriptEvent(pub usize);
+pub struct ScriptEvent(pub MapId, pub usize);
 
 pub fn initialise_map(world: &mut World) {
     let map_data: SerializableMap = {
@@ -161,6 +245,7 @@ pub fn initialise_map(world: &mut World) {
         solids,
         actions,
         map_scripts,
+        connections,
     } = map_data;
 
     let terrain_entity = initialise_map_layer(
@@ -194,6 +279,7 @@ pub fn initialise_map(world: &mut World) {
         script_repository: Vec::new(),
         actions,
         map_scripts,
+        connections,
     };
 
     map.script_repository.push(GameScript::Native(|world| {
@@ -205,7 +291,14 @@ pub fn initialise_map(world: &mut World) {
             .single_write(TextEvent::new("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."));
     }));
 
-    world.insert(map);
+    world.insert(MapHandler {
+        loaded_maps: {
+            let mut loaded_maps = HashMap::new();
+            loaded_maps.insert("test_map".to_string(), map);
+            loaded_maps
+        },
+        current_map: "test_map".to_string(),
+    });
 }
 
 fn initialise_map_layer(world: &mut World, depth: f32, image_name: &str, ron_name: &str) -> Entity {

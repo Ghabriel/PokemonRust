@@ -4,11 +4,11 @@ use amethyst::{
 };
 
 use crate::{
-    common::get_forward_tile_position,
+    common::Direction,
     constants::TILE_SIZE,
     entities::{
-        map::Map,
-        player::{Direction, Player, PlayerAction, StaticPlayer},
+        map::MapHandler,
+        player::{Player, PlayerAction, StaticPlayer},
     },
 };
 
@@ -33,7 +33,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
         WriteStorage<'a, StaticPlayer>,
         WriteStorage<'a, Transform>,
         Entities<'a>,
-        ReadExpect<'a, Map>,
+        ReadExpect<'a, MapHandler>,
         Read<'a, Time>,
     );
 
@@ -84,9 +84,9 @@ impl<'a> System<'a> for PlayerMovementSystem {
                         continue;
                     }
 
-                    let final_position = get_forward_tile_position(&player, &transform);
+                    let final_tile_data = map.get_forward_tile(&player, &transform);
 
-                    if map.is_tile_blocked(&final_position) {
+                    if map.is_tile_blocked(&final_tile_data) {
                         static_players
                             .insert(entity, StaticPlayer)
                             .expect("Failed to attach StaticPlayer");
@@ -97,7 +97,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
 
                     self.timing_data.insert(entity, MovementTimingData {
                         estimated_time,
-                        final_position,
+                        final_position: final_tile_data.position,
                     });
                 },
             }

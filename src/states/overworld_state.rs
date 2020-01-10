@@ -25,9 +25,9 @@ use amethyst::{
 };
 
 use crate::{
+    common::Direction,
     entities::{
         player::{
-            Direction,
             initialise_player,
             PlayerAction,
             PlayerAnimation,
@@ -35,7 +35,7 @@ use crate::{
             SimulatedPlayer,
             StaticPlayer,
         },
-        map::{GameScript, initialise_map, Map, MapEvent, ScriptEvent},
+        map::{GameScript, initialise_map, Map, MapEvent, MapHandler, ScriptEvent},
         resources::initialise_resources,
         text::TextEvent,
     },
@@ -178,10 +178,10 @@ impl SimpleState for OverworldState<'_, '_> {
             .map(Clone::clone)
             .collect::<Vec<ScriptEvent>>();
 
-        for ScriptEvent(script_index) in events {
+        for script_event in events {
             let game_script = world
-                .read_resource::<Map>()
-                .script_repository[script_index]
+                .read_resource::<MapHandler>()
+                .get_script_from_event(&script_event)
                 .clone();
 
             if let GameScript::Native(script) = game_script {

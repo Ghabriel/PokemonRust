@@ -16,9 +16,8 @@ use amethyst::{
 };
 
 use crate::{
-    common::get_forward_tile_position,
     entities::{
-        map::{GameAction, GameActionKind, Map, MapEvent, ScriptEvent},
+        map::{GameAction, GameActionKind, MapEvent, MapHandler, ScriptEvent},
         player::Player,
     },
 };
@@ -40,12 +39,13 @@ impl MapInteractionSystem {
         let (players, transforms, map, _, script_event_channel) = system_data;
 
         for (player, transform) in (&*players, &*transforms).join() {
-            let interacted_position = get_forward_tile_position(&player, &transform);
-            let tile_coordinates = map.world_to_tile_coordinates(&interacted_position);
+            let interacted_position = map.get_forward_tile(&player, &transform);
 
-            match map.actions.get(&tile_coordinates) {
+            match map.get_action_at(&interacted_position) {
                 Some(GameAction { when, script_index }) if when == &GameActionKind::OnInteraction => {
-                    script_event_channel.single_write(ScriptEvent(*script_index));
+                    script_event_channel.single_write(
+                        ScriptEvent(interacted_position.map_id, *script_index)
+                    );
                 },
                 _ => {},
             }
@@ -57,7 +57,7 @@ impl<'a> System<'a> for MapInteractionSystem {
     type SystemData = (
         ReadStorage<'a, Player>,
         ReadStorage<'a, Transform>,
-        ReadExpect<'a, Map>,
+        ReadExpect<'a, MapHandler>,
         Read<'a, EventChannel<MapEvent>>,
         Write<'a, EventChannel<ScriptEvent>>,
     );

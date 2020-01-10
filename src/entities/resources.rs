@@ -5,7 +5,7 @@ use amethyst::{
     ui::{FontHandle, TtfFormat},
 };
 
-use super::load_sprite_sheet;
+use crate::common::load_sprite_sheet;
 
 pub struct Resources {
     pub font: FontHandle,

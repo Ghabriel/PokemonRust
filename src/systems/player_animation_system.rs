@@ -13,7 +13,10 @@ use amethyst::{
     renderer::SpriteRender,
 };
 
-use crate::entities::player::{Direction, Player, PlayerAction, PlayerAnimation, PlayerSpriteSheets};
+use crate::{
+    common::Direction,
+    entities::player::{Player, PlayerAction, PlayerAnimation, PlayerSpriteSheets},
+};
 
 pub struct PlayerAnimationSystem {
     player_events_id: ReaderId<ComponentEvent>,

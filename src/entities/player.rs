@@ -24,17 +24,9 @@ use amethyst::{
     renderer::{SpriteRender, SpriteSheet},
 };
 
-use super::load_sprite_sheet;
+use crate::common::{Direction, load_sprite_sheet};
 
 use serde::{Deserialize, Serialize};
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
-}
 
 pub struct SimulatedPlayer(pub Player);
 

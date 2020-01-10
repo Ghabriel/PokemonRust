@@ -1,23 +1,31 @@
-use amethyst::core::{math::Vector3, Transform};
+use amethyst::{
+    assets::{Handle, Loader},
+    core::{math::Vector3, Transform},
+    ecs::{World, WorldExt},
+    renderer::{ImageFormat, SpriteSheet, SpriteSheetFormat},
+};
 
 use crate::{
     constants::TILE_SIZE,
-    entities::player::{Direction, Player},
+    entities::{
+        map::MapHandler,
+        player::Player,
+    },
 };
 
-pub fn get_forward_tile_position(player: &Player, player_position: &Transform) -> Vector3<f32> {
-    let (offset_x, offset_y) = match player.facing_direction {
-        Direction::Up => (0., 1.),
-        Direction::Down => (0., -1.),
-        Direction::Left => (-1., 0.),
-        Direction::Right => (1., 0.),
-    };
+use serde::{Deserialize, Serialize};
 
-    let tile_size = TILE_SIZE as f32;
+#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+pub enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+}
 
-    player_position.translation() + Vector3::new(
-        offset_x * tile_size,
-        offset_y * tile_size,
-        0.,
-    )
+pub fn load_sprite_sheet(world: &World, image_name: &str, ron_name: &str) -> Handle<SpriteSheet> {
+    let loader = world.read_resource::<Loader>();
+    let texture_handle = loader.load(image_name, ImageFormat::default(), (), &world.read_resource());
+
+    loader.load(ron_name, SpriteSheetFormat(texture_handle), (), &world.read_resource())
 }
