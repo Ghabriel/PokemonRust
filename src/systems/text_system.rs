@@ -26,7 +26,7 @@ use crate::{
 
 use std::collections::VecDeque;
 
-pub const TEXT_DELAY: f32 = 0.03;
+pub const TEXT_DELAY: f32 = 0.005;
 
 pub struct TextBox {
     full_text: String,
@@ -72,31 +72,40 @@ impl TextSystem {
         ui_texts: &mut WriteStorage<UiText>,
     ) -> TextState {
         if let Some(text_box) = self.text_box.as_mut() {
-            let is_showing_full_text = text_box.displayed_text_end == text_box.full_text.len();
+            let full_text_length = text_box.full_text.len();
+            let maximum_display_length = 150;
 
-            if text_box.awaiting_keypress && pressed_action_key {
-                if is_showing_full_text {
-                    return TextState::Closed;
-                } else {
-                    text_box.displayed_text_start = text_box.displayed_text_end;
-                    text_box.awaiting_keypress = false;
+            match (pressed_action_key, text_box.awaiting_keypress) {
+                (true, true) => {
+                    if text_box.displayed_text_end == full_text_length {
+                        return TextState::Closed;
+                    } else {
+                        text_box.displayed_text_start = text_box.displayed_text_end;
+                        text_box.awaiting_keypress = false;
+                    }
+                },
+                (true, false) => {
+                    text_box.displayed_text_end = full_text_length.min(
+                        text_box.displayed_text_start + maximum_display_length
+                    );
+                },
+                (false, false) => {
+                    text_box.cooldown += time.delta_seconds();
+                    while text_box.cooldown >= TEXT_DELAY {
+                        text_box.cooldown -= TEXT_DELAY;
+    
+                        let displayed_length = text_box.displayed_text_end - text_box.displayed_text_start;
+    
+                        if text_box.displayed_text_end == full_text_length || displayed_length == maximum_display_length {
+                            text_box.awaiting_keypress = true;
+                        } else {
+                            text_box.displayed_text_end += 1;
+                        }
+                    }
                 }
+                _ => {},
             }
-
-            if text_box.cooldown >= time.delta_seconds() {
-                text_box.cooldown -= time.delta_seconds();
-            } else {
-                text_box.cooldown = TEXT_DELAY;
-
-                let displayed_length = text_box.displayed_text_end - text_box.displayed_text_start;
-
-                if is_showing_full_text || displayed_length == 150 {
-                    text_box.awaiting_keypress = true;
-                } else {
-                    text_box.displayed_text_end += 1;
-                }
-            }
-
+            
             ui_texts
                 .get_mut(text_box.text_entity)
                 .expect("Failed to retrieve UiText")
@@ -163,7 +172,7 @@ impl<'a> System<'a> for TextSystem {
                         displayed_text_start: 0,
                         displayed_text_end: 0,
                         awaiting_keypress: false,
-                        cooldown: TEXT_DELAY,
+                        cooldown: 0.,
                         box_entity: initialise_box_entity(
                             &entities,
                             &mut ui_images,
