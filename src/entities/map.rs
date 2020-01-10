@@ -144,7 +144,8 @@ pub fn initialise_map(world: &mut World) {
             .unwrap()
             .join("assets")
             .join("maps")
-            .join("test_map_data.ron");
+            .join("test_map")
+            .join("map.ron");
         let file = File::open(map_file).expect("Failed opening map file");
 
         from_reader(file).expect("Failed deserializing map")
