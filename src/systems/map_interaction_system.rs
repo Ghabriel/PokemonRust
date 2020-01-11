@@ -17,7 +17,7 @@ use amethyst::{
 
 use crate::{
     entities::{
-        map::{GameAction, GameActionKind, MapEvent, MapHandler, ScriptEvent},
+        map::{GameActionKind, MapEvent, MapHandler, ScriptEvent, ValidatedGameAction},
         player::Player,
     },
 };
@@ -42,10 +42,10 @@ impl MapInteractionSystem {
             let interacted_position = map.get_forward_tile(&player, &transform);
 
             match map.get_action_at(&interacted_position) {
-                Some(GameAction { when, script_index }) if when == &GameActionKind::OnInteraction => {
-                    script_event_channel.single_write(
-                        ScriptEvent(interacted_position.map_id, *script_index)
-                    );
+                Some(
+                    ValidatedGameAction { when, script_event }
+                ) if when == GameActionKind::OnInteraction => {
+                    script_event_channel.single_write(script_event);
                 },
                 _ => {},
             }

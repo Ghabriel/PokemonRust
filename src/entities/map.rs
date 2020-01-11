@@ -92,11 +92,18 @@ impl MapHandler {
             .is_tile_blocked(&tile_data.position)
     }
 
-    pub fn get_action_at(&self, tile_data: &TileData) -> Option<&GameAction> {
+    pub fn get_action_at(&self, tile_data: &TileData) -> Option<ValidatedGameAction> {
         let map = &self.loaded_maps[&tile_data.map_id.0];
         let tile_coordinates = map.world_to_tile_coordinates(&tile_data.position);
 
-        map.actions.get(&tile_coordinates)
+        map.actions
+            .get(&tile_coordinates)
+            .map(|game_action| {
+                ValidatedGameAction {
+                    when: game_action.when.clone(),
+                    script_event: ScriptEvent(tile_data.map_id.clone(), game_action.script_index)
+                }
+            })
     }
 
     pub fn get_script_from_event(&self, script_event: &ScriptEvent) -> &GameScript {
@@ -163,6 +170,12 @@ impl Component for Tile {
     type Storage = DenseVecStorage<Self>;
 }
 
+// TODO: find a better name
+pub struct ValidatedGameAction {
+    pub when: GameActionKind,
+    pub script_event: ScriptEvent,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct GameAction {
     pub when: GameActionKind,
@@ -220,7 +233,7 @@ pub struct MapConnection {
 }
 
 #[derive(Clone, Debug)]
-pub struct ScriptEvent(pub MapId, pub usize);
+pub struct ScriptEvent(MapId, usize);
 
 pub fn initialise_map(world: &mut World) {
     let map_data: SerializableMap = {
