@@ -1,13 +1,14 @@
 use amethyst::{
     core::{math::Vector3, Time, Transform},
-    ecs::{Entities, Entity, Join, Read, ReadExpect, ReadStorage, System, WriteStorage},
+    ecs::{Entities, Entity, Join, Read, ReadExpect, ReadStorage, System, Write, WriteStorage},
+    shrev::EventChannel,
 };
 
 use crate::{
     common::Direction,
     constants::TILE_SIZE,
     entities::{
-        map::MapHandler,
+        map::{MapHandler, MapScriptKind, ScriptEvent, TileData},
         player::{Player, PlayerAction, StaticPlayer},
     },
 };
@@ -19,7 +20,7 @@ struct MovementTimingData {
     estimated_time: f32,
     /// Stores where the player will be after he reaches the next tile. This
     /// is used to compensate for rounding errors.
-    final_position: Vector3<f32>,
+    final_tile_data: TileData,
 }
 
 #[derive(Default)]
@@ -34,6 +35,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
         WriteStorage<'a, Transform>,
         Entities<'a>,
         ReadExpect<'a, MapHandler>,
+        Write<'a, EventChannel<ScriptEvent>>,
         Read<'a, Time>,
     );
 
@@ -43,6 +45,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
         mut transforms,
         entities,
         map,
+        mut script_event_channel,
         time,
     ): Self::SystemData) {
         for (entity, player, transform) in (&entities, &players, &mut transforms).join() {
@@ -66,11 +69,18 @@ impl<'a> System<'a> for PlayerMovementSystem {
                     let delta_seconds = time.delta_seconds();
 
                     if timing_data.estimated_time <= delta_seconds {
-                        transform.set_translation(timing_data.final_position);
+                        transform.set_translation(timing_data.final_tile_data.position);
+
+                        map.get_map_scripts(&timing_data.final_tile_data, MapScriptKind::OnTileChange)
+                            .for_each(|event| {
+                                script_event_channel.single_write(event);
+                            });
+
                         self.timing_data.remove(&entity);
                         static_players
                             .insert(entity, StaticPlayer)
                             .expect("Failed to attach StaticPlayer");
+
                         continue;
                     }
 
@@ -97,7 +107,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
 
                     self.timing_data.insert(entity, MovementTimingData {
                         estimated_time,
-                        final_position: final_tile_data.position,
+                        final_tile_data,
                     });
                 },
             }

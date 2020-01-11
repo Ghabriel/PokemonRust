@@ -1,6 +1,6 @@
 use amethyst::{
     core::{math::{Vector2, Vector3}, Transform},
-    ecs::{Component, DenseVecStorage, Entity, world::Builder, World, WorldExt},
+    ecs::{Component, DenseVecStorage, Entity, Join, world::Builder, World, WorldExt},
     renderer::SpriteRender,
     utils::application_root_dir,
 };
@@ -45,7 +45,6 @@ pub struct MapHandler {
     loaded_maps: HashMap<String, Map>,
     current_map: String,
 }
-// M.bottom_left_corner += M0.bottom_left_corner;
 
 impl MapHandler {
     pub fn get_forward_tile(
@@ -110,6 +109,35 @@ impl MapHandler {
         let map = &self.loaded_maps[&(script_event.0).0];
 
         &map.script_repository[script_event.1]
+    }
+
+    pub fn get_map_scripts<'a>(
+        &'a self,
+        tile_data: &'a TileData,
+        kind: MapScriptKind,
+    ) -> impl Iterator<Item = ScriptEvent> + 'a {
+        self.loaded_maps[&tile_data.map_id.0]
+            .map_scripts
+            .iter()
+            .filter(move |script| script.when == kind)
+            .map(move |script| ScriptEvent(tile_data.map_id.clone(), script.script_index))
+    }
+
+    pub fn get_nearby_connections(
+        &self,
+        position: &Vector3<f32>,
+    ) -> impl Iterator<Item = (&Vector2<u32>, &MapConnection)> {
+        let map = &self.loaded_maps[&self.current_map];
+        let position = map.world_to_tile_coordinates(&position);
+
+        map.connections
+            .iter()
+            .filter(move |(tile, _)| {
+                let distance_x = (tile.x as i32) - (position.x as i32);
+                let distance_y = (tile.y as i32) - (position.y as i32);
+                let distance = distance_x.abs() + distance_y.abs();
+                distance <= 25
+            })
     }
 }
 
@@ -205,7 +233,7 @@ pub struct MapScript {
     pub script_index: usize,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum MapScriptKind {
     /**
      * Triggered when the player steps on a new tile.
@@ -226,7 +254,7 @@ impl Debug for GameScript {
     }
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct MapConnection {
     map: String,
     directions: HashMap<Direction, Vector2<u32>>,
@@ -236,12 +264,108 @@ pub struct MapConnection {
 pub struct ScriptEvent(MapId, usize);
 
 pub fn initialise_map(world: &mut World) {
+    let mut map = load_map(world, "test_map", None);
+
+    map.script_repository.push(GameScript::Native(|world| {
+        use amethyst::shrev::EventChannel;
+        use crate::entities::text::TextEvent;
+
+        world
+            .write_resource::<EventChannel<TextEvent>>()
+            .single_write(TextEvent::new("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."));
+    }));
+
+    map.script_repository.push(GameScript::Native(|world| {
+        let (nearby_connections, bottom_left_corner) = {
+            let map = world.read_resource::<MapHandler>();
+            let players = world.read_storage::<Player>();
+            let transforms = world.read_storage::<Transform>();
+
+            let position = (&players, &transforms).join()
+                .map(|(_, transform)| transform.translation())
+                .next()
+                .unwrap();
+
+            let nearby_connections = map
+                .get_nearby_connections(&position)
+                .filter(|(_, connection)| !map.loaded_maps.contains_key(&connection.map))
+                .map(|(tile, connection)| (tile.clone(), connection.clone()))
+                .collect::<Vec<_>>();
+
+            let bottom_left_corner = map
+                .loaded_maps[&map.current_map]
+                .bottom_left_corner
+                .clone();
+
+            (nearby_connections, bottom_left_corner)
+        };
+
+        let loaded_maps: Vec<_> = nearby_connections
+            .iter()
+            .map(|(tile, connection)| {
+                let tile_size = TILE_SIZE as i32;
+                let half_tile = (TILE_SIZE / 2) as i32;
+                let tile_world_coordinates = Vector2::new(
+                    (tile.x as i32) * tile_size + half_tile + bottom_left_corner.x,
+                    (tile.y as i32) * tile_size + half_tile + bottom_left_corner.y,
+                );
+
+                // TODO: handle multi-connections (non-rectangular maps)
+                let (first_direction, external_tile) = connection.directions.iter().next().unwrap();
+
+                let external_tile_offset = match first_direction {
+                    Direction::Up => Vector2::new(0, tile_size),
+                    Direction::Down => Vector2::new(0, -tile_size),
+                    Direction::Left => Vector2::new(-tile_size, 0),
+                    Direction::Right => Vector2::new(tile_size, 0),
+                };
+
+                let external_tile_world_coordinates = tile_world_coordinates + &external_tile_offset;
+                let external_left_corner = Vector3::new(
+                    external_tile_world_coordinates.x - half_tile - (external_tile.x as i32) * tile_size,
+                    external_tile_world_coordinates.y - half_tile - (external_tile.y as i32) * tile_size,
+                    0,
+                );
+
+                println!("Loading map {}...", connection.map);
+                println!("Connection tile (map coordinates): {:?}", tile);
+                println!("Connection tile (world coordinates): {:?}", tile_world_coordinates);
+                println!("External tile (world coordinates): {:?}", external_tile_world_coordinates);
+                println!("External left corner: {:?}", external_left_corner);
+
+                let map = load_map(world, &connection.map, Some(external_left_corner));
+                (connection.map.clone(), map)
+            })
+            .collect();
+
+        world
+            .write_resource::<MapHandler>()
+            .loaded_maps
+            .extend(loaded_maps);
+    }));
+
+    map.map_scripts.push(MapScript {
+        when: MapScriptKind::OnTileChange,
+        script_index: 1,
+    });
+
+    world.insert(MapHandler {
+        loaded_maps: {
+            let mut loaded_maps = HashMap::new();
+            loaded_maps.insert("test_map".to_string(), map);
+            loaded_maps
+        },
+        current_map: "test_map".to_string(),
+    });
+}
+
+pub fn load_map(world: &mut World, map_name: &str, bottom_left_corner: Option<Vector3<i32>>) -> Map {
     let map_data: SerializableMap = {
         let map_file = application_root_dir()
             .unwrap()
             .join("assets")
             .join("maps")
-            .join("test_map")
+            .join(map_name)
             .join("map.ron");
         let file = File::open(map_file).expect("Failed opening map file");
 
@@ -261,26 +385,38 @@ pub fn initialise_map(world: &mut World) {
         connections,
     } = map_data;
 
+    let bottom_left_corner = bottom_left_corner.unwrap_or(
+        Vector3::new(
+            -(num_tiles_x as i32) * ((TILE_SIZE / 2) as i32),
+            -(num_tiles_y as i32) * ((TILE_SIZE / 2) as i32),
+            0,
+        )
+    );
+
+    let map_center = bottom_left_corner + Vector3::new(
+        (num_tiles_x as i32) * ((TILE_SIZE / 2) as i32),
+        (num_tiles_y as i32) * ((TILE_SIZE / 2) as i32),
+        0,
+    );
+
     let terrain_entity = initialise_map_layer(
         world,
         -1.,
         &base_file_name,
         &spritesheet_file_name,
+        &map_center,
     );
     let decoration_entity = initialise_map_layer(
         world,
         0.5,
         &layer3_file_name,
         &spritesheet_file_name,
+        &map_center,
     );
 
-    let mut map = Map {
+    Map {
         map_name,
-        bottom_left_corner: Vector3::new(
-            -(num_tiles_x as i32) * ((TILE_SIZE / 2) as i32),
-            -(num_tiles_y as i32) * ((TILE_SIZE / 2) as i32),
-            0,
-        ),
+        bottom_left_corner,
         num_tiles_x,
         num_tiles_y,
         terrain_entity,
@@ -293,35 +429,23 @@ pub fn initialise_map(world: &mut World) {
         actions,
         map_scripts,
         connections,
-    };
-
-    map.script_repository.push(GameScript::Native(|world| {
-        use amethyst::shrev::EventChannel;
-        use crate::entities::text::TextEvent;
-
-        world
-            .write_resource::<EventChannel<TextEvent>>()
-            .single_write(TextEvent::new("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."));
-    }));
-
-    world.insert(MapHandler {
-        loaded_maps: {
-            let mut loaded_maps = HashMap::new();
-            loaded_maps.insert("test_map".to_string(), map);
-            loaded_maps
-        },
-        current_map: "test_map".to_string(),
-    });
+    }
 }
 
-fn initialise_map_layer(world: &mut World, depth: f32, image_name: &str, ron_name: &str) -> Entity {
+fn initialise_map_layer(
+    world: &mut World,
+    depth: f32,
+    image_name: &str,
+    ron_name: &str,
+    position: &Vector3<i32>,
+) -> Entity {
     let sprite_render = SpriteRender {
         sprite_sheet: load_sprite_sheet(world, &image_name, &ron_name),
         sprite_number: 0,
     };
 
     let mut transform = Transform::default();
-    transform.set_translation_xyz(0., 0., depth);
+    transform.set_translation_xyz(position.x as f32, position.y as f32, depth);
 
     world
         .create_entity()

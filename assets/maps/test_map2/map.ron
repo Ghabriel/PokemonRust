@@ -1,0 +1,19 @@
+(
+    map_name: "Test Map 2",
+    base_file_name: "maps/test_map2/map.png",
+    layer3_file_name: "maps/test_map2/layer3.png",
+    spritesheet_file_name: "maps/test_map2/spritesheet.ron",
+    num_tiles_x: 49,
+    num_tiles_y: 29,
+    solids: [],
+    actions: {},
+    map_scripts: [],
+    connections: {
+        [22, 0]: (
+            map: "test_map",
+            directions: {
+                Down: [22, 48],
+            },
+        ),
+    },
+)
