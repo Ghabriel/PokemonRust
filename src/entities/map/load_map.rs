@@ -82,12 +82,14 @@ fn load_nearby_connections(world: &mut World) {
     let loaded_maps: Vec<_> = nearby_connections
         .iter()
         .map(|(tile, connection)| {
+            println!("Loading map {}...", connection.map);
             let bottom_left_corner = get_new_map_bottom_left_corner(
                 &tile,
                 &connection,
                 &bottom_left_corner,
             );
             let map = load_map(world, &connection.map, Some(bottom_left_corner));
+
             (connection.map.clone(), map)
         })
         .collect();
@@ -132,19 +134,12 @@ fn get_new_map_bottom_left_corner(
     };
 
     let external_tile_world_coordinates = tile_world_coordinates + external_tile_offset;
-    let external_left_corner = Vector3::new(
+
+    Vector3::new(
         external_tile_world_coordinates.x - half_tile - (external_tile.x as i32) * tile_size,
         external_tile_world_coordinates.y - half_tile - (external_tile.y as i32) * tile_size,
         0,
-    );
-
-    println!("Loading map {}...", connection.map);
-    println!("Connection tile (map coordinates): {:?}", tile);
-    println!("Connection tile (world coordinates): {:?}", tile_world_coordinates);
-    println!("External tile (world coordinates): {:?}", external_tile_world_coordinates);
-    println!("External left corner: {:?}", external_left_corner);
-
-    external_left_corner
+    )
 }
 
 pub fn load_map(world: &mut World, map_name: &str, bottom_left_corner: Option<Vector3<i32>>) -> Map {
