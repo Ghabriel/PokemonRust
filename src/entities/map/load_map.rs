@@ -61,7 +61,7 @@ pub fn initialise_map(world: &mut World) {
 }
 
 fn load_nearby_connections(world: &mut World) {
-    let (nearby_connections, bottom_left_corner) = {
+    let (nearby_connections, reference_point) = {
         let map = world.read_resource::<MapHandler>();
         let player_position = get_player_position(world);
 
@@ -71,24 +71,24 @@ fn load_nearby_connections(world: &mut World) {
             .map(|(tile, connection)| (tile.clone(), connection.clone()))
             .collect();
 
-        let bottom_left_corner = map
+        let reference_point = map
             .loaded_maps[&map.current_map]
-            .bottom_left_corner
+            .reference_point
             .clone();
 
-        (nearby_connections, bottom_left_corner)
+        (nearby_connections, reference_point)
     };
 
     let loaded_maps: Vec<_> = nearby_connections
         .iter()
         .map(|(tile, connection)| {
             println!("Loading map {}...", connection.map);
-            let bottom_left_corner = get_new_map_bottom_left_corner(
+            let reference_point = get_new_map_reference_point(
                 &tile,
                 &connection,
-                &bottom_left_corner,
+                &reference_point,
             );
-            let map = load_map(world, &connection.map, Some(bottom_left_corner));
+            let map = load_map(world, &connection.map, Some(reference_point));
 
             (connection.map.clone(), map)
         })
@@ -111,16 +111,16 @@ fn get_player_position(world: &World) -> Vector3<f32> {
         .clone()
 }
 
-fn get_new_map_bottom_left_corner(
+fn get_new_map_reference_point(
     tile: &Vector2<u32>,
     connection: &MapConnection,
-    current_map_bottom_left_corner: &Vector3<i32>,
+    current_map_reference_point: &Vector3<i32>,
 ) -> Vector3<i32> {
     let tile_size = TILE_SIZE as i32;
     let half_tile = (TILE_SIZE / 2) as i32;
     let tile_world_coordinates = Vector2::new(
-        (tile.x as i32) * tile_size + half_tile + current_map_bottom_left_corner.x,
-        (tile.y as i32) * tile_size + half_tile + current_map_bottom_left_corner.y,
+        (tile.x as i32) * tile_size + half_tile + current_map_reference_point.x,
+        (tile.y as i32) * tile_size + half_tile + current_map_reference_point.y,
     );
 
     // TODO: handle multi-connections (non-rectangular maps)
@@ -142,7 +142,7 @@ fn get_new_map_bottom_left_corner(
     )
 }
 
-pub fn load_map(world: &mut World, map_name: &str, bottom_left_corner: Option<Vector3<i32>>) -> Map {
+pub fn load_map(world: &mut World, map_name: &str, reference_point: Option<Vector3<i32>>) -> Map {
     let map_data: SerializableMap = {
         let map_file = application_root_dir()
             .unwrap()
@@ -168,7 +168,7 @@ pub fn load_map(world: &mut World, map_name: &str, bottom_left_corner: Option<Ve
         connections,
     } = map_data;
 
-    let bottom_left_corner = bottom_left_corner.unwrap_or(
+    let reference_point = reference_point.unwrap_or(
         Vector3::new(
             -(num_tiles_x as i32) * ((TILE_SIZE / 2) as i32),
             -(num_tiles_y as i32) * ((TILE_SIZE / 2) as i32),
@@ -176,7 +176,7 @@ pub fn load_map(world: &mut World, map_name: &str, bottom_left_corner: Option<Ve
         )
     );
 
-    let map_center = bottom_left_corner + Vector3::new(
+    let map_center = reference_point + Vector3::new(
         (num_tiles_x as i32) * ((TILE_SIZE / 2) as i32),
         (num_tiles_y as i32) * ((TILE_SIZE / 2) as i32),
         0,
@@ -199,7 +199,7 @@ pub fn load_map(world: &mut World, map_name: &str, bottom_left_corner: Option<Ve
 
     Map {
         map_name,
-        bottom_left_corner,
+        reference_point,
         terrain_entity,
         solids: solids
             .into_iter()

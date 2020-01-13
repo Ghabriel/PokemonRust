@@ -17,7 +17,11 @@ use std::{
 
 pub struct Map {
     pub(super) map_name: String,
-    pub(super) bottom_left_corner: Vector3<i32>,
+    /**
+     * The Reference Point of this map, which corresponds to the coordinates of
+     * its bottom-left corner.
+     */
+    pub(super) reference_point: Vector3<i32>,
     pub(super) terrain_entity: Entity,
     pub(super) solids: HashMap<Vector2<u32>, Tile>,
     pub(super) decoration_entity: Entity,
@@ -41,7 +45,7 @@ impl Map {
         let tile_size = TILE_SIZE as i32;
         let half_tile = tile_size / 2;
         let target_corner = position - Vector3::new(half_tile, half_tile + 12, 0);
-        let normalized_position = (target_corner - self.bottom_left_corner) / tile_size;
+        let normalized_position = (target_corner - self.reference_point) / tile_size;
 
         Vector2::new(
             normalized_position.x as u32,
