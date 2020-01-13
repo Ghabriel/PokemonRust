@@ -5,7 +5,7 @@ use amethyst::{
 
 use crate::{
     common::Direction,
-    constants::TILE_SIZE,
+    constants::{HALF_TILE_SIZE, TILE_SIZE},
 };
 
 use serde::{Deserialize, Serialize};
@@ -43,7 +43,7 @@ impl Map {
             position.z as i32,
         );
         let tile_size = TILE_SIZE as i32;
-        let half_tile = tile_size / 2;
+        let half_tile = HALF_TILE_SIZE as i32;
         let target_corner = position - Vector3::new(half_tile, half_tile + 12, 0);
         let normalized_position = (target_corner - self.reference_point) / tile_size;
 

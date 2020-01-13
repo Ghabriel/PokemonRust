@@ -7,7 +7,7 @@ use amethyst::{
 
 use crate::{
     common::{Direction, load_sprite_sheet},
-    constants::TILE_SIZE,
+    constants::{HALF_TILE_SIZE, MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
     entities::player::Player,
 };
 
@@ -117,7 +117,7 @@ fn get_new_map_reference_point(
     current_map_reference_point: &Vector3<i32>,
 ) -> Vector3<i32> {
     let tile_size = TILE_SIZE as i32;
-    let half_tile = (TILE_SIZE / 2) as i32;
+    let half_tile = HALF_TILE_SIZE as i32;
     let tile_world_coordinates = Vector2::new(
         (tile.x as i32) * tile_size + half_tile + current_map_reference_point.x,
         (tile.y as i32) * tile_size + half_tile + current_map_reference_point.y,
@@ -168,30 +168,27 @@ pub fn load_map(world: &mut World, map_name: &str, reference_point: Option<Vecto
         connections,
     } = map_data;
 
-    let reference_point = reference_point.unwrap_or(
-        Vector3::new(
-            -(num_tiles_x as i32) * ((TILE_SIZE / 2) as i32),
-            -(num_tiles_y as i32) * ((TILE_SIZE / 2) as i32),
-            0,
-        )
-    );
-
-    let map_center = reference_point + Vector3::new(
-        (num_tiles_x as i32) * ((TILE_SIZE / 2) as i32),
-        (num_tiles_y as i32) * ((TILE_SIZE / 2) as i32),
+    let half_map = Vector3::new(
+        (num_tiles_x as i32) * (HALF_TILE_SIZE as i32),
+        (num_tiles_y as i32) * (HALF_TILE_SIZE as i32),
         0,
     );
 
+    let (reference_point, map_center) = match reference_point {
+        Some(reference_point) => (reference_point, reference_point + half_map),
+        None => (-half_map, Vector3::new(0, 0, 0)),
+    };
+
     let terrain_entity = initialise_map_layer(
         world,
-        -1.,
+        MAP_TERRAIN_LAYER_Z,
         &base_file_name,
         &spritesheet_file_name,
         &map_center,
     );
     let decoration_entity = initialise_map_layer(
         world,
-        0.5,
+        MAP_DECORATION_LAYER_Z,
         &layer3_file_name,
         &spritesheet_file_name,
         &map_center,
