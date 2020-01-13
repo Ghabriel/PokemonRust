@@ -63,19 +63,13 @@ pub fn initialise_map(world: &mut World) {
 fn load_nearby_connections(world: &mut World) {
     let (nearby_connections, bottom_left_corner) = {
         let map = world.read_resource::<MapHandler>();
-        let players = world.read_storage::<Player>();
-        let transforms = world.read_storage::<Transform>();
+        let player_position = get_player_position(world);
 
-        let position = (&players, &transforms).join()
-            .map(|(_, transform)| transform.translation())
-            .next()
-            .unwrap();
-
-        let nearby_connections = map
-            .get_nearby_connections(&position)
+        let nearby_connections: Vec<_> = map
+            .get_nearby_connections(&player_position)
             .filter(|(_, connection)| !map.loaded_maps.contains_key(&connection.map))
             .map(|(tile, connection)| (tile.clone(), connection.clone()))
-            .collect::<Vec<_>>();
+            .collect();
 
         let bottom_left_corner = map
             .loaded_maps[&map.current_map]
@@ -102,6 +96,17 @@ fn load_nearby_connections(world: &mut World) {
         .write_resource::<MapHandler>()
         .loaded_maps
         .extend(loaded_maps);
+}
+
+fn get_player_position(world: &World) -> Vector3<f32> {
+    let players = world.read_storage::<Player>();
+    let transforms = world.read_storage::<Transform>();
+
+    (&players, &transforms).join()
+        .map(|(_, transform)| transform.translation())
+        .next()
+        .unwrap()
+        .clone()
 }
 
 fn get_new_map_bottom_left_corner(
