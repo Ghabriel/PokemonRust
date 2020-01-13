@@ -8,24 +8,27 @@ use crate::{
     common::Direction,
     constants::TILE_SIZE,
     entities::{
-        map::{MapHandler, MapScriptKind, ScriptEvent, TileData},
+        map::{MapHandler, MapId, MapScriptKind, ScriptEvent, TileData},
         player::{Player, PlayerAction, StaticPlayer},
     },
 };
 
 use std::collections::HashMap;
 
-struct MovementTimingData {
+struct MovementData {
     /// Stores how much time it will take for the player to reach the next tile.
     estimated_time: f32,
+    /// Stores the map that the player was in at the start of the movement.
+    /// Useful for detecting map changes.
+    starting_map_id: MapId,
     /// Stores where the player will be after he reaches the next tile. This
-    /// is used to compensate for rounding errors.
+    /// is used to compensate for rounding errors and detecting map changes.
     final_tile_data: TileData,
 }
 
 #[derive(Default)]
 pub struct PlayerMovementSystem {
-    timing_data: HashMap<Entity, MovementTimingData>,
+    movement_data: HashMap<Entity, MovementData>,
 }
 
 impl<'a> System<'a> for PlayerMovementSystem {
@@ -62,21 +65,28 @@ impl<'a> System<'a> for PlayerMovementSystem {
                 Direction::Right => (1., 0.),
             };
 
-            let timing_data = self.timing_data.get_mut(&entity);
+            let movement_data = self.movement_data.get_mut(&entity);
 
-            match timing_data {
-                Some(timing_data) => {
+            match movement_data {
+                Some(movement_data) => {
                     let delta_seconds = time.delta_seconds();
 
-                    if timing_data.estimated_time <= delta_seconds {
-                        transform.set_translation(timing_data.final_tile_data.position);
+                    if movement_data.estimated_time <= delta_seconds {
+                        transform.set_translation(movement_data.final_tile_data.position);
 
-                        map.get_map_scripts(&timing_data.final_tile_data, MapScriptKind::OnTileChange)
+                        if movement_data.starting_map_id != movement_data.final_tile_data.map_id {
+                            map.get_map_scripts(&movement_data.final_tile_data, MapScriptKind::OnMapEnter)
+                                .for_each(|event| {
+                                    script_event_channel.single_write(event);
+                                });
+                        }
+
+                        map.get_map_scripts(&movement_data.final_tile_data, MapScriptKind::OnTileChange)
                             .for_each(|event| {
                                 script_event_channel.single_write(event);
                             });
 
-                        self.timing_data.remove(&entity);
+                        self.movement_data.remove(&entity);
                         static_players
                             .insert(entity, StaticPlayer)
                             .expect("Failed to attach StaticPlayer");
@@ -84,7 +94,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
                         continue;
                     }
 
-                    timing_data.estimated_time -= delta_seconds;
+                    movement_data.estimated_time -= delta_seconds;
                 },
                 None => {
                     if !player.moving {
@@ -105,8 +115,9 @@ impl<'a> System<'a> for PlayerMovementSystem {
 
                     let estimated_time = (TILE_SIZE as f32) / velocity;
 
-                    self.timing_data.insert(entity, MovementTimingData {
+                    self.movement_data.insert(entity, MovementData {
                         estimated_time,
+                        starting_map_id: map.get_current_map_id(),
                         final_tile_data,
                     });
                 },

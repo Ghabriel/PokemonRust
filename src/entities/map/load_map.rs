@@ -45,9 +45,18 @@ pub fn initialise_map(world: &mut World) {
 
     map.script_repository.push(GameScript::Native(load_nearby_connections));
 
+    map.script_repository.push(GameScript::Native(|world| {
+        change_current_map(world, "test_map".to_string());
+    }));
+
     map.map_scripts.push(MapScript {
         when: MapScriptKind::OnTileChange,
         script_index: 1,
+    });
+
+    map.map_scripts.push(MapScript {
+        when: MapScriptKind::OnMapEnter,
+        script_index: 2,
     });
 
     world.insert(MapHandler {
@@ -88,7 +97,18 @@ fn load_nearby_connections(world: &mut World) {
                 &connection,
                 &reference_point,
             );
-            let map = load_map(world, &connection.map, Some(reference_point));
+            let mut map = load_map(world, &connection.map, Some(reference_point));
+
+            if connection.map == "test_map2" {
+                map.script_repository.push(GameScript::Native(|world| {
+                    change_current_map(world, "test_map2".to_string());
+                }));
+
+                map.map_scripts.push(MapScript {
+                    when: MapScriptKind::OnMapEnter,
+                    script_index: map.script_repository.len() - 1,
+                });
+            }
 
             (connection.map.clone(), map)
         })
@@ -140,6 +160,13 @@ fn get_new_map_reference_point(
         external_tile_world_coordinates.y - half_tile - (external_tile.y as i32) * tile_size,
         0,
     )
+}
+
+fn change_current_map(world: &mut World, new_map: String) {
+    println!("Changing to map {}", new_map);
+    world
+        .write_resource::<MapHandler>()
+        .current_map = new_map;
 }
 
 pub fn load_map(world: &mut World, map_name: &str, reference_point: Option<Vector3<i32>>) -> Map {

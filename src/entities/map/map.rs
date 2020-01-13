@@ -114,6 +114,10 @@ pub enum MapScriptKind {
      * Triggered when the player steps on a new tile.
      */
     OnTileChange,
+    /**
+     * Triggered when the player enters in this map.
+     */
+    OnMapEnter,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
