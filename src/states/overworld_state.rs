@@ -35,7 +35,7 @@ use crate::{
             SimulatedPlayer,
             StaticPlayer,
         },
-        map::{GameScript, initialise_map, Map, MapEvent, MapHandler, ScriptEvent},
+        map::{GameScript, initialise_map, MapEvent, MapHandler, ScriptEvent},
         resources::initialise_resources,
         text::TextEvent,
     },
@@ -86,12 +86,6 @@ impl OverworldState<'_, '_> {
 impl SimpleState for OverworldState<'_, '_> {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
         println!("Welcome to Pokémon Rust!");
-
-        data.world.register::<Player>();
-        data.world.register::<AnimationSet<PlayerAnimation, SpriteRender>>();
-        data.world.register::<AnimationControlSet<PlayerAnimation, SpriteRender>>();
-        data.world.register::<Map>();
-        data.world.register::<SimulatedPlayer>();
 
         data.world.insert(EventChannel::<MapEvent>::new());
         data.world.insert(EventChannel::<TextEvent>::new());

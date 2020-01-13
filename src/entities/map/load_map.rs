@@ -19,13 +19,15 @@ use std::{
 };
 
 use super::{
-    GameScript,
-    Map,
+    map::{
+        GameScript,
+        Map,
+        MapScript,
+        MapScriptKind,
+        Tile,
+    },
     MapHandler,
-    MapScript,
-    MapScriptKind,
     serializable_map::SerializableMap,
-    Tile,
 };
 
 pub fn initialise_map(world: &mut World) {
@@ -182,8 +184,6 @@ pub fn load_map(world: &mut World, map_name: &str, bottom_left_corner: Option<Ve
     Map {
         map_name,
         bottom_left_corner,
-        num_tiles_x,
-        num_tiles_y,
         terrain_entity,
         solids: solids
             .into_iter()

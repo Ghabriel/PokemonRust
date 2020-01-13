@@ -1,16 +1,7 @@
 use amethyst::{
     assets::{Handle, Loader},
-    core::{math::Vector3, Transform},
     ecs::{World, WorldExt},
     renderer::{ImageFormat, SpriteSheet, SpriteSheetFormat},
-};
-
-use crate::{
-    constants::TILE_SIZE,
-    entities::{
-        map::MapHandler,
-        player::Player,
-    },
 };
 
 use serde::{Deserialize, Serialize};

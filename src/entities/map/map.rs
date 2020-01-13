@@ -18,8 +18,6 @@ use std::{
 pub struct Map {
     pub(super) map_name: String,
     pub(super) bottom_left_corner: Vector3<i32>,
-    pub(super) num_tiles_x: u32,
-    pub(super) num_tiles_y: u32,
     pub(super) terrain_entity: Entity,
     pub(super) solids: HashMap<Vector2<u32>, Tile>,
     pub(super) decoration_entity: Entity,

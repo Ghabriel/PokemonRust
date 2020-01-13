@@ -13,6 +13,8 @@ use crate::{
     entities::player::Player,
 };
 
+use self::map::Map;
+
 use std::collections::HashMap;
 
 pub use self::{
@@ -23,7 +25,6 @@ pub use self::{
         GameAction,
         GameActionKind,
         GameScript,
-        Map,
         MapConnection,
         MapScript,
         MapScriptKind,

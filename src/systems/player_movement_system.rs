@@ -1,5 +1,5 @@
 use amethyst::{
-    core::{math::Vector3, Time, Transform},
+    core::{Time, Transform},
     ecs::{Entities, Entity, Join, Read, ReadExpect, ReadStorage, System, Write, WriteStorage},
     shrev::EventChannel,
 };
