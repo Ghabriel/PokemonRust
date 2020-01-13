@@ -132,11 +132,24 @@ impl MapHandler {
 
         map.connections
             .iter()
-            .filter(move |(tile, _)| {
+            .filter(move |(tile, connection)| {
+                let visible_tiles_x = 22;
+                let visible_tiles_y = 16;
                 let distance_x = (tile.x as i32) - (position.x as i32);
                 let distance_y = (tile.y as i32) - (position.y as i32);
-                let distance = distance_x.abs() + distance_y.abs();
-                distance <= 25
+                let leniency = 12;
+
+                connection
+                    .directions
+                    .iter()
+                    .all(|(direction, _)| match direction {
+                        Direction::Up | Direction::Down => {
+                            distance_y.abs() <= visible_tiles_y / 2 + leniency
+                        },
+                        Direction::Left | Direction::Right => {
+                            distance_x.abs() <= visible_tiles_x / 2 + leniency
+                        },
+                    })
             })
     }
 }
@@ -320,7 +333,7 @@ pub fn initialise_map(world: &mut World) {
                     Direction::Right => Vector2::new(tile_size, 0),
                 };
 
-                let external_tile_world_coordinates = tile_world_coordinates + &external_tile_offset;
+                let external_tile_world_coordinates = tile_world_coordinates + external_tile_offset;
                 let external_left_corner = Vector3::new(
                     external_tile_world_coordinates.x - half_tile - (external_tile.x as i32) * tile_size,
                     external_tile_world_coordinates.y - half_tile - (external_tile.y as i32) * tile_size,
