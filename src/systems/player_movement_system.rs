@@ -6,6 +6,7 @@ use amethyst::{
 
 use crate::{
     common::get_direction_offset,
+    config::GameConfig,
     constants::TILE_SIZE,
     entities::{
         map::{MapHandler, MapId, MapScriptKind, ScriptEvent, TileData},
@@ -37,6 +38,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
         WriteStorage<'a, StaticPlayer>,
         WriteStorage<'a, Transform>,
         Entities<'a>,
+        ReadExpect<'a, GameConfig>,
         ReadExpect<'a, MapHandler>,
         Write<'a, EventChannel<ScriptEvent>>,
         Read<'a, Time>,
@@ -47,6 +49,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
         mut static_players,
         mut transforms,
         entities,
+        config,
         map,
         mut script_event_channel,
         time,
@@ -54,8 +57,8 @@ impl<'a> System<'a> for PlayerMovementSystem {
         for (entity, player, transform) in (&entities, &players, &mut transforms).join() {
             let velocity = match player.action {
                 PlayerAction::Idle => unreachable!(),
-                PlayerAction::Walk => 160.,
-                PlayerAction::Run => 256.,
+                PlayerAction::Walk => config.player_walking_speed,
+                PlayerAction::Run => config.player_running_speed,
             };
 
             let movement_data = self.movement_data.get_mut(&entity);
