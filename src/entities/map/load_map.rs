@@ -74,11 +74,19 @@ fn load_nearby_connections(world: &mut World) {
         let map = world.read_resource::<MapHandler>();
         let player_position = get_player_position(world);
 
-        let nearby_connections: Vec<_> = map
+        let mut nearby_connections: Vec<_> = map
             .get_nearby_connections(&player_position)
             .filter(|(_, connection)| !map.loaded_maps.contains_key(&connection.map))
             .map(|(tile, connection)| (tile.clone(), connection.clone()))
             .collect();
+
+        nearby_connections.sort_by(|(_, lhs_connection), (_, rhs_connection)| {
+            lhs_connection.map.cmp(&rhs_connection.map)
+        });
+
+        nearby_connections.dedup_by(|(_, lhs_connection), (_, rhs_connection)| {
+            lhs_connection.map == rhs_connection.map
+        });
 
         let reference_point = map
             .loaded_maps[&map.current_map]
