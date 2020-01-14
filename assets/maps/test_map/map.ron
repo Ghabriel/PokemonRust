@@ -21,10 +21,64 @@
     },
     map_scripts: [],
     connections: {
+        [20, 48]: (
+            map: "test_map2",
+            directions: {
+                Up: [20, 0],
+            },
+        ),
+        [21, 48]: (
+            map: "test_map2",
+            directions: {
+                Up: [21, 0],
+            },
+        ),
         [22, 48]: (
             map: "test_map2",
             directions: {
                 Up: [22, 0],
+            },
+        ),
+        [23, 48]: (
+            map: "test_map2",
+            directions: {
+                Up: [23, 0],
+            },
+        ),
+        [24, 48]: (
+            map: "test_map2",
+            directions: {
+                Up: [24, 0],
+            },
+        ),
+        [25, 48]: (
+            map: "test_map2",
+            directions: {
+                Up: [25, 0],
+            },
+        ),
+        [26, 48]: (
+            map: "test_map2",
+            directions: {
+                Up: [26, 0],
+            },
+        ),
+        [27, 48]: (
+            map: "test_map2",
+            directions: {
+                Up: [27, 0],
+            },
+        ),
+        [28, 48]: (
+            map: "test_map2",
+            directions: {
+                Up: [28, 0],
+            },
+        ),
+        [29, 48]: (
+            map: "test_map2",
+            directions: {
+                Up: [29, 0],
             },
         ),
     },
