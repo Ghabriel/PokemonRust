@@ -1,4 +1,5 @@
 use amethyst::{
+    assets::ProgressCounter,
     core::{math::{Vector2, Vector3}, Transform},
     ecs::{Entity, Join, world::Builder, World, WorldExt},
     renderer::SpriteRender,
@@ -31,8 +32,8 @@ use super::{
     serializable_map::SerializableMap,
 };
 
-pub fn initialise_map(world: &mut World) {
-    let mut map = load_map(world, "test_map", None);
+pub fn initialise_map(world: &mut World, progress_counter: &mut ProgressCounter) {
+    let mut map = load_map(world, "test_map", None, progress_counter);
 
     map.script_repository.push(GameScript::Native(|world| {
         use amethyst::shrev::EventChannel;
@@ -105,7 +106,9 @@ fn load_nearby_connections(world: &mut World) {
                 &connection,
                 &reference_point,
             );
-            let mut map = load_map(world, &connection.map, Some(reference_point));
+            // TODO: use the Progress trait to avoid needing to construct a ProgressCounter
+            let mut progress_counter = ProgressCounter::new();
+            let mut map = load_map(world, &connection.map, Some(reference_point), &mut progress_counter);
 
             if connection.map == "test_map2" {
                 map.script_repository.push(GameScript::Native(|world| {
@@ -172,7 +175,12 @@ fn change_current_map(world: &mut World, new_map: String) {
         .current_map = new_map;
 }
 
-pub fn load_map(world: &mut World, map_name: &str, reference_point: Option<Vector3<i32>>) -> Map {
+pub fn load_map(
+    world: &mut World,
+    map_name: &str,
+    reference_point: Option<Vector3<i32>>,
+    progress_counter: &mut ProgressCounter,
+) -> Map {
     let map_data: SerializableMap = {
         let map_file = application_root_dir()
             .unwrap()
@@ -215,6 +223,7 @@ pub fn load_map(world: &mut World, map_name: &str, reference_point: Option<Vecto
         &base_file_name,
         &spritesheet_file_name,
         &map_center,
+        progress_counter,
     );
     let decoration_entity = initialise_map_layer(
         world,
@@ -222,6 +231,7 @@ pub fn load_map(world: &mut World, map_name: &str, reference_point: Option<Vecto
         &layer3_file_name,
         &spritesheet_file_name,
         &map_center,
+        progress_counter,
     );
 
     Map {
@@ -246,9 +256,10 @@ fn initialise_map_layer(
     image_name: &str,
     ron_name: &str,
     position: &Vector3<i32>,
+    progress_counter: &mut ProgressCounter,
 ) -> Entity {
     let sprite_render = SpriteRender {
-        sprite_sheet: load_sprite_sheet(world, &image_name, &ron_name),
+        sprite_sheet: load_sprite_sheet(world, &image_name, &ron_name, progress_counter),
         sprite_number: 0,
     };
 

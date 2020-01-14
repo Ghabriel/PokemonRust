@@ -21,7 +21,7 @@ use amethyst::{
 
 use crate::{
     config::GameConfig,
-    states::OverworldState,
+    states::LoadingState,
 };
 
 fn main() -> amethyst::Result<()> {
@@ -54,7 +54,7 @@ fn main() -> amethyst::Result<()> {
         .with_bundle(AudioBundle::default())?;
 
     let assets_path = app_root.join("assets");
-    Application::build(assets_path, OverworldState::default())?
+    Application::build(assets_path, LoadingState::default())?
         .with_resource(game_config)
         .build(game_data)?
         .run();
