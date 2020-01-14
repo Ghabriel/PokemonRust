@@ -8,7 +8,7 @@ use amethyst::{
 };
 
 use crate::{
-    common::Direction,
+    common::{Direction, get_direction_offset},
     constants::TILE_SIZE,
     entities::player::Player,
 };
@@ -40,13 +40,6 @@ pub struct MapHandler {
 
 impl MapHandler {
     pub fn get_forward_tile(&self, player: &Player, player_position: &Transform) -> TileData {
-        let (offset_x, offset_y) = match player.facing_direction {
-            Direction::Up => (0., 1.),
-            Direction::Down => (0., -1.),
-            Direction::Left => (-1., 0.),
-            Direction::Right => (1., 0.),
-        };
-
         let current_map = &self.loaded_maps[&self.current_map];
         let current_tile = current_map.world_to_tile_coordinates(&player_position.translation());
         let connection = current_map.connections.get(&current_tile);
@@ -60,6 +53,7 @@ impl MapHandler {
             self.current_map.clone()
         };
 
+        let (offset_x, offset_y) = get_direction_offset::<f32>(&player.facing_direction);
         let tile_size = TILE_SIZE as f32;
         let position = player_position.translation() + Vector3::new(
             offset_x * tile_size,

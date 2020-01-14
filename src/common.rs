@@ -20,3 +20,17 @@ pub fn load_sprite_sheet(world: &World, image_name: &str, ron_name: &str) -> Han
 
     loader.load(ron_name, SpriteSheetFormat(texture_handle), (), &world.read_resource())
 }
+
+pub fn get_direction_offset<T>(direction: &Direction) -> (T, T)
+where
+    T: From<i8>
+{
+    let (x, y) = match direction {
+        Direction::Up => (0, 1),
+        Direction::Down => (0, -1),
+        Direction::Left => (-1, 0),
+        Direction::Right => (1, 0),
+    };
+
+    (x.into(), y.into())
+}

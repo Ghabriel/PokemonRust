@@ -5,7 +5,7 @@ use amethyst::{
 };
 
 use crate::{
-    common::Direction,
+    common::get_direction_offset,
     constants::TILE_SIZE,
     entities::{
         map::{MapHandler, MapId, MapScriptKind, ScriptEvent, TileData},
@@ -56,13 +56,6 @@ impl<'a> System<'a> for PlayerMovementSystem {
                 PlayerAction::Idle => unreachable!(),
                 PlayerAction::Walk => 160.,
                 PlayerAction::Run => 256.,
-            };
-
-            let (offset_x, offset_y) = match player.facing_direction {
-                Direction::Up => (0., 1.),
-                Direction::Down => (0., -1.),
-                Direction::Left => (-1., 0.),
-                Direction::Right => (1., 0.),
             };
 
             let movement_data = self.movement_data.get_mut(&entity);
@@ -124,6 +117,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
             }
 
             static_players.remove(entity);
+            let (offset_x, offset_y) = get_direction_offset::<f32>(&player.facing_direction);
             transform.prepend_translation_x(offset_x * velocity * time.delta_seconds());
             transform.prepend_translation_y(offset_y * velocity * time.delta_seconds());
         }

@@ -6,7 +6,7 @@ use amethyst::{
 };
 
 use crate::{
-    common::{Direction, load_sprite_sheet},
+    common::{get_direction_offset, load_sprite_sheet},
     constants::{HALF_TILE_SIZE, MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
     entities::player::Player,
 };
@@ -154,13 +154,8 @@ fn get_new_map_reference_point(
     // TODO: handle multi-connections (non-rectangular maps)
     let (first_direction, external_tile) = connection.directions.iter().next().unwrap();
 
-    let external_tile_offset = match first_direction {
-        Direction::Up => Vector2::new(0, tile_size),
-        Direction::Down => Vector2::new(0, -tile_size),
-        Direction::Left => Vector2::new(-tile_size, 0),
-        Direction::Right => Vector2::new(tile_size, 0),
-    };
-
+    let (offset_x, offset_y) = get_direction_offset::<i32>(&first_direction);
+    let external_tile_offset = tile_size * Vector2::new(offset_x, offset_y);
     let external_tile_world_coordinates = tile_world_coordinates + external_tile_offset;
 
     Vector3::new(
