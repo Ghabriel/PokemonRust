@@ -16,7 +16,7 @@ use amethyst::{
 };
 
 use crate::{
-    common::Direction,
+    common::{Direction, run_script_events},
     entities::{
         player::{
             PlayerAction,
@@ -25,7 +25,7 @@ use crate::{
             SimulatedPlayer,
             StaticPlayer,
         },
-        map::{GameScript, MapEvent, MapHandler, ScriptEvent},
+        map::{MapEvent, ScriptEvent},
     },
     systems::{
         MapInteractionSystem,
@@ -107,24 +107,7 @@ impl SimpleState for OverworldState<'_, '_> {
             dispatcher.dispatch(world);
         }
 
-        let mut script_event_reader = self.script_event_reader.as_mut().unwrap();
-        let events = world
-            .read_resource::<EventChannel<ScriptEvent>>()
-            .read(&mut script_event_reader)
-            .into_iter()
-            .map(Clone::clone)
-            .collect::<Vec<ScriptEvent>>();
-
-        for script_event in events {
-            let game_script = world
-                .read_resource::<MapHandler>()
-                .get_script_from_event(&script_event)
-                .clone();
-
-            if let GameScript::Native(script) = game_script {
-                script(world);
-            }
-        }
+        run_script_events(world, self.script_event_reader.as_mut().unwrap());
 
         // println!("FPS: {}", world.read_resource::<FpsCounter>().sampled_fps());
 
