@@ -6,9 +6,7 @@ use amethyst::{
         DispatcherBuilder,
         Entity,
         ReaderId,
-        World,
     },
-    input::{InputEvent, InputHandler, StringBindings},
     prelude::*,
     renderer::SpriteRender,
     shrev::EventChannel,
@@ -16,20 +14,15 @@ use amethyst::{
 };
 
 use crate::{
-    common::{Direction, run_script_events},
+    common::run_script_events,
     entities::{
-        player::{
-            PlayerAction,
-            PlayerAnimation,
-            Player,
-            SimulatedPlayer,
-            StaticPlayer,
-        },
-        map::{MapEvent, ScriptEvent},
+        player::{PlayerAnimation, Player},
+        map::ScriptEvent,
     },
     systems::{
         MapInteractionSystem,
         PlayerAnimationSystem,
+        PlayerInputSystem,
         PlayerMovementSystem,
         StaticPlayerSystem,
         TextSystem,
@@ -52,18 +45,6 @@ impl<'a, 'b> OverworldState<'a, 'b> {
             script_event_reader: None,
         }
     }
-
-    fn mutate_player<F>(&self, world: &mut World, callback: F)
-    where
-        F: Fn(&mut Player) -> ()
-    {
-        let mut players = world.write_storage::<SimulatedPlayer>();
-        let player = players
-            .get_mut(self.player_entity)
-            .expect("Failed to retrieve Player");
-
-        callback(&mut player.0);
-    }
 }
 
 impl SimpleState for OverworldState<'_, '_> {
@@ -83,6 +64,7 @@ impl SimpleState for OverworldState<'_, '_> {
                 let mut player_storage = world.write_storage::<Player>();
                 PlayerAnimationSystem::new(&mut player_storage)
             }, "player_animation_system", &[])
+            .with(PlayerInputSystem::new(world, self.player_entity), "player_input_system", &[])
             .with(PlayerMovementSystem::default(), "player_movement_system", &[])
             .with(StaticPlayerSystem, "static_player_system", &["player_movement_system"])
             .with(TextSystem::new(world), "text_system", &[])
@@ -110,79 +92,6 @@ impl SimpleState for OverworldState<'_, '_> {
         run_script_events(world, self.script_event_reader.as_mut().unwrap());
 
         // println!("FPS: {}", world.read_resource::<FpsCounter>().sampled_fps());
-
-        Trans::None
-    }
-
-    fn handle_event(&mut self, data: StateData<'_, GameData<'_, '_>>, event: StateEvent) -> SimpleTrans {
-        let world = data.world;
-
-        if let StateEvent::Input(event) = event {
-            match event {
-                InputEvent::ActionPressed(action) if action == "action" => {
-                    let is_player_static = world
-                        .read_storage::<StaticPlayer>()
-                        .contains(self.player_entity);
-
-                    if is_player_static {
-                        world
-                            .write_resource::<EventChannel<MapEvent>>()
-                            .single_write(MapEvent::Interaction);
-                    }
-                },
-                InputEvent::ActionPressed(action) if action == "cancel" => {
-                    self.mutate_player(world, |player| player.action = PlayerAction::Run);
-                },
-                InputEvent::ActionReleased(action) if action == "cancel" => {
-                    self.mutate_player(world, |player| player.action = PlayerAction::Walk);
-                },
-                InputEvent::AxisMoved { axis, value } if axis == "vertical" && value < -0.2 => {
-                    self.mutate_player(world, |player| {
-                        player.facing_direction = Direction::Down;
-                        player.moving = true;
-                    });
-                },
-                InputEvent::AxisMoved { axis, value } if axis == "vertical" && value > 0.2 => {
-                    self.mutate_player(world, |player| {
-                        player.facing_direction = Direction::Up;
-                        player.moving = true;
-                    });
-                },
-                InputEvent::AxisMoved { axis, value: _ } if axis == "vertical" => {
-                    let horizontal_value = world
-                        .read_resource::<InputHandler<StringBindings>>()
-                        .axis_value("horizontal")
-                        .unwrap_or(0.);
-
-                    if horizontal_value > -0.2 && horizontal_value < 0.2 {
-                        self.mutate_player(world, |player| player.moving = false);
-                    }
-                },
-                InputEvent::AxisMoved { axis, value } if axis == "horizontal" && value < -0.2 => {
-                    self.mutate_player(world, |player| {
-                        player.facing_direction = Direction::Left;
-                        player.moving = true;
-                    });
-                },
-                InputEvent::AxisMoved { axis, value } if axis == "horizontal" && value > 0.2 => {
-                    self.mutate_player(world, |player| {
-                        player.facing_direction = Direction::Right;
-                        player.moving = true;
-                    });
-                },
-                InputEvent::AxisMoved { axis, value: _ } if axis == "horizontal" => {
-                    let vertical_value = world
-                        .read_resource::<InputHandler<StringBindings>>()
-                        .axis_value("vertical")
-                        .unwrap_or(0.);
-
-                    if vertical_value > -0.2 && vertical_value < 0.2 {
-                        self.mutate_player(world, |player| player.moving = false);
-                    }
-                },
-                _ => {},
-            }
-        }
 
         Trans::None
     }
