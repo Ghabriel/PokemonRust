@@ -9,6 +9,8 @@ use amethyst::{
         storage::ComponentEvent,
         System,
         WriteStorage,
+        World,
+        WorldExt,
     },
     renderer::SpriteRender,
 };
@@ -23,9 +25,9 @@ pub struct PlayerAnimationSystem {
 }
 
 impl PlayerAnimationSystem {
-    pub fn new(storage: &mut WriteStorage<Player>) -> Self {
+    pub fn new(world: &mut World) -> Self {
         PlayerAnimationSystem {
-            player_events_id: storage.register_reader(),
+            player_events_id: world.write_storage::<Player>().register_reader(),
         }
     }
 }

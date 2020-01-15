@@ -1,6 +1,6 @@
 use amethyst::{
     animation::AnimationBundle,
-    core::{ArcThreadPool, bundle::SystemBundle},
+    core::ArcThreadPool,
     ecs::{
         Dispatcher,
         DispatcherBuilder,
@@ -14,9 +14,9 @@ use amethyst::{
 };
 
 use crate::{
-    common::run_script_events,
+    common::{run_script_events, WithBundle},
     entities::{
-        player::{PlayerAnimation, Player},
+        player::PlayerAnimation,
         map::ScriptEvent,
     },
     systems::{
@@ -58,26 +58,21 @@ impl SimpleState for OverworldState<'_, '_> {
                 .register_reader()
         );
 
-        let mut dispatcher_builder = DispatcherBuilder::new()
+        let mut dispatcher = DispatcherBuilder::new()
             .with(MapInteractionSystem::new(world), "map_interaction_system", &[])
-            .with({
-                let mut player_storage = world.write_storage::<Player>();
-                PlayerAnimationSystem::new(&mut player_storage)
-            }, "player_animation_system", &[])
+            .with(PlayerAnimationSystem::new(world), "player_animation_system", &[])
             .with(PlayerInputSystem::new(world, self.player_entity), "player_input_system", &[])
             .with(PlayerMovementSystem::default(), "player_movement_system", &["player_input_system"])
             .with(StaticPlayerSystem, "static_player_system", &["player_movement_system"])
             .with(TextSystem::new(world), "text_system", &[])
             .with(FpsCounterSystem, "fps_counter_system", &[])
-            .with_pool(world.read_resource::<ArcThreadPool>().deref().clone());
+            .with_bundle(world, AnimationBundle::<PlayerAnimation, SpriteRender>::new(
+                "sprite_animation_control",
+                "sprite_sampler_interpolation",
+            )).expect("Failed to build AnimationBundle")
+            .with_pool(world.read_resource::<ArcThreadPool>().deref().clone())
+            .build();
 
-        AnimationBundle::<PlayerAnimation, SpriteRender>::new(
-            "sprite_animation_control",
-            "sprite_sampler_interpolation",
-        ).build(world, &mut dispatcher_builder)
-            .expect("Failed to build AnimationBundle");
-
-        let mut dispatcher = dispatcher_builder.build();
         dispatcher.setup(world);
         self.dispatcher = Some(dispatcher);
     }
