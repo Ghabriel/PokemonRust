@@ -65,7 +65,7 @@ impl SimpleState for OverworldState<'_, '_> {
                 PlayerAnimationSystem::new(&mut player_storage)
             }, "player_animation_system", &[])
             .with(PlayerInputSystem::new(world, self.player_entity), "player_input_system", &[])
-            .with(PlayerMovementSystem::default(), "player_movement_system", &[])
+            .with(PlayerMovementSystem::default(), "player_movement_system", &["player_input_system"])
             .with(StaticPlayerSystem, "static_player_system", &["player_movement_system"])
             .with(TextSystem::new(world), "text_system", &[])
             .with(FpsCounterSystem, "fps_counter_system", &[])
