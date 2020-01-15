@@ -1,12 +1,7 @@
 use amethyst::{
     animation::AnimationBundle,
     core::ArcThreadPool,
-    ecs::{
-        Dispatcher,
-        DispatcherBuilder,
-        Entity,
-        ReaderId,
-    },
+    ecs::{Dispatcher, DispatcherBuilder, ReaderId},
     prelude::*,
     renderer::SpriteRender,
     shrev::EventChannel,
@@ -16,35 +11,26 @@ use amethyst::{
 use crate::{
     common::{run_script_events, WithBundle},
     entities::{
+        event_queue::{EventQueue, GameEvent},
         player::PlayerAnimation,
         map::ScriptEvent,
     },
+    states::OverworldTextState,
     systems::{
         MapInteractionSystem,
         PlayerAnimationSystem,
         PlayerInputSystem,
         PlayerMovementSystem,
         StaticPlayerSystem,
-        TextSystem,
     },
 };
 
 use std::ops::Deref;
 
+#[derive(Default)]
 pub struct OverworldState<'a, 'b> {
     pub dispatcher: Option<Dispatcher<'a, 'b>>,
-    pub player_entity: Entity,
     pub script_event_reader: Option<ReaderId<ScriptEvent>>,
-}
-
-impl<'a, 'b> OverworldState<'a, 'b> {
-    pub fn new(player_entity: Entity) -> OverworldState<'a, 'b> {
-        OverworldState {
-            dispatcher: None,
-            player_entity,
-            script_event_reader: None,
-        }
-    }
 }
 
 impl SimpleState for OverworldState<'_, '_> {
@@ -60,11 +46,10 @@ impl SimpleState for OverworldState<'_, '_> {
 
         let mut dispatcher = DispatcherBuilder::new()
             .with(MapInteractionSystem::new(world), "map_interaction_system", &[])
-            .with(PlayerAnimationSystem::new(world), "player_animation_system", &[])
-            .with(PlayerInputSystem::new(world, self.player_entity), "player_input_system", &[])
+            .with(PlayerInputSystem::new(world), "player_input_system", &[])
             .with(PlayerMovementSystem::default(), "player_movement_system", &["player_input_system"])
             .with(StaticPlayerSystem, "static_player_system", &["player_movement_system"])
-            .with(TextSystem::new(world), "text_system", &[])
+            .with(PlayerAnimationSystem::new(world), "player_animation_system", &["static_player_system"])
             .with(FpsCounterSystem, "fps_counter_system", &[])
             .with_bundle(world, AnimationBundle::<PlayerAnimation, SpriteRender>::new(
                 "sprite_animation_control",
@@ -88,6 +73,14 @@ impl SimpleState for OverworldState<'_, '_> {
 
         // println!("FPS: {}", world.read_resource::<FpsCounter>().sampled_fps());
 
-        Trans::None
+        let event_queue = world.read_resource::<EventQueue>();
+
+        if let Some(event) = event_queue.front() {
+            match event {
+                GameEvent::TextEvent(_) => Trans::Switch(Box::new(OverworldTextState::default())),
+            }
+        } else {
+            Trans::None
+        }
     }
 }

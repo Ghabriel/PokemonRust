@@ -9,7 +9,10 @@ use amethyst::{
 use crate::{
     common::{get_direction_offset, load_sprite_sheet},
     constants::{HALF_TILE_SIZE, MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
-    entities::player::Player,
+    entities::{
+        event_queue::{EventQueue, GameEvent},
+        player::Player,
+    },
 };
 
 use ron::de::from_reader;
@@ -36,12 +39,14 @@ pub fn initialise_map(world: &mut World, progress_counter: &mut ProgressCounter)
     let mut map = load_map(world, "test_map", None, progress_counter);
 
     map.script_repository.push(GameScript::Native(|world| {
-        use amethyst::shrev::EventChannel;
-        use crate::entities::text::TextEvent;
-
         world
-            .write_resource::<EventChannel<TextEvent>>()
-            .single_write(TextEvent::new("Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."));
+            .write_resource::<EventQueue>()
+            .push(
+                GameEvent::TextEvent(
+                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                    .to_string()
+                )
+            );
     }));
 
     map.script_repository.push(GameScript::Native(load_nearby_connections));

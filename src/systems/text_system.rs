@@ -9,6 +9,7 @@ use amethyst::{
         System,
         World,
         WorldExt,
+        Write,
         WriteStorage,
     },
     input::{InputEvent, StringBindings},
@@ -27,6 +28,12 @@ use crate::{
 use std::collections::VecDeque;
 
 pub const TEXT_DELAY: f32 = 0.005;
+
+/// Resource that stores whether or not all event processing in this system has ended.
+#[derive(Default)]
+pub struct EventStatus {
+    pub ended: bool,
+}
 
 pub struct TextBox {
     full_text: String,
@@ -93,9 +100,9 @@ impl TextSystem {
                     text_box.cooldown += time.delta_seconds();
                     while text_box.cooldown >= TEXT_DELAY {
                         text_box.cooldown -= TEXT_DELAY;
-    
+
                         let displayed_length = text_box.displayed_text_end - text_box.displayed_text_start;
-    
+
                         if text_box.displayed_text_end == full_text_length || displayed_length == maximum_display_length {
                             text_box.awaiting_keypress = true;
                         } else {
@@ -105,7 +112,7 @@ impl TextSystem {
                 }
                 _ => {},
             }
-            
+
             ui_texts
                 .get_mut(text_box.text_entity)
                 .expect("Failed to retrieve UiText")
@@ -137,6 +144,7 @@ impl<'a> System<'a> for TextSystem {
         Read<'a, Time>,
         Read<'a, EventChannel<TextEvent>>,
         Read<'a, EventChannel<InputEvent<StringBindings>>>,
+        Write<'a, EventStatus>,
     );
 
     fn run(&mut self, (
@@ -148,9 +156,11 @@ impl<'a> System<'a> for TextSystem {
         time,
         text_event_channel,
         input_event_channel,
+        mut event_status,
     ): Self::SystemData) {
         for event in text_event_channel.read(&mut self.text_event_reader) {
             self.text_queue.push_front(event.clone());
+            event_status.ended = false;
         }
 
         let mut pressed_action_key = false;
@@ -193,13 +203,16 @@ impl<'a> System<'a> for TextSystem {
 
         if state == TextState::Closed {
             self.close_text_box(&entities);
+
+            if self.text_queue.is_empty() {
+                event_status.ended = true;
+            }
         }
     }
 }
 
 fn initialise_box_entity(
     entities: &Entities,
-    // sprite_renders: &mut WriteStorage<SpriteRender>,
     ui_images: &mut WriteStorage<UiImage>,
     ui_transforms: &mut WriteStorage<UiTransform>,
     resources: &Resources,

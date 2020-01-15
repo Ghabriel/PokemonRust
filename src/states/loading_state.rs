@@ -24,7 +24,8 @@ use amethyst::{
 
 use crate::{
     entities::{
-        player::{initialise_player, PlayerAnimation},
+        event_queue::EventQueue,
+        player::{initialise_player, PlayerAnimation, PlayerEntity},
         map::{initialise_map, MapEvent, ScriptEvent},
         resources::initialise_resources,
         text::TextEvent,
@@ -49,7 +50,6 @@ pub fn initialise_camera(world: &mut World, player: Entity) {
 #[derive(Default)]
 pub struct LoadingState<'a, 'b> {
     pub dispatcher: Option<Dispatcher<'a, 'b>>,
-    pub player_entity: Option<Entity>,
     pub progress_counter: Option<ProgressCounter>,
     pub cached_num_loaded_assets: usize,
 }
@@ -78,14 +78,16 @@ impl SimpleState for LoadingState<'_, '_> {
         world.insert(EventChannel::<MapEvent>::new());
         world.insert(EventChannel::<ScriptEvent>::new());
         world.insert(EventChannel::<TextEvent>::new());
+        world.insert(EventQueue::default());
 
         let mut progress_counter = ProgressCounter::new();
         initialise_resources(world, &mut progress_counter);
         let player = initialise_player(world, &mut progress_counter);
         initialise_map(world, &mut progress_counter);
         initialise_camera(world, player);
-        self.player_entity = Some(player);
         self.progress_counter = Some(progress_counter);
+
+        world.insert(PlayerEntity(player));
 
         {
             let entities = world.read_resource::<EntitiesRes>();
@@ -141,7 +143,7 @@ impl SimpleState for LoadingState<'_, '_> {
 
         match &self.progress_counter {
             Some(progress_counter) if progress_counter.is_complete() => {
-                Trans::Switch(Box::new(OverworldState::new(self.player_entity.unwrap())))
+                Trans::Switch(Box::new(OverworldState::default()))
             },
             _ => Trans::None,
         }

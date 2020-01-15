@@ -18,7 +18,7 @@ use crate::{
     common::Direction,
     entities::{
         map::MapEvent,
-        player::{PlayerAction, SimulatedPlayer, StaticPlayer},
+        player::{PlayerAction, PlayerEntity, SimulatedPlayer, StaticPlayer},
     },
 };
 
@@ -28,11 +28,11 @@ pub struct PlayerInputSystem {
 }
 
 impl PlayerInputSystem {
-    pub fn new(world: &mut World, player_entity: Entity) -> PlayerInputSystem {
+    pub fn new(world: &mut World) -> PlayerInputSystem {
         PlayerInputSystem {
             event_reader: world.write_resource::<EventChannel<InputEvent<StringBindings>>>()
                 .register_reader(),
-            player_entity,
+            player_entity: world.read_resource::<PlayerEntity>().0,
         }
     }
 }

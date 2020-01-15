@@ -41,6 +41,8 @@ impl Component for StaticPlayer {
     type Storage = NullStorage<Self>;
 }
 
+pub struct PlayerEntity(pub Entity);
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Player {
     pub action: PlayerAction,
