@@ -1,18 +1,15 @@
 use amethyst::{
-    animation::AnimationBundle,
     core::ArcThreadPool,
     ecs::{Dispatcher, DispatcherBuilder, ReaderId},
     prelude::*,
-    renderer::SpriteRender,
     shrev::EventChannel,
     utils::fps_counter::{FpsCounter, FpsCounterSystem},
 };
 
 use crate::{
-    common::{run_script_events, WithBundle},
+    common::run_script_events,
     entities::{
         event_queue::{EventQueue, GameEvent},
-        player::PlayerAnimation,
         map::ScriptEvent,
     },
     states::OverworldTextState,
@@ -51,10 +48,6 @@ impl SimpleState for OverworldState<'_, '_> {
             .with(StaticPlayerSystem, "static_player_system", &["player_movement_system"])
             .with(PlayerAnimationSystem::new(world), "player_animation_system", &["static_player_system"])
             .with(FpsCounterSystem, "fps_counter_system", &[])
-            .with_bundle(world, AnimationBundle::<PlayerAnimation, SpriteRender>::new(
-                "sprite_animation_control",
-                "sprite_sampler_interpolation",
-            )).expect("Failed to build AnimationBundle")
             .with_pool(world.read_resource::<ArcThreadPool>().deref().clone())
             .build();
 

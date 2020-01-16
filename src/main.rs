@@ -6,6 +6,7 @@ mod states;
 mod systems;
 
 use amethyst::{
+    animation::AnimationBundle,
     audio::AudioBundle,
     core::transform::TransformBundle,
     input::{InputBundle, StringBindings},
@@ -14,6 +15,7 @@ use amethyst::{
         plugins::{RenderFlat2D, RenderToWindow},
         types::DefaultBackend,
         RenderingBundle,
+        SpriteRender,
     },
     ui::{RenderUi, UiBundle},
     utils::application_root_dir,
@@ -21,6 +23,7 @@ use amethyst::{
 
 use crate::{
     config::GameConfig,
+    entities::player::PlayerAnimation,
     states::LoadingState,
 };
 
@@ -51,7 +54,11 @@ fn main() -> amethyst::Result<()> {
                 .with_bindings_from_file(keybindings_config_path)?
         )?
         .with_bundle(UiBundle::<StringBindings>::new())?
-        .with_bundle(AudioBundle::default())?;
+        .with_bundle(AudioBundle::default())?
+        .with_bundle(AnimationBundle::<PlayerAnimation, SpriteRender>::new(
+            "sprite_animation_control",
+            "sprite_sampler_interpolation",
+        ))?;
 
     let assets_path = app_root.join("assets");
     Application::build(assets_path, LoadingState::default())?
