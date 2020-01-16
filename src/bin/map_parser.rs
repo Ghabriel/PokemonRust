@@ -25,7 +25,8 @@ fn get_solid_list<'a>(map: &'a TiledMap) -> impl Iterator<Item = (usize, usize)>
         .iter()
         .enumerate()
         .filter(|(_, tile)| **tile != 0)
-        .map(move |(index, _)| (index / map.width, index % map.width))
+        .map(move |(index, _)| (index % map.width, index / map.width))
+        .map(move |(x, y)| (x, map.height - 1 - y))
 }
 
 fn main() {
