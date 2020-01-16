@@ -2,7 +2,7 @@ use serde::Deserialize;
 
 use serde_json::from_reader;
 
-use std::{env, fs::File, process};
+use std::{env, fs::File, io::Write, process};
 
 #[derive(Debug, Deserialize)]
 struct TiledMap {
@@ -33,11 +33,13 @@ fn main() {
 
     match args.next() {
         Some(map_file) => {
-            let file = File::open(map_file).expect("Failed opening map file");
-            let map: TiledMap = from_reader(file).expect("Failed deserializing map");
+            let map: TiledMap = {
+                let file = File::open(map_file).expect("Failed to open map file");
+                from_reader(file).expect("Failed to deserialize map")
+            };
 
-            println!(
-                "\tnum_tiles_x: {},\n\tnum_tiles_y: {},\n\tsolids: [\n{}\t],",
+            let output = format!(
+                "(\n\tnum_tiles_x: {},\n\tnum_tiles_y: {},\n\tsolids: [\n{}\t],\n)\n",
                 map.width,
                 map.height,
                 get_solid_list(&map)
@@ -45,6 +47,15 @@ fn main() {
                     .collect::<Vec<String>>()
                     .join("")
             );
+
+            let output_file_name = "out.txt";
+
+            File::create(output_file_name)
+                .expect("Failed to open output file")
+                .write(output.as_bytes())
+                .expect("Failed to write to output file");
+
+            println!("Saved output to {}.", output_file_name);
         },
         None => {
             println!("Usage: map_parser tiled_map.json");
