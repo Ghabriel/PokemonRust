@@ -9,7 +9,15 @@ use crate::{
     config::GameConfig,
     constants::TILE_SIZE,
     entities::{
-        map::{MapHandler, MapId, MapScriptKind, ScriptEvent, TileData},
+        map::{
+            GameActionKind,
+            MapHandler,
+            MapId,
+            MapScriptKind,
+            ScriptEvent,
+            TileData,
+            ValidatedGameAction,
+        },
         player::{Player, PlayerAction, StaticPlayer},
     },
 };
@@ -81,6 +89,15 @@ impl<'a> System<'a> for PlayerMovementSystem {
                             .for_each(|event| {
                                 script_event_channel.single_write(event);
                             });
+
+                        match map.get_action_at(&movement_data.final_tile_data) {
+                            Some(
+                                ValidatedGameAction { when, script_event }
+                            ) if when == GameActionKind::OnStep => {
+                                script_event_channel.single_write(script_event);
+                            },
+                            _ => {},
+                        }
 
                         self.movement_data.remove(&entity);
                         static_players
