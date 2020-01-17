@@ -88,10 +88,12 @@ impl SimpleState for OverworldState<'_, '_> {
             }
         }
 
-        let should_disable_input = self.event_executor.borrow_mut().start_new_events(world);
+        if self.event_executor.borrow().has_new_events() {
+            let should_disable_input = self.event_executor.borrow_mut().start_new_events(world);
 
-        if should_disable_input.0 {
-            return Trans::Switch(Box::new(OverworldAnimationState::new(self.event_executor.clone())));
+            if should_disable_input.0 {
+                return Trans::Switch(Box::new(OverworldAnimationState::new(self.event_executor.clone())));
+            }
         }
 
         self.event_executor.borrow_mut().tick(world, false);

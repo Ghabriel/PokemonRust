@@ -13,6 +13,10 @@ impl EventExecutor {
         self.incoming_events.push(event);
     }
 
+    pub fn has_new_events(&self) -> bool {
+        !self.incoming_events.is_empty()
+    }
+
     pub fn start_new_events(&mut self, world: &mut World) -> ShouldDisableInput {
         let mut should_disable_input = false;
 
@@ -27,5 +31,9 @@ impl EventExecutor {
 
     pub fn tick(&mut self, world: &mut World, disabled_inputs: bool) {
         self.root.tick(world, disabled_inputs);
+    }
+
+    pub fn is_complete(&self) -> bool {
+        self.root.is_complete()
     }
 }

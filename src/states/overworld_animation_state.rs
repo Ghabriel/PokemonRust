@@ -35,7 +35,7 @@ impl<'a, 'b> OverworldAnimationState<'a, 'b> {
 
 impl SimpleState for OverworldAnimationState<'_, '_> {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
-        println!("Entering Text State");
+        println!("Entering Animation State");
 
         let world = data.world;
 
@@ -62,9 +62,15 @@ impl SimpleState for OverworldAnimationState<'_, '_> {
             }
         }
 
-        let should_disable_input = self.event_executor.borrow_mut().start_new_events(world);
+        if self.event_executor.borrow().has_new_events() {
+            let should_disable_input = self.event_executor.borrow_mut().start_new_events(world);
 
-        if !should_disable_input.0 {
+            if !should_disable_input.0 {
+                return Trans::Switch(Box::new(OverworldState::new(self.event_executor.clone())));
+            }
+        }
+
+        if self.event_executor.borrow().is_complete() {
             return Trans::Switch(Box::new(OverworldState::new(self.event_executor.clone())));
         }
 

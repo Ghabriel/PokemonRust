@@ -27,7 +27,6 @@ use crate::{
         player::{initialise_player, PlayerAnimation, PlayerEntity},
         map::{initialise_map, MapEvent, ScriptEvent},
         resources::initialise_resources,
-        text::TextEvent,
     },
     events::EventQueue,
     states::OverworldState,
@@ -77,7 +76,6 @@ impl SimpleState for LoadingState<'_, '_> {
 
         world.insert(EventChannel::<MapEvent>::new());
         world.insert(EventChannel::<ScriptEvent>::new());
-        world.insert(EventChannel::<TextEvent>::new());
         world.insert(EventQueue::default());
 
         let mut progress_counter = ProgressCounter::new();

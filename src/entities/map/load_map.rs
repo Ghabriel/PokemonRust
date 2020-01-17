@@ -39,13 +39,12 @@ pub fn initialise_map(world: &mut World, progress_counter: &mut ProgressCounter)
     let mut map = load_map(world, "test_map", None, progress_counter);
 
     map.script_repository.push(GameScript::Native(|world| {
-        world
-            .write_resource::<EventQueue>()
-            .push(
-                TextEvent::new(
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-                )
-            );
+        let event = TextEvent::new(
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+            world,
+        );
+
+        world.write_resource::<EventQueue>().push(event);
     }));
 
     map.script_repository.push(GameScript::Native(load_nearby_connections));
