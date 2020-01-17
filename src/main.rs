@@ -2,6 +2,7 @@ mod common;
 mod config;
 mod constants;
 mod entities;
+mod events;
 mod states;
 mod systems;
 

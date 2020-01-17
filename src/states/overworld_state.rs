@@ -9,10 +9,10 @@ use amethyst::{
 use crate::{
     common::run_script_events,
     entities::{
-        event_queue::{EventQueue, GameEvent},
         map::ScriptEvent,
     },
-    states::OverworldTextState,
+    events::{EventExecutor, EventQueue},
+    states::OverworldAnimationState,
     systems::{
         MapInteractionSystem,
         PlayerAnimationSystem,
@@ -22,12 +22,26 @@ use crate::{
     },
 };
 
-use std::ops::Deref;
+use std::{
+    cell::RefCell,
+    rc::Rc,
+    ops::Deref,
+};
 
 #[derive(Default)]
 pub struct OverworldState<'a, 'b> {
     pub dispatcher: Option<Dispatcher<'a, 'b>>,
     pub script_event_reader: Option<ReaderId<ScriptEvent>>,
+    pub event_executor: Rc<RefCell<EventExecutor>>,
+}
+
+impl<'a, 'b> OverworldState<'a, 'b> {
+    pub fn new(event_executor: Rc<RefCell<EventExecutor>>) -> OverworldState<'a, 'b> {
+        OverworldState {
+            event_executor,
+            ..Default::default()
+        }
+    }
 }
 
 impl SimpleState for OverworldState<'_, '_> {
@@ -66,14 +80,22 @@ impl SimpleState for OverworldState<'_, '_> {
 
         // println!("FPS: {}", world.read_resource::<FpsCounter>().sampled_fps());
 
-        let event_queue = world.read_resource::<EventQueue>();
+        {
+            let mut event_queue = world.write_resource::<EventQueue>();
 
-        if let Some(event) = event_queue.front() {
-            match event {
-                GameEvent::TextEvent(_) => Trans::Switch(Box::new(OverworldTextState::default())),
+            while let Some(event) = event_queue.pop() {
+                self.event_executor.borrow_mut().push(event);
             }
-        } else {
-            Trans::None
         }
+
+        let should_disable_input = self.event_executor.borrow_mut().start_new_events(world);
+
+        if should_disable_input.0 {
+            return Trans::Switch(Box::new(OverworldAnimationState::new(self.event_executor.clone())));
+        }
+
+        self.event_executor.borrow_mut().tick(world, false);
+
+        Trans::None
     }
 }

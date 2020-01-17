@@ -10,9 +10,9 @@ use crate::{
     common::{get_direction_offset, load_sprite_sheet},
     constants::{HALF_TILE_SIZE, MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
     entities::{
-        event_queue::{EventQueue, GameEvent},
         player::Player,
     },
+    events::{EventQueue, TextEvent, WarpEvent},
 };
 
 use ron::de::from_reader;
@@ -42,9 +42,8 @@ pub fn initialise_map(world: &mut World, progress_counter: &mut ProgressCounter)
         world
             .write_resource::<EventQueue>()
             .push(
-                GameEvent::TextEvent(
+                TextEvent::new(
                     "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-                    .to_string()
                 )
             );
     }));
@@ -116,6 +115,14 @@ fn load_nearby_connections(world: &mut World) {
             let mut map = load_map(world, &connection.map, Some(reference_point), &mut progress_counter);
 
             if connection.map == "test_map2" {
+                map.script_repository.push(GameScript::Native(|world| {
+                    world
+                        .write_resource::<EventQueue>()
+                        .push(
+                            WarpEvent::new("test_map", Vector2::new(5, 10))
+                        );
+                }));
+
                 map.script_repository.push(GameScript::Native(|world| {
                     change_current_map(world, "test_map2".to_string());
                 }));

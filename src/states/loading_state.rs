@@ -24,12 +24,12 @@ use amethyst::{
 
 use crate::{
     entities::{
-        event_queue::EventQueue,
         player::{initialise_player, PlayerAnimation, PlayerEntity},
         map::{initialise_map, MapEvent, ScriptEvent},
         resources::initialise_resources,
         text::TextEvent,
     },
+    events::EventQueue,
     states::OverworldState,
 };
 
