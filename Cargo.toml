@@ -3,3 +3,5 @@ members = [
     "map_parser",
     "pokemon_rust",
 ]
+
+default-members = ["pokemon_rust"]
