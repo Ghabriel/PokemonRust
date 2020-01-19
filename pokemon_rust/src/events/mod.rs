@@ -1,6 +1,7 @@
 pub mod chained_events;
 pub mod event_executor;
 pub mod event_queue;
+pub mod fade_out_event;
 pub mod parallel_events;
 pub mod text_event;
 pub mod warp_event;
@@ -11,6 +12,7 @@ pub use self::{
     chained_events::ChainedEvents,
     event_executor::EventExecutor,
     event_queue::EventQueue,
+    fade_out_event::FadeOutEvent,
     parallel_events::ParallelEvents,
     text_event::TextEvent,
     warp_event::WarpEvent,

@@ -4,13 +4,26 @@ use super::{GameEvent, ShouldDisableInput};
 
 use std::collections::VecDeque;
 
+#[derive(Default)]
 pub struct ChainedEvents {
     chain: VecDeque<Box<dyn GameEvent + Sync + Send>>,
     called_start: bool,
 }
 
+impl ChainedEvents {
+    pub fn add_event(&mut self, event: Box<dyn GameEvent + Sync + Send>) {
+        if self.is_complete() {
+            self.called_start = false;
+        }
+
+        self.chain.push_back(event);
+    }
+}
+
 impl GameEvent for ChainedEvents {
     fn start(&mut self, world: &mut World) -> ShouldDisableInput {
+        self.called_start = true;
+
         self.chain
             .front_mut()
             .map(|event| event.start(world))
@@ -28,6 +41,7 @@ impl GameEvent for ChainedEvents {
 
             if event.is_complete() {
                 self.chain.pop_front();
+                self.called_start = false;
             }
         }
     }

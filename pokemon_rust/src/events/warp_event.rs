@@ -1,13 +1,9 @@
-use amethyst::{
-    core::math::Vector2,
-    ecs::World,
-};
+use amethyst::{core::math::Vector2, ecs::World};
 
-use super::{GameEvent, ShouldDisableInput};
+use super::{ChainedEvents, FadeOutEvent, GameEvent, ShouldDisableInput};
 
 pub struct WarpEvent {
-    map: String,
-    tile: Vector2<u32>,
+    executor: ChainedEvents,
 }
 
 impl WarpEvent {
@@ -15,26 +11,25 @@ impl WarpEvent {
     where
         T: Into<String>
     {
+        let mut executor = ChainedEvents::default();
+        executor.add_event(Box::new(FadeOutEvent::default()));
+
         WarpEvent {
-            map: map.into(),
-            tile,
+            executor,
         }
     }
 }
 
 impl GameEvent for WarpEvent {
-    fn start(&mut self, _world: &mut World) -> ShouldDisableInput {
-        // TODO
-        ShouldDisableInput(true)
+    fn start(&mut self, world: &mut World) -> ShouldDisableInput {
+        self.executor.start(world)
     }
 
-    fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) {
-        // TODO
-        println!("WarpEvent::tick");
+    fn tick(&mut self, world: &mut World, disabled_inputs: bool) {
+        self.executor.tick(world, disabled_inputs);
     }
 
     fn is_complete(&self) -> bool {
-        // TODO
-        false
+        self.executor.is_complete()
     }
 }

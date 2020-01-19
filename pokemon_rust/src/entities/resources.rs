@@ -5,11 +5,12 @@ use amethyst::{
     ui::{FontHandle, TtfFormat},
 };
 
-use crate::common::load_sprite_sheet;
+use crate::common::load_full_texture_sprite_sheet;
 
 pub struct Resources {
     pub font: FontHandle,
     pub text_box: Handle<SpriteSheet>,
+    pub black: Handle<SpriteSheet>,
 }
 
 pub fn initialise_resources(world: &mut World, progress_counter: &mut ProgressCounter) {
@@ -20,12 +21,19 @@ pub fn initialise_resources(world: &mut World, progress_counter: &mut ProgressCo
         &world.read_resource(),
     );
 
-    let text_box = load_sprite_sheet(
+    let text_box = load_full_texture_sprite_sheet(
         world,
         "sprites/text_box.png",
-        "sprites/text_box.ron",
+        (800, 100),
         &mut *progress_counter,
     );
 
-    world.insert(Resources { font, text_box });
+    let black = load_full_texture_sprite_sheet(
+        world,
+        "sprites/black.png",
+        (32, 32),
+        &mut *progress_counter,
+    );
+
+    world.insert(Resources { font, text_box, black });
 }

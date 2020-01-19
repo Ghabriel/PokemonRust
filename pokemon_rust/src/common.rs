@@ -3,7 +3,7 @@ use amethyst::{
     core::bundle::SystemBundle,
     ecs::{DispatcherBuilder, ReaderId, World, WorldExt},
     error::Error,
-    renderer::{ImageFormat, SpriteSheet, SpriteSheetFormat},
+    renderer::{ImageFormat, sprite::{Sprite, TextureCoordinates}, SpriteSheet, SpriteSheetFormat},
     shrev::EventChannel,
 };
 
@@ -36,6 +36,44 @@ pub fn load_sprite_sheet(
     loader.load(
         ron_name,
         SpriteSheetFormat(texture_handle),
+        &mut *progress_counter,
+        &world.read_resource()
+    )
+}
+
+pub fn load_full_texture_sprite_sheet(
+    world: &World,
+    image_name: &str,
+    image_size: (u32, u32),
+    progress_counter: &mut ProgressCounter,
+) -> Handle<SpriteSheet> {
+    let loader = world.read_resource::<Loader>();
+    let texture = loader.load(
+        image_name,
+        ImageFormat::default(),
+        &mut *progress_counter,
+        &world.read_resource(),
+    );
+
+    let sprite_sheet = SpriteSheet {
+        texture,
+        sprites: vec![
+            Sprite {
+                width: image_size.0 as f32,
+                height: image_size.1 as f32,
+                offsets: [0., 0.],
+                tex_coords: TextureCoordinates {
+                    left: 0.,
+                    right: 1.,
+                    bottom: 1.,
+                    top: 0.,
+                }
+            }
+        ]
+    };
+
+    loader.load_from_data(
+        sprite_sheet,
         &mut *progress_counter,
         &world.read_resource()
     )
