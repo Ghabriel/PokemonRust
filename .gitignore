@@ -1,4 +1,5 @@
 # Unwanted files
+future
 target
 Cargo.lock
 

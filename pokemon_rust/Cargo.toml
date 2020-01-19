@@ -1,0 +1,10 @@
+[package]
+name = "pokemon_rust"
+version = "0.1.0"
+authors = ["Ghabriel <ghabriel.nunes@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+amethyst = { version = "0.13", features = ["nightly", "sdl_controller", "vulkan"] }
+serde = "1.0"
+ron = "0.5"
