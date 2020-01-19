@@ -1,4 +1,6 @@
 (
     player_walking_speed: 160,
     player_running_speed: 256,
+    text_delay: 0.005,
+    fade_duration: 0.3,
 )

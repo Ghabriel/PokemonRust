@@ -17,11 +17,12 @@ use amethyst::{
     ui::{Anchor, LineMode, UiImage, UiText, UiTransform},
 };
 
-use crate::entities::{resources::Resources};
+use crate::{
+    config::GameConfig,
+    entities::{resources::Resources},
+};
 
 use super::{GameEvent, ShouldDisableInput};
-
-pub const TEXT_DELAY: f32 = 0.005;
 
 pub struct TextBox {
     full_text: String,
@@ -64,6 +65,7 @@ impl TextEvent {
     fn advance_text(
         &mut self,
         pressed_action_key: bool,
+        game_config: &GameConfig,
         time: &Time,
         ui_texts: &mut WriteStorage<UiText>,
     ) -> TextState {
@@ -87,8 +89,8 @@ impl TextEvent {
                 },
                 (false, false) => {
                     text_box.cooldown += time.delta_seconds();
-                    while text_box.cooldown >= TEXT_DELAY {
-                        text_box.cooldown -= TEXT_DELAY;
+                    while text_box.cooldown >= game_config.text_delay {
+                        text_box.cooldown -= game_config.text_delay;
 
                         let displayed_length = text_box.displayed_text_end - text_box.displayed_text_start;
 
@@ -166,11 +168,13 @@ impl GameEvent for TextEvent {
         let (
             mut ui_texts,
             entities,
+            game_config,
             time,
             input_event_channel,
         ) = <(
             WriteStorage<UiText>,
             Entities,
+            ReadExpect<GameConfig>,
             Read<Time>,
             Read<EventChannel<InputEvent<StringBindings>>>,
         )>::fetch(world);
@@ -185,7 +189,7 @@ impl GameEvent for TextEvent {
             }
         }
 
-        let state = self.advance_text(pressed_action_key, &time, &mut ui_texts);
+        let state = self.advance_text(pressed_action_key, &game_config, &time, &mut ui_texts);
 
         if state == TextState::Closed {
             self.close_text_box(&entities);

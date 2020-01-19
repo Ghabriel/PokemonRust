@@ -1,25 +1,23 @@
 use amethyst::{
-    assets::ProgressCounter,
     core::Time,
-    ecs::{Entity, Read, SystemData, world::Builder, World, WorldExt, WriteStorage},
+    ecs::{Entity, Read, ReadExpect, SystemData, world::Builder, World, WorldExt, WriteStorage},
     renderer::SpriteRender,
     ui::{Anchor, UiImage, UiTransform},
 };
 
 use crate::{
-    common::load_full_texture_sprite_sheet,
+    config::GameConfig,
     entities::resources::Resources,
 };
 
 use super::{GameEvent, ShouldDisableInput};
-
-pub const FADE_DURATION: f32 = 0.3;
 
 #[derive(Default)]
 pub struct FadeOutEvent {
     top_fade: Option<Entity>,
     bottom_fade: Option<Entity>,
     elapsed_time: f32,
+    completed: bool,
 }
 
 impl GameEvent for FadeOutEvent {
@@ -38,26 +36,31 @@ impl GameEvent for FadeOutEvent {
     }
 
     fn tick(&mut self, world: &mut World, _disabled_inputs: bool) {
-        let (mut ui_transforms, time) = <(
+        let (mut ui_transforms, game_config, time) = <(
             WriteStorage<UiTransform>,
+            ReadExpect<GameConfig>,
             Read<Time>,
         )>::fetch(world);
+
+        let fade_duration = game_config.fade_duration;
 
         self.elapsed_time += time.delta_seconds();
 
         ui_transforms
             .get_mut(*self.top_fade.as_mut().unwrap())
             .expect("Failed to retrieve UiTransform")
-            .height = 300. * (self.elapsed_time / FADE_DURATION);
+            .height = 300. * (self.elapsed_time / fade_duration);
 
         ui_transforms
             .get_mut(*self.bottom_fade.as_mut().unwrap())
             .expect("Failed to retrieve UiTransform")
-            .height = 300. * (self.elapsed_time / FADE_DURATION);
+            .height = 300. * (self.elapsed_time / fade_duration);
+
+        self.completed = self.elapsed_time >= fade_duration;
     }
 
     fn is_complete(&self) -> bool {
-        self.elapsed_time >= FADE_DURATION
+        self.completed
     }
 }
 
