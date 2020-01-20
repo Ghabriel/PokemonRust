@@ -1,6 +1,13 @@
 use amethyst::{core::math::Vector2, ecs::World};
 
-use super::{ChainedEvents, FadeOutEvent, GameEvent, ShouldDisableInput};
+use super::{
+    ChainedEvents,
+    FadeInEvent,
+    FadeOutEvent,
+    GameEvent,
+    ShouldDisableInput,
+    SwitchMapEvent,
+};
 
 pub struct WarpEvent {
     executor: ChainedEvents,
@@ -13,6 +20,8 @@ impl WarpEvent {
     {
         let mut executor = ChainedEvents::default();
         executor.add_event(Box::new(FadeOutEvent::default()));
+        executor.add_event(Box::new(SwitchMapEvent::new(map, tile)));
+        executor.add_event(Box::new(FadeInEvent::default()));
 
         WarpEvent {
             executor,

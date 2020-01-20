@@ -19,8 +19,7 @@ use std::collections::HashMap;
 
 pub use self::{
     events::{MapEvent, ScriptEvent},
-    load_map::initialise_map,
-
+    load_map::{change_tile, initialise_map, prepare_warp},
     map::{
         GameAction,
         GameActionKind,
@@ -139,8 +138,12 @@ impl MapHandler {
     }
 }
 
+/// A global way to refer to a tile.
 pub struct TileData {
+    /// The position of the tile, in World Coordinates. The universal player
+    /// offset is included.
     pub position: Vector3<f32>,
+    /// The map in which the tile is located.
     pub map_id: MapId,
 }
 

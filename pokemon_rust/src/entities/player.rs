@@ -41,6 +41,7 @@ impl Component for StaticPlayer {
     type Storage = NullStorage<Self>;
 }
 
+/// Resource that stores the entity corresponding to the human player.
 pub struct PlayerEntity(pub Entity);
 
 #[derive(Clone, Debug, Eq, PartialEq)]

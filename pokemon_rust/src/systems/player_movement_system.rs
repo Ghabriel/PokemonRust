@@ -9,15 +9,7 @@ use crate::{
     config::GameConfig,
     constants::TILE_SIZE,
     entities::{
-        map::{
-            GameActionKind,
-            MapHandler,
-            MapId,
-            MapScriptKind,
-            ScriptEvent,
-            TileData,
-            ValidatedGameAction,
-        },
+        map::{change_tile, MapHandler, MapId, ScriptEvent, TileData},
         player::{Player, PlayerAction, StaticPlayer},
     },
 };
@@ -78,26 +70,12 @@ impl<'a> System<'a> for PlayerMovementSystem {
                     if movement_data.estimated_time <= delta_seconds {
                         transform.set_translation(movement_data.final_tile_data.position);
 
-                        if movement_data.starting_map_id != movement_data.final_tile_data.map_id {
-                            map.get_map_scripts(&movement_data.final_tile_data, MapScriptKind::OnMapEnter)
-                                .for_each(|event| {
-                                    script_event_channel.single_write(event);
-                                });
-                        }
-
-                        map.get_map_scripts(&movement_data.final_tile_data, MapScriptKind::OnTileChange)
-                            .for_each(|event| {
-                                script_event_channel.single_write(event);
-                            });
-
-                        match map.get_action_at(&movement_data.final_tile_data) {
-                            Some(
-                                ValidatedGameAction { when, script_event }
-                            ) if when == GameActionKind::OnStep => {
-                                script_event_channel.single_write(script_event);
-                            },
-                            _ => {},
-                        }
+                        change_tile(
+                            &movement_data.starting_map_id,
+                            &movement_data.final_tile_data,
+                            &map,
+                            &mut script_event_channel,
+                        );
 
                         self.movement_data.remove(&entity);
                         static_players

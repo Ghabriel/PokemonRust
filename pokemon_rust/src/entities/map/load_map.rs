@@ -3,6 +3,7 @@ use amethyst::{
     core::{math::{Vector2, Vector3}, Transform},
     ecs::{Entity, Join, world::Builder, World, WorldExt},
     renderer::SpriteRender,
+    shrev::EventChannel,
     utils::application_root_dir,
 };
 
@@ -23,7 +24,9 @@ use std::{
 };
 
 use super::{
+    events::ScriptEvent,
     map::{
+        GameActionKind,
         GameScript,
         Map,
         MapConnection,
@@ -32,8 +35,112 @@ use super::{
         Tile,
     },
     MapHandler,
+    MapId,
     serializable_map::SerializableMap,
+    TileData,
+    ValidatedGameAction,
 };
+
+pub fn change_tile(
+    starting_map_id: &MapId,
+    final_tile_data: &TileData,
+    map: &MapHandler,
+    script_event_channel: &mut EventChannel<ScriptEvent>,
+) {
+    if *starting_map_id != final_tile_data.map_id {
+        map.get_map_scripts(&final_tile_data, MapScriptKind::OnMapEnter)
+            .for_each(|event| {
+                script_event_channel.single_write(event);
+            });
+    }
+
+    map.get_map_scripts(&final_tile_data, MapScriptKind::OnTileChange)
+        .for_each(|event| {
+            script_event_channel.single_write(event);
+        });
+
+    match map.get_action_at(&final_tile_data) {
+        Some(
+            ValidatedGameAction { when, script_event }
+        ) if when == GameActionKind::OnStep => {
+            script_event_channel.single_write(script_event);
+        },
+        _ => {},
+    }
+}
+
+pub fn prepare_warp(
+    world: &mut World,
+    map_name: &str,
+    tile: &Vector2<u32>,
+    progress_counter: &mut ProgressCounter,
+) -> TileData {
+    if !is_map_loaded(world, map_name) {
+        let map = load_detached_map(world, &map_name, progress_counter);
+
+        world
+            .write_resource::<MapHandler>()
+            .loaded_maps
+            .insert(map_name.to_string(), map);
+    }
+
+    let map_handler = world.read_resource::<MapHandler>();
+    let map = &map_handler.loaded_maps[map_name];
+    let target_position = tile_to_world_coordinates(&tile, &map.reference_point);
+
+    TileData {
+        position: Vector3::new(target_position.x as f32, (target_position.y + 12) as f32, 0.),
+        map_id: MapId(map_name.to_string()),
+    }
+}
+
+pub fn is_map_loaded(world: &mut World, map_name: &str) -> bool {
+    world.read_resource::<MapHandler>()
+        .loaded_maps
+        .contains_key(map_name)
+}
+
+pub fn load_detached_map(
+    world: &mut World,
+    map_name: &str,
+    progress_counter: &mut ProgressCounter,
+) -> Map {
+    // TODO: obtain this value algorithmically
+    let reference_point = Vector3::new(1000000, 0, 0);
+
+    let mut map = load_map(world, &map_name, Some(reference_point), progress_counter);
+
+    if map_name == "test_map3" {
+        println!("Loading scripts...");
+
+        map.script_repository.push(GameScript::Native(|world| {
+            let event = TextEvent::new(
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+                world,
+            );
+
+            world.write_resource::<EventQueue>().push(event);
+        }));
+
+        map.script_repository.push(GameScript::Native(load_nearby_connections));
+
+        map.script_repository.push(GameScript::Native(|world| {
+            change_current_map(world, "test_map3".to_string());
+        }));
+
+        map.map_scripts.push(MapScript {
+            when: MapScriptKind::OnTileChange,
+            script_index: 1,
+        });
+
+        map.map_scripts.push(MapScript {
+            when: MapScriptKind::OnMapEnter,
+            script_index: 2,
+        });
+    }
+
+    map
+}
 
 pub fn initialise_map(world: &mut World, progress_counter: &mut ProgressCounter) {
     let mut map = load_map(world, "test_map", None, progress_counter);
@@ -118,7 +225,7 @@ fn load_nearby_connections(world: &mut World) {
                     world
                         .write_resource::<EventQueue>()
                         .push(
-                            WarpEvent::new("test_map", Vector2::new(5, 10))
+                            WarpEvent::new("test_map3", Vector2::new(5, 10))
                         );
                 }));
 
@@ -158,24 +265,34 @@ fn get_new_map_reference_point(
     connection: &MapConnection,
     current_map_reference_point: &Vector3<i32>,
 ) -> Vector3<i32> {
-    let tile_size = TILE_SIZE as i32;
-    let half_tile = HALF_TILE_SIZE as i32;
-    let tile_world_coordinates = Vector2::new(
-        (tile.x as i32) * tile_size + half_tile + current_map_reference_point.x,
-        (tile.y as i32) * tile_size + half_tile + current_map_reference_point.y,
-    );
+    let tile_world_coordinates = tile_to_world_coordinates(&tile, &current_map_reference_point);
 
     // TODO: handle multi-connections (non-rectangular maps)
     let (first_direction, external_tile) = connection.directions.iter().next().unwrap();
 
+    let tile_size = TILE_SIZE as i32;
     let (offset_x, offset_y) = get_direction_offset::<i32>(&first_direction);
     let external_tile_offset = tile_size * Vector2::new(offset_x, offset_y);
     let external_tile_world_coordinates = tile_world_coordinates + external_tile_offset;
+    let half_tile = HALF_TILE_SIZE as i32;
 
     Vector3::new(
         external_tile_world_coordinates.x - half_tile - (external_tile.x as i32) * tile_size,
         external_tile_world_coordinates.y - half_tile - (external_tile.y as i32) * tile_size,
         0,
+    )
+}
+
+fn tile_to_world_coordinates(
+    tile: &Vector2<u32>,
+    reference_point: &Vector3<i32>,
+) -> Vector2<i32> {
+    let tile_size = TILE_SIZE as i32;
+    let half_tile = HALF_TILE_SIZE as i32;
+
+    Vector2::new(
+        (tile.x as i32) * tile_size + half_tile + reference_point.x,
+        (tile.y as i32) * tile_size + half_tile + reference_point.y,
     )
 }
 
@@ -186,7 +303,7 @@ fn change_current_map(world: &mut World, new_map: String) {
         .current_map = new_map;
 }
 
-pub fn load_map(
+fn load_map(
     world: &mut World,
     map_name: &str,
     reference_point: Option<Vector3<i32>>,

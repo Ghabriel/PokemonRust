@@ -1,25 +1,22 @@
 use amethyst::{
     core::Time,
     ecs::{
-        Component,
         Entity,
         Entities,
         Join,
         Read,
         ReadExpect,
         SystemData,
-        world::{Builder, EntitiesRes},
+        world::EntitiesRes,
         World,
         WorldExt,
         WriteStorage,
     },
-    renderer::SpriteRender,
-    ui::{Anchor, UiImage, UiTransform},
+    ui::UiTransform,
 };
 
 use crate::{
     config::GameConfig,
-    entities::resources::Resources,
     events::fade_out_event::Fade,
 };
 
