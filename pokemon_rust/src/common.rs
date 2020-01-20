@@ -44,7 +44,7 @@ pub fn load_sprite_sheet(
 pub fn load_full_texture_sprite_sheet(
     world: &World,
     image_name: &str,
-    image_size: (u32, u32),
+    image_size: &(u32, u32),
     progress_counter: &mut ProgressCounter,
 ) -> Handle<SpriteSheet> {
     let loader = world.read_resource::<Loader>();

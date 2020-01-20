@@ -11,7 +11,6 @@ pub(super) struct SerializableMap {
     pub map_name: String,
     pub base_file_name: String,
     pub layer3_file_name: String,
-    pub spritesheet_file_name: String,
     pub num_tiles_x: u32,
     pub num_tiles_y: u32,
     pub solids: Vec<Vector2<u32>>,

@@ -2,7 +2,6 @@
     map_name: "Test Map",
     base_file_name: "maps/test_map/map.png",
     layer3_file_name: "maps/test_map/layer3.png",
-    spritesheet_file_name: "maps/test_map/spritesheet.ron",
     num_tiles_x: 49,
     num_tiles_y: 49,
     solids: [

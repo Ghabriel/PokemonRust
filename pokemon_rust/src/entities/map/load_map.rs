@@ -8,7 +8,7 @@ use amethyst::{
 };
 
 use crate::{
-    common::{get_direction_offset, load_sprite_sheet},
+    common::{get_direction_offset, load_full_texture_sprite_sheet},
     constants::{HALF_TILE_SIZE, MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
     entities::{
         player::Player,
@@ -325,7 +325,6 @@ fn load_map(
         map_name,
         base_file_name,
         layer3_file_name,
-        spritesheet_file_name,
         num_tiles_x,
         num_tiles_y,
         solids,
@@ -345,11 +344,13 @@ fn load_map(
         None => (-half_map, Vector3::new(0, 0, 0)),
     };
 
+    let map_size = (num_tiles_x * TILE_SIZE as u32, num_tiles_y * TILE_SIZE as u32);
+
     let terrain_entity = initialise_map_layer(
         world,
         MAP_TERRAIN_LAYER_Z,
         &base_file_name,
-        &spritesheet_file_name,
+        &map_size,
         &map_center,
         progress_counter,
     );
@@ -357,7 +358,7 @@ fn load_map(
         world,
         MAP_DECORATION_LAYER_Z,
         &layer3_file_name,
-        &spritesheet_file_name,
+        &map_size,
         &map_center,
         progress_counter,
     );
@@ -382,12 +383,17 @@ fn initialise_map_layer(
     world: &mut World,
     depth: f32,
     image_name: &str,
-    ron_name: &str,
+    image_size: &(u32, u32),
     position: &Vector3<i32>,
     progress_counter: &mut ProgressCounter,
 ) -> Entity {
     let sprite_render = SpriteRender {
-        sprite_sheet: load_sprite_sheet(world, &image_name, &ron_name, progress_counter),
+        sprite_sheet: load_full_texture_sprite_sheet(
+            world,
+            &image_name,
+            &image_size,
+            progress_counter,
+        ),
         sprite_number: 0,
     };
 

@@ -24,14 +24,14 @@ pub fn initialise_resources(world: &mut World, progress_counter: &mut ProgressCo
     let text_box = load_full_texture_sprite_sheet(
         world,
         "sprites/text_box.png",
-        (800, 100),
+        &(800, 100),
         &mut *progress_counter,
     );
 
     let black = load_full_texture_sprite_sheet(
         world,
         "sprites/black.png",
-        (32, 32),
+        &(32, 32),
         &mut *progress_counter,
     );
 
