@@ -67,7 +67,6 @@ impl<'a> System<'a> for MapInteractionSystem {
 
         let events = map_event_channel
             .read(&mut self.event_reader)
-            .into_iter()
             .map(Clone::clone)
             .collect::<Vec<_>>();
 

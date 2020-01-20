@@ -79,7 +79,7 @@ impl<'a> System<'a> for PlayerInputSystem {
                     player.facing_direction = Direction::Up;
                     player.moving = true;
                 },
-                InputEvent::AxisMoved { axis, value: _ } if axis == "vertical" => {
+                InputEvent::AxisMoved { axis, .. } if axis == "vertical" => {
                     let horizontal_value = input_handler
                         .axis_value("horizontal")
                         .unwrap_or(0.);
@@ -96,7 +96,7 @@ impl<'a> System<'a> for PlayerInputSystem {
                     player.facing_direction = Direction::Right;
                     player.moving = true;
                 },
-                InputEvent::AxisMoved { axis, value: _ } if axis == "horizontal" => {
+                InputEvent::AxisMoved { axis, .. } if axis == "horizontal" => {
                     let vertical_value = input_handler
                         .axis_value("vertical")
                         .unwrap_or(0.);

@@ -97,7 +97,6 @@ pub fn run_script_events(world: &mut World, script_event_reader: &mut ReaderId<S
     let events: Vec<ScriptEvent> = world
         .read_resource::<EventChannel<ScriptEvent>>()
         .read(script_event_reader)
-        .into_iter()
         .map(Clone::clone)
         .collect();
 

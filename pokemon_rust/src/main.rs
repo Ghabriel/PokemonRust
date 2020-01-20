@@ -1,3 +1,15 @@
+#![warn(
+    clippy::correctness,
+    clippy::complexity,
+)]
+
+#![allow(
+    clippy::clone_on_copy,
+    clippy::cognitive_complexity,
+    clippy::perf,
+    clippy::type_complexity,
+)]
+
 mod common;
 mod config;
 mod constants;

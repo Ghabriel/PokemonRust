@@ -106,7 +106,7 @@ pub fn load_detached_map(
     progress_counter: &mut ProgressCounter,
 ) -> Map {
     // TODO: obtain this value algorithmically
-    let reference_point = Vector3::new(1000000, 0, 0);
+    let reference_point = Vector3::new(1_000_000, 0, 0);
 
     let mut map = load_map(world, &map_name, Some(reference_point), progress_counter);
 
