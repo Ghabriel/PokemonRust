@@ -1,6 +1,17 @@
 use amethyst::{
     core::Time,
-    ecs::{Entity, Read, ReadExpect, SystemData, world::Builder, World, WorldExt, WriteStorage},
+    ecs::{
+        Component,
+        Entity,
+        HashMapStorage,
+        Read,
+        ReadExpect,
+        SystemData,
+        world::Builder,
+        World,
+        WorldExt,
+        WriteStorage,
+    },
     renderer::SpriteRender,
     ui::{Anchor, UiImage, UiTransform},
 };
@@ -12,6 +23,15 @@ use crate::{
 
 use super::{GameEvent, ShouldDisableInput};
 
+/// A marker component to allow easy retrieval of the fade-related entities.
+pub struct Fade {
+    pub id: u8,
+}
+
+impl Component for Fade {
+    type Storage = HashMapStorage<Self>;
+}
+
 #[derive(Default)]
 pub struct FadeOutEvent {
     top_fade: Option<Entity>,
@@ -22,14 +42,12 @@ pub struct FadeOutEvent {
 
 impl GameEvent for FadeOutEvent {
     fn start(&mut self, world: &mut World) -> ShouldDisableInput {
-        println!("FadeOutEvent::start");
-
         self.top_fade = Some(
-            initialise_fade_entity(world, Anchor::TopMiddle, Anchor::TopMiddle)
+            initialise_fade_entity(world, Anchor::TopMiddle, Anchor::TopMiddle, 0)
         );
 
         self.bottom_fade = Some(
-            initialise_fade_entity(world, Anchor::BottomMiddle, Anchor::BottomMiddle)
+            initialise_fade_entity(world, Anchor::BottomMiddle, Anchor::BottomMiddle, 1)
         );
 
         ShouldDisableInput(true)
@@ -64,7 +82,7 @@ impl GameEvent for FadeOutEvent {
     }
 }
 
-fn initialise_fade_entity(world: &mut World, anchor: Anchor, pivot: Anchor) -> Entity {
+fn initialise_fade_entity(world: &mut World, anchor: Anchor, pivot: Anchor, id: u8) -> Entity {
     let sprite_render = SpriteRender {
         sprite_sheet: world.read_resource::<Resources>().black.clone(),
         sprite_number: 0,
@@ -75,8 +93,11 @@ fn initialise_fade_entity(world: &mut World, anchor: Anchor, pivot: Anchor) -> E
         0., 0., 2., 800., 0.
     );
 
+    world.register::<Fade>();
+
     world
         .create_entity()
+        .with(Fade { id })
         .with(UiImage::Sprite(sprite_render))
         .with(ui_transform)
         .build()
