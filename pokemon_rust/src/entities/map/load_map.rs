@@ -361,9 +361,11 @@ fn load_map(
         connections,
     } = map_data;
 
+    let map_size = (num_tiles_x * TILE_SIZE as u32, num_tiles_y * TILE_SIZE as u32);
+
     let half_map_offset = WorldOffset::new(
-        ((num_tiles_x as i32) * (TILE_SIZE as i32)) / 2,
-        ((num_tiles_y as i32) * (TILE_SIZE as i32)) / 2,
+        map_size.0 as i32 / 2,
+        map_size.1 as i32 / 2,
     );
 
     let (reference_point, map_center) = match reference_point {
@@ -376,8 +378,6 @@ fn load_map(
             WorldCoordinates::origin()
         ),
     };
-
-    let map_size = (num_tiles_x * TILE_SIZE as u32, num_tiles_y * TILE_SIZE as u32);
 
     let terrain_entity = initialise_map_layer(
         world,

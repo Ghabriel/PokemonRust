@@ -163,6 +163,16 @@ impl PlayerCoordinates {
 
         transform
     }
+
+    pub fn offset_by_direction(&self, direction: &Direction) -> PlayerCoordinates {
+        let tile_size: f32 = TILE_SIZE.into();
+        let (offset_x, offset_y) = get_direction_offset::<f32>(&direction);
+
+        PlayerCoordinates::new(
+            self.x() + tile_size * offset_x,
+            self.y() + tile_size * offset_y,
+        )
+    }
 }
 
 impl CoordinateSystem for PlayerCoordinates {

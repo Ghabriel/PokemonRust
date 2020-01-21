@@ -7,8 +7,7 @@ mod serializable_map;
 use amethyst::core::Transform;
 
 use crate::{
-    common::{Direction, get_direction_offset},
-    constants::TILE_SIZE,
+    common::Direction,
     entities::player::Player,
 };
 
@@ -54,15 +53,8 @@ impl MapHandler {
             self.current_map.clone()
         };
 
-        let (offset_x, offset_y) = get_direction_offset::<f32>(&player.facing_direction);
-        let tile_size: f32 = TILE_SIZE.into();
-        let position = PlayerCoordinates::new(
-            player_position.x() + offset_x * tile_size,
-            player_position.y() + offset_y * tile_size,
-        );
-
         TileData {
-            position,
+            position: player_position.offset_by_direction(&player.facing_direction),
             map_id: MapId(target_map),
         }
     }
