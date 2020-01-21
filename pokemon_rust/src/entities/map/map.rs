@@ -5,7 +5,7 @@ use crate::common::Direction;
 use serde::{Deserialize, Serialize};
 
 use super::{
-    load_map::world_to_map_coordinates,
+    conversions::player_to_map_coordinates,
     MapCoordinates,
     PlayerCoordinates,
     WorldCoordinates,
@@ -38,10 +38,7 @@ impl Component for Map {
 
 impl Map {
     pub(super) fn player_to_map_coordinates(&self, position: &PlayerCoordinates) -> MapCoordinates {
-        world_to_map_coordinates(
-            &position.to_world_coordinates(),
-            &self.reference_point
-        )
+        player_to_map_coordinates(&position, &self.reference_point)
     }
 
     pub(super) fn is_tile_blocked(&self, position: &PlayerCoordinates) -> bool {
