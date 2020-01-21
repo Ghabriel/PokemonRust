@@ -1,6 +1,6 @@
 use amethyst::{
     assets::ProgressCounter,
-    core::{math::Vector2, Transform},
+    core::Transform,
     ecs::{Entity, world::Builder, World, WorldExt},
     renderer::SpriteRender,
     shrev::EventChannel,
@@ -335,17 +335,18 @@ fn load_map(
         connections,
     } = map_data;
 
-    let half_map = Vector2::new(
-        (num_tiles_x as i32) * (HALF_TILE_SIZE as i32),
-        (num_tiles_y as i32) * (HALF_TILE_SIZE as i32),
-    );
+    let half_map_x = (num_tiles_x as i32) * (HALF_TILE_SIZE as i32);
+    let half_map_y = (num_tiles_y as i32) * (HALF_TILE_SIZE as i32);
 
     let (reference_point, map_center) = match reference_point {
         Some(reference_point) => {
-            let center = WorldCoordinates(reference_point.0 + half_map);
+            let center = WorldCoordinates::new(
+                reference_point.x() + half_map_x,
+                reference_point.y() + half_map_y,
+            );
             (reference_point, center)
         },
-        None => (WorldCoordinates(-half_map), WorldCoordinates::new(0, 0)),
+        None => (WorldCoordinates::new(-half_map_x, -half_map_y), WorldCoordinates::new(0, 0)),
     };
 
     let map_size = (num_tiles_x * TILE_SIZE as u32, num_tiles_y * TILE_SIZE as u32);
@@ -373,25 +374,27 @@ fn load_map(
         terrain_entity,
         solids: solids
             .into_iter()
-            .map(|tile_position| (MapCoordinates(tile_position), Tile))
+            .map(|tile_position| (MapCoordinates::from_vector(&tile_position), Tile))
             .collect(),
         decoration_entity,
         script_repository: Vec::new(),
         actions: actions
             .into_iter()
-            .map(|(tile_position, action)| (MapCoordinates(tile_position), action))
+            .map(|(tile_position, action)| (MapCoordinates::from_vector(&tile_position), action))
             .collect(),
         map_scripts,
         connections: connections
             .into_iter()
             .map(|(tile_position, connection)| {
                 (
-                    MapCoordinates(tile_position),
+                    MapCoordinates::from_vector(&tile_position),
                     MapConnection {
                         map: connection.map,
                         directions: connection.directions
                             .into_iter()
-                            .map(|(direction, coordinates)| (direction, MapCoordinates(coordinates)))
+                            .map(|(direction, coordinates)| {
+                                (direction, MapCoordinates::from_vector(&coordinates))
+                            })
                             .collect(),
                     },
                 )
