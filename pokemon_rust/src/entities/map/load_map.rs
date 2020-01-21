@@ -9,7 +9,7 @@ use amethyst::{
 
 use crate::{
     common::load_full_texture_sprite_sheet,
-    constants::{HALF_TILE_SIZE, MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
+    constants::{MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
     entities::{
         player::PlayerEntity,
     },
@@ -362,8 +362,8 @@ fn load_map(
     } = map_data;
 
     let half_map_offset = WorldOffset::new(
-        (num_tiles_x as i32) * (HALF_TILE_SIZE as i32),
-        (num_tiles_y as i32) * (HALF_TILE_SIZE as i32),
+        ((num_tiles_x as i32) * (TILE_SIZE as i32)) / 2,
+        ((num_tiles_y as i32) * (TILE_SIZE as i32)) / 2,
     );
 
     let (reference_point, map_center) = match reference_point {

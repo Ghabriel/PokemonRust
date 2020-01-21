@@ -2,7 +2,7 @@ use amethyst::core::{math::Vector2, Transform};
 
 use crate::{
     common::{Direction, get_direction_offset},
-    constants::{HALF_TILE_SIZE, TILE_SIZE, UNIVERSAL_PLAYER_OFFSET_Y},
+    constants::{TILE_SIZE, UNIVERSAL_PLAYER_OFFSET_Y},
 };
 
 pub trait CoordinateSystem {
@@ -62,9 +62,11 @@ impl WorldCoordinates {
 
     /// Returns the bottom-left corner of the tile that this position refers to.
     pub fn corner(&self) -> WorldCoordinates {
+        let half_tile: i32 = (TILE_SIZE / 2).into();
+
         WorldCoordinates::new(
-            self.x() - HALF_TILE_SIZE as i32,
-            self.y() - HALF_TILE_SIZE as i32,
+            self.x() - half_tile,
+            self.y() - half_tile,
         )
     }
 }
@@ -103,7 +105,7 @@ impl MapCoordinates {
 
     pub fn to_world_offset(&self) -> WorldOffset {
         let tile_size: i32 = TILE_SIZE.into();
-        let half_tile: i32 = HALF_TILE_SIZE.into();
+        let half_tile = tile_size / 2;
 
         WorldOffset::new(
             (self.x() as i32) * tile_size + half_tile,
