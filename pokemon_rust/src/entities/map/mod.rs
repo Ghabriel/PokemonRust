@@ -4,7 +4,7 @@ mod map;
 mod serializable_map;
 
 use amethyst::{
-    core::{math::{Vector2, Vector3}, Transform},
+    core::{math::Vector2, Transform},
 };
 
 use crate::{
@@ -39,8 +39,13 @@ pub struct MapHandler {
 
 impl MapHandler {
     pub fn get_forward_tile(&self, player: &Player, player_position: &Transform) -> TileData {
+        let player_position = PlayerCoordinates(Vector2::new(
+            player_position.translation().x,
+            player_position.translation().y,
+        ));
+
         let current_map = &self.loaded_maps[&self.current_map];
-        let current_tile = current_map.world_to_tile_coordinates(&player_position.translation());
+        let current_tile = current_map.player_to_map_coordinates(&player_position);
         let connection = current_map.connections.get(&current_tile);
         let target_map = if let Some(connection) = connection {
             if connection.directions.contains_key(&player.facing_direction) {
@@ -53,12 +58,11 @@ impl MapHandler {
         };
 
         let (offset_x, offset_y) = get_direction_offset::<f32>(&player.facing_direction);
-        let tile_size = TILE_SIZE as f32;
-        let position = player_position.translation() + Vector3::new(
-            offset_x * tile_size,
-            offset_y * tile_size,
-            0.,
-        );
+        let tile_size: f32 = TILE_SIZE.into();
+        let position = PlayerCoordinates(Vector2::new(
+            player_position.0.x + offset_x * tile_size,
+            player_position.0.y + offset_y * tile_size,
+        ));
 
         TileData {
             position,
@@ -73,7 +77,7 @@ impl MapHandler {
 
     pub fn get_action_at(&self, tile_data: &TileData) -> Option<ValidatedGameAction> {
         let map = &self.loaded_maps[&tile_data.map_id.0];
-        let tile_coordinates = map.world_to_tile_coordinates(&tile_data.position);
+        let tile_coordinates = map.player_to_map_coordinates(&tile_data.position);
 
         map.actions
             .get(&tile_coordinates)
@@ -109,18 +113,19 @@ impl MapHandler {
 
     pub fn get_nearby_connections(
         &self,
-        position: &Vector3<f32>,
-    ) -> impl Iterator<Item = (&Vector2<u32>, &MapConnection)> {
+        position: &PlayerCoordinates,
+    ) -> impl Iterator<Item = (&MapCoordinates, &MapConnection)> {
         let map = &self.loaded_maps[&self.current_map];
-        let position = map.world_to_tile_coordinates(&position);
+        let position = map.player_to_map_coordinates(&position);
 
         map.connections
             .iter()
             .filter(move |(tile, connection)| {
                 let visible_tiles_x = 22;
                 let visible_tiles_y = 16;
-                let distance_x = (tile.x as i32) - (position.x as i32);
-                let distance_y = (tile.y as i32) - (position.y as i32);
+                // TODO: coordinate system conflict. Bug?
+                let distance_x = (tile.0.x as i32) - (position.0.x as i32);
+                let distance_y = (tile.0.y as i32) - (position.0.y as i32);
                 let leniency = 12;
 
                 connection
@@ -140,12 +145,25 @@ impl MapHandler {
 
 /// A global way to refer to a tile.
 pub struct TileData {
-    /// The position of the tile, in World Coordinates. The universal player
-    /// offset is included.
-    pub position: Vector3<f32>,
+    /// The position of the tile.
+    pub position: PlayerCoordinates,
     /// The map in which the tile is located.
     pub map_id: MapId,
 }
+
+/// Represents a position expressed in World Coordinates.
+#[derive(Clone)]
+pub struct WorldCoordinates(pub Vector2<i32>);
+
+/// Represents a position expressed in Map Coordinates, i.e the position of
+/// something relative to the map it's in.
+#[derive(Clone, Eq, Hash, PartialEq)]
+pub struct MapCoordinates(pub Vector2<u32>);
+
+/// Represents a position possibly occupied by a player, expressed in World
+/// Coordinates. The universal player offset is included.
+#[derive(Clone)]
+pub struct PlayerCoordinates(pub Vector2<f32>);
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct MapId(String);

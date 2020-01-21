@@ -1,4 +1,6 @@
-use amethyst::{core::math::Vector2, ecs::World};
+use amethyst::ecs::World;
+
+use crate::entities::map::MapCoordinates;
 
 use super::{
     ChainedEvents,
@@ -14,7 +16,7 @@ pub struct WarpEvent {
 }
 
 impl WarpEvent {
-    pub fn new<T>(map: T, tile: Vector2<u32>) -> WarpEvent
+    pub fn new<T>(map: T, tile: MapCoordinates) -> WarpEvent
     where
         T: Into<String>
     {

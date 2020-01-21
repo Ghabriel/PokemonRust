@@ -1,5 +1,5 @@
 use amethyst::{
-    core::{Time, Transform},
+    core::{math::Vector3, Time, Transform},
     ecs::{Entities, Entity, Join, Read, ReadExpect, ReadStorage, System, Write, WriteStorage},
     shrev::EventChannel,
 };
@@ -68,7 +68,11 @@ impl<'a> System<'a> for PlayerMovementSystem {
                     let delta_seconds = time.delta_seconds();
 
                     if movement_data.estimated_time <= delta_seconds {
-                        transform.set_translation(movement_data.final_tile_data.position);
+                        transform.set_translation(Vector3::new(
+                            movement_data.final_tile_data.position.0.x,
+                            movement_data.final_tile_data.position.0.y,
+                            0.,
+                        ));
 
                         change_tile(
                             &movement_data.starting_map_id,

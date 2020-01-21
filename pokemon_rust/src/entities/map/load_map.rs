@@ -1,7 +1,7 @@
 use amethyst::{
     assets::ProgressCounter,
-    core::{math::{Vector2, Vector3}, Transform},
-    ecs::{Entity, Join, world::Builder, World, WorldExt},
+    core::{math::Vector2, Transform},
+    ecs::{Entity, world::Builder, World, WorldExt},
     renderer::SpriteRender,
     shrev::EventChannel,
     utils::application_root_dir,
@@ -11,7 +11,7 @@ use crate::{
     common::{get_direction_offset, load_full_texture_sprite_sheet},
     constants::{HALF_TILE_SIZE, MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
     entities::{
-        player::Player,
+        player::PlayerEntity,
     },
     events::{EventQueue, TextEvent, WarpEvent},
 };
@@ -34,11 +34,14 @@ use super::{
         MapScriptKind,
         Tile,
     },
+    MapCoordinates,
     MapHandler,
     MapId,
+    PlayerCoordinates,
     serializable_map::SerializableMap,
     TileData,
     ValidatedGameAction,
+    WorldCoordinates,
 };
 
 pub fn change_tile(
@@ -72,7 +75,7 @@ pub fn change_tile(
 pub fn prepare_warp(
     world: &mut World,
     map_name: &str,
-    tile: &Vector2<u32>,
+    tile: &MapCoordinates,
     progress_counter: &mut ProgressCounter,
 ) -> TileData {
     if !is_map_loaded(world, map_name) {
@@ -86,10 +89,13 @@ pub fn prepare_warp(
 
     let map_handler = world.read_resource::<MapHandler>();
     let map = &map_handler.loaded_maps[map_name];
-    let target_position = tile_to_world_coordinates(&tile, &map.reference_point);
+    let target_position = map_to_world_coordinates(&tile, &map.reference_point);
 
     TileData {
-        position: Vector3::new(target_position.x as f32, (target_position.y + 12) as f32, 0.),
+        position: PlayerCoordinates(Vector2::new(
+            target_position.0.x as f32,
+            (target_position.0.y + 12) as f32,
+        )),
         map_id: MapId(map_name.to_string()),
     }
 }
@@ -106,7 +112,7 @@ pub fn load_detached_map(
     progress_counter: &mut ProgressCounter,
 ) -> Map {
     // TODO: obtain this value algorithmically
-    let reference_point = Vector3::new(1_000_000, 0, 0);
+    let reference_point = WorldCoordinates(Vector2::new(1_000_000, 0));
 
     let mut map = load_map(world, &map_name, Some(reference_point), progress_counter);
 
@@ -225,7 +231,7 @@ fn load_nearby_connections(world: &mut World) {
                     world
                         .write_resource::<EventQueue>()
                         .push(
-                            WarpEvent::new("test_map3", Vector2::new(5, 10))
+                            WarpEvent::new("test_map3", MapCoordinates(Vector2::new(5, 10)))
                         );
                 }));
 
@@ -249,23 +255,24 @@ fn load_nearby_connections(world: &mut World) {
         .extend(loaded_maps);
 }
 
-fn get_player_position(world: &World) -> Vector3<f32> {
-    let players = world.read_storage::<Player>();
-    let transforms = world.read_storage::<Transform>();
+fn get_player_position(world: &World) -> PlayerCoordinates {
+    let player_entity = world.read_resource::<PlayerEntity>();
 
-    (&players, &transforms).join()
-        .map(|(_, transform)| transform.translation())
-        .next()
-        .unwrap()
-        .clone()
+    world.read_storage::<Transform>()
+        .get(player_entity.0)
+        .map(|transform| PlayerCoordinates(Vector2::new(
+            transform.translation().x,
+            transform.translation().y,
+        )))
+        .expect("Failed to retrieve Transform")
 }
 
 fn get_new_map_reference_point(
-    tile: &Vector2<u32>,
+    tile: &MapCoordinates,
     connection: &MapConnection,
-    current_map_reference_point: &Vector3<i32>,
-) -> Vector3<i32> {
-    let tile_world_coordinates = tile_to_world_coordinates(&tile, &current_map_reference_point);
+    current_map_reference_point: &WorldCoordinates,
+) -> WorldCoordinates {
+    let tile_world_coordinates = map_to_world_coordinates(&tile, &current_map_reference_point);
 
     // TODO: handle multi-connections (non-rectangular maps)
     let (first_direction, external_tile) = connection.directions.iter().next().unwrap();
@@ -273,27 +280,26 @@ fn get_new_map_reference_point(
     let tile_size = TILE_SIZE as i32;
     let (offset_x, offset_y) = get_direction_offset::<i32>(&first_direction);
     let external_tile_offset = tile_size * Vector2::new(offset_x, offset_y);
-    let external_tile_world_coordinates = tile_world_coordinates + external_tile_offset;
+    let external_tile_world_coordinates = tile_world_coordinates.0 + external_tile_offset;
     let half_tile = HALF_TILE_SIZE as i32;
 
-    Vector3::new(
+    WorldCoordinates(Vector2::new(
         external_tile_world_coordinates.x - half_tile - (external_tile.x as i32) * tile_size,
         external_tile_world_coordinates.y - half_tile - (external_tile.y as i32) * tile_size,
-        0,
-    )
+    ))
 }
 
-fn tile_to_world_coordinates(
-    tile: &Vector2<u32>,
-    reference_point: &Vector3<i32>,
-) -> Vector2<i32> {
+fn map_to_world_coordinates(
+    tile: &MapCoordinates,
+    reference_point: &WorldCoordinates,
+) -> WorldCoordinates {
     let tile_size = TILE_SIZE as i32;
     let half_tile = HALF_TILE_SIZE as i32;
 
-    Vector2::new(
-        (tile.x as i32) * tile_size + half_tile + reference_point.x,
-        (tile.y as i32) * tile_size + half_tile + reference_point.y,
-    )
+    WorldCoordinates(Vector2::new(
+        (tile.0.x as i32) * tile_size + half_tile + reference_point.0.x,
+        (tile.0.y as i32) * tile_size + half_tile + reference_point.0.y,
+    ))
 }
 
 fn change_current_map(world: &mut World, new_map: String) {
@@ -306,7 +312,7 @@ fn change_current_map(world: &mut World, new_map: String) {
 fn load_map(
     world: &mut World,
     map_name: &str,
-    reference_point: Option<Vector3<i32>>,
+    reference_point: Option<WorldCoordinates>,
     progress_counter: &mut ProgressCounter,
 ) -> Map {
     let map_data: SerializableMap = {
@@ -333,15 +339,17 @@ fn load_map(
         connections,
     } = map_data;
 
-    let half_map = Vector3::new(
+    let half_map = Vector2::new(
         (num_tiles_x as i32) * (HALF_TILE_SIZE as i32),
         (num_tiles_y as i32) * (HALF_TILE_SIZE as i32),
-        0,
     );
 
     let (reference_point, map_center) = match reference_point {
-        Some(reference_point) => (reference_point, reference_point + half_map),
-        None => (-half_map, Vector3::new(0, 0, 0)),
+        Some(reference_point) => {
+            let center = WorldCoordinates(reference_point.0 + half_map);
+            (reference_point, center)
+        },
+        None => (WorldCoordinates(-half_map), WorldCoordinates(Vector2::new(0, 0))),
     };
 
     let map_size = (num_tiles_x * TILE_SIZE as u32, num_tiles_y * TILE_SIZE as u32);
@@ -369,13 +377,19 @@ fn load_map(
         terrain_entity,
         solids: solids
             .into_iter()
-            .map(|tile_position| (tile_position, Tile))
+            .map(|tile_position| (MapCoordinates(tile_position), Tile))
             .collect(),
         decoration_entity,
         script_repository: Vec::new(),
-        actions,
+        actions: actions
+            .into_iter()
+            .map(|(tile_position, action)| (MapCoordinates(tile_position), action))
+            .collect(),
         map_scripts,
-        connections,
+        connections: connections
+            .into_iter()
+            .map(|(tile_position, connection)| (MapCoordinates(tile_position), connection))
+            .collect(),
     }
 }
 
@@ -384,7 +398,7 @@ fn initialise_map_layer(
     depth: f32,
     image_name: &str,
     image_size: &(u32, u32),
-    position: &Vector3<i32>,
+    position: &WorldCoordinates,
     progress_counter: &mut ProgressCounter,
 ) -> Entity {
     let sprite_render = SpriteRender {
@@ -398,7 +412,7 @@ fn initialise_map_layer(
     };
 
     let mut transform = Transform::default();
-    transform.set_translation_xyz(position.x as f32, position.y as f32, depth);
+    transform.set_translation_xyz(position.0.x as f32, position.0.y as f32, depth);
 
     world
         .create_entity()

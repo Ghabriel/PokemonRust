@@ -1,13 +1,13 @@
 use amethyst::{
     assets::ProgressCounter,
-    core::{math::Vector2, Transform},
+    core::{math::Vector3, Transform},
     ecs::{World, WorldExt},
     shrev::EventChannel,
 };
 
 use crate::{
     entities::{
-        map::{change_tile, MapHandler, prepare_warp, ScriptEvent},
+        map::{change_tile, MapCoordinates, MapHandler, prepare_warp, ScriptEvent},
         player::PlayerEntity,
     },
 };
@@ -16,12 +16,12 @@ use super::{GameEvent, ShouldDisableInput};
 
 pub struct SwitchMapEvent {
     map: String,
-    tile: Vector2<u32>,
+    tile: MapCoordinates,
     progress_counter: ProgressCounter,
 }
 
 impl SwitchMapEvent {
-    pub fn new<T>(map: T, tile: Vector2<u32>) -> SwitchMapEvent
+    pub fn new<T>(map: T, tile: MapCoordinates) -> SwitchMapEvent
     where
         T: Into<String>
     {
@@ -43,7 +43,11 @@ impl GameEvent for SwitchMapEvent {
         world.write_storage::<Transform>()
             .get_mut(player_entity.0)
             .expect("Failed to retrieve Transform")
-            .set_translation(target_tile_data.position);
+            .set_translation(Vector3::new(
+                target_tile_data.position.0.x,
+                target_tile_data.position.0.y,
+                0.,
+            ));
 
         change_tile(
             &starting_map_id,

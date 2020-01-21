@@ -1,5 +1,5 @@
 use amethyst::{
-    core::{math::{Vector2, Vector3}},
+    core::{math::Vector2},
     ecs::{Component, DenseVecStorage, Entity, World},
 };
 
@@ -9,6 +9,8 @@ use crate::{
 };
 
 use serde::{Deserialize, Serialize};
+
+use super::{MapCoordinates, PlayerCoordinates, WorldCoordinates};
 
 use std::{
     collections::HashMap,
@@ -21,14 +23,14 @@ pub struct Map {
      * The Reference Point of this map, which corresponds to the coordinates of
      * its bottom-left corner.
      */
-    pub(super) reference_point: Vector3<i32>,
+    pub(super) reference_point: WorldCoordinates,
     pub(super) terrain_entity: Entity,
-    pub(super) solids: HashMap<Vector2<u32>, Tile>,
+    pub(super) solids: HashMap<MapCoordinates, Tile>,
     pub(super) decoration_entity: Entity,
     pub script_repository: Vec<GameScript>,
-    pub actions: HashMap<Vector2<u32>, GameAction>,
+    pub actions: HashMap<MapCoordinates, GameAction>,
     pub(super) map_scripts: Vec<MapScript>,
-    pub(super) connections: HashMap<Vector2<u32>, MapConnection>,
+    pub(super) connections: HashMap<MapCoordinates, MapConnection>,
 }
 
 impl Component for Map {
@@ -36,25 +38,18 @@ impl Component for Map {
 }
 
 impl Map {
-    pub(super) fn world_to_tile_coordinates(&self, position: &Vector3<f32>) -> Vector2<u32> {
-        let position = Vector3::new(
-            position.x as i32,
-            position.y as i32,
-            position.z as i32,
-        );
-        let tile_size = TILE_SIZE as i32;
-        let half_tile = HALF_TILE_SIZE as i32;
-        let target_corner = position - Vector3::new(half_tile, half_tile + 12, 0);
-        let normalized_position = (target_corner - self.reference_point) / tile_size;
+    pub(super) fn player_to_map_coordinates(&self, position: &PlayerCoordinates) -> MapCoordinates {
+        let tile_size: u32 = TILE_SIZE.into();
+        let half_tile: i32 = HALF_TILE_SIZE.into();
 
-        Vector2::new(
-            normalized_position.x as u32,
-            normalized_position.y as u32,
-        )
+        MapCoordinates(Vector2::new(
+            (position.0.x as i32 - half_tile - self.reference_point.0.x) as u32 / tile_size,
+            (position.0.y as i32 - half_tile - 12 - self.reference_point.0.y) as u32 / tile_size,
+        ))
     }
 
-    pub(super) fn is_tile_blocked(&self, position: &Vector3<f32>) -> bool {
-        let tile = self.world_to_tile_coordinates(&position);
+    pub(super) fn is_tile_blocked(&self, position: &PlayerCoordinates) -> bool {
+        let tile = self.player_to_map_coordinates(&position);
         self.solids.contains_key(&tile)
     }
 }
