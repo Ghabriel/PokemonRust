@@ -1,7 +1,4 @@
-use amethyst::{
-    core::{math::Vector2},
-    ecs::{Component, DenseVecStorage, Entity, World},
-};
+use amethyst::ecs::{Component, DenseVecStorage, Entity, World};
 
 use crate::{
     common::Direction,
@@ -43,10 +40,10 @@ impl Map {
         let half_tile: i32 = HALF_TILE_SIZE.into();
         let position = position.to_world_coordinates();
 
-        MapCoordinates(Vector2::new(
+        MapCoordinates::new(
             (position.0.x as i32 - half_tile - self.reference_point.0.x) as u32 / tile_size,
             (position.0.y as i32 - half_tile - self.reference_point.0.y) as u32 / tile_size,
-        ))
+        )
     }
 
     pub(super) fn is_tile_blocked(&self, position: &PlayerCoordinates) -> bool {
@@ -116,9 +113,9 @@ pub enum MapScriptKind {
     OnMapEnter,
 }
 
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone)]
 pub struct MapConnection {
     // TODO: maybe pub is ok
     pub(super) map: String,
-    pub(super) directions: HashMap<Direction, Vector2<u32>>,
+    pub(super) directions: HashMap<Direction, MapCoordinates>,
 }

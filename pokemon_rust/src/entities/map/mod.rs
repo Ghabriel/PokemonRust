@@ -39,10 +39,10 @@ pub struct MapHandler {
 
 impl MapHandler {
     pub fn get_forward_tile(&self, player: &Player, player_position: &Transform) -> TileData {
-        let player_position = PlayerCoordinates(Vector2::new(
+        let player_position = PlayerCoordinates::new(
             player_position.translation().x,
             player_position.translation().y,
-        ));
+        );
 
         let current_map = &self.loaded_maps[&self.current_map];
         let current_tile = current_map.player_to_map_coordinates(&player_position);
@@ -59,10 +59,10 @@ impl MapHandler {
 
         let (offset_x, offset_y) = get_direction_offset::<f32>(&player.facing_direction);
         let tile_size: f32 = TILE_SIZE.into();
-        let position = PlayerCoordinates(Vector2::new(
+        let position = PlayerCoordinates::new(
             player_position.0.x + offset_x * tile_size,
             player_position.0.y + offset_y * tile_size,
-        ));
+        );
 
         TileData {
             position,
@@ -164,6 +164,12 @@ pub struct ValidatedGameAction {
 #[derive(Clone)]
 pub struct WorldCoordinates(pub Vector2<i32>);
 
+impl WorldCoordinates {
+    pub fn new(x: i32, y: i32) -> WorldCoordinates {
+        WorldCoordinates(Vector2::new(x, y))
+    }
+}
+
 impl Default for WorldCoordinates {
     fn default() -> WorldCoordinates {
         WorldCoordinates(Vector2::new(0, 0))
@@ -175,12 +181,22 @@ impl Default for WorldCoordinates {
 #[derive(Clone, Eq, Hash, PartialEq)]
 pub struct MapCoordinates(pub Vector2<u32>);
 
+impl MapCoordinates {
+    pub fn new(x: u32, y: u32) -> MapCoordinates {
+        MapCoordinates(Vector2::new(x, y))
+    }
+}
+
 /// Represents a position possibly occupied by a player, expressed in World
 /// Coordinates. The universal player offset is included.
 #[derive(Clone)]
 pub struct PlayerCoordinates(pub Vector2<f32>);
 
 impl PlayerCoordinates {
+    pub fn new(x: f32, y: f32) -> PlayerCoordinates {
+        PlayerCoordinates(Vector2::new(x, y))
+    }
+
     pub fn from_world_coordinates(coordinates: &WorldCoordinates) -> PlayerCoordinates {
         PlayerCoordinates(Vector2::new(
             coordinates.0.x as f32,

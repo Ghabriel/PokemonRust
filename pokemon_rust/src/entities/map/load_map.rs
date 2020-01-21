@@ -109,7 +109,7 @@ pub fn load_detached_map(
     progress_counter: &mut ProgressCounter,
 ) -> Map {
     // TODO: obtain this value algorithmically
-    let reference_point = WorldCoordinates(Vector2::new(1_000_000, 0));
+    let reference_point = WorldCoordinates::new(1_000_000, 0);
 
     let mut map = load_map(world, &map_name, Some(reference_point), progress_counter);
 
@@ -228,7 +228,7 @@ fn load_nearby_connections(world: &mut World) {
                     world
                         .write_resource::<EventQueue>()
                         .push(
-                            WarpEvent::new("test_map3", MapCoordinates(Vector2::new(5, 10)))
+                            WarpEvent::new("test_map3", MapCoordinates::new(5, 10))
                         );
                 }));
 
@@ -257,10 +257,10 @@ fn get_player_position(world: &World) -> PlayerCoordinates {
 
     world.read_storage::<Transform>()
         .get(player_entity.0)
-        .map(|transform| PlayerCoordinates(Vector2::new(
+        .map(|transform| PlayerCoordinates::new(
             transform.translation().x,
             transform.translation().y,
-        )))
+        ))
         .expect("Failed to retrieve Transform")
 }
 
@@ -280,10 +280,10 @@ fn get_new_map_reference_point(
     let external_tile_world_coordinates = tile_world_coordinates.0 + external_tile_offset;
     let half_tile = HALF_TILE_SIZE as i32;
 
-    WorldCoordinates(Vector2::new(
-        external_tile_world_coordinates.x - half_tile - (external_tile.x as i32) * tile_size,
-        external_tile_world_coordinates.y - half_tile - (external_tile.y as i32) * tile_size,
-    ))
+    WorldCoordinates::new(
+        external_tile_world_coordinates.x - half_tile - (external_tile.0.x as i32) * tile_size,
+        external_tile_world_coordinates.y - half_tile - (external_tile.0.y as i32) * tile_size,
+    )
 }
 
 fn map_to_world_coordinates(
@@ -293,10 +293,10 @@ fn map_to_world_coordinates(
     let tile_size = TILE_SIZE as i32;
     let half_tile = HALF_TILE_SIZE as i32;
 
-    WorldCoordinates(Vector2::new(
+    WorldCoordinates::new(
         (tile.0.x as i32) * tile_size + half_tile + reference_point.0.x,
         (tile.0.y as i32) * tile_size + half_tile + reference_point.0.y,
-    ))
+    )
 }
 
 fn change_current_map(world: &mut World, new_map: String) {
@@ -346,7 +346,7 @@ fn load_map(
             let center = WorldCoordinates(reference_point.0 + half_map);
             (reference_point, center)
         },
-        None => (WorldCoordinates(-half_map), WorldCoordinates(Vector2::new(0, 0))),
+        None => (WorldCoordinates(-half_map), WorldCoordinates::new(0, 0)),
     };
 
     let map_size = (num_tiles_x * TILE_SIZE as u32, num_tiles_y * TILE_SIZE as u32);
@@ -385,7 +385,18 @@ fn load_map(
         map_scripts,
         connections: connections
             .into_iter()
-            .map(|(tile_position, connection)| (MapCoordinates(tile_position), connection))
+            .map(|(tile_position, connection)| {
+                (
+                    MapCoordinates(tile_position),
+                    MapConnection {
+                        map: connection.map,
+                        directions: connection.directions
+                            .into_iter()
+                            .map(|(direction, coordinates)| (direction, MapCoordinates(coordinates)))
+                            .collect(),
+                    },
+                )
+            })
             .collect(),
     }
 }
