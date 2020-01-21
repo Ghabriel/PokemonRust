@@ -9,7 +9,7 @@ use crate::{
     config::GameConfig,
     constants::TILE_SIZE,
     entities::{
-        map::{change_tile, MapHandler, MapId, ScriptEvent, TileData},
+        map::{change_tile, CoordinateSystem, MapHandler, MapId, ScriptEvent, TileData},
         player::{Player, PlayerAction, StaticPlayer},
     },
 };

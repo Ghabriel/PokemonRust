@@ -7,7 +7,7 @@ use amethyst::{
 
 use crate::{
     entities::{
-        map::{change_tile, MapCoordinates, MapHandler, prepare_warp, ScriptEvent},
+        map::{change_tile, CoordinateSystem, MapCoordinates, MapHandler, prepare_warp, ScriptEvent},
         player::PlayerEntity,
     },
 };

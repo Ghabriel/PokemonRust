@@ -7,7 +7,7 @@ use crate::{
 
 use serde::{Deserialize, Serialize};
 
-use super::{MapCoordinates, PlayerCoordinates, WorldCoordinates};
+use super::{CoordinateSystem, MapCoordinates, PlayerCoordinates, WorldCoordinates};
 
 use std::{
     collections::HashMap,

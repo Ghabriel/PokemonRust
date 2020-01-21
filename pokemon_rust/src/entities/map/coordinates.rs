@@ -2,6 +2,13 @@ use amethyst::core::{math::Vector2, Transform};
 
 use crate::constants::UNIVERSAL_PLAYER_OFFSET_Y;
 
+pub trait CoordinateSystem {
+    type CoordinateType;
+
+    fn x(&self) -> Self::CoordinateType;
+    fn y(&self) -> Self::CoordinateType;
+}
+
 /// Represents a position expressed in World Coordinates.
 #[derive(Clone)]
 pub struct WorldCoordinates(Vector2<i32>);
@@ -10,19 +17,23 @@ impl WorldCoordinates {
     pub fn new(x: i32, y: i32) -> WorldCoordinates {
         WorldCoordinates(Vector2::new(x, y))
     }
-
-    pub fn x(&self) -> i32 {
-        self.0.x
-    }
-
-    pub fn y(&self) -> i32 {
-        self.0.y
-    }
 }
 
 impl Default for WorldCoordinates {
     fn default() -> WorldCoordinates {
         WorldCoordinates(Vector2::new(0, 0))
+    }
+}
+
+impl CoordinateSystem for WorldCoordinates {
+    type CoordinateType = i32;
+
+    fn x(&self) -> i32 {
+        self.0.x
+    }
+
+    fn y(&self) -> i32 {
+        self.0.y
     }
 }
 
@@ -39,12 +50,16 @@ impl MapCoordinates {
     pub fn from_vector(vector: &Vector2<u32>) -> MapCoordinates {
         MapCoordinates::new(vector.x, vector.y)
     }
+}
 
-    pub fn x(&self) -> u32 {
+impl CoordinateSystem for MapCoordinates {
+    type CoordinateType = u32;
+
+    fn x(&self) -> u32 {
         self.0.x
     }
 
-    pub fn y(&self) -> u32 {
+    fn y(&self) -> u32 {
         self.0.y
     }
 }
@@ -80,11 +95,22 @@ impl PlayerCoordinates {
         )
     }
 
-    pub fn x(&self) -> f32 {
+    pub fn to_transform(&self) -> Transform {
+        let mut transform = Transform::default();
+        transform.set_translation_xyz(self.0.x, self.0.y, 0.);
+
+        transform
+    }
+}
+
+impl CoordinateSystem for PlayerCoordinates {
+    type CoordinateType = f32;
+
+    fn x(&self) -> f32 {
         self.0.x
     }
 
-    pub fn y(&self) -> f32 {
+    fn y(&self) -> f32 {
         self.0.y
     }
 }

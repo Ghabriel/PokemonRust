@@ -17,7 +17,7 @@ use self::map::Map;
 use std::collections::HashMap;
 
 pub use self::{
-    coordinates::{MapCoordinates, PlayerCoordinates, WorldCoordinates},
+    coordinates::{CoordinateSystem, MapCoordinates, PlayerCoordinates, WorldCoordinates},
     events::{MapEvent, ScriptEvent},
     load_map::{change_tile, initialise_map, prepare_warp},
     map::{

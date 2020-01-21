@@ -152,13 +152,8 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
         moving: false,
     };
 
-    let transform = {
-        let position = PlayerCoordinates::from_world_coordinates(&WorldCoordinates::default());
-        let mut transform = Transform::default();
-        transform.set_translation_xyz(position.x(), position.y(), 0.);
-
-        transform
-    };
+    let transform = PlayerCoordinates::from_world_coordinates(&WorldCoordinates::default())
+        .to_transform();
 
     let sprite_render = SpriteRender {
         sprite_sheet: sprite_sheets.walking.clone(),

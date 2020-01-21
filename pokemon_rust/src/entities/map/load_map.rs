@@ -24,6 +24,7 @@ use std::{
 };
 
 use super::{
+    CoordinateSystem,
     events::ScriptEvent,
     map::{
         GameActionKind,
