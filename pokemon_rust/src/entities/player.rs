@@ -8,7 +8,6 @@ use amethyst::{
         SpriteRenderPrimitive,
     },
     assets::{AssetStorage, Handle, Loader, ProgressCounter},
-    core::Transform,
     ecs::{
         Component,
         DenseVecStorage,

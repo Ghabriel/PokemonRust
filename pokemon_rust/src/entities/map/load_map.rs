@@ -8,7 +8,7 @@ use amethyst::{
 };
 
 use crate::{
-    common::{get_direction_offset, load_full_texture_sprite_sheet},
+    common::load_full_texture_sprite_sheet,
     constants::{HALF_TILE_SIZE, MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
     entities::{
         player::PlayerEntity,
@@ -24,7 +24,13 @@ use std::{
 };
 
 use super::{
-    CoordinateSystem,
+    coordinates::{
+        CoordinateSystem,
+        MapCoordinates,
+        PlayerCoordinates,
+        WorldCoordinates,
+        WorldOffset,
+    },
     events::ScriptEvent,
     map::{
         GameActionKind,
@@ -35,14 +41,11 @@ use super::{
         MapScriptKind,
         Tile,
     },
-    MapCoordinates,
     MapHandler,
     MapId,
-    PlayerCoordinates,
     serializable_map::SerializableMap,
     TileData,
     ValidatedGameAction,
-    WorldCoordinates,
 };
 
 pub fn change_tile(
@@ -272,31 +275,53 @@ fn get_new_map_reference_point(
     // TODO: handle multi-connections (non-rectangular maps)
     let (first_direction, external_tile) = connection.directions.iter().next().unwrap();
 
-    let tile_size = TILE_SIZE as i32;
-    let (offset_x, offset_y) = get_direction_offset::<i32>(&first_direction);
-    let external_tile_world_coordinates = WorldCoordinates::new(
-        tile_world_coordinates.x() + tile_size * offset_x,
-        tile_world_coordinates.y() + tile_size * offset_y,
-    );
-    let half_tile = HALF_TILE_SIZE as i32;
+    let external_tile_world_coordinates = tile_world_coordinates
+        .offset_by_direction(&first_direction);
 
-    WorldCoordinates::new(
-        external_tile_world_coordinates.x() - half_tile - (external_tile.x() as i32) * tile_size,
-        external_tile_world_coordinates.y() - half_tile - (external_tile.y() as i32) * tile_size,
+    get_reference_point_from_tile(
+        &external_tile,
+        &external_tile_world_coordinates,
     )
 }
 
+/// Given the position of a tile in Map Coordinates and the reference point of
+/// its map, calculates the position of the tile in World Coordinates.
 fn map_to_world_coordinates(
     tile: &MapCoordinates,
     reference_point: &WorldCoordinates,
 ) -> WorldCoordinates {
-    let tile_size = TILE_SIZE as i32;
-    let half_tile = HALF_TILE_SIZE as i32;
+    reference_point.with_offset(&tile.to_world_offset())
+}
 
-    WorldCoordinates::new(
-        (tile.x() as i32) * tile_size + half_tile + reference_point.x(),
-        (tile.y() as i32) * tile_size + half_tile + reference_point.y(),
+/// Given the position of a tile in World Coordinates and the reference point of
+/// its map, calculates the position of the tile in Map Coordinates.
+pub fn world_to_map_coordinates(
+    tile: &WorldCoordinates,
+    reference_point: &WorldCoordinates,
+) -> MapCoordinates {
+    let tile_size: u32 = TILE_SIZE.into();
+
+    let scaled_map_coordinates = tile
+        .with_offset(&reference_point.to_world_offset().invert())
+        .corner();
+
+    MapCoordinates::new(
+        scaled_map_coordinates.x() as u32 / tile_size,
+        scaled_map_coordinates.y() as u32 / tile_size,
     )
+}
+
+/// Given the position of a tile in both Map Coordinates and World Coordinates,
+/// calculates the reference point of its map.
+fn get_reference_point_from_tile(
+    tile_map_coordinates: &MapCoordinates,
+    tile_world_coordinates: &WorldCoordinates,
+) -> WorldCoordinates {
+    let offset = tile_map_coordinates
+        .to_world_offset()
+        .invert();
+
+    tile_world_coordinates.with_offset(&offset)
 }
 
 fn change_current_map(world: &mut World, new_map: String) {
@@ -336,18 +361,20 @@ fn load_map(
         connections,
     } = map_data;
 
-    let half_map_x = (num_tiles_x as i32) * (HALF_TILE_SIZE as i32);
-    let half_map_y = (num_tiles_y as i32) * (HALF_TILE_SIZE as i32);
+    let half_map_offset = WorldOffset::new(
+        (num_tiles_x as i32) * (HALF_TILE_SIZE as i32),
+        (num_tiles_y as i32) * (HALF_TILE_SIZE as i32),
+    );
 
     let (reference_point, map_center) = match reference_point {
         Some(reference_point) => {
-            let center = WorldCoordinates::new(
-                reference_point.x() + half_map_x,
-                reference_point.y() + half_map_y,
-            );
+            let center = reference_point.with_offset(&half_map_offset);
             (reference_point, center)
         },
-        None => (WorldCoordinates::new(-half_map_x, -half_map_y), WorldCoordinates::new(0, 0)),
+        None => (
+            WorldCoordinates::origin().with_offset(&half_map_offset.invert()),
+            WorldCoordinates::origin()
+        ),
     };
 
     let map_size = (num_tiles_x * TILE_SIZE as u32, num_tiles_y * TILE_SIZE as u32);

@@ -1,13 +1,15 @@
 use amethyst::ecs::{Component, DenseVecStorage, Entity, World};
 
-use crate::{
-    common::Direction,
-    constants::{HALF_TILE_SIZE, TILE_SIZE},
-};
+use crate::common::Direction;
 
 use serde::{Deserialize, Serialize};
 
-use super::{CoordinateSystem, MapCoordinates, PlayerCoordinates, WorldCoordinates};
+use super::{
+    load_map::world_to_map_coordinates,
+    MapCoordinates,
+    PlayerCoordinates,
+    WorldCoordinates,
+};
 
 use std::{
     collections::HashMap,
@@ -36,13 +38,9 @@ impl Component for Map {
 
 impl Map {
     pub(super) fn player_to_map_coordinates(&self, position: &PlayerCoordinates) -> MapCoordinates {
-        let tile_size: u32 = TILE_SIZE.into();
-        let half_tile: i32 = HALF_TILE_SIZE.into();
-        let position = position.to_world_coordinates();
-
-        MapCoordinates::new(
-            (position.x() as i32 - half_tile - self.reference_point.x()) as u32 / tile_size,
-            (position.y() as i32 - half_tile - self.reference_point.y()) as u32 / tile_size,
+        world_to_map_coordinates(
+            &position.to_world_coordinates(),
+            &self.reference_point
         )
     }
 

@@ -1,6 +1,9 @@
 use amethyst::core::{math::Vector2, Transform};
 
-use crate::constants::UNIVERSAL_PLAYER_OFFSET_Y;
+use crate::{
+    common::{Direction, get_direction_offset},
+    constants::{HALF_TILE_SIZE, TILE_SIZE, UNIVERSAL_PLAYER_OFFSET_Y},
+};
 
 pub trait CoordinateSystem {
     type CoordinateType;
@@ -9,13 +12,60 @@ pub trait CoordinateSystem {
     fn y(&self) -> Self::CoordinateType;
 }
 
-/// Represents a position expressed in World Coordinates.
+/// Represents an offset expressed in World Coordinates.
+pub struct WorldOffset(Vector2<i32>);
+
+impl WorldOffset {
+    pub fn new(x: i32, y: i32) -> WorldOffset {
+        WorldOffset(Vector2::new(x, y))
+    }
+
+    pub fn invert(&self) -> WorldOffset {
+        WorldOffset::new(-self.0.x, -self.0.y)
+    }
+}
+
+/// Represents a position expressed in World Coordinates. It typically
+/// refers to the center of a tile.
 #[derive(Clone)]
 pub struct WorldCoordinates(Vector2<i32>);
 
 impl WorldCoordinates {
     pub fn new(x: i32, y: i32) -> WorldCoordinates {
         WorldCoordinates(Vector2::new(x, y))
+    }
+
+    pub fn origin() -> WorldCoordinates {
+        WorldCoordinates::new(0, 0)
+    }
+
+    pub fn offset_by_direction(&self, direction: &Direction) -> WorldCoordinates {
+        let tile_size: i32 = TILE_SIZE.into();
+        let (offset_x, offset_y) = get_direction_offset::<i32>(&direction);
+
+        WorldCoordinates::new(
+            self.x() + tile_size * offset_x,
+            self.y() + tile_size * offset_y,
+        )
+    }
+
+    pub fn with_offset(&self, offset: &WorldOffset) -> WorldCoordinates {
+        WorldCoordinates::new(
+            self.x() + offset.0.x,
+            self.y() + offset.0.y,
+        )
+    }
+
+    pub fn to_world_offset(&self) -> WorldOffset {
+        WorldOffset::new(self.x(), self.y())
+    }
+
+    /// Returns the bottom-left corner of the tile that this position refers to.
+    pub fn corner(&self) -> WorldCoordinates {
+        WorldCoordinates::new(
+            self.x() - HALF_TILE_SIZE as i32,
+            self.y() - HALF_TILE_SIZE as i32,
+        )
     }
 }
 
@@ -49,6 +99,16 @@ impl MapCoordinates {
 
     pub fn from_vector(vector: &Vector2<u32>) -> MapCoordinates {
         MapCoordinates::new(vector.x, vector.y)
+    }
+
+    pub fn to_world_offset(&self) -> WorldOffset {
+        let tile_size: i32 = TILE_SIZE.into();
+        let half_tile: i32 = HALF_TILE_SIZE.into();
+
+        WorldOffset::new(
+            (self.x() as i32) * tile_size + half_tile,
+            (self.y() as i32) * tile_size + half_tile,
+        )
     }
 }
 
