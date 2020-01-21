@@ -39,6 +39,13 @@ impl WorldCoordinates {
         WorldCoordinates::new(0, 0)
     }
 
+    pub fn to_transform(&self) -> Transform {
+        let mut transform = Transform::default();
+        transform.set_translation_xyz(self.x() as f32, self.y() as f32, 0.);
+
+        transform
+    }
+
     pub fn offset_by_direction(&self, direction: &Direction) -> WorldCoordinates {
         let tile_size: i32 = TILE_SIZE.into();
         let (offset_x, offset_y) = get_direction_offset::<i32>(&direction);
@@ -159,7 +166,7 @@ impl PlayerCoordinates {
 
     pub fn to_transform(&self) -> Transform {
         let mut transform = Transform::default();
-        transform.set_translation_xyz(self.0.x, self.0.y, 0.);
+        transform.set_translation_xyz(self.x(), self.y(), 0.);
 
         transform
     }

@@ -449,8 +449,8 @@ fn initialise_map_layer(
         sprite_number: 0,
     };
 
-    let mut transform = Transform::default();
-    transform.set_translation_xyz(position.x() as f32, position.y() as f32, depth);
+    let mut transform = position.to_transform();
+    transform.set_translation_z(depth);
 
     world
         .create_entity()

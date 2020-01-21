@@ -1,13 +1,13 @@
 use amethyst::{
     assets::ProgressCounter,
-    core::{math::Vector3, Transform},
+    core::Transform,
     ecs::{World, WorldExt},
     shrev::EventChannel,
 };
 
 use crate::{
     entities::{
-        map::{change_tile, CoordinateSystem, MapCoordinates, MapHandler, prepare_warp, ScriptEvent},
+        map::{change_tile, MapCoordinates, MapHandler, prepare_warp, ScriptEvent},
         player::PlayerEntity,
     },
 };
@@ -43,11 +43,7 @@ impl GameEvent for SwitchMapEvent {
         world.write_storage::<Transform>()
             .get_mut(player_entity.0)
             .expect("Failed to retrieve Transform")
-            .set_translation(Vector3::new(
-                target_tile_data.position.x(),
-                target_tile_data.position.y(),
-                0.,
-            ));
+            .set_translation(*target_tile_data.position.to_transform().translation());
 
         change_tile(
             &starting_map_id,
