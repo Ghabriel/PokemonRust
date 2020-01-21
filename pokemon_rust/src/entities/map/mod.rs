@@ -60,8 +60,8 @@ impl MapHandler {
         let (offset_x, offset_y) = get_direction_offset::<f32>(&player.facing_direction);
         let tile_size: f32 = TILE_SIZE.into();
         let position = PlayerCoordinates::new(
-            player_position.0.x + offset_x * tile_size,
-            player_position.0.y + offset_y * tile_size,
+            player_position.x() + offset_x * tile_size,
+            player_position.y() + offset_y * tile_size,
         );
 
         TileData {
@@ -124,8 +124,8 @@ impl MapHandler {
                 let visible_tiles_x = 22;
                 let visible_tiles_y = 16;
                 // TODO: coordinate system conflict. Bug?
-                let distance_x = (tile.0.x as i32) - (position.0.x as i32);
-                let distance_y = (tile.0.y as i32) - (position.0.y as i32);
+                let distance_x = (tile.x() as i32) - (position.x() as i32);
+                let distance_y = (tile.y() as i32) - (position.y() as i32);
                 let leniency = 12;
 
                 connection
@@ -162,11 +162,19 @@ pub struct ValidatedGameAction {
 
 /// Represents a position expressed in World Coordinates.
 #[derive(Clone)]
-pub struct WorldCoordinates(pub Vector2<i32>);
+pub struct WorldCoordinates(Vector2<i32>);
 
 impl WorldCoordinates {
     pub fn new(x: i32, y: i32) -> WorldCoordinates {
         WorldCoordinates(Vector2::new(x, y))
+    }
+
+    pub fn x(&self) -> i32 {
+        self.0.x
+    }
+
+    pub fn y(&self) -> i32 {
+        self.0.y
     }
 }
 
@@ -179,18 +187,26 @@ impl Default for WorldCoordinates {
 /// Represents a position expressed in Map Coordinates, i.e the position of
 /// something relative to the map it's in.
 #[derive(Clone, Eq, Hash, PartialEq)]
-pub struct MapCoordinates(pub Vector2<u32>);
+pub struct MapCoordinates(Vector2<u32>);
 
 impl MapCoordinates {
     pub fn new(x: u32, y: u32) -> MapCoordinates {
         MapCoordinates(Vector2::new(x, y))
+    }
+
+    pub fn x(&self) -> u32 {
+        self.0.x
+    }
+
+    pub fn y(&self) -> u32 {
+        self.0.y
     }
 }
 
 /// Represents a position possibly occupied by a player, expressed in World
 /// Coordinates. The universal player offset is included.
 #[derive(Clone)]
-pub struct PlayerCoordinates(pub Vector2<f32>);
+pub struct PlayerCoordinates(Vector2<f32>);
 
 impl PlayerCoordinates {
     pub fn new(x: f32, y: f32) -> PlayerCoordinates {
@@ -209,5 +225,13 @@ impl PlayerCoordinates {
             self.0.x as i32,
             (self.0.y - UNIVERSAL_PLAYER_OFFSET_Y) as i32,
         ))
+    }
+
+    pub fn x(&self) -> f32 {
+        self.0.x
+    }
+
+    pub fn y(&self) -> f32 {
+        self.0.y
     }
 }

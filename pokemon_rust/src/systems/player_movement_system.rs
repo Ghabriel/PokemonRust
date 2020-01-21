@@ -69,8 +69,8 @@ impl<'a> System<'a> for PlayerMovementSystem {
 
                     if movement_data.estimated_time <= delta_seconds {
                         transform.set_translation(Vector3::new(
-                            movement_data.final_tile_data.position.0.x,
-                            movement_data.final_tile_data.position.0.y,
+                            movement_data.final_tile_data.position.x(),
+                            movement_data.final_tile_data.position.y(),
                             0.,
                         ));
 

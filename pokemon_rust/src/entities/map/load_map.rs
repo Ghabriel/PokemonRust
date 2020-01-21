@@ -276,13 +276,15 @@ fn get_new_map_reference_point(
 
     let tile_size = TILE_SIZE as i32;
     let (offset_x, offset_y) = get_direction_offset::<i32>(&first_direction);
-    let external_tile_offset = tile_size * Vector2::new(offset_x, offset_y);
-    let external_tile_world_coordinates = tile_world_coordinates.0 + external_tile_offset;
+    let external_tile_world_coordinates = WorldCoordinates::new(
+        tile_world_coordinates.x() + tile_size * offset_x,
+        tile_world_coordinates.y() + tile_size * offset_y,
+    );
     let half_tile = HALF_TILE_SIZE as i32;
 
     WorldCoordinates::new(
-        external_tile_world_coordinates.x - half_tile - (external_tile.0.x as i32) * tile_size,
-        external_tile_world_coordinates.y - half_tile - (external_tile.0.y as i32) * tile_size,
+        external_tile_world_coordinates.x() - half_tile - (external_tile.x() as i32) * tile_size,
+        external_tile_world_coordinates.y() - half_tile - (external_tile.y() as i32) * tile_size,
     )
 }
 
@@ -294,8 +296,8 @@ fn map_to_world_coordinates(
     let half_tile = HALF_TILE_SIZE as i32;
 
     WorldCoordinates::new(
-        (tile.0.x as i32) * tile_size + half_tile + reference_point.0.x,
-        (tile.0.y as i32) * tile_size + half_tile + reference_point.0.y,
+        (tile.x() as i32) * tile_size + half_tile + reference_point.x(),
+        (tile.y() as i32) * tile_size + half_tile + reference_point.y(),
     )
 }
 
@@ -420,7 +422,7 @@ fn initialise_map_layer(
     };
 
     let mut transform = Transform::default();
-    transform.set_translation_xyz(position.0.x as f32, position.0.y as f32, depth);
+    transform.set_translation_xyz(position.x() as f32, position.y() as f32, depth);
 
     world
         .create_entity()

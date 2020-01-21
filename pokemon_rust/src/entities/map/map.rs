@@ -41,8 +41,8 @@ impl Map {
         let position = position.to_world_coordinates();
 
         MapCoordinates::new(
-            (position.0.x as i32 - half_tile - self.reference_point.0.x) as u32 / tile_size,
-            (position.0.y as i32 - half_tile - self.reference_point.0.y) as u32 / tile_size,
+            (position.x() as i32 - half_tile - self.reference_point.x()) as u32 / tile_size,
+            (position.y() as i32 - half_tile - self.reference_point.y()) as u32 / tile_size,
         )
     }
 

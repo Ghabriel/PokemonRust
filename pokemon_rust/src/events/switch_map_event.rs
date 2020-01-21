@@ -44,8 +44,8 @@ impl GameEvent for SwitchMapEvent {
             .get_mut(player_entity.0)
             .expect("Failed to retrieve Transform")
             .set_translation(Vector3::new(
-                target_tile_data.position.0.x,
-                target_tile_data.position.0.y,
+                target_tile_data.position.x(),
+                target_tile_data.position.y(),
                 0.,
             ));
 

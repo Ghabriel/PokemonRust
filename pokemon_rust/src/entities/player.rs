@@ -155,7 +155,7 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
     let transform = {
         let position = PlayerCoordinates::from_world_coordinates(&WorldCoordinates::default());
         let mut transform = Transform::default();
-        transform.set_translation_xyz(position.0.x, position.0.y, 0.);
+        transform.set_translation_xyz(position.x(), position.y(), 0.);
 
         transform
     };
