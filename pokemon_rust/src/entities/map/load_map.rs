@@ -300,18 +300,6 @@ fn load_map(
     reference_point: Option<WorldCoordinates>,
     progress_counter: &mut ProgressCounter,
 ) -> Map {
-    let map_data: SerializableMap = {
-        let map_file = application_root_dir()
-            .unwrap()
-            .join("assets")
-            .join("maps")
-            .join(map_name)
-            .join("map.ron");
-        let file = File::open(map_file).expect("Failed opening map file");
-
-        from_reader(file).expect("Failed deserializing map")
-    };
-
     let SerializableMap {
         map_name,
         base_file_name,
@@ -322,7 +310,7 @@ fn load_map(
         actions,
         map_scripts,
         connections,
-    } = map_data;
+    } = read_map_file(&map_name);
 
     let map_size = (num_tiles_x * TILE_SIZE as u32, num_tiles_y * TILE_SIZE as u32);
 
@@ -392,6 +380,19 @@ fn load_map(
             })
             .collect(),
     }
+}
+
+fn read_map_file(map_name: &str) -> SerializableMap {
+    let map_file = application_root_dir()
+        .unwrap()
+        .join("assets")
+        .join("maps")
+        .join(map_name)
+        .join("map.ron");
+
+    let file = File::open(map_file).expect("Failed opening map file");
+
+    from_reader(file).expect("Failed deserializing map")
 }
 
 fn initialise_map_layer(
