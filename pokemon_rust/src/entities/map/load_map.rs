@@ -257,10 +257,7 @@ fn get_player_position(world: &World) -> PlayerCoordinates {
 
     world.read_storage::<Transform>()
         .get(player_entity.0)
-        .map(|transform| PlayerCoordinates::new(
-            transform.translation().x,
-            transform.translation().y,
-        ))
+        .map(PlayerCoordinates::from_transform)
         .expect("Failed to retrieve Transform")
 }
 

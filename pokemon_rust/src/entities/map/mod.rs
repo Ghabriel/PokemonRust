@@ -39,10 +39,7 @@ pub struct MapHandler {
 
 impl MapHandler {
     pub fn get_forward_tile(&self, player: &Player, player_position: &Transform) -> TileData {
-        let player_position = PlayerCoordinates::new(
-            player_position.translation().x,
-            player_position.translation().y,
-        );
+        let player_position = PlayerCoordinates::from_transform(&player_position);
 
         let current_map = &self.loaded_maps[&self.current_map];
         let current_tile = current_map.player_to_map_coordinates(&player_position);
@@ -225,6 +222,13 @@ impl PlayerCoordinates {
             self.0.x as i32,
             (self.0.y - UNIVERSAL_PLAYER_OFFSET_Y) as i32,
         ))
+    }
+
+    pub fn from_transform(transform: &Transform) -> PlayerCoordinates {
+        PlayerCoordinates::new(
+            transform.translation().x,
+            transform.translation().y,
+        )
     }
 
     pub fn x(&self) -> f32 {
