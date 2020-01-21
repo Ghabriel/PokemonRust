@@ -8,6 +8,7 @@ use super::{
     conversions::player_to_map_coordinates,
     MapCoordinates,
     PlayerCoordinates,
+    serializable_map::InitializedMap,
     WorldCoordinates,
 };
 
@@ -37,6 +38,42 @@ impl Component for Map {
 }
 
 impl Map {
+    pub(super) fn from_initialized_map(map: InitializedMap) -> Map {
+        Map {
+            map_name: map.map_name,
+            reference_point: map.reference_point,
+            terrain_entity: map.terrain_entity,
+            solids: map.solids
+                .into_iter()
+                .map(|tile_position| (MapCoordinates::from_vector(&tile_position), Tile))
+                .collect(),
+            decoration_entity: map.decoration_entity,
+            script_repository: Vec::new(),
+            actions: map.actions
+                .into_iter()
+                .map(|(tile_position, action)| (MapCoordinates::from_vector(&tile_position), action))
+                .collect(),
+            map_scripts: map.map_scripts,
+            connections: map.connections
+                .into_iter()
+                .map(|(tile_position, connection)| {
+                    (
+                        MapCoordinates::from_vector(&tile_position),
+                        MapConnection {
+                            map: connection.map,
+                            directions: connection.directions
+                                .into_iter()
+                                .map(|(direction, coordinates)| {
+                                    (direction, MapCoordinates::from_vector(&coordinates))
+                                })
+                                .collect(),
+                        },
+                    )
+                })
+                .collect(),
+        }
+    }
+
     pub(super) fn player_to_map_coordinates(&self, position: &PlayerCoordinates) -> MapCoordinates {
         player_to_map_coordinates(&position, &self.reference_point)
     }

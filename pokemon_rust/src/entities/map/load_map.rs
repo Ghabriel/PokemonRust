@@ -42,11 +42,10 @@ use super::{
         MapConnection,
         MapScript,
         MapScriptKind,
-        Tile,
     },
     MapHandler,
     MapId,
-    serializable_map::SerializableMap,
+    serializable_map::{InitializedMap, SerializableMap},
     TileData,
     ValidatedGameAction,
 };
@@ -300,20 +299,8 @@ fn load_map(
     reference_point: Option<WorldCoordinates>,
     progress_counter: &mut ProgressCounter,
 ) -> Map {
-    let SerializableMap {
-        map_name,
-        base_file_name,
-        layer3_file_name,
-        num_tiles_x,
-        num_tiles_y,
-        solids,
-        actions,
-        map_scripts,
-        connections,
-    } = read_map_file(&map_name);
-
-    let map_size = (num_tiles_x * TILE_SIZE as u32, num_tiles_y * TILE_SIZE as u32);
-
+    let map = read_map_file(&map_name);
+    let map_size = (map.num_tiles_x * TILE_SIZE as u32, map.num_tiles_y * TILE_SIZE as u32);
     let half_map_offset = WorldOffset::new(
         map_size.0 as i32 / 2,
         map_size.1 as i32 / 2,
@@ -333,7 +320,7 @@ fn load_map(
     let terrain_entity = initialise_map_layer(
         world,
         MAP_TERRAIN_LAYER_Z,
-        &base_file_name,
+        &map.base_file_name,
         &map_size,
         &map_center,
         progress_counter,
@@ -341,45 +328,22 @@ fn load_map(
     let decoration_entity = initialise_map_layer(
         world,
         MAP_DECORATION_LAYER_Z,
-        &layer3_file_name,
+        &map.layer3_file_name,
         &map_size,
         &map_center,
         progress_counter,
     );
 
-    Map {
-        map_name,
+    Map::from_initialized_map(InitializedMap {
+        map_name: map.map_name,
         reference_point,
         terrain_entity,
-        solids: solids
-            .into_iter()
-            .map(|tile_position| (MapCoordinates::from_vector(&tile_position), Tile))
-            .collect(),
+        solids: map.solids,
         decoration_entity,
-        script_repository: Vec::new(),
-        actions: actions
-            .into_iter()
-            .map(|(tile_position, action)| (MapCoordinates::from_vector(&tile_position), action))
-            .collect(),
-        map_scripts,
-        connections: connections
-            .into_iter()
-            .map(|(tile_position, connection)| {
-                (
-                    MapCoordinates::from_vector(&tile_position),
-                    MapConnection {
-                        map: connection.map,
-                        directions: connection.directions
-                            .into_iter()
-                            .map(|(direction, coordinates)| {
-                                (direction, MapCoordinates::from_vector(&coordinates))
-                            })
-                            .collect(),
-                    },
-                )
-            })
-            .collect(),
-    }
+        actions: map.actions,
+        map_scripts: map.map_scripts,
+        connections: map.connections,
+    })
 }
 
 fn read_map_file(map_name: &str) -> SerializableMap {
