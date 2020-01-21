@@ -9,7 +9,7 @@ use amethyst::{
 
 use crate::{
     common::{Direction, get_direction_offset},
-    constants::TILE_SIZE,
+    constants::{TILE_SIZE, UNIVERSAL_PLAYER_OFFSET_Y},
     entities::player::Player,
 };
 
@@ -151,9 +151,24 @@ pub struct TileData {
     pub map_id: MapId,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct MapId(String);
+
+// TODO: find a better name
+pub struct ValidatedGameAction {
+    pub when: GameActionKind,
+    pub script_event: ScriptEvent,
+}
+
 /// Represents a position expressed in World Coordinates.
 #[derive(Clone)]
 pub struct WorldCoordinates(pub Vector2<i32>);
+
+impl Default for WorldCoordinates {
+    fn default() -> WorldCoordinates {
+        WorldCoordinates(Vector2::new(0, 0))
+    }
+}
 
 /// Represents a position expressed in Map Coordinates, i.e the position of
 /// something relative to the map it's in.
@@ -165,13 +180,18 @@ pub struct MapCoordinates(pub Vector2<u32>);
 #[derive(Clone)]
 pub struct PlayerCoordinates(pub Vector2<f32>);
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct MapId(String);
+impl PlayerCoordinates {
+    pub fn from_world_coordinates(coordinates: &WorldCoordinates) -> PlayerCoordinates {
+        PlayerCoordinates(Vector2::new(
+            coordinates.0.x as f32,
+            coordinates.0.y as f32 + UNIVERSAL_PLAYER_OFFSET_Y,
+        ))
+    }
 
-// TODO: find a better name
-pub struct ValidatedGameAction {
-    pub when: GameActionKind,
-    pub script_event: ScriptEvent,
+    pub fn to_world_coordinates(&self) -> WorldCoordinates {
+        WorldCoordinates(Vector2::new(
+            self.0.x as i32,
+            (self.0.y - UNIVERSAL_PLAYER_OFFSET_Y) as i32,
+        ))
+    }
 }
-
-

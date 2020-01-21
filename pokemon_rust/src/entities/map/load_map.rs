@@ -92,10 +92,7 @@ pub fn prepare_warp(
     let target_position = map_to_world_coordinates(&tile, &map.reference_point);
 
     TileData {
-        position: PlayerCoordinates(Vector2::new(
-            target_position.0.x as f32,
-            (target_position.0.y + 12) as f32,
-        )),
+        position: PlayerCoordinates::from_world_coordinates(&target_position),
         map_id: MapId(map_name.to_string()),
     }
 }

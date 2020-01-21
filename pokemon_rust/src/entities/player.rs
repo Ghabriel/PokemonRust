@@ -24,7 +24,10 @@ use amethyst::{
     renderer::{SpriteRender, SpriteSheet},
 };
 
-use crate::common::{Direction, load_sprite_sheet};
+use crate::{
+    common::{Direction, load_sprite_sheet},
+    entities::map::{PlayerCoordinates, WorldCoordinates},
+};
 
 use serde::{Deserialize, Serialize};
 
@@ -149,8 +152,13 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
         moving: false,
     };
 
-    let mut transform = Transform::default();
-    transform.set_translation_xyz(0., 12., 0.);
+    let transform = {
+        let position = PlayerCoordinates::from_world_coordinates(&WorldCoordinates::default());
+        let mut transform = Transform::default();
+        transform.set_translation_xyz(position.0.x, position.0.y, 0.);
+
+        transform
+    };
 
     let sprite_render = SpriteRender {
         sprite_sheet: sprite_sheets.walking.clone(),

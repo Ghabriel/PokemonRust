@@ -41,10 +41,11 @@ impl Map {
     pub(super) fn player_to_map_coordinates(&self, position: &PlayerCoordinates) -> MapCoordinates {
         let tile_size: u32 = TILE_SIZE.into();
         let half_tile: i32 = HALF_TILE_SIZE.into();
+        let position = position.to_world_coordinates();
 
         MapCoordinates(Vector2::new(
             (position.0.x as i32 - half_tile - self.reference_point.0.x) as u32 / tile_size,
-            (position.0.y as i32 - half_tile - 12 - self.reference_point.0.y) as u32 / tile_size,
+            (position.0.y as i32 - half_tile - self.reference_point.0.y) as u32 / tile_size,
         ))
     }
 
