@@ -34,23 +34,6 @@ impl MapInteractionSystem {
             event_reader: world.write_resource::<EventChannel<MapEvent>>().register_reader(),
         }
     }
-
-    fn interact(&mut self, system_data: &mut <Self as System<'_>>::SystemData) {
-        let (players, transforms, map, _, script_event_channel) = system_data;
-
-        for (player, transform) in (&*players, &*transforms).join() {
-            let interacted_position = map.get_forward_tile(&player, &transform);
-
-            match map.get_action_at(&interacted_position) {
-                Some(
-                    ValidatedGameAction { when, script_event }
-                ) if when == GameActionKind::OnInteraction => {
-                    script_event_channel.single_write(script_event);
-                },
-                _ => {},
-            }
-        }
-    }
 }
 
 impl<'a> System<'a> for MapInteractionSystem {
@@ -72,8 +55,25 @@ impl<'a> System<'a> for MapInteractionSystem {
 
         for event in events {
             match event {
-                MapEvent::Interaction => self.interact(&mut system_data),
+                MapEvent::Interaction => interact(&mut system_data),
             }
+        }
+    }
+}
+
+fn interact(system_data: &mut <MapInteractionSystem as System<'_>>::SystemData) {
+    let (players, transforms, map, _, script_event_channel) = system_data;
+
+    for (player, transform) in (&*players, &*transforms).join() {
+        let interacted_position = map.get_forward_tile(&player, &transform);
+
+        match map.get_action_at(&interacted_position) {
+            Some(
+                ValidatedGameAction { when, script_event }
+            ) if when == GameActionKind::OnInteraction => {
+                script_event_channel.single_write(script_event);
+            },
+            _ => {},
         }
     }
 }

@@ -55,7 +55,7 @@ impl Component for Player {
     type Storage = FlaggedStorage<Self, DenseVecStorage<Self>>;
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum PlayerAction {
     Idle,
     Walk,
@@ -102,8 +102,8 @@ pub fn make_sprite_animation(
                 SpriteRenderChannel::SpriteIndex,
                 Sampler {
                     input,
-                    output: output.iter()
-                        .map(|value| SpriteRenderPrimitive::SpriteIndex(*value))
+                    output: output.into_iter()
+                        .map(SpriteRenderPrimitive::SpriteIndex)
                         .collect(),
                     function: InterpolationFunction::Step,
                 }
@@ -157,6 +157,28 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
         sprite_number: 0,
     };
 
+    let animation_set = get_player_animation_set(world, progress_counter);
+
+    world.insert(sprite_sheets);
+
+    world.register::<AnimationSet<PlayerAnimation, SpriteRender>>();
+    world.register::<Player>();
+    world.register::<SimulatedPlayer>();
+
+    world
+        .create_entity()
+        .with(SimulatedPlayer(player.clone()))
+        .with(player)
+        .with(transform)
+        .with(sprite_render)
+        .with(animation_set)
+        .build()
+}
+
+pub fn get_player_animation_set(
+    world: &mut World,
+    progress_counter: &mut ProgressCounter,
+) -> AnimationSet<PlayerAnimation, SpriteRender> {
     let mut animation_set = AnimationSet::new();
 
     let idle_animation_timing = vec![0.0, 1.0];
@@ -183,7 +205,7 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
     ));
     animation_set.insert(PlayerAnimation::IdleUp, make_sprite_animation(
         world,
-        idle_animation_timing.clone(),
+        idle_animation_timing,
         vec![12],
         progress_counter,
     ));
@@ -208,7 +230,7 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
     ));
     animation_set.insert(PlayerAnimation::WalkUp, make_sprite_animation(
         world,
-        walk_animation_timing.clone(),
+        walk_animation_timing,
         vec![12, 13, 14, 15],
         progress_counter,
     ));
@@ -233,23 +255,10 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
     ));
     animation_set.insert(PlayerAnimation::RunUp, make_sprite_animation(
         world,
-        run_animation_timing.clone(),
+        run_animation_timing,
         vec![12, 13, 14, 15],
         progress_counter,
     ));
 
-    world.insert(sprite_sheets);
-
-    world.register::<AnimationSet<PlayerAnimation, SpriteRender>>();
-    world.register::<Player>();
-    world.register::<SimulatedPlayer>();
-
-    world
-        .create_entity()
-        .with(SimulatedPlayer(player.clone()))
-        .with(player)
-        .with(transform)
-        .with(sprite_render)
-        .with(animation_set)
-        .build()
+    animation_set
 }

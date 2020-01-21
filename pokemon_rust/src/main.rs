@@ -1,12 +1,23 @@
 #![warn(
-    clippy::correctness,
-    clippy::complexity,
+    clippy::all,
+    clippy::pedantic,
 )]
 
 #![allow(
+    clippy::cast_lossless,
+    clippy::cast_precision_loss,
+    clippy::cast_possible_truncation,
+    clippy::cast_possible_wrap,
+    clippy::cast_sign_loss,
     clippy::clone_on_copy,
     clippy::cognitive_complexity,
-    clippy::perf,
+    clippy::filter_map,
+    clippy::module_inception,
+    clippy::module_name_repetitions,
+    clippy::non_ascii_literal,
+    clippy::pub_enum_variant_names,
+    clippy::single_match_else,
+    clippy::trivially_copy_pass_by_ref,
     clippy::type_complexity,
 )]
 
@@ -23,6 +34,7 @@ use amethyst::{
     audio::AudioBundle,
     core::transform::TransformBundle,
     input::{InputBundle, StringBindings},
+    LoggerConfig,
     prelude::*,
     renderer::{
         plugins::{RenderFlat2D, RenderToWindow},
@@ -41,7 +53,7 @@ use crate::{
 };
 
 fn main() -> amethyst::Result<()> {
-    amethyst::start_logger(Default::default());
+    amethyst::start_logger(LoggerConfig::default());
 
     let app_root = application_root_dir()?;
     let config_path = app_root.join("config");

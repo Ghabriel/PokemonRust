@@ -38,8 +38,9 @@ pub struct OverworldState<'a, 'b> {
 impl<'a, 'b> OverworldState<'a, 'b> {
     pub fn new(event_executor: Rc<RefCell<EventExecutor>>) -> OverworldState<'a, 'b> {
         OverworldState {
+            dispatcher: None,
+            script_event_reader: None,
             event_executor,
-            ..Default::default()
         }
     }
 }
@@ -70,7 +71,7 @@ impl SimpleState for OverworldState<'_, '_> {
     }
 
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
-        let world = &mut data.world;
+        let StateData { world, .. } = data;
 
         if let Some(dispatcher) = &mut self.dispatcher {
             dispatcher.dispatch(world);

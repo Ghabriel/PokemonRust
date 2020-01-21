@@ -64,7 +64,7 @@ impl<'a> System<'a> for PlayerAnimationSystem {
             _,
         ) in (&mut control_sets, &players, &mut sprite_renders, &modified).join() {
             let actual_action = if player.moving {
-                player.action
+                player.action.clone()
             } else {
                 PlayerAction::Idle
             };
@@ -75,7 +75,7 @@ impl<'a> System<'a> for PlayerAnimationSystem {
             }
 
             let new_animation = get_new_animation(&actual_action, &player.facing_direction);
-            change_player_animation(&new_animation, control_set);
+            change_player_animation(new_animation, control_set);
         }
     }
 }
@@ -108,19 +108,19 @@ pub fn player_run(sprite_render: &mut SpriteRender, sprite_sheets: &PlayerSprite
 }
 
 fn change_player_animation(
-    new_animation: &PlayerAnimation,
+    new_animation: PlayerAnimation,
     control_set: &mut AnimationControlSet<PlayerAnimation, SpriteRender>,
 ) {
     control_set.animations
         .iter_mut()
-        .filter(|(id, _)| *id != *new_animation)
+        .filter(|(id, _)| *id != new_animation)
         .for_each(|(_, animation)| {
             animation.command = AnimationCommand::Pause;
         });
 
     let (_, animation) = control_set.animations
         .iter_mut()
-        .find(|(id, _)| *id == *new_animation)
+        .find(|(id, _)| *id == new_animation)
         .unwrap();
     animation.state = ControlState::Requested;
     animation.command = AnimationCommand::Start;

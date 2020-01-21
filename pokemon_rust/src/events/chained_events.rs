@@ -26,8 +26,7 @@ impl GameEvent for ChainedEvents {
 
         self.chain
             .front_mut()
-            .map(|event| event.start(world))
-            .unwrap_or(ShouldDisableInput(false))
+            .map_or(ShouldDisableInput(false), |event| event.start(world))
     }
 
     fn tick(&mut self, world: &mut World, disabled_inputs: bool) {

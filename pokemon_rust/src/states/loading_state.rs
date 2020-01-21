@@ -109,7 +109,7 @@ impl SimpleState for LoadingState<'_, '_> {
             for (entity, animation_set) in (&entities, &animation_sets).join() {
                 let animation_control_set = get_animation_set(&mut control_sets, entity).unwrap();
 
-                for &animation in animations.iter() {
+                for &animation in &animations {
                     animation_control_set.add_animation(
                         animation,
                         &animation_set.get(&animation).unwrap(),
