@@ -766,6 +766,7 @@
         [47, 0],
         [48, 0],
     ],
+    script_repository: [],
     actions: {
         [19, 27]: (
             when: OnInteraction,

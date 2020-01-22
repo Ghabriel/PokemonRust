@@ -583,6 +583,7 @@
         [47, 0],
         [48, 0],
     ],
+    script_repository: [],
     actions: {
         [39, 17]: (
             when: OnStep,

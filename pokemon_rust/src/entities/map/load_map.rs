@@ -169,23 +169,18 @@ pub fn initialise_map(world: &mut World, progress_counter: &mut ProgressCounter)
 
     map.script_repository.push(GameScript::Native(load_nearby_connections));
 
+    map.map_scripts.push(MapScript {
+        when: MapScriptKind::OnTileChange,
+        script_index: map.script_repository.len() - 1,
+    });
+
     map.script_repository.push(GameScript::Native(|world| {
         change_current_map(world, "test_map".to_string());
     }));
 
-    map.script_repository.push(GameScript::Lua {
-        file: "test.lua".to_string(),
-        function: "do_it".to_string(),
-    });
-
-    map.map_scripts.push(MapScript {
-        when: MapScriptKind::OnTileChange,
-        script_index: 1,
-    });
-
     map.map_scripts.push(MapScript {
         when: MapScriptKind::OnMapEnter,
-        script_index: 2,
+        script_index: map.script_repository.len() - 1,
     });
 
     world.insert(MapHandler {
@@ -349,6 +344,7 @@ fn load_map(
         terrain_entity,
         solids: map.solids,
         decoration_entity,
+        script_repository: map.script_repository,
         actions: map.actions,
         map_scripts: map.map_scripts,
         connections: map.connections,

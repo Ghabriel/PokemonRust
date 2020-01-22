@@ -48,7 +48,10 @@ impl Map {
                 .map(|tile_position| (MapCoordinates::from_vector(&tile_position), Tile))
                 .collect(),
             decoration_entity: map.decoration_entity,
-            script_repository: Vec::new(),
+            script_repository: map.script_repository
+                .into_iter()
+                .map(Into::into)
+                .collect(),
             actions: map.actions
                 .into_iter()
                 .map(|(tile_position, action)| (MapCoordinates::from_vector(&tile_position), action))

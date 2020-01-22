@@ -766,14 +766,17 @@
         [47, 0],
         [48, 0],
     ],
+    script_repository: [
+        Lua(file: "test.lua", function: "do_it"),
+    ],
     actions: {
         [19, 27]: (
             when: OnInteraction,
-            script_index: 0,
+            script_index: 1,
         ),
         [20, 27]: (
             when: OnInteraction,
-            script_index: 3,
+            script_index: 0,
         ),
     },
     map_scripts: [],
