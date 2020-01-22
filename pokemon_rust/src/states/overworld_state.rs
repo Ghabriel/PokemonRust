@@ -9,7 +9,6 @@ use crate::{
     events::{EventExecutor, EventQueue},
     states::OverworldAnimationState,
     systems::{
-        MapInteractionSystem,
         PlayerAnimationSystem,
         PlayerInputSystem,
         PlayerMovementSystem,
@@ -45,7 +44,6 @@ impl SimpleState for OverworldState<'_, '_> {
         let world = data.world;
 
         let mut dispatcher = DispatcherBuilder::new()
-            .with(MapInteractionSystem::new(world), "map_interaction_system", &[])
             .with(PlayerInputSystem::new(world), "player_input_system", &[])
             .with(PlayerMovementSystem::default(), "player_movement_system", &["player_input_system"])
             .with(StaticPlayerSystem, "static_player_system", &["player_movement_system"])

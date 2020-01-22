@@ -16,10 +16,8 @@ use amethyst::{
 
 use crate::{
     common::Direction,
-    entities::{
-        map::MapEvent,
-        player::{PlayerAction, PlayerEntity, SimulatedPlayer, StaticPlayer},
-    },
+    entities::player::{PlayerAction, PlayerEntity, SimulatedPlayer, StaticPlayer},
+    events::{EventQueue, MapInteractionEvent},
 };
 
 pub struct PlayerInputSystem {
@@ -41,7 +39,7 @@ impl<'a> System<'a> for PlayerInputSystem {
     type SystemData = (
         WriteStorage<'a, SimulatedPlayer>,
         ReadStorage<'a, StaticPlayer>,
-        Write<'a, EventChannel<MapEvent>>,
+        Write<'a, EventQueue>,
         Read<'a, EventChannel<InputEvent<StringBindings>>>,
         Read<'a, InputHandler<StringBindings>>,
     );
@@ -49,7 +47,7 @@ impl<'a> System<'a> for PlayerInputSystem {
     fn run(&mut self, (
         mut simulated_players,
         static_players,
-        mut map_event_channel,
+        mut event_queue,
         input_event_channel,
         input_handler,
     ): Self::SystemData) {
@@ -62,7 +60,7 @@ impl<'a> System<'a> for PlayerInputSystem {
             match event {
                 InputEvent::ActionPressed(action) if action == "action" => {
                     if static_players.contains(self.player_entity) {
-                        map_event_channel.single_write(MapEvent::Interaction);
+                        event_queue.push(MapInteractionEvent);
                     }
                 },
                 InputEvent::ActionPressed(action) if action == "cancel" => {

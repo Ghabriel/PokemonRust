@@ -1,6 +1,5 @@
 mod conversions;
 mod coordinates;
-mod events;
 mod load_map;
 mod map;
 mod serializable_map;
@@ -19,7 +18,6 @@ use std::collections::HashMap;
 
 pub use self::{
     coordinates::{CoordinateSystem, MapCoordinates, PlayerCoordinates, WorldCoordinates},
-    events::MapEvent,
     load_map::{change_tile, initialise_map, prepare_warp},
     map::{
         GameAction,
