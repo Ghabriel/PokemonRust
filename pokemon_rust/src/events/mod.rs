@@ -4,6 +4,7 @@ pub mod event_queue;
 pub mod fade_in_event;
 pub mod fade_out_event;
 pub mod parallel_events;
+pub mod script_event;
 pub mod switch_map_event;
 pub mod text_event;
 pub mod warp_event;
@@ -17,6 +18,7 @@ pub use self::{
     fade_out_event::FadeOutEvent,
     fade_in_event::FadeInEvent,
     parallel_events::ParallelEvents,
+    script_event::ScriptEvent,
     switch_map_event::SwitchMapEvent,
     text_event::TextEvent,
     warp_event::WarpEvent,

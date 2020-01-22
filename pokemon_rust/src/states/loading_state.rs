@@ -25,7 +25,7 @@ use amethyst::{
 use crate::{
     entities::{
         player::{initialise_player, PlayerAnimation, PlayerEntity},
-        map::{initialise_map, MapEvent, ScriptEvent},
+        map::{initialise_map, MapEvent},
         resources::initialise_resources,
     },
     events::EventQueue,
@@ -75,7 +75,6 @@ impl SimpleState for LoadingState<'_, '_> {
         world.register::<AnimationControlSet<PlayerAnimation, SpriteRender>>();
 
         world.insert(EventChannel::<MapEvent>::new());
-        world.insert(EventChannel::<ScriptEvent>::new());
         world.insert(EventQueue::default());
 
         let mut progress_counter = ProgressCounter::new();

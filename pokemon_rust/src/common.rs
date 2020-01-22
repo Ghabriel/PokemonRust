@@ -1,13 +1,10 @@
 use amethyst::{
     assets::{Handle, Loader, ProgressCounter},
     core::bundle::SystemBundle,
-    ecs::{DispatcherBuilder, ReaderId, World, WorldExt},
+    ecs::{DispatcherBuilder, World, WorldExt},
     error::Error,
     renderer::{ImageFormat, sprite::{Sprite, TextureCoordinates}, SpriteSheet, SpriteSheetFormat},
-    shrev::EventChannel,
 };
-
-use crate::entities::map::{GameScript, MapHandler, ScriptEvent};
 
 use serde::{Deserialize, Serialize};
 
@@ -91,25 +88,6 @@ where
     };
 
     (x.into(), y.into())
-}
-
-pub fn run_script_events(world: &mut World, script_event_reader: &mut ReaderId<ScriptEvent>) {
-    let events: Vec<ScriptEvent> = world
-        .read_resource::<EventChannel<ScriptEvent>>()
-        .read(script_event_reader)
-        .map(Clone::clone)
-        .collect();
-
-    for script_event in events {
-        let game_script = world
-            .read_resource::<MapHandler>()
-            .get_script_from_event(&script_event)
-            .clone();
-
-        if let GameScript::Native(script) = game_script {
-            script(world);
-        }
-    }
 }
 
 pub trait WithBundle<'a, 'b> {

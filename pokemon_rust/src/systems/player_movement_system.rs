@@ -1,7 +1,6 @@
 use amethyst::{
     core::{math::Vector3, Time, Transform},
     ecs::{Entities, Entity, Join, Read, ReadExpect, ReadStorage, System, Write, WriteStorage},
-    shrev::EventChannel,
 };
 
 use crate::{
@@ -9,9 +8,10 @@ use crate::{
     config::GameConfig,
     constants::TILE_SIZE,
     entities::{
-        map::{change_tile, CoordinateSystem, MapHandler, MapId, ScriptEvent, TileData},
+        map::{change_tile, CoordinateSystem, MapHandler, MapId, TileData},
         player::{Player, PlayerAction, StaticPlayer},
     },
+    events::EventQueue,
 };
 
 use std::collections::HashMap;
@@ -40,7 +40,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
         Entities<'a>,
         ReadExpect<'a, GameConfig>,
         ReadExpect<'a, MapHandler>,
-        Write<'a, EventChannel<ScriptEvent>>,
+        Write<'a, EventQueue>,
         Read<'a, Time>,
     );
 
@@ -51,7 +51,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
         entities,
         config,
         map,
-        mut script_event_channel,
+        mut event_queue,
         time,
     ): Self::SystemData) {
         for (entity, player, transform) in (&entities, &players, &mut transforms).join() {
@@ -78,7 +78,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
                             &movement_data.starting_map_id,
                             &movement_data.final_tile_data,
                             &map,
-                            &mut script_event_channel,
+                            &mut event_queue,
                         );
 
                         self.movement_data.remove(&entity);

@@ -17,9 +17,10 @@ use amethyst::{
 
 use crate::{
     entities::{
-        map::{GameActionKind, MapEvent, MapHandler, ScriptEvent, ValidatedGameAction},
+        map::{GameActionKind, MapEvent, MapHandler, ValidatedGameAction},
         player::Player,
     },
+    events::EventQueue,
 };
 
 pub struct MapInteractionSystem {
@@ -42,7 +43,7 @@ impl<'a> System<'a> for MapInteractionSystem {
         ReadStorage<'a, Transform>,
         ReadExpect<'a, MapHandler>,
         Read<'a, EventChannel<MapEvent>>,
-        Write<'a, EventChannel<ScriptEvent>>,
+        Write<'a, EventQueue>,
     );
 
     fn run(&mut self, mut system_data: Self::SystemData) {
@@ -62,7 +63,7 @@ impl<'a> System<'a> for MapInteractionSystem {
 }
 
 fn interact(system_data: &mut <MapInteractionSystem as System<'_>>::SystemData) {
-    let (players, transforms, map, _, script_event_channel) = system_data;
+    let (players, transforms, map, _, event_queue) = system_data;
 
     for (player, transform) in (&*players, &*transforms).join() {
         let interacted_position = map.get_forward_tile(&player, &transform);
@@ -71,7 +72,7 @@ fn interact(system_data: &mut <MapInteractionSystem as System<'_>>::SystemData) 
             Some(
                 ValidatedGameAction { when, script_event }
             ) if when == GameActionKind::OnInteraction => {
-                script_event_channel.single_write(script_event);
+                event_queue.push(script_event);
             },
             _ => {},
         }

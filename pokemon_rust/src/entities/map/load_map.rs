@@ -3,7 +3,6 @@ use amethyst::{
     core::Transform,
     ecs::{Entity, world::Builder, World, WorldExt},
     renderer::SpriteRender,
-    shrev::EventChannel,
     utils::application_root_dir,
 };
 
@@ -34,7 +33,6 @@ use super::{
         WorldCoordinates,
         WorldOffset,
     },
-    events::ScriptEvent,
     map::{
         GameActionKind,
         GameScript,
@@ -54,25 +52,25 @@ pub fn change_tile(
     starting_map_id: &MapId,
     final_tile_data: &TileData,
     map: &MapHandler,
-    script_event_channel: &mut EventChannel<ScriptEvent>,
+    event_queue: &mut EventQueue,
 ) {
     if *starting_map_id != final_tile_data.map_id {
         map.get_map_scripts(&final_tile_data, MapScriptKind::OnMapEnter)
             .for_each(|event| {
-                script_event_channel.single_write(event);
+                event_queue.push(event);
             });
     }
 
     map.get_map_scripts(&final_tile_data, MapScriptKind::OnTileChange)
         .for_each(|event| {
-            script_event_channel.single_write(event);
+            event_queue.push(event);
         });
 
     match map.get_action_at(&final_tile_data) {
         Some(
             ValidatedGameAction { when, script_event }
         ) if when == GameActionKind::OnStep => {
-            script_event_channel.single_write(script_event);
+            event_queue.push(script_event);
         },
         _ => {},
     }
@@ -120,8 +118,6 @@ pub fn load_detached_map(
     let mut map = load_map(world, &map_name, Some(reference_point), progress_counter);
 
     if map_name == "test_map3" {
-        println!("Loading scripts...");
-
         map.script_repository.push(GameScript::Native(|world| {
             let event = TextEvent::new(
                 "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",

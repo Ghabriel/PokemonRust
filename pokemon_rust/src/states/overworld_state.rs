@@ -1,16 +1,11 @@
 use amethyst::{
     core::ArcThreadPool,
-    ecs::{Dispatcher, DispatcherBuilder, ReaderId},
+    ecs::{Dispatcher, DispatcherBuilder},
     prelude::*,
-    shrev::EventChannel,
     utils::fps_counter::{FpsCounter, FpsCounterSystem},
 };
 
 use crate::{
-    common::run_script_events,
-    entities::{
-        map::ScriptEvent,
-    },
     events::{EventExecutor, EventQueue},
     states::OverworldAnimationState,
     systems::{
@@ -31,7 +26,6 @@ use std::{
 #[derive(Default)]
 pub struct OverworldState<'a, 'b> {
     pub dispatcher: Option<Dispatcher<'a, 'b>>,
-    pub script_event_reader: Option<ReaderId<ScriptEvent>>,
     pub event_executor: Rc<RefCell<EventExecutor>>,
 }
 
@@ -39,7 +33,6 @@ impl<'a, 'b> OverworldState<'a, 'b> {
     pub fn new(event_executor: Rc<RefCell<EventExecutor>>) -> OverworldState<'a, 'b> {
         OverworldState {
             dispatcher: None,
-            script_event_reader: None,
             event_executor,
         }
     }
@@ -50,11 +43,6 @@ impl SimpleState for OverworldState<'_, '_> {
         println!("Welcome to Pokémon Rust!");
 
         let world = data.world;
-
-        self.script_event_reader = Some(
-            world.write_resource::<EventChannel<ScriptEvent>>()
-                .register_reader()
-        );
 
         let mut dispatcher = DispatcherBuilder::new()
             .with(MapInteractionSystem::new(world), "map_interaction_system", &[])
@@ -76,8 +64,6 @@ impl SimpleState for OverworldState<'_, '_> {
         if let Some(dispatcher) = &mut self.dispatcher {
             dispatcher.dispatch(world);
         }
-
-        run_script_events(world, self.script_event_reader.as_mut().unwrap());
 
         // println!("FPS: {}", world.read_resource::<FpsCounter>().sampled_fps());
 

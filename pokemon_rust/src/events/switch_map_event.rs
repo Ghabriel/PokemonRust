@@ -2,14 +2,14 @@ use amethyst::{
     assets::ProgressCounter,
     core::Transform,
     ecs::{World, WorldExt},
-    shrev::EventChannel,
 };
 
 use crate::{
     entities::{
-        map::{change_tile, MapCoordinates, MapHandler, prepare_warp, ScriptEvent},
+        map::{change_tile, MapCoordinates, MapHandler, prepare_warp},
         player::PlayerEntity,
     },
+    events::EventQueue,
 };
 
 use super::{GameEvent, ShouldDisableInput};
@@ -49,7 +49,7 @@ impl GameEvent for SwitchMapEvent {
             &starting_map_id,
             &target_tile_data,
             &world.read_resource::<MapHandler>(),
-            &mut world.write_resource::<EventChannel<ScriptEvent>>(),
+            &mut world.write_resource::<EventQueue>(),
         );
 
         ShouldDisableInput(true)

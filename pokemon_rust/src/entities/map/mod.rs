@@ -10,6 +10,7 @@ use amethyst::core::Transform;
 use crate::{
     common::Direction,
     entities::player::Player,
+    events::ScriptEvent,
 };
 
 use self::map::Map;
@@ -18,7 +19,7 @@ use std::collections::HashMap;
 
 pub use self::{
     coordinates::{CoordinateSystem, MapCoordinates, PlayerCoordinates, WorldCoordinates},
-    events::{MapEvent, ScriptEvent},
+    events::MapEvent,
     load_map::{change_tile, initialise_map, prepare_warp},
     map::{
         GameAction,
@@ -74,15 +75,18 @@ impl MapHandler {
             .map(|game_action| {
                 ValidatedGameAction {
                     when: game_action.when.clone(),
-                    script_event: ScriptEvent(tile_data.map_id.clone(), game_action.script_index)
+                    script_event: ScriptEvent::new(
+                        tile_data.map_id.clone(),
+                        game_action.script_index,
+                    ),
                 }
             })
     }
 
-    pub fn get_script_from_event(&self, script_event: &ScriptEvent) -> &GameScript {
-        let map = &self.loaded_maps[&(script_event.0).0];
+    pub fn get_script(&self, map_id: &MapId, script_index: usize) -> &GameScript {
+        let map = &self.loaded_maps[&map_id.0];
 
-        &map.script_repository[script_event.1]
+        &map.script_repository[script_index]
     }
 
     pub fn get_map_scripts<'a>(
@@ -94,7 +98,7 @@ impl MapHandler {
             .map_scripts
             .iter()
             .filter(move |script| script.when == kind)
-            .map(move |script| ScriptEvent(tile_data.map_id.clone(), script.script_index))
+            .map(move |script| ScriptEvent::new(tile_data.map_id.clone(), script.script_index))
     }
 
     pub fn get_current_map_id(&self) -> MapId {
