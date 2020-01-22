@@ -94,12 +94,19 @@ impl Component for Tile {
 #[derive(Clone)]
 pub enum GameScript {
     Native(fn(&mut World) -> ()),
+    Lua {
+        file: String,
+        function: String,
+    },
 }
 
 impl Debug for GameScript {
     fn fmt(&self, formatter: &mut Formatter) -> Result<(), Error> {
         match self {
             GameScript::Native(_) => write!(formatter, "Native Script"),
+            GameScript::Lua { file, function } => {
+                write!(formatter, "Lua Script({}, {})", file, function)
+            },
         }
     }
 }

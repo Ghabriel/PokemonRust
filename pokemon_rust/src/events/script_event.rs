@@ -1,8 +1,19 @@
-use amethyst::ecs::{World, WorldExt};
+use amethyst::{
+    ecs::{World, WorldExt},
+    utils::application_root_dir,
+};
 
 use crate::entities::map::{GameScript, MapHandler, MapId};
 
+use rlua::{Function, Lua};
+
+use std::fs::read_to_string;
+
 use super::{GameEvent, ShouldDisableInput};
+
+thread_local! {
+    static LUA: Lua = Lua::new();
+}
 
 pub struct ScriptEvent {
     map: MapId,
@@ -30,8 +41,33 @@ impl GameEvent for ScriptEvent {
             .get_script(&self.map, self.script_index)
             .clone();
 
-        if let GameScript::Native(script) = game_script {
-            script(world);
+        match game_script {
+            GameScript::Native(script) => script(world),
+            GameScript::Lua { file, function } => {
+                let path = application_root_dir()
+                    .unwrap()
+                    .join("src")
+                    .join("lua")
+                    .join(&file);
+
+                LUA.with(|lua| {
+                    lua.context(|context| {
+                        let content = read_to_string(&path)
+                            .expect(&format!("Failed to open lua file {}", file));
+
+                        context.load(&content)
+                            .exec()
+                            .expect(&format!("Failed to parse lua file {}", file));
+
+                        let globals = context.globals();
+                        let callback: Function = globals.get(function.as_str())
+                            .expect(&format!("Failed to retrieve lua function {}", function));
+
+                        callback.call::<_, ()>(())
+                            .expect(&format!("Failed to call lua function {}", function));
+                    });
+                })
+            },
         }
     }
 

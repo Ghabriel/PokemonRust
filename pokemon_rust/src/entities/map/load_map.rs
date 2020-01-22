@@ -173,6 +173,11 @@ pub fn initialise_map(world: &mut World, progress_counter: &mut ProgressCounter)
         change_current_map(world, "test_map".to_string());
     }));
 
+    map.script_repository.push(GameScript::Lua {
+        file: "test.lua".to_string(),
+        function: "do_it".to_string(),
+    });
+
     map.map_scripts.push(MapScript {
         when: MapScriptKind::OnTileChange,
         script_index: 1,

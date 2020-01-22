@@ -771,6 +771,10 @@
             when: OnInteraction,
             script_index: 0,
         ),
+        [20, 27]: (
+            when: OnInteraction,
+            script_index: 3,
+        ),
     },
     map_scripts: [],
     connections: {
