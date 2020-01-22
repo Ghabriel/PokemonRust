@@ -28,6 +28,7 @@ use super::{
         map_to_world_coordinates,
     },
     coordinates::{
+        CoordinateSystem,
         MapCoordinates,
         PlayerCoordinates,
         WorldCoordinates,
@@ -112,8 +113,15 @@ pub fn load_detached_map(
     map_name: &str,
     progress_counter: &mut ProgressCounter,
 ) -> Map {
-    // TODO: obtain this value algorithmically
-    let reference_point = WorldCoordinates::new(1_000_000, 0);
+    let max_reference_point_x = world
+        .read_resource::<MapHandler>()
+        .loaded_maps
+        .iter()
+        .map(|(_, map)| map.reference_point.x())
+        .max()
+        .unwrap();
+
+    let reference_point = WorldCoordinates::new(max_reference_point_x + 1_000_000, 0);
 
     let mut map = load_map(world, &map_name, Some(reference_point), progress_counter);
 
