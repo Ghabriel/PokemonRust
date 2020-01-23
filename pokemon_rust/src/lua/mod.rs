@@ -50,6 +50,19 @@ fn run_script(
     })
 }
 
+macro_rules! native_functions {
+    ( $(($globals:ident, $scope:ident, $world:ident) $target_name:ident: $original_name:ident($($param_name:ident: $param_type:ty),*)),* ) => {
+        $(
+            let $target_name = $scope.create_function_mut(|_, ($( $param_name ),*): ($( $param_type ),*)| {
+                $original_name(&mut $world.borrow_mut(), $( $param_name ),*);
+                Ok(())
+            })?;
+
+            $globals.set(stringify!($target_name), $target_name)?;
+        )*
+    }
+}
+
 fn run_with_native_functions<F, R>(world: &mut World, lua: &Lua, callback: F) -> Result<R, Error>
 where
     F: FnOnce(&Context) -> Result<R, Error>,
@@ -58,19 +71,12 @@ where
 
     lua.context(|context| {
         context.scope(|scope| {
-            let rust_add_text_event = scope.create_function_mut(|_, text: String| {
-                add_text_event(&mut world.borrow_mut(), text);
-                Ok(())
-            })?;
-
-            let rust_add_warp_event = scope.create_function_mut(|_, (map, x, y): (String, u32, u32)| {
-                add_warp_event(&mut world.borrow_mut(), map, x, y);
-                Ok(())
-            })?;
-
             let globals = context.globals();
-            globals.set("rust_add_text_event", rust_add_text_event)?;
-            globals.set("rust_add_warp_event", rust_add_warp_event)?;
+
+            native_functions!(
+                (globals, scope, world) rust_add_text_event: add_text_event(text: String),
+                (globals, scope, world) rust_add_warp_event: add_warp_event(map: String, x: u32, y: u32)
+            );
 
             callback(&context)
         })
