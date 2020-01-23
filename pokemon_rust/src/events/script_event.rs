@@ -5,13 +5,7 @@ use crate::{
     lua::run_lua_script,
 };
 
-use rlua::Lua;
-
 use super::{GameEvent, ShouldDisableInput};
-
-thread_local! {
-    static LUA: Lua = Lua::new();
-}
 
 pub struct ScriptEvent {
     map: MapId,
@@ -42,10 +36,8 @@ impl GameEvent for ScriptEvent {
         match game_script {
             GameScript::Native(script) => script(world),
             GameScript::Lua { file, function } => {
-                LUA.with(|lua| {
-                    run_lua_script(world, &lua, &file, &function)
-                        .expect("Failed to run Lua script");
-                })
+                run_lua_script(world, &file, &function)
+                    .expect("Failed to run Lua script");
             },
         }
     }
