@@ -26,6 +26,7 @@ mod config;
 mod constants;
 mod entities;
 mod events;
+mod lua;
 mod states;
 mod systems;
 

@@ -1,13 +1,11 @@
-use amethyst::{
-    ecs::{World, WorldExt},
-    utils::application_root_dir,
+use amethyst::ecs::{World, WorldExt};
+
+use crate::{
+    entities::map::{GameScript, MapHandler, MapId},
+    lua::run_lua_script,
 };
 
-use crate::entities::map::{GameScript, MapHandler, MapId};
-
-use rlua::{Function, Lua};
-
-use std::fs::read_to_string;
+use rlua::Lua;
 
 use super::{GameEvent, ShouldDisableInput};
 
@@ -35,7 +33,7 @@ impl GameEvent for ScriptEvent {
         ShouldDisableInput(false)
     }
 
-    fn tick(&mut self, world: &mut World, _disabled_inputs: bool) {
+    fn tick<'a>(&mut self, world: &'a mut World, _disabled_inputs: bool) {
         let game_script = world
             .read_resource::<MapHandler>()
             .get_script(&self.map, self.script_index)
@@ -44,28 +42,9 @@ impl GameEvent for ScriptEvent {
         match game_script {
             GameScript::Native(script) => script(world),
             GameScript::Lua { file, function } => {
-                let path = application_root_dir()
-                    .unwrap()
-                    .join("src")
-                    .join("lua")
-                    .join(&file);
-
                 LUA.with(|lua| {
-                    lua.context(|context| {
-                        let content = read_to_string(&path)
-                            .expect(&format!("Failed to open lua file {}", file));
-
-                        context.load(&content)
-                            .exec()
-                            .expect(&format!("Failed to parse lua file {}", file));
-
-                        let globals = context.globals();
-                        let callback: Function = globals.get(function.as_str())
-                            .expect(&format!("Failed to retrieve lua function {}", function));
-
-                        callback.call::<_, ()>(())
-                            .expect(&format!("Failed to call lua function {}", function));
-                    });
+                    run_lua_script(world, &lua, &file, &function)
+                        .expect("Failed to run Lua script");
                 })
             },
         }
