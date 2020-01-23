@@ -51,8 +51,12 @@ fn run_script(
 }
 
 macro_rules! native_functions {
-    ( $(($globals:ident, $scope:ident, $world:ident) $target_name:ident: $original_name:ident($($param_name:ident: $param_type:ty),*)),* ) => {
+    (
+        ($globals:ident, $scope:ident, $world:ident)
+        $($target_name:ident: $original_name:ident($($param_name:ident: $param_type:ty),*)),*
+    ) => {
         $(
+            #[allow(unused_parens)]
             let $target_name = $scope.create_function_mut(|_, ($( $param_name ),*): ($( $param_type ),*)| {
                 $original_name(&mut $world.borrow_mut(), $( $param_name ),*);
                 Ok(())
@@ -74,8 +78,9 @@ where
             let globals = context.globals();
 
             native_functions!(
-                (globals, scope, world) rust_add_text_event: add_text_event(text: String),
-                (globals, scope, world) rust_add_warp_event: add_warp_event(map: String, x: u32, y: u32)
+                (globals, scope, world)
+                rust_add_text_event: add_text_event(text: String),
+                rust_add_warp_event: add_warp_event(map: String, x: u32, y: u32)
             );
 
             callback(&context)
