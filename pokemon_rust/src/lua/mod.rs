@@ -1,4 +1,5 @@
 mod polymorphic_container;
+mod utils;
 
 use amethyst::{
     ecs::{World, WorldExt},
@@ -12,7 +13,10 @@ use crate::{
 
 use rlua::{Context, Error, Function, Lua};
 
-use self::polymorphic_container::PolymorphicContainer;
+use self::{
+    polymorphic_container::PolymorphicContainer,
+    utils::remove_event,
+};
 
 use std::{
     cell::RefCell,
@@ -107,30 +111,17 @@ where
 
             native_functions!(
                 (globals, scope, execution_context)
-                // rust_add_text_event: add_text_event(text: String),
-                // rust_add_warp_event: add_warp_event(map: String, x: u32, y: u32)
                 rust_create_chained_event: create_chained_event(),
                 rust_create_text_event: create_text_event(text: String),
                 rust_create_warp_event: create_warp_event(map: String, x: u32, y: u32),
-                rust_add_text_event: add_text_event(chain_key: usize, new_event: usize),
-                rust_add_warp_event: add_warp_event(chain_key: usize, new_event: usize),
-                rust_dispatch_event: dispatch_event(chain_key: usize)
+                rust_add_event: add_event(chain_key: usize, new_event: usize),
+                rust_dispatch_event: dispatch_event(key: usize)
             );
 
             callback(&context)
         })
     })
 }
-
-// fn add_text_event(world: &mut World, storage: &mut PolymorphicContainer, text: String) {
-//     let event = TextEvent::new(text, world);
-//     world.write_resource::<EventQueue>().push(event);
-// }
-
-// fn add_warp_event(world: &mut World, storage: &mut PolymorphicContainer, map: String, x: u32, y: u32) {
-//     let event = WarpEvent::new(map, MapCoordinates::new(x, y));
-//     world.write_resource::<EventQueue>().push(event);
-// }
 
 fn create_chained_event(context: &mut ExecutionContext) -> usize {
     let event = ChainedEvents::default();
@@ -150,24 +141,16 @@ fn create_warp_event(context: &mut ExecutionContext, map: String, x: u32, y: u32
     context.store(event)
 }
 
-fn add_text_event(context: &mut ExecutionContext, chain_key: usize, new_event: usize) {
+fn add_event(context: &mut ExecutionContext, chain_key: usize, new_event: usize) {
     let mut chain = context.remove::<ChainedEvents>(chain_key);
-    let new_event = context.remove::<TextEvent>(new_event);
 
-    chain.add_event(new_event);
+    chain.add_event(remove_event(context, new_event));
+
     context.store_at(chain_key, chain);
 }
 
-fn add_warp_event(context: &mut ExecutionContext, chain_key: usize, new_event: usize) {
-    let mut chain = context.remove::<ChainedEvents>(chain_key);
-    let new_event = context.remove::<WarpEvent>(new_event);
+fn dispatch_event(context: &mut ExecutionContext, key: usize) {
+    let event = remove_event(context, key);
 
-    chain.add_event(new_event);
-    context.store_at(chain_key, chain);
-}
-
-fn dispatch_event(context: &mut ExecutionContext, chain: usize) {
-    let chain = context.remove::<ChainedEvents>(chain);
-
-    context.world.write_resource::<EventQueue>().push(*chain);
+    context.world.write_resource::<EventQueue>().push_boxed(event);
 }

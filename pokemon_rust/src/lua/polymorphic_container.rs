@@ -31,6 +31,14 @@ impl PolymorphicContainer {
             .downcast_mut()
     }
 
+    pub fn try_remove_boxed(&mut self, key: usize) -> Option<Box<dyn Any>> {
+        self.data.remove(&key)
+    }
+
+    pub fn remove_boxed(&mut self, key: usize) -> Box<dyn Any> {
+        self.try_remove_boxed(key).unwrap()
+    }
+
     pub fn try_remove<T: 'static>(&mut self, key: usize) -> Option<Box<T>> {
         self.data
             .remove(&key)?

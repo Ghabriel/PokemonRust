@@ -12,7 +12,11 @@ impl EventQueue {
     where
         T: GameEvent + Sync + Send + 'static
     {
-        self.events.push_back(Box::new(event));
+        self.push_boxed(Box::new(event));
+    }
+
+    pub fn push_boxed(&mut self, event: Box<dyn GameEvent + Sync + Send>) {
+        self.events.push_back(event);
     }
 
     pub fn pop(&mut self) -> Option<Box<dyn GameEvent + Sync + Send>> {
