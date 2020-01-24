@@ -31,10 +31,14 @@ impl PolymorphicContainer {
             .downcast_mut()
     }
 
-    pub fn remove<T: 'static>(&mut self, key: usize) -> Option<Box<T>> {
+    pub fn try_remove<T: 'static>(&mut self, key: usize) -> Option<Box<T>> {
         self.data
             .remove(&key)?
             .downcast()
             .ok()
+    }
+
+    pub fn remove<T: 'static>(&mut self, key: usize) -> Box<T> {
+        self.try_remove(key).unwrap()
     }
 }

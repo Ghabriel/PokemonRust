@@ -150,35 +150,24 @@ fn create_warp_event(context: &mut ExecutionContext, map: String, x: u32, y: u32
     context.store(event)
 }
 
-fn add_text_event(
-    context: &mut ExecutionContext,
-    chain_key: usize,
-    new_event: usize,
-) {
-    let mut chain = context.remove::<ChainedEvents>(chain_key).unwrap();
-    let new_event = context.remove::<TextEvent>(new_event).unwrap();
+fn add_text_event(context: &mut ExecutionContext, chain_key: usize, new_event: usize) {
+    let mut chain = context.remove::<ChainedEvents>(chain_key);
+    let new_event = context.remove::<TextEvent>(new_event);
 
     chain.add_event(new_event);
     context.store_at(chain_key, chain);
 }
 
-fn add_warp_event(
-    context: &mut ExecutionContext,
-    chain_key: usize,
-    new_event: usize,
-) {
-    let mut chain = context.remove::<ChainedEvents>(chain_key).unwrap();
-    let new_event = context.remove::<WarpEvent>(new_event).unwrap();
+fn add_warp_event(context: &mut ExecutionContext, chain_key: usize, new_event: usize) {
+    let mut chain = context.remove::<ChainedEvents>(chain_key);
+    let new_event = context.remove::<WarpEvent>(new_event);
 
     chain.add_event(new_event);
     context.store_at(chain_key, chain);
 }
 
-fn dispatch_event(
-    context: &mut ExecutionContext,
-    chain: usize,
-) {
-    let chain = context.remove::<ChainedEvents>(chain).unwrap();
+fn dispatch_event(context: &mut ExecutionContext, chain: usize) {
+    let chain = context.remove::<ChainedEvents>(chain);
 
     context.world.write_resource::<EventQueue>().push(*chain);
 }
