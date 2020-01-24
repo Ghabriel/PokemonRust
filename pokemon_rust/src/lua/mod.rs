@@ -17,7 +17,27 @@ use self::polymorphic_container::PolymorphicContainer;
 use std::{
     cell::RefCell,
     fs::read_to_string,
+    ops::{Deref, DerefMut},
 };
+
+struct ExecutionContext<'a> {
+    lua_variables: PolymorphicContainer,
+    world: &'a mut World,
+}
+
+impl Deref for ExecutionContext<'_> {
+    type Target = PolymorphicContainer;
+
+    fn deref(&self) -> &PolymorphicContainer {
+        &self.lua_variables
+    }
+}
+
+impl DerefMut for ExecutionContext<'_> {
+    fn deref_mut(&mut self) -> &mut PolymorphicContainer {
+        &mut self.lua_variables
+    }
+}
 
 thread_local! {
     static LUA: Lua = Lua::new();
@@ -56,14 +76,14 @@ fn run_script(
 
 macro_rules! native_functions {
     (
-        ($globals:ident, $scope:ident, $world:ident, $vars:ident)
+        ($globals:ident, $scope:ident, $context:ident)
         $($target_name:ident: $original_name:ident($($param_name:ident: $param_type:ty),*)),*
     ) => {
         $(
             #[allow(unused_parens)]
             let $target_name = $scope.create_function_mut(|_, ($( $param_name ),*): ($( $param_type ),*)| {
                 Ok(
-                    $original_name(&mut $world.borrow_mut(), &mut $vars.borrow_mut(), $( $param_name ),*)
+                    $original_name(&mut $context.borrow_mut(), $( $param_name ),*)
                 )
             })?;
 
@@ -76,15 +96,17 @@ fn run_with_native_functions<F, R>(world: &mut World, lua: &Lua, callback: F) ->
 where
     F: FnOnce(&Context) -> Result<R, Error>,
 {
-    let world = RefCell::new(world);
-    let lua_variables = RefCell::new(PolymorphicContainer::default());
+    let execution_context = RefCell::new(ExecutionContext {
+        world,
+        lua_variables: PolymorphicContainer::default(),
+    });
 
     lua.context(|context| {
         context.scope(|scope| {
             let globals = context.globals();
 
             native_functions!(
-                (globals, scope, world, lua_variables)
+                (globals, scope, execution_context)
                 // rust_add_text_event: add_text_event(text: String),
                 // rust_add_warp_event: add_warp_event(map: String, x: u32, y: u32)
                 rust_create_chained_event: create_chained_event(),
@@ -110,56 +132,53 @@ where
 //     world.write_resource::<EventQueue>().push(event);
 // }
 
-fn create_chained_event(world: &mut World, storage: &mut PolymorphicContainer) -> usize {
+fn create_chained_event(context: &mut ExecutionContext) -> usize {
     let event = ChainedEvents::default();
 
-    storage.store(event)
+    context.store(event)
 }
 
-fn create_text_event(world: &mut World, storage: &mut PolymorphicContainer, text: String) -> usize {
-    let event = TextEvent::new(text, world);
+fn create_text_event(context: &mut ExecutionContext, text: String) -> usize {
+    let event = TextEvent::new(text, context.world);
 
-    storage.store(event)
+    context.store(event)
 }
 
-fn create_warp_event(world: &mut World, storage: &mut PolymorphicContainer, map: String, x: u32, y: u32) -> usize {
+fn create_warp_event(context: &mut ExecutionContext, map: String, x: u32, y: u32) -> usize {
     let event = WarpEvent::new(map, MapCoordinates::new(x, y));
 
-    storage.store(event)
+    context.store(event)
 }
 
 fn add_text_event(
-    world: &mut World,
-    storage: &mut PolymorphicContainer,
+    context: &mut ExecutionContext,
     chain_key: usize,
     new_event: usize,
 ) {
-    let mut chain = storage.remove::<ChainedEvents>(chain_key).unwrap();
-    let new_event = storage.remove::<TextEvent>(new_event).unwrap();
+    let mut chain = context.remove::<ChainedEvents>(chain_key).unwrap();
+    let new_event = context.remove::<TextEvent>(new_event).unwrap();
 
     chain.add_event(new_event);
-    storage.store_at(chain_key, chain);
+    context.store_at(chain_key, chain);
 }
 
 fn add_warp_event(
-    world: &mut World,
-    storage: &mut PolymorphicContainer,
+    context: &mut ExecutionContext,
     chain_key: usize,
     new_event: usize,
 ) {
-    let mut chain = storage.remove::<ChainedEvents>(chain_key).unwrap();
-    let new_event = storage.remove::<WarpEvent>(new_event).unwrap();
+    let mut chain = context.remove::<ChainedEvents>(chain_key).unwrap();
+    let new_event = context.remove::<WarpEvent>(new_event).unwrap();
 
     chain.add_event(new_event);
-    storage.store_at(chain_key, chain);
+    context.store_at(chain_key, chain);
 }
 
 fn dispatch_event(
-    world: &mut World,
-    storage: &mut PolymorphicContainer,
+    context: &mut ExecutionContext,
     chain: usize,
 ) {
-    let chain = storage.remove::<ChainedEvents>(chain).unwrap();
+    let chain = context.remove::<ChainedEvents>(chain).unwrap();
 
-    world.write_resource::<EventQueue>().push(*chain);
+    context.world.write_resource::<EventQueue>().push(*chain);
 }
