@@ -1,21 +1,22 @@
+mod events;
 mod polymorphic_container;
-mod utils;
 
 use amethyst::{
-    ecs::{World, WorldExt},
+    ecs::World,
     utils::application_root_dir,
-};
-
-use crate::{
-    entities::map::MapCoordinates,
-    events::{ChainedEvents, EventQueue, TextEvent, WarpEvent},
 };
 
 use rlua::{Context, Error, Function, Lua};
 
 use self::{
+    events::{
+        create_chained_event,
+        create_text_event,
+        create_warp_event,
+        add_event,
+        dispatch_event,
+    },
     polymorphic_container::PolymorphicContainer,
-    utils::remove_event,
 };
 
 use std::{
@@ -121,36 +122,4 @@ where
             callback(&context)
         })
     })
-}
-
-fn create_chained_event(context: &mut ExecutionContext) -> usize {
-    let event = ChainedEvents::default();
-
-    context.store(event)
-}
-
-fn create_text_event(context: &mut ExecutionContext, text: String) -> usize {
-    let event = TextEvent::new(text, context.world);
-
-    context.store(event)
-}
-
-fn create_warp_event(context: &mut ExecutionContext, map: String, x: u32, y: u32) -> usize {
-    let event = WarpEvent::new(map, MapCoordinates::new(x, y));
-
-    context.store(event)
-}
-
-fn add_event(context: &mut ExecutionContext, chain_key: usize, new_event: usize) {
-    let mut chain = context.remove::<ChainedEvents>(chain_key);
-
-    chain.add_event(remove_event(context, new_event));
-
-    context.store_at(chain_key, chain);
-}
-
-fn dispatch_event(context: &mut ExecutionContext, key: usize) {
-    let event = remove_event(context, key);
-
-    context.world.write_resource::<EventQueue>().push_boxed(event);
 }
