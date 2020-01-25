@@ -584,7 +584,7 @@
         [48, 0],
     ],
     script_repository: [
-        Lua(file: "test.lua", function: "enter_cave"),
+        Lua(file:  "assets/maps/test_map2/scripts.lua", function: "enter_cave"),
     ],
     actions: {
         [39, 17]: (

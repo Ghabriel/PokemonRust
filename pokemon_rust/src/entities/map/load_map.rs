@@ -106,7 +106,7 @@ pub fn prepare_warp(
     }
 }
 
-pub fn is_map_loaded(world: &mut World, map_name: &str) -> bool {
+pub fn is_map_loaded(world: &World, map_name: &str) -> bool {
     world.read_resource::<MapHandler>()
         .loaded_maps
         .contains_key(map_name)

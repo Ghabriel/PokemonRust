@@ -767,7 +767,7 @@
         [48, 0],
     ],
     script_repository: [
-        Lua(file: "test.lua", function: "interact_with_tree"),
+        Lua(file: "assets/maps/test_map3/scripts.lua", function: "interact_with_tree"),
     ],
     actions: {
         [19, 27]: (

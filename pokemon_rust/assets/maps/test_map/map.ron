@@ -767,17 +767,17 @@
         [48, 0],
     ],
     script_repository: [
-        Lua(file: "test.lua", function: "do_it"),
-        Lua(file: "test.lua", function: "interact_with_tree"),
+        Lua(file: "assets/maps/test_map/scripts.lua", function: "interact_with_tree"),
+        Lua(file: "assets/maps/test_map/scripts.lua", function: "do_it"),
     ],
     actions: {
         [19, 27]: (
             when: OnInteraction,
-            script_index: 1,
+            script_index: 0,
         ),
         [20, 27]: (
             when: OnInteraction,
-            script_index: 0,
+            script_index: 1,
         ),
     },
     map_scripts: [],

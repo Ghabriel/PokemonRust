@@ -63,7 +63,6 @@ fn run_script(
     run_with_native_functions(world, lua, |context| {
         let path = application_root_dir()
             .unwrap()
-            .join("lua")
             .join(&file);
 
         let content = read_to_string(&path)
