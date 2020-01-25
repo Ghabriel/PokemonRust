@@ -14,7 +14,10 @@ use crate::{
 
 use self::map::Map;
 
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    convert::TryFrom,
+};
 
 pub use self::{
     coordinates::{CoordinateSystem, MapCoordinates, PlayerCoordinates, WorldCoordinates},
@@ -115,9 +118,8 @@ impl MapHandler {
             .filter(move |(tile, connection)| {
                 let visible_tiles_x = 22;
                 let visible_tiles_y = 16;
-                // TODO: coordinate system conflict. Bug?
-                let distance_x = (tile.x() as i32) - (position.x() as i32);
-                let distance_y = (tile.y() as i32) - (position.y() as i32);
+                let distance_x = i32::try_from(tile.x()).unwrap() - i32::try_from(position.x()).unwrap();
+                let distance_y = i32::try_from(tile.y()).unwrap() - i32::try_from(position.y()).unwrap();
                 let leniency = 12;
 
                 connection

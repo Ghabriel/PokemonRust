@@ -5,6 +5,8 @@ use crate::{
     constants::{TILE_SIZE, UNIVERSAL_PLAYER_OFFSET_Y},
 };
 
+use std::convert::TryFrom;
+
 pub trait CoordinateSystem {
     type CoordinateType;
 
@@ -115,8 +117,8 @@ impl MapCoordinates {
         let half_tile = tile_size / 2;
 
         WorldOffset::new(
-            (self.x() as i32) * tile_size + half_tile,
-            (self.y() as i32) * tile_size + half_tile,
+            i32::try_from(self.x()).unwrap() * tile_size + half_tile,
+            i32::try_from(self.y()).unwrap() * tile_size + half_tile,
         )
     }
 }

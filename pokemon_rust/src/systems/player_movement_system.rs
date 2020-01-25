@@ -119,7 +119,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
                         continue;
                     }
 
-                    let estimated_time = (TILE_SIZE as f32) / velocity;
+                    let estimated_time = f32::from(TILE_SIZE) / velocity;
 
                     self.movement_data.insert(entity, MovementData {
                         estimated_time,

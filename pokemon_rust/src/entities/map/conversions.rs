@@ -1,5 +1,7 @@
 use crate::constants::TILE_SIZE;
 
+use std::convert::TryFrom;
+
 use super::coordinates::{CoordinateSystem, MapCoordinates, PlayerCoordinates, WorldCoordinates};
 
 /// Given the position of a tile in Map Coordinates and the reference point of
@@ -24,8 +26,8 @@ pub fn world_to_map_coordinates(
         .corner();
 
     MapCoordinates::new(
-        scaled_map_coordinates.x() as u32 / tile_size,
-        scaled_map_coordinates.y() as u32 / tile_size,
+        u32::try_from(scaled_map_coordinates.x()).unwrap() / tile_size,
+        u32::try_from(scaled_map_coordinates.y()).unwrap() / tile_size,
     )
 }
 

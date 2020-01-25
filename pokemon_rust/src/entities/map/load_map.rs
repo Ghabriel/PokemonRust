@@ -19,6 +19,7 @@ use ron::de::from_reader;
 
 use std::{
     collections::HashMap,
+    convert::TryFrom,
     fs::File,
 };
 
@@ -227,10 +228,10 @@ fn load_map(
     progress_counter: &mut ProgressCounter,
 ) -> Map {
     let map = read_map_file(&map_name);
-    let map_size = (map.num_tiles_x * TILE_SIZE as u32, map.num_tiles_y * TILE_SIZE as u32);
+    let map_size = (map.num_tiles_x * u32::from(TILE_SIZE), map.num_tiles_y * u32::from(TILE_SIZE));
     let half_map_offset = WorldOffset::new(
-        map_size.0 as i32 / 2,
-        map_size.1 as i32 / 2,
+        i32::try_from(map_size.0 / 2).unwrap(),
+        i32::try_from(map_size.1 / 2).unwrap(),
     );
 
     let (reference_point, map_center) = match reference_point {
