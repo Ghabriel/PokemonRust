@@ -19,18 +19,6 @@ impl PolymorphicContainer {
         self.data.insert(key, value);
     }
 
-    pub fn get<T: 'static>(&self, key: usize) -> Option<&T> {
-        self.data
-            .get(&key)?
-            .downcast_ref()
-    }
-
-    pub fn get_mut<T: 'static>(&mut self, key: usize) -> Option<&mut T> {
-        self.data
-            .get_mut(&key)?
-            .downcast_mut()
-    }
-
     pub fn try_remove_boxed(&mut self, key: usize) -> Option<Box<dyn Any>> {
         self.data.remove(&key)
     }
