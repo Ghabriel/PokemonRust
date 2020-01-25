@@ -48,7 +48,7 @@ impl GameEvent for SwitchMapEvent {
         change_tile(
             &starting_map_id,
             &target_tile_data,
-            &world.read_resource::<MapHandler>(),
+            &mut world.write_resource::<MapHandler>(),
             &mut world.write_resource::<EventQueue>(),
         );
 

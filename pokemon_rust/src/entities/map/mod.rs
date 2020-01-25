@@ -33,19 +33,19 @@ pub use self::{
 // TODO: find a better name
 pub struct MapHandler {
     loaded_maps: HashMap<String, Map>,
-    current_map: String,
+    current_map: MapId,
 }
 
 impl MapHandler {
     pub fn get_forward_tile(&self, player: &Player, player_position: &Transform) -> TileData {
         let player_position = PlayerCoordinates::from_transform(&player_position);
 
-        let current_map = &self.loaded_maps[&self.current_map];
+        let current_map = &self.loaded_maps[&self.current_map.0];
         let current_tile = current_map.player_to_map_coordinates(&player_position);
         let connection = current_map.connections.get(&current_tile);
         let target_map = if let Some(connection) = connection {
             if connection.directions.contains_key(&player.facing_direction) {
-                connection.map.clone()
+                MapId(connection.map.clone())
             } else {
                 self.current_map.clone()
             }
@@ -55,7 +55,7 @@ impl MapHandler {
 
         TileData {
             position: player_position.offset_by_direction(&player.facing_direction),
-            map_id: MapId(target_map),
+            map_id: target_map,
         }
     }
 
@@ -100,14 +100,14 @@ impl MapHandler {
     }
 
     pub fn get_current_map_id(&self) -> MapId {
-        MapId(self.current_map.clone())
+        self.current_map.clone()
     }
 
     pub fn get_nearby_connections(
         &self,
         position: &PlayerCoordinates,
     ) -> impl Iterator<Item = (&MapCoordinates, &MapConnection)> {
-        let map = &self.loaded_maps[&self.current_map];
+        let map = &self.loaded_maps[&self.current_map.0];
         let position = map.player_to_map_coordinates(&position);
 
         map.connections

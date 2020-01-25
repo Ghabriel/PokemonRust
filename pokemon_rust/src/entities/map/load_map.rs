@@ -52,10 +52,13 @@ use super::{
 pub fn change_tile(
     starting_map_id: &MapId,
     final_tile_data: &TileData,
-    map: &MapHandler,
+    map: &mut MapHandler,
     event_queue: &mut EventQueue,
 ) {
     if *starting_map_id != final_tile_data.map_id {
+        println!("Changing to map {}", final_tile_data.map_id.0);
+        map.current_map = final_tile_data.map_id.clone();
+
         map.get_map_scripts(&final_tile_data, MapScriptKind::OnMapEnter)
             .for_each(|event| {
                 event_queue.push(event);
@@ -135,7 +138,7 @@ pub fn initialise_map(world: &mut World, progress_counter: &mut ProgressCounter)
             loaded_maps.insert("test_map".to_string(), map);
             loaded_maps
         },
-        current_map: "test_map".to_string(),
+        current_map: MapId("test_map".to_string()),
     });
 }
 
@@ -159,7 +162,7 @@ fn load_nearby_connections(world: &mut World) {
         });
 
         let reference_point = map
-            .loaded_maps[&map.current_map]
+            .loaded_maps[&map.current_map.0]
             .reference_point
             .clone();
 
@@ -215,13 +218,6 @@ fn get_new_map_reference_point(
         &external_tile,
         &external_tile_world_coordinates,
     )
-}
-
-fn change_current_map(world: &mut World, new_map: String) {
-    println!("Changing to map {}", new_map);
-    world
-        .write_resource::<MapHandler>()
-        .current_map = new_map;
 }
 
 fn load_map(
@@ -328,33 +324,6 @@ fn add_intrinsic_scripts(map: &mut Map) {
 
     map.map_scripts.push(MapScript {
         when: MapScriptKind::OnTileChange,
-        script_index: map.script_repository.len() - 1,
-    });
-
-    // TODO: find a way to do this generically
-    let change_map_script = match map.map_name.as_str() {
-        "Test Map" => {
-            GameScript::Native(|world| {
-                change_current_map(world, "test_map".to_string());
-            })
-        },
-        "Test Map 2" => {
-            GameScript::Native(|world| {
-                change_current_map(world, "test_map2".to_string());
-            })
-        },
-        "Test Map 3" => {
-            GameScript::Native(|world| {
-                change_current_map(world, "test_map3".to_string());
-            })
-        },
-        _ => panic!("Tried to add intrinsic scripts of non-supported map: {}", map.map_name),
-    };
-
-    map.script_repository.push(change_map_script);
-
-    map.map_scripts.push(MapScript {
-        when: MapScriptKind::OnMapEnter,
         script_index: map.script_repository.len() - 1,
     });
 }

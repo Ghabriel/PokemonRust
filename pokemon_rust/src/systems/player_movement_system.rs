@@ -1,6 +1,17 @@
 use amethyst::{
     core::{math::Vector3, Time, Transform},
-    ecs::{Entities, Entity, Join, Read, ReadExpect, ReadStorage, System, Write, WriteStorage},
+    ecs::{
+        Entities,
+        Entity,
+        Join,
+        Read,
+        ReadExpect,
+        ReadStorage,
+        System,
+        Write,
+        WriteExpect,
+        WriteStorage,
+    },
 };
 
 use crate::{
@@ -39,7 +50,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
         WriteStorage<'a, Transform>,
         Entities<'a>,
         ReadExpect<'a, GameConfig>,
-        ReadExpect<'a, MapHandler>,
+        WriteExpect<'a, MapHandler>,
         Write<'a, EventQueue>,
         Read<'a, Time>,
     );
@@ -50,7 +61,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
         mut transforms,
         entities,
         config,
-        map,
+        mut map,
         mut event_queue,
         time,
     ): Self::SystemData) {
@@ -77,7 +88,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
                         change_tile(
                             &movement_data.starting_map_id,
                             &movement_data.final_tile_data,
-                            &map,
+                            &mut map,
                             &mut event_queue,
                         );
 
