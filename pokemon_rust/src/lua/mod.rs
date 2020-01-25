@@ -6,7 +6,7 @@ use amethyst::{
     utils::application_root_dir,
 };
 
-use rlua::{Context, Error, Function, Lua};
+use rlua::{Context, Error as LuaError, Function, Lua};
 
 use self::{
     events::{
@@ -21,7 +21,9 @@ use self::{
 
 use std::{
     cell::RefCell,
+    fmt::{self, Display, Formatter},
     fs::read_to_string,
+    io::Error as IoError,
     ops::{Deref, DerefMut},
 };
 
@@ -48,7 +50,34 @@ thread_local! {
     static LUA: Lua = Lua::new();
 }
 
-pub fn run_lua_script(world: &mut World, file: &str, function: &str) -> Result<(), Error> {
+#[derive(Debug)]
+pub enum LuaScriptError {
+    Io(IoError),
+    Lua(LuaError),
+}
+
+impl From<IoError> for LuaScriptError {
+    fn from(error: IoError) -> LuaScriptError {
+        LuaScriptError::Io(error)
+    }
+}
+
+impl From<LuaError> for LuaScriptError {
+    fn from(error: LuaError) -> LuaScriptError {
+        LuaScriptError::Lua(error)
+    }
+}
+
+impl Display for LuaScriptError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            LuaScriptError::Io(error) => write!(f, "{}", error),
+            LuaScriptError::Lua(error) => write!(f, "{}", error),
+        }
+    }
+}
+
+pub fn run_lua_script(world: &mut World, file: &str, function: &str) -> Result<(), LuaScriptError> {
     LUA.with(|lua| {
         run_script(world, &lua, &file, &function)
     })
@@ -59,14 +88,13 @@ fn run_script(
     lua: &Lua,
     file: &str,
     function: &str,
-) -> Result<(), Error> {
+) -> Result<(), LuaScriptError> {
     run_with_native_functions(world, lua, |context| {
         let path = application_root_dir()
             .unwrap()
             .join(&file);
 
-        let content = read_to_string(&path)
-            .expect("Failed to open lua file");
+        let content = read_to_string(&path)?;
 
         context.load(&content).exec()?;
 
@@ -96,9 +124,9 @@ macro_rules! native_functions {
     }
 }
 
-fn run_with_native_functions<F, R>(world: &mut World, lua: &Lua, callback: F) -> Result<R, Error>
+fn run_with_native_functions<F, R>(world: &mut World, lua: &Lua, callback: F) -> Result<R, LuaScriptError>
 where
-    F: FnOnce(&Context) -> Result<R, Error>,
+    F: FnOnce(&Context) -> Result<R, LuaScriptError>,
 {
     let execution_context = RefCell::new(ExecutionContext {
         world,
