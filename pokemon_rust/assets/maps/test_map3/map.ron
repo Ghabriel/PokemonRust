@@ -766,7 +766,9 @@
         [47, 0],
         [48, 0],
     ],
-    script_repository: [],
+    script_repository: [
+        Lua(file: "test.lua", function: "interact_with_tree"),
+    ],
     actions: {
         [19, 27]: (
             when: OnInteraction,

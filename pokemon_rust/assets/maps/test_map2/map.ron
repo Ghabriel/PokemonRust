@@ -583,7 +583,9 @@
         [47, 0],
         [48, 0],
     ],
-    script_repository: [],
+    script_repository: [
+        Lua(file: "test.lua", function: "enter_cave"),
+    ],
     actions: {
         [39, 17]: (
             when: OnStep,

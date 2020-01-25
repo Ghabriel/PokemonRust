@@ -768,6 +768,7 @@
     ],
     script_repository: [
         Lua(file: "test.lua", function: "do_it"),
+        Lua(file: "test.lua", function: "interact_with_tree"),
     ],
     actions: {
         [19, 27]: (

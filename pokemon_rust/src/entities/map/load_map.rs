@@ -12,7 +12,7 @@ use crate::{
     entities::{
         player::PlayerEntity,
     },
-    events::{EventQueue, TextEvent, WarpEvent},
+    events::EventQueue,
 };
 
 use ron::de::from_reader;
@@ -123,65 +123,11 @@ pub fn load_detached_map(
 
     let reference_point = WorldCoordinates::new(max_reference_point_x + 1_000_000, 0);
 
-    let mut map = load_map(world, &map_name, Some(reference_point), progress_counter);
-
-    if map_name == "test_map3" {
-        map.script_repository.push(GameScript::Native(|world| {
-            let event = TextEvent::new(
-                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-                world,
-            );
-
-            world.write_resource::<EventQueue>().push(event);
-        }));
-
-        map.script_repository.push(GameScript::Native(load_nearby_connections));
-
-        map.script_repository.push(GameScript::Native(|world| {
-            change_current_map(world, "test_map3".to_string());
-        }));
-
-        map.map_scripts.push(MapScript {
-            when: MapScriptKind::OnTileChange,
-            script_index: 1,
-        });
-
-        map.map_scripts.push(MapScript {
-            when: MapScriptKind::OnMapEnter,
-            script_index: 2,
-        });
-    }
-
-    map
+    load_map(world, &map_name, Some(reference_point), progress_counter)
 }
 
 pub fn initialise_map(world: &mut World, progress_counter: &mut ProgressCounter) {
-    let mut map = load_map(world, "test_map", None, progress_counter);
-
-    map.script_repository.push(GameScript::Native(|world| {
-        let event = TextEvent::new(
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-            world,
-        );
-
-        world.write_resource::<EventQueue>().push(event);
-    }));
-
-    map.script_repository.push(GameScript::Native(load_nearby_connections));
-
-    map.map_scripts.push(MapScript {
-        when: MapScriptKind::OnTileChange,
-        script_index: map.script_repository.len() - 1,
-    });
-
-    map.script_repository.push(GameScript::Native(|world| {
-        change_current_map(world, "test_map".to_string());
-    }));
-
-    map.map_scripts.push(MapScript {
-        when: MapScriptKind::OnMapEnter,
-        script_index: map.script_repository.len() - 1,
-    });
+    let map = load_map(world, "test_map", None, progress_counter);
 
     world.insert(MapHandler {
         loaded_maps: {
@@ -231,26 +177,7 @@ fn load_nearby_connections(world: &mut World) {
             );
             // TODO: use the Progress trait to avoid needing to construct a ProgressCounter
             let mut progress_counter = ProgressCounter::new();
-            let mut map = load_map(world, &connection.map, Some(reference_point), &mut progress_counter);
-
-            if connection.map == "test_map2" {
-                map.script_repository.push(GameScript::Native(|world| {
-                    world
-                        .write_resource::<EventQueue>()
-                        .push(
-                            WarpEvent::new("test_map3", MapCoordinates::new(5, 10))
-                        );
-                }));
-
-                map.script_repository.push(GameScript::Native(|world| {
-                    change_current_map(world, "test_map2".to_string());
-                }));
-
-                map.map_scripts.push(MapScript {
-                    when: MapScriptKind::OnMapEnter,
-                    script_index: map.script_repository.len() - 1,
-                });
-            }
+            let map = load_map(world, &connection.map, Some(reference_point), &mut progress_counter);
 
             (connection.map.clone(), map)
         })
@@ -338,7 +265,7 @@ fn load_map(
         progress_counter,
     );
 
-    Map::from_initialized_map(InitializedMap {
+    let mut map = Map::from_initialized_map(InitializedMap {
         map_name: map.map_name,
         reference_point,
         terrain_entity,
@@ -348,7 +275,11 @@ fn load_map(
         actions: map.actions,
         map_scripts: map.map_scripts,
         connections: map.connections,
-    })
+    });
+
+    add_intrinsic_scripts(&mut map);
+
+    map
 }
 
 fn read_map_file(map_name: &str) -> SerializableMap {
@@ -390,4 +321,40 @@ fn initialise_map_layer(
         .with(transform)
         .with(sprite_render)
         .build()
+}
+
+fn add_intrinsic_scripts(map: &mut Map) {
+    map.script_repository.push(GameScript::Native(load_nearby_connections));
+
+    map.map_scripts.push(MapScript {
+        when: MapScriptKind::OnTileChange,
+        script_index: map.script_repository.len() - 1,
+    });
+
+    // TODO: find a way to do this generically
+    let change_map_script = match map.map_name.as_str() {
+        "Test Map" => {
+            GameScript::Native(|world| {
+                change_current_map(world, "test_map".to_string());
+            })
+        },
+        "Test Map 2" => {
+            GameScript::Native(|world| {
+                change_current_map(world, "test_map2".to_string());
+            })
+        },
+        "Test Map 3" => {
+            GameScript::Native(|world| {
+                change_current_map(world, "test_map3".to_string());
+            })
+        },
+        _ => panic!("Tried to add intrinsic scripts of non-supported map: {}", map.map_name),
+    };
+
+    map.script_repository.push(change_map_script);
+
+    map.map_scripts.push(MapScript {
+        when: MapScriptKind::OnMapEnter,
+        script_index: map.script_repository.len() - 1,
+    });
 }
