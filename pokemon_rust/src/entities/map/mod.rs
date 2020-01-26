@@ -21,6 +21,7 @@ use std::{
 
 pub use self::{
     coordinates::{CoordinateSystem, MapCoordinates, PlayerCoordinates, WorldCoordinates},
+    conversions::map_to_world_coordinates,
     load_map::{change_tile, initialise_map, prepare_warp},
     map::{
         GameAction,

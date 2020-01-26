@@ -112,6 +112,10 @@ impl MapCoordinates {
         MapCoordinates::new(vector.x, vector.y)
     }
 
+    pub fn from_tuple(vector: &(u32, u32)) -> MapCoordinates {
+        MapCoordinates::new(vector.0, vector.1)
+    }
+
     pub fn to_world_offset(&self) -> WorldOffset {
         let tile_size: i32 = TILE_SIZE.into();
         let half_tile = tile_size / 2;

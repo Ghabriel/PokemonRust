@@ -6,4 +6,5 @@ pub struct GameConfig {
     pub player_running_speed: f32,
     pub text_delay: f32,
     pub fade_duration: f32,
+    pub player_starting_position: (u32, u32),
 }

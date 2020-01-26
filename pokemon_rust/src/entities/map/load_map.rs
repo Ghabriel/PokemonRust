@@ -127,11 +127,11 @@ pub fn load_detached_map(
 
     let reference_point = WorldCoordinates::new(max_reference_point_x + 1_000_000, 0);
 
-    load_map(world, &map_name, Some(reference_point), progress_counter)
+    load_map(world, &map_name, reference_point, progress_counter)
 }
 
 pub fn initialise_map(world: &mut World, progress_counter: &mut ProgressCounter) {
-    let map = load_map(world, "test_map", None, progress_counter);
+    let map = load_map(world, "test_map", WorldCoordinates::origin(), progress_counter);
 
     world.insert(MapHandler {
         loaded_maps: {
@@ -181,7 +181,7 @@ fn load_nearby_connections(world: &mut World) {
             );
             // TODO: use the Progress trait to avoid needing to construct a ProgressCounter
             let mut progress_counter = ProgressCounter::new();
-            let map = load_map(world, &connection.map, Some(reference_point), &mut progress_counter);
+            let map = load_map(world, &connection.map, reference_point, &mut progress_counter);
 
             (connection.map.clone(), map)
         })
@@ -224,25 +224,20 @@ fn get_new_map_reference_point(
 fn load_map(
     world: &mut World,
     map_name: &str,
-    reference_point: Option<WorldCoordinates>,
+    reference_point: WorldCoordinates,
     progress_counter: &mut ProgressCounter,
 ) -> Map {
     let map = read_map_file(&map_name);
-    let map_size = (map.num_tiles_x * u32::from(TILE_SIZE), map.num_tiles_y * u32::from(TILE_SIZE));
-    let half_map_offset = WorldOffset::new(
-        i32::try_from(map_size.0 / 2).unwrap(),
-        i32::try_from(map_size.1 / 2).unwrap(),
-    );
+    let tile_size: u32 = TILE_SIZE.into();
+    let map_size = (map.num_tiles_x * tile_size, map.num_tiles_y * tile_size);
 
-    let (reference_point, map_center) = match reference_point {
-        Some(reference_point) => {
-            let center = reference_point.with_offset(&half_map_offset);
-            (reference_point, center)
-        },
-        None => (
-            WorldCoordinates::origin().with_offset(&half_map_offset.invert()),
-            WorldCoordinates::origin()
-        ),
+    let map_center = {
+        let half_map_offset = WorldOffset::new(
+            i32::try_from(map_size.0 / 2).unwrap(),
+            i32::try_from(map_size.1 / 2).unwrap(),
+        );
+
+        reference_point.with_offset(&half_map_offset)
     };
 
     let terrain_entity = initialise_map_layer(
