@@ -44,7 +44,7 @@ fn main() {
                 map.width,
                 map.height,
                 get_solid_list(&map)
-                    .map(|(x, y)| format!("\t\t[{}, {}],\n", x, y))
+                    .map(|(x, y)| format!("\t\t({}, {}),\n", x, y))
                     .collect::<Vec<String>>()
                     .join("")
             );
