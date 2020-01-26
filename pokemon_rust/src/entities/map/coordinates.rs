@@ -15,26 +15,26 @@ pub trait CoordinateSystem {
 }
 
 /// Represents an offset expressed in World Coordinates.
-pub struct WorldOffset(Vector2<i32>);
+pub struct WorldOffset(i32, i32);
 
 impl WorldOffset {
     pub fn new(x: i32, y: i32) -> WorldOffset {
-        WorldOffset(Vector2::new(x, y))
+        WorldOffset(x, y)
     }
 
     pub fn invert(&self) -> WorldOffset {
-        WorldOffset::new(-self.0.x, -self.0.y)
+        WorldOffset::new(-self.0, -self.1)
     }
 }
 
 /// Represents a position expressed in World Coordinates. It typically
 /// refers to the center of a tile.
-#[derive(Clone)]
-pub struct WorldCoordinates(Vector2<i32>);
+#[derive(Clone, Default)]
+pub struct WorldCoordinates(i32, i32);
 
 impl WorldCoordinates {
     pub fn new(x: i32, y: i32) -> WorldCoordinates {
-        WorldCoordinates(Vector2::new(x, y))
+        WorldCoordinates(x, y)
     }
 
     pub fn origin() -> WorldCoordinates {
@@ -60,8 +60,8 @@ impl WorldCoordinates {
 
     pub fn with_offset(&self, offset: &WorldOffset) -> WorldCoordinates {
         WorldCoordinates::new(
-            self.x() + offset.0.x,
-            self.y() + offset.0.y,
+            self.x() + offset.0,
+            self.y() + offset.1,
         )
     }
 
@@ -80,32 +80,26 @@ impl WorldCoordinates {
     }
 }
 
-impl Default for WorldCoordinates {
-    fn default() -> WorldCoordinates {
-        WorldCoordinates(Vector2::new(0, 0))
-    }
-}
-
 impl CoordinateSystem for WorldCoordinates {
     type CoordinateType = i32;
 
     fn x(&self) -> i32 {
-        self.0.x
+        self.0
     }
 
     fn y(&self) -> i32 {
-        self.0.y
+        self.1
     }
 }
 
 /// Represents a position expressed in Map Coordinates, i.e the position of
 /// something relative to the map it's in.
 #[derive(Clone, Eq, Hash, PartialEq)]
-pub struct MapCoordinates(Vector2<u32>);
+pub struct MapCoordinates(u32, u32);
 
 impl MapCoordinates {
     pub fn new(x: u32, y: u32) -> MapCoordinates {
-        MapCoordinates(Vector2::new(x, y))
+        MapCoordinates(x, y)
     }
 
     pub fn from_vector(vector: &Vector2<u32>) -> MapCoordinates {
@@ -131,36 +125,36 @@ impl CoordinateSystem for MapCoordinates {
     type CoordinateType = u32;
 
     fn x(&self) -> u32 {
-        self.0.x
+        self.0
     }
 
     fn y(&self) -> u32 {
-        self.0.y
+        self.1
     }
 }
 
 /// Represents a position possibly occupied by a player, expressed in World
 /// Coordinates. The universal player offset is included.
 #[derive(Clone)]
-pub struct PlayerCoordinates(Vector2<f32>);
+pub struct PlayerCoordinates(f32, f32);
 
 impl PlayerCoordinates {
     pub fn new(x: f32, y: f32) -> PlayerCoordinates {
-        PlayerCoordinates(Vector2::new(x, y))
+        PlayerCoordinates(x, y)
     }
 
     pub fn from_world_coordinates(coordinates: &WorldCoordinates) -> PlayerCoordinates {
-        PlayerCoordinates(Vector2::new(
-            coordinates.0.x as f32,
-            coordinates.0.y as f32 + UNIVERSAL_PLAYER_OFFSET_Y,
-        ))
+        PlayerCoordinates::new(
+            coordinates.x() as f32,
+            coordinates.y() as f32 + UNIVERSAL_PLAYER_OFFSET_Y,
+        )
     }
 
     pub fn to_world_coordinates(&self) -> WorldCoordinates {
-        WorldCoordinates(Vector2::new(
-            self.0.x as i32,
-            (self.0.y - UNIVERSAL_PLAYER_OFFSET_Y) as i32,
-        ))
+        WorldCoordinates::new(
+            self.x() as i32,
+            (self.y() - UNIVERSAL_PLAYER_OFFSET_Y) as i32,
+        )
     }
 
     pub fn from_transform(transform: &Transform) -> PlayerCoordinates {
@@ -192,10 +186,10 @@ impl CoordinateSystem for PlayerCoordinates {
     type CoordinateType = f32;
 
     fn x(&self) -> f32 {
-        self.0.x
+        self.0
     }
 
     fn y(&self) -> f32 {
-        self.0.y
+        self.1
     }
 }
