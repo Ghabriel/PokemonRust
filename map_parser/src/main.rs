@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-use serde_json::from_reader;
+use serde_xml_rs::from_reader;
 
 use std::{env, fs::File, io::Write, process};
 
@@ -8,12 +8,20 @@ use std::{env, fs::File, io::Write, process};
 struct TiledMap {
     height: usize,
     width: usize,
+
+    #[serde(rename = "layer")]
     layers: Vec<TiledLayer>,
 }
 
 #[derive(Debug, Deserialize)]
 struct TiledLayer {
-    data: Vec<usize>,
+    data: TiledLayerData,
+}
+
+#[derive(Debug, Deserialize)]
+struct TiledLayerData {
+    #[serde(rename = "$value")]
+    body: String,
 }
 
 fn get_solid_list<'a>(map: &'a TiledMap) -> impl Iterator<Item = (usize, usize)> + 'a {
@@ -22,9 +30,11 @@ fn get_solid_list<'a>(map: &'a TiledMap) -> impl Iterator<Item = (usize, usize)>
         .nth(1)
         .expect("Map has only one layer")
         .data
-        .iter()
+        .body
+        .split(",")
+        .map(|tile| tile.replace("\n", ""))
         .enumerate()
-        .filter(|(_, tile)| **tile != 0)
+        .filter(|(_, tile)| *tile != "0")
         .map(move |(index, _)| (index % map.width, index / map.width))
         .map(move |(x, y)| (x, map.height - 1 - y))
 }
