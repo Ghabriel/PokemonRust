@@ -1,4 +1,4 @@
-use amethyst::core::{math::Vector2, Transform};
+use amethyst::core::Transform;
 
 use crate::{
     common::{Direction, get_direction_offset},
@@ -100,10 +100,6 @@ pub struct MapCoordinates(u32, u32);
 impl MapCoordinates {
     pub fn new(x: u32, y: u32) -> MapCoordinates {
         MapCoordinates(x, y)
-    }
-
-    pub fn from_vector(vector: &Vector2<u32>) -> MapCoordinates {
-        MapCoordinates::new(vector.x, vector.y)
     }
 
     pub fn from_tuple(vector: &(u32, u32)) -> MapCoordinates {

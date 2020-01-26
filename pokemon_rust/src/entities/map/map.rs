@@ -45,7 +45,7 @@ impl Map {
             terrain_entity: map.terrain_entity,
             solids: map.solids
                 .into_iter()
-                .map(|tile_position| (MapCoordinates::from_vector(&tile_position), Tile))
+                .map(|tile_position| (MapCoordinates::from_tuple(&tile_position), Tile))
                 .collect(),
             decoration_entity: map.decoration_entity,
             script_repository: map.script_repository
@@ -54,20 +54,20 @@ impl Map {
                 .collect(),
             actions: map.actions
                 .into_iter()
-                .map(|(tile_position, action)| (MapCoordinates::from_vector(&tile_position), action))
+                .map(|(tile_position, action)| (MapCoordinates::from_tuple(&tile_position), action))
                 .collect(),
             map_scripts: map.map_scripts,
             connections: map.connections
                 .into_iter()
                 .map(|(tile_position, connection)| {
                     (
-                        MapCoordinates::from_vector(&tile_position),
+                        MapCoordinates::from_tuple(&tile_position),
                         MapConnection {
                             map: connection.map,
                             directions: connection.directions
                                 .into_iter()
                                 .map(|(direction, coordinates)| {
-                                    (direction, MapCoordinates::from_vector(&coordinates))
+                                    (direction, MapCoordinates::from_tuple(&coordinates))
                                 })
                                 .collect(),
                         },
