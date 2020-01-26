@@ -1,8 +1,16 @@
+use regex::Regex;
+
 use serde::Deserialize;
 
 use serde_xml_rs::from_reader;
 
-use std::{env, fs::File, io::Write, process};
+use std::{
+    env,
+    fs::{File, read_to_string},
+    io::Write,
+    path::Path,
+    process,
+};
 
 #[derive(Debug, Deserialize)]
 struct TiledMap {
@@ -43,30 +51,50 @@ fn main() {
     let mut args = env::args().skip(1);
 
     match args.next() {
-        Some(map_file) => {
+        Some(map_folder) => {
+            let map_folder_path = Path::new(&map_folder);
+            let map_ron_path = map_folder_path.join("map.ron");
+
+            let mut map_ron_content = read_to_string(&map_ron_path)
+                .expect("Failed to open ron file for reading");
+
+            let solid_list_range = {
+                let regex = Regex::new(r"solids: \[[^\[]+\]").unwrap();
+                let match_position = regex.find(&map_ron_content).unwrap();
+                let start = match_position.start();
+                let end = match_position.end();
+
+                start..end
+            };
+
             let map: TiledMap = {
-                let file = File::open(map_file).expect("Failed to open map file");
+                let map_tmx_file = map_folder_path.join("map.tmx");
+                let file = File::open(map_tmx_file).expect("Failed to open map file");
                 from_reader(file).expect("Failed to deserialize map")
             };
 
-            let output = format!(
-                "(\n\tnum_tiles_x: {},\n\tnum_tiles_y: {},\n\tsolids: [\n{}\t],\n)\n",
-                map.width,
-                map.height,
-                get_solid_list(&map)
-                    .map(|(x, y)| format!("\t\t({}, {}),\n", x, y))
-                    .collect::<Vec<String>>()
-                    .join("")
+            map_ron_content.replace_range(
+                solid_list_range,
+                &format!(
+                    "solids: [\n{}    ]",
+                    get_solid_list(&map)
+                        .map(|(x, y)| format!("        ({}, {}),\n", x, y))
+                        .collect::<Vec<String>>()
+                        .join(""),
+                ),
             );
 
-            let output_file_name = "out.txt";
+            File::create(&map_ron_path)
+                .expect("Failed to open ron file for writing")
+                .write(map_ron_content.as_bytes())
+                .expect("Failed to write to ron file");
 
-            File::create(output_file_name)
-                .expect("Failed to open output file")
-                .write(output.as_bytes())
-                .expect("Failed to write to output file");
-
-            println!("Saved output to {}.", output_file_name);
+            let folder_name = map_folder_path
+                .file_name()
+                .unwrap()
+                .to_str()
+                .unwrap();
+            println!("Updated map \"{}\".", folder_name);
         },
         None => {
             println!("Usage: map_parser tiled_map.json");
