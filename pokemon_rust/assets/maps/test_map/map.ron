@@ -1813,61 +1813,61 @@
     },
     map_scripts: [],
     connections: {
-        (24, 48): (
+        (24, 49): (
             map: "test_map2",
             directions: {
                 Up: (24, 0),
             },
         ),
-        (25, 48): (
+        (25, 49): (
             map: "test_map2",
             directions: {
                 Up: (25, 0),
             },
         ),
-        (26, 48): (
+        (26, 49): (
             map: "test_map2",
             directions: {
                 Up: (26, 0),
             },
         ),
-        (27, 48): (
+        (27, 49): (
             map: "test_map2",
             directions: {
                 Up: (27, 0),
             },
         ),
-        (28, 48): (
+        (28, 49): (
             map: "test_map2",
             directions: {
                 Up: (28, 0),
             },
         ),
-        (29, 48): (
+        (29, 49): (
             map: "test_map2",
             directions: {
                 Up: (29, 0),
             },
         ),
-        (30, 48): (
+        (30, 49): (
             map: "test_map2",
             directions: {
                 Up: (30, 0),
             },
         ),
-        (31, 48): (
+        (31, 49): (
             map: "test_map2",
             directions: {
                 Up: (31, 0),
             },
         ),
-        (32, 48): (
+        (32, 49): (
             map: "test_map2",
             directions: {
                 Up: (32, 0),
             },
         ),
-        (33, 48): (
+        (33, 49): (
             map: "test_map2",
             directions: {
                 Up: (33, 0),
