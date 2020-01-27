@@ -357,7 +357,12 @@ fn test(world: &mut World) {
         moving: false,
     };
 
-    let transform = PlayerCoordinates::from_world_coordinates(&WorldCoordinates::new(30, 30))
+    let transform = PlayerCoordinates::from_world_coordinates(
+            &map_to_world_coordinates(
+                &MapCoordinates::new(30, 30),
+                &WorldCoordinates::origin()
+            ),
+        )
         .to_transform();
 
     let sprite_render = {
