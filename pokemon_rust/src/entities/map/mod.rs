@@ -93,14 +93,14 @@ impl MapHandler {
 
     pub fn get_map_scripts<'a>(
         &'a self,
-        tile_data: &'a TileData,
+        map_id: &'a MapId,
         kind: MapScriptKind,
     ) -> impl Iterator<Item = ScriptEvent> + 'a {
-        self.loaded_maps[&tile_data.map_id.0]
+        self.loaded_maps[&map_id.0]
             .map_scripts
             .iter()
             .filter(move |script| script.when == kind)
-            .map(move |script| ScriptEvent::new(tile_data.map_id.clone(), script.script_index))
+            .map(move |script| ScriptEvent::new(map_id.clone(), script.script_index))
     }
 
     pub fn get_current_map_id(&self) -> MapId {

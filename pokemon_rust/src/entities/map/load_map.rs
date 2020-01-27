@@ -60,13 +60,13 @@ pub fn change_tile(
         println!("Changing to map {}", final_tile_data.map_id.0);
         map.current_map = final_tile_data.map_id.clone();
 
-        map.get_map_scripts(&final_tile_data, MapScriptKind::OnMapEnter)
+        map.get_map_scripts(&final_tile_data.map_id, MapScriptKind::OnMapEnter)
             .for_each(|event| {
                 event_queue.push(event);
             });
     }
 
-    map.get_map_scripts(&final_tile_data, MapScriptKind::OnTileChange)
+    map.get_map_scripts(&final_tile_data.map_id, MapScriptKind::OnTileChange)
         .for_each(|event| {
             event_queue.push(event);
         });
