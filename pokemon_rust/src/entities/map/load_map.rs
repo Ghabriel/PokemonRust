@@ -346,6 +346,7 @@ fn test(world: &mut World) {
     use crate::{
         common::Direction,
         entities::{
+            map::Tile,
             npc::{Npc, NpcAction},
             player::PlayerSpriteSheets,
         },
@@ -357,9 +358,11 @@ fn test(world: &mut World) {
         moving: false,
     };
 
+    let position = MapCoordinates::new(30, 30);
+
     let transform = PlayerCoordinates::from_world_coordinates(
             &map_to_world_coordinates(
-                &MapCoordinates::new(30, 30),
+                &position,
                 &WorldCoordinates::origin()
             ),
         )
@@ -373,6 +376,17 @@ fn test(world: &mut World) {
             sprite_number: 0,
         }
     };
+
+    {
+        let map: &mut MapHandler = &mut world.write_resource::<MapHandler>();
+        let MapHandler { loaded_maps, current_map } = map;
+
+        loaded_maps
+            .get_mut(&current_map.0)
+            .unwrap()
+            .solids
+            .insert(position, Tile);
+    }
 
     world.register::<Npc>();
 
