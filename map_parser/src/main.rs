@@ -11,7 +11,7 @@ use std::{
     io::{Error as IoError, Write},
     ops::RangeBounds,
     path::Path,
-    process,
+    process::{self, Command},
 };
 
 #[derive(Debug, Deserialize)]
@@ -86,6 +86,33 @@ fn get_solid_list<'a>(map: &'a TiledMap) -> impl Iterator<Item = (usize, usize)>
 }
 
 fn update_map(map_folder_path: &Path) -> Result<(), Error> {
+    update_map_images(&map_folder_path)?;
+    update_map_ron(&map_folder_path)?;
+
+    Ok(())
+}
+
+fn update_map_images(map_folder_path: &Path) -> Result<(), Error> {
+    Command::new("tmxrasterizer")
+        .arg(map_folder_path.join("map.tmx").to_str().unwrap())
+        .arg(map_folder_path.join("map.png").to_str().unwrap())
+        .arg("--hide-layer")
+        .arg("Decoration")
+        .output()?;
+
+    Command::new("tmxrasterizer")
+        .arg(map_folder_path.join("map.tmx").to_str().unwrap())
+        .arg(map_folder_path.join("layer3.png").to_str().unwrap())
+        .arg("--hide-layer")
+        .arg("Terrain")
+        .arg("--hide-layer")
+        .arg("Solids")
+        .output()?;
+
+    Ok(())
+}
+
+fn update_map_ron(map_folder_path: &Path) -> Result<(), Error> {
     let map_ron_path = map_folder_path.join("map.ron");
 
     let mut map_ron_content = read_to_string(&map_ron_path)?;
