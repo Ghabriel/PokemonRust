@@ -1,5 +1,9 @@
 require("pokemon_rust.lua.events");
 
+function on_map_enter()
+    print("Welcome to Test Map!")
+end
+
 function do_it()
     ChainedEvents:new({
         TextEvent:new("Hello, world!"),

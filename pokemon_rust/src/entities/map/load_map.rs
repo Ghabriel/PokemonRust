@@ -133,14 +133,25 @@ pub fn load_detached_map(
 pub fn initialise_map(world: &mut World, progress_counter: &mut ProgressCounter) {
     let map = load_map(world, "test_map", WorldCoordinates::origin(), progress_counter);
 
-    world.insert(MapHandler {
+    let map_handler = MapHandler {
         loaded_maps: {
             let mut loaded_maps = HashMap::new();
             loaded_maps.insert("test_map".to_string(), map);
             loaded_maps
         },
         current_map: MapId("test_map".to_string()),
-    });
+    };
+
+    {
+        let mut event_queue = world.write_resource::<EventQueue>();
+
+        map_handler.get_map_scripts(&map_handler.current_map, MapScriptKind::OnMapEnter)
+            .for_each(|event| {
+                event_queue.push(event);
+            });
+    }
+
+    world.insert(map_handler);
 }
 
 fn load_nearby_connections(world: &mut World) {
@@ -322,4 +333,48 @@ fn add_intrinsic_scripts(map: &mut Map) {
         when: MapScriptKind::OnTileChange,
         script_index: map.script_repository.len() - 1,
     });
+
+    map.script_repository.push(GameScript::Native(test));
+
+    map.map_scripts.push(MapScript {
+        when: MapScriptKind::OnMapEnter,
+        script_index: map.script_repository.len() - 1,
+    });
+}
+
+fn test(world: &mut World) {
+    use crate::{
+        common::Direction,
+        entities::{
+            npc::{Npc, NpcAction},
+            player::PlayerSpriteSheets,
+        },
+    };
+
+    let npc = Npc {
+        action: NpcAction::Idle,
+        facing_direction: Direction::Down,
+        moving: false,
+    };
+
+    let transform = PlayerCoordinates::from_world_coordinates(&WorldCoordinates::new(30, 30))
+        .to_transform();
+
+    let sprite_render = {
+        let sprite_sheets = world.read_resource::<PlayerSpriteSheets>();
+
+        SpriteRender {
+            sprite_sheet: sprite_sheets.walking.clone(),
+            sprite_number: 0,
+        }
+    };
+
+    world.register::<Npc>();
+
+    world
+        .create_entity()
+        .with(npc)
+        .with(transform)
+        .with(sprite_render)
+        .build();
 }
