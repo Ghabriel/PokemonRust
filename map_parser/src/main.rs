@@ -9,6 +9,7 @@ use std::{
     fmt::{self, Display, Formatter},
     fs::{File, read_to_string},
     io::{Error as IoError, Write},
+    ops::RangeBounds,
     path::Path,
     process,
 };
@@ -89,21 +90,7 @@ fn update_map(map_folder_path: &Path) -> Result<(), Error> {
 
     let mut map_ron_content = read_to_string(&map_ron_path)?;
 
-    let solid_list_range = {
-        let regex = Regex::new(r"solids: \[[^\[]+\]")?;
-
-        match regex.find(&map_ron_content) {
-            Some(match_position) => {
-                let start = match_position.start();
-                let end = match_position.end();
-
-                start..end
-            },
-            None => {
-                return Err(Error::Parsing("Failed to find the list of solids in the map file."));
-            },
-        }
-    };
+    let solid_list_range = find_matching_range(&map_ron_content, r"solids: \[[^\[]+\]")?;
 
     let map: TiledMap = {
         let map_tmx_file = map_folder_path.join("map.tmx");
@@ -122,10 +109,36 @@ fn update_map(map_folder_path: &Path) -> Result<(), Error> {
         ),
     );
 
+    map_ron_content.replace_range(
+        find_matching_range(&map_ron_content, r"num_tiles_x: [0-9]+")?,
+        &format!("num_tiles_x: {}", map.width),
+    );
+
+    map_ron_content.replace_range(
+        find_matching_range(&map_ron_content, r"num_tiles_y: [0-9]+")?,
+        &format!("num_tiles_y: {}", map.height),
+    );
+
     File::create(&map_ron_path)?
         .write(map_ron_content.as_bytes())?;
 
     Ok(())
+}
+
+fn find_matching_range(content: &str, regex: &str) -> Result<impl RangeBounds<usize>, Error> {
+    let regex = Regex::new(regex)?;
+
+    match regex.find(&content) {
+        Some(match_position) => {
+            let start = match_position.start();
+            let end = match_position.end();
+
+            Ok(start..end)
+        },
+        None => {
+            Err(Error::Parsing("Failed to find a matching range"))
+        },
+    }
 }
 
 fn main() {
