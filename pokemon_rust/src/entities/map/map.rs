@@ -100,15 +100,21 @@ pub enum GameScript {
     Lua {
         file: String,
         function: String,
+        parameters: Option<LuaGameScriptParameters>,
     },
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub enum LuaGameScriptParameters {
+    SourceTile(MapCoordinates),
 }
 
 impl Debug for GameScript {
     fn fmt(&self, formatter: &mut Formatter) -> Result<(), Error> {
         match self {
             GameScript::Native(_) => write!(formatter, "Native Script"),
-            GameScript::Lua { file, function } => {
-                write!(formatter, "Lua Script({}, {})", file, function)
+            GameScript::Lua { file, function, parameters } => {
+                write!(formatter, "Lua Script({}, {}, {:?})", file, function, parameters)
             },
         }
     }

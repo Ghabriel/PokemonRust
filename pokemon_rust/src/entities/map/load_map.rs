@@ -36,8 +36,10 @@ use super::{
         WorldOffset,
     },
     map::{
+        GameAction,
         GameActionKind,
         GameScript,
+        LuaGameScriptParameters,
         Map,
         MapConnection,
         MapScript,
@@ -378,14 +380,23 @@ fn test(world: &mut World) {
     };
 
     {
-        let map: &mut MapHandler = &mut world.write_resource::<MapHandler>();
-        let MapHandler { loaded_maps, current_map } = map;
+        let map_handler: &mut MapHandler = &mut world.write_resource::<MapHandler>();
+        let MapHandler { loaded_maps, current_map } = map_handler;
 
-        loaded_maps
-            .get_mut(&current_map.0)
-            .unwrap()
-            .solids
-            .insert(position, Tile);
+        let map = loaded_maps.get_mut(&current_map.0).unwrap();
+
+        map.script_repository.push(GameScript::Lua {
+            file: "assets/maps/test_map/scripts.lua".to_string(),
+            function: "interact_with_npc".to_string(),
+            parameters: Some(LuaGameScriptParameters::SourceTile(position.clone())),
+        });
+
+        map.actions.insert(position.clone(), GameAction {
+            when: GameActionKind::OnInteraction,
+            script_index: map.script_repository.len() - 1,
+        });
+
+        map.solids.insert(position, Tile);
     }
 
     world.register::<Npc>();

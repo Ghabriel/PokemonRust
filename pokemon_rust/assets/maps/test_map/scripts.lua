@@ -16,3 +16,7 @@ function interact_with_tree()
         "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
     ):dispatch()
 end
+
+function interact_with_npc(x, y)
+    print("NPC interaction: (" .. x .. ", " .. y .. ")")
+end

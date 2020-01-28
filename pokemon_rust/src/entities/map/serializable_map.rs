@@ -6,7 +6,13 @@ use serde::{Deserialize, Serialize};
 
 use std::collections::HashMap;
 
-use super::{coordinates::WorldCoordinates, GameAction, GameScript, MapScript};
+use super::{
+    coordinates::WorldCoordinates,
+    GameAction,
+    GameScript,
+    MapScript,
+    LuaGameScriptParameters,
+};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub(super) struct SerializableMap {
@@ -27,13 +33,18 @@ pub enum SerializableGameScript {
     Lua {
         file: String,
         function: String,
+        parameters: Option<LuaGameScriptParameters>,
     },
 }
 
 impl From<SerializableGameScript> for GameScript {
     fn from(script: SerializableGameScript) -> GameScript {
         match script {
-            SerializableGameScript::Lua { file, function } => GameScript::Lua { file, function },
+            SerializableGameScript::Lua {
+                file,
+                function,
+                parameters,
+            } => GameScript::Lua { file, function, parameters },
         }
     }
 }

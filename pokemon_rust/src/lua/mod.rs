@@ -6,6 +6,8 @@ use amethyst::{
     utils::application_root_dir,
 };
 
+use crate::entities::map::{CoordinateSystem, LuaGameScriptParameters};
+
 use rlua::{Context, Error as LuaError, Function, Lua};
 
 use self::{
@@ -77,9 +79,14 @@ impl Display for LuaScriptError {
     }
 }
 
-pub fn run_lua_script(world: &mut World, file: &str, function: &str) -> Result<(), LuaScriptError> {
+pub fn run_lua_script(
+    world: &mut World,
+    file: &str,
+    function: &str,
+    parameters: &Option<LuaGameScriptParameters>,
+) -> Result<(), LuaScriptError> {
     LUA.with(|lua| {
-        run_script(world, &lua, &file, &function)
+        run_script(world, &lua, &file, &function, &parameters)
     })
 }
 
@@ -88,6 +95,7 @@ fn run_script(
     lua: &Lua,
     file: &str,
     function: &str,
+    parameters: &Option<LuaGameScriptParameters>,
 ) -> Result<(), LuaScriptError> {
     run_with_native_functions(world, lua, |context| {
         let path = application_root_dir()
@@ -98,9 +106,13 @@ fn run_script(
 
         context.load(&content).exec()?;
 
-        context.globals()
-            .get::<_, Function>(function)?
-            .call(())?;
+        let function: Function = context.globals().get(function)?;
+
+        match parameters {
+            None => function.call(())?,
+            Some(LuaGameScriptParameters::SourceTile(coordinates)) =>
+                function.call((coordinates.x(), coordinates.y()))?,
+        }
 
         Ok(())
     })

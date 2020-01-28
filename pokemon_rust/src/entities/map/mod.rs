@@ -28,6 +28,7 @@ pub use self::{
         GameActionKind,
         GameScript,
         MapConnection,
+        LuaGameScriptParameters,
         MapScript,
         MapScriptKind,
         Tile,
