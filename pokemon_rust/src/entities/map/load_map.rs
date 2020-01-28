@@ -133,14 +133,26 @@ pub fn load_detached_map(
 pub fn initialise_map(world: &mut World, progress_counter: &mut ProgressCounter) {
     let map = load_map(world, "test_map", WorldCoordinates::origin(), progress_counter);
 
-    world.insert(MapHandler {
+    let map_handler = MapHandler {
         loaded_maps: {
             let mut loaded_maps = HashMap::new();
             loaded_maps.insert("test_map".to_string(), map);
             loaded_maps
         },
         current_map: MapId("test_map".to_string()),
-    });
+        next_npc_id: 0,
+    };
+
+    {
+        let mut event_queue = world.write_resource::<EventQueue>();
+
+        map_handler.get_map_scripts(&map_handler.current_map, MapScriptKind::OnMapEnter)
+            .for_each(|event| {
+                event_queue.push(event);
+            });
+    }
+
+    world.insert(map_handler);
 }
 
 fn load_nearby_connections(world: &mut World) {
@@ -173,7 +185,6 @@ fn load_nearby_connections(world: &mut World) {
     let loaded_maps: Vec<_> = nearby_connections
         .iter()
         .map(|(tile, connection)| {
-            println!("Loading map {}...", connection.map);
             let reference_point = get_new_map_reference_point(
                 &tile,
                 &connection,
@@ -227,6 +238,8 @@ fn load_map(
     reference_point: WorldCoordinates,
     progress_counter: &mut ProgressCounter,
 ) -> Map {
+    println!("Loading map {}...", map_name);
+
     let map = read_map_file(&map_name);
     let tile_size: u32 = TILE_SIZE.into();
     let map_size = (map.num_tiles_x * tile_size, map.num_tiles_y * tile_size);
@@ -258,6 +271,7 @@ fn load_map(
     );
 
     let mut map = Map::from_initialized_map(InitializedMap {
+        map_id: MapId(map_name.to_string()),
         map_name: map.map_name,
         reference_point,
         terrain_entity,
@@ -270,6 +284,13 @@ fn load_map(
     });
 
     add_intrinsic_scripts(&mut map);
+
+    let mut event_queue = world.write_resource::<EventQueue>();
+
+    map.get_map_scripts(MapScriptKind::OnMapLoad)
+        .for_each(|event| {
+            event_queue.push(event);
+        });
 
     map
 }

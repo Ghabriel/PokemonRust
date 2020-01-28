@@ -5,6 +5,8 @@ use crate::{
     constants::{TILE_SIZE, UNIVERSAL_PLAYER_OFFSET_Y},
 };
 
+use serde::{Deserialize, Serialize};
+
 use std::convert::TryFrom;
 
 pub trait CoordinateSystem {
@@ -94,7 +96,7 @@ impl CoordinateSystem for WorldCoordinates {
 
 /// Represents a position expressed in Map Coordinates, i.e the position of
 /// something relative to the map it's in.
-#[derive(Clone, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub struct MapCoordinates(u32, u32);
 
 impl MapCoordinates {

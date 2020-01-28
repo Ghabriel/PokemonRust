@@ -1,12 +1,16 @@
 use amethyst::ecs::{Component, DenseVecStorage, Entity, World};
 
-use crate::common::Direction;
+use crate::{
+    common::Direction,
+    events::ScriptEvent,
+};
 
 use serde::{Deserialize, Serialize};
 
 use super::{
-    conversions::player_to_map_coordinates,
+    conversions::{map_to_world_coordinates, player_to_map_coordinates},
     MapCoordinates,
+    MapId,
     PlayerCoordinates,
     serializable_map::InitializedMap,
     WorldCoordinates,
@@ -18,6 +22,7 @@ use std::{
 };
 
 pub struct Map {
+    pub(super) map_id: MapId,
     pub(super) map_name: String,
     /**
      * The Reference Point of this map, which corresponds to the coordinates of
@@ -40,6 +45,7 @@ impl Component for Map {
 impl Map {
     pub(super) fn from_initialized_map(map: InitializedMap) -> Map {
         Map {
+            map_id: map.map_id,
             map_name: map.map_name,
             reference_point: map.reference_point,
             terrain_entity: map.terrain_entity,
@@ -77,6 +83,10 @@ impl Map {
         }
     }
 
+    pub(super) fn map_to_world_coordinates(&self, position: &MapCoordinates) -> WorldCoordinates {
+        map_to_world_coordinates(&position, &self.reference_point)
+    }
+
     pub(super) fn player_to_map_coordinates(&self, position: &PlayerCoordinates) -> MapCoordinates {
         player_to_map_coordinates(&position, &self.reference_point)
     }
@@ -84,6 +94,16 @@ impl Map {
     pub(super) fn is_tile_blocked(&self, position: &PlayerCoordinates) -> bool {
         let tile = self.player_to_map_coordinates(&position);
         self.solids.contains_key(&tile)
+    }
+
+    pub(super) fn get_map_scripts<'a>(
+        &'a self,
+        kind: MapScriptKind,
+    ) -> impl Iterator<Item = ScriptEvent> + 'a {
+        self.map_scripts
+            .iter()
+            .filter(move |script| script.when == kind)
+            .map(move |script| ScriptEvent::new(self.map_id.clone(), script.script_index))
     }
 }
 
@@ -100,15 +120,22 @@ pub enum GameScript {
     Lua {
         file: String,
         function: String,
+        parameters: Option<LuaGameScriptParameters>,
     },
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub enum LuaGameScriptParameters {
+    SourceTile(MapCoordinates),
+    TargetNpc(usize),
 }
 
 impl Debug for GameScript {
     fn fmt(&self, formatter: &mut Formatter) -> Result<(), Error> {
         match self {
             GameScript::Native(_) => write!(formatter, "Native Script"),
-            GameScript::Lua { file, function } => {
-                write!(formatter, "Lua Script({}, {})", file, function)
+            GameScript::Lua { file, function, parameters } => {
+                write!(formatter, "Lua Script({}, {}, {:?})", file, function, parameters)
             },
         }
     }
@@ -145,13 +172,11 @@ pub struct MapScript {
 
 #[derive(Clone, Debug, Deserialize, Eq, PartialEq, Serialize)]
 pub enum MapScriptKind {
-    /**
-     * Triggered when the player steps on a new tile.
-     */
+    /// Triggered when the map loads.
+    OnMapLoad,
+    /// Triggered when the player steps on a new tile.
     OnTileChange,
-    /**
-     * Triggered when the player enters in this map.
-     */
+    /// Triggered when the player enters in this map.
     OnMapEnter,
 }
 

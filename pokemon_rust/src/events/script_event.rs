@@ -35,8 +35,8 @@ impl GameEvent for ScriptEvent {
 
         match game_script {
             GameScript::Native(script) => script(world),
-            GameScript::Lua { file, function } => {
-                let result = run_lua_script(world, &file, &function);
+            GameScript::Lua { file, function, parameters } => {
+                let result = run_lua_script(world, &file, &function, &parameters);
 
                 if let Err(err) = result {
                     eprintln!("An error occurred during the execution of a Lua script.");

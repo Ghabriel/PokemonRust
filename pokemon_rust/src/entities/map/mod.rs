@@ -28,6 +28,7 @@ pub use self::{
         GameActionKind,
         GameScript,
         MapConnection,
+        LuaGameScriptParameters,
         MapScript,
         MapScriptKind,
         Tile,
@@ -38,6 +39,7 @@ pub use self::{
 pub struct MapHandler {
     loaded_maps: HashMap<String, Map>,
     current_map: MapId,
+    next_npc_id: usize,
 }
 
 impl MapHandler {
@@ -97,10 +99,7 @@ impl MapHandler {
         kind: MapScriptKind,
     ) -> impl Iterator<Item = ScriptEvent> + 'a {
         self.loaded_maps[&map_id.0]
-            .map_scripts
-            .iter()
-            .filter(move |script| script.when == kind)
-            .map(move |script| ScriptEvent::new(map_id.clone(), script.script_index))
+            .get_map_scripts(kind)
     }
 
     pub fn get_current_map_id(&self) -> MapId {
@@ -135,6 +134,43 @@ impl MapHandler {
                         },
                     })
             })
+    }
+
+    pub fn make_map_id(&self, map_id: String) -> MapId {
+        if self.loaded_maps.contains_key(&map_id) {
+            MapId(map_id)
+        } else {
+            panic!("Cannot make a MapId out of a non-loaded map");
+        }
+    }
+
+    pub fn register_npc(&mut self, map_id: &MapId, position: &MapCoordinates) -> usize {
+        let npc_id = self.next_npc_id;
+        self.next_npc_id += 1;
+
+        let map = self.loaded_maps.get_mut(&map_id.0).unwrap();
+
+        map.script_repository.push(GameScript::Lua {
+            file: format!("assets/maps/{}/scripts.lua", map_id.0),
+            function: "interact_with_npc".to_string(),
+            parameters: Some(LuaGameScriptParameters::TargetNpc(npc_id)),
+        });
+
+        map.actions.insert(position.clone(), GameAction {
+            when: GameActionKind::OnInteraction,
+            script_index: map.script_repository.len() - 1,
+        });
+
+        map.solids.insert(position.clone(), Tile);
+
+        npc_id
+    }
+
+    pub fn map_to_world_coordinates(&self, map_id: &MapId, tile: &MapCoordinates) -> WorldCoordinates {
+        self.loaded_maps
+            .get(&map_id.0)
+            .unwrap()
+            .map_to_world_coordinates(&tile)
     }
 }
 
