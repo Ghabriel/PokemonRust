@@ -140,6 +140,7 @@ pub fn initialise_map(world: &mut World, progress_counter: &mut ProgressCounter)
             loaded_maps
         },
         current_map: MapId("test_map".to_string()),
+        next_npc_id: 0,
     };
 
     {

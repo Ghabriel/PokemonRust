@@ -39,6 +39,7 @@ pub use self::{
 pub struct MapHandler {
     loaded_maps: HashMap<String, Map>,
     current_map: MapId,
+    next_npc_id: usize,
 }
 
 impl MapHandler {
@@ -144,8 +145,9 @@ impl MapHandler {
     }
 
     pub fn register_npc(&mut self, map_id: MapId, position: &MapCoordinates) -> usize {
-        // TODO: generate a globally-unique ID
-        let npc_id = 0;
+        let npc_id = self.next_npc_id;
+        self.next_npc_id += 1;
+
         let map = self.loaded_maps.get_mut(&map_id.0).unwrap();
 
         map.script_repository.push(GameScript::Lua {
