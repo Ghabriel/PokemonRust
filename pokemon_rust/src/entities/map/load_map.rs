@@ -36,10 +36,8 @@ use super::{
         WorldOffset,
     },
     map::{
-        GameAction,
         GameActionKind,
         GameScript,
-        LuaGameScriptParameters,
         Map,
         MapConnection,
         MapScript,
@@ -344,76 +342,4 @@ fn add_intrinsic_scripts(map: &mut Map) {
         when: MapScriptKind::OnTileChange,
         script_index: map.script_repository.len() - 1,
     });
-
-    map.script_repository.push(GameScript::Native(test));
-
-    map.map_scripts.push(MapScript {
-        when: MapScriptKind::OnMapEnter,
-        script_index: map.script_repository.len() - 1,
-    });
-}
-
-fn test(world: &mut World) {
-    use crate::{
-        common::Direction,
-        entities::{
-            map::Tile,
-            npc::{Npc, NpcAction},
-            player::PlayerSpriteSheets,
-        },
-    };
-
-    let npc = Npc {
-        action: NpcAction::Idle,
-        facing_direction: Direction::Down,
-        moving: false,
-    };
-
-    let position = MapCoordinates::new(30, 30);
-
-    let transform = PlayerCoordinates::from_world_coordinates(
-            &map_to_world_coordinates(
-                &position,
-                &WorldCoordinates::origin()
-            ),
-        )
-        .to_transform();
-
-    let sprite_render = {
-        let sprite_sheets = world.read_resource::<PlayerSpriteSheets>();
-
-        SpriteRender {
-            sprite_sheet: sprite_sheets.walking.clone(),
-            sprite_number: 0,
-        }
-    };
-
-    {
-        let map_handler: &mut MapHandler = &mut world.write_resource::<MapHandler>();
-        let MapHandler { loaded_maps, current_map } = map_handler;
-
-        let map = loaded_maps.get_mut(&current_map.0).unwrap();
-
-        map.script_repository.push(GameScript::Lua {
-            file: "assets/maps/test_map/scripts.lua".to_string(),
-            function: "interact_with_npc".to_string(),
-            parameters: Some(LuaGameScriptParameters::SourceTile(position.clone())),
-        });
-
-        map.actions.insert(position.clone(), GameAction {
-            when: GameActionKind::OnInteraction,
-            script_index: map.script_repository.len() - 1,
-        });
-
-        map.solids.insert(position, Tile);
-    }
-
-    world.register::<Npc>();
-
-    world
-        .create_entity()
-        .with(npc)
-        .with(transform)
-        .with(sprite_render)
-        .build();
 }

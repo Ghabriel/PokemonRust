@@ -11,6 +11,7 @@ pub struct Npc {
     pub action: NpcAction,
     pub facing_direction: Direction,
     pub moving: bool,
+    pub kind: String,
 }
 
 impl Component for Npc {

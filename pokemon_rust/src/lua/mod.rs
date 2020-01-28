@@ -1,4 +1,5 @@
 mod events;
+mod npc;
 mod polymorphic_container;
 
 use amethyst::{
@@ -17,6 +18,11 @@ use self::{
         create_warp_event,
         add_event,
         dispatch_event,
+    },
+    npc::{
+        create_npc,
+        change_npc_direction,
+        add_npc,
     },
     polymorphic_container::PolymorphicContainer,
 };
@@ -155,7 +161,10 @@ where
                 rust_create_text_event: create_text_event(text: String),
                 rust_create_warp_event: create_warp_event(map: String, x: u32, y: u32),
                 rust_add_event: add_event(chain_key: usize, new_event: usize),
-                rust_dispatch_event: dispatch_event(key: usize)
+                rust_dispatch_event: dispatch_event(key: usize),
+                rust_create_npc: create_npc(x: u32, y: u32, kind: String, direction: u8),
+                rust_change_npc_direction: change_npc_direction(npc_key: usize, direction: u8),
+                rust_add_npc: add_npc(npc_key: usize)
             );
 
             callback(&context)
