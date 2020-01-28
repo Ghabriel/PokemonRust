@@ -10,6 +10,7 @@ use super::{
     coordinates::WorldCoordinates,
     GameAction,
     GameScript,
+    MapId,
     MapScript,
     LuaGameScriptParameters,
 };
@@ -56,6 +57,7 @@ pub struct SerializableMapConnection {
 }
 
 pub(super) struct InitializedMap {
+    pub map_id: MapId,
     pub map_name: String,
     pub reference_point: WorldCoordinates,
     pub terrain_entity: Entity,

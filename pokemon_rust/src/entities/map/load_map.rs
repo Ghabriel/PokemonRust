@@ -186,7 +186,6 @@ fn load_nearby_connections(world: &mut World) {
     let loaded_maps: Vec<_> = nearby_connections
         .iter()
         .map(|(tile, connection)| {
-            println!("Loading map {}...", connection.map);
             let reference_point = get_new_map_reference_point(
                 &tile,
                 &connection,
@@ -240,6 +239,8 @@ fn load_map(
     reference_point: WorldCoordinates,
     progress_counter: &mut ProgressCounter,
 ) -> Map {
+    println!("Loading map {}...", map_name);
+
     let map = read_map_file(&map_name);
     let tile_size: u32 = TILE_SIZE.into();
     let map_size = (map.num_tiles_x * tile_size, map.num_tiles_y * tile_size);
@@ -271,6 +272,7 @@ fn load_map(
     );
 
     let mut map = Map::from_initialized_map(InitializedMap {
+        map_id: MapId(map_name.to_string()),
         map_name: map.map_name,
         reference_point,
         terrain_entity,
@@ -283,6 +285,13 @@ fn load_map(
     });
 
     add_intrinsic_scripts(&mut map);
+
+    let mut event_queue = world.write_resource::<EventQueue>();
+
+    map.get_map_scripts(MapScriptKind::OnMapLoad)
+        .for_each(|event| {
+            event_queue.push(event);
+        });
 
     map
 }

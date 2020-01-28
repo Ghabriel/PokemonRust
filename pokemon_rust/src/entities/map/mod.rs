@@ -98,10 +98,7 @@ impl MapHandler {
         kind: MapScriptKind,
     ) -> impl Iterator<Item = ScriptEvent> + 'a {
         self.loaded_maps[&map_id.0]
-            .map_scripts
-            .iter()
-            .filter(move |script| script.when == kind)
-            .map(move |script| ScriptEvent::new(map_id.clone(), script.script_index))
+            .get_map_scripts(kind)
     }
 
     pub fn get_current_map_id(&self) -> MapId {

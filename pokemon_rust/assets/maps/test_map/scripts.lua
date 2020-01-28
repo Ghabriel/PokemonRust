@@ -17,6 +17,6 @@ function interact_with_tree()
     ):dispatch()
 end
 
-function interact_with_npc(x, y)
-    print("NPC interaction: (" .. x .. ", " .. y .. ")")
+function on_map_load()
+    print("Loading first map...")
 end
