@@ -21,6 +21,7 @@ use crate::{
 use super::ExecutionContext;
 
 struct NpcEntity {
+    map_id: String,
     position: MapCoordinates,
     kind: String,
     facing_direction: Direction,
@@ -28,12 +29,14 @@ struct NpcEntity {
 
 pub(super) fn create_npc(
     context: &mut ExecutionContext,
+    map_id: String,
     x: u32,
     y: u32,
     kind: String,
     direction: u8,
 ) -> usize {
     let npc = NpcEntity {
+        map_id,
         position: MapCoordinates::new(x, y),
         kind,
         facing_direction: parse_lua_direction(direction),
@@ -53,22 +56,22 @@ pub(super) fn change_npc_direction(context: &mut ExecutionContext, npc_key: usiz
 pub(super) fn add_npc(context: &mut ExecutionContext, npc_key: usize) -> usize {
     let npc_entity = context.remove::<NpcEntity>(npc_key);
 
-    context.world.register::<Npc>();
+    let npc_id = {
+        let mut map_handler = context.world.write_resource::<MapHandler>();
+        let map_id = map_handler.make_map_id(npc_entity.map_id);
 
-    let npc_count = context.world.read_storage::<Npc>().count();
+        map_handler.register_npc(map_id, &npc_entity.position)
+    };
 
     let npc = Npc {
-        // TODO: retrieve the correct map name
-        // TODO: find a better ID scheme that guarantees that no conflicts will
-        // occur within a map (the current strategy might, if a story event
-        // creates or removes NPCs dynamically).
-        id: npc_count,
+        id: npc_id,
         action: NpcAction::Idle,
         facing_direction: npc_entity.facing_direction,
         moving: false,
         kind: npc_entity.kind,
     };
 
+    // TODO: use the appropriate coordinate system for NPC positions
     let transform = PlayerCoordinates::from_world_coordinates(
         &map_to_world_coordinates(
             &npc_entity.position,
@@ -88,17 +91,13 @@ pub(super) fn add_npc(context: &mut ExecutionContext, npc_key: usize) -> usize {
     };
 
     context.world
-        .write_resource::<MapHandler>()
-        .register_npc(npc.id, &npc_entity.position);
-
-    context.world
         .create_entity()
         .with(npc)
         .with(transform)
         .with(sprite_render)
         .build();
 
-    npc_count
+    npc_id
 }
 
 fn parse_lua_direction(direction: u8) -> Direction {

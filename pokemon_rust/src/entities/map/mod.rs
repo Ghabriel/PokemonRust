@@ -135,12 +135,21 @@ impl MapHandler {
             })
     }
 
-    pub fn register_npc(&mut self, npc_id: usize, position: &MapCoordinates) {
-        // TODO: retrieve the correct map
-        let map = self.loaded_maps.get_mut(&self.current_map.0).unwrap();
+    pub fn make_map_id(&self, map_id: String) -> MapId {
+        if self.loaded_maps.contains_key(&map_id) {
+            MapId(map_id)
+        } else {
+            panic!("Cannot make a MapId out of a non-loaded map");
+        }
+    }
+
+    pub fn register_npc(&mut self, map_id: MapId, position: &MapCoordinates) -> usize {
+        // TODO: generate a globally-unique ID
+        let npc_id = 0;
+        let map = self.loaded_maps.get_mut(&map_id.0).unwrap();
 
         map.script_repository.push(GameScript::Lua {
-            file: "assets/maps/test_map/scripts.lua".to_string(),
+            file: format!("assets/maps/{}/scripts.lua", map_id.0),
             function: "interact_with_npc".to_string(),
             parameters: Some(LuaGameScriptParameters::TargetNpc(npc_id)),
         });
@@ -151,6 +160,8 @@ impl MapHandler {
         });
 
         map.solids.insert(position.clone(), Tile);
+
+        npc_id
     }
 }
 

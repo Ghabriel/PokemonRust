@@ -159,12 +159,14 @@ where
 
             native_functions!(
                 (globals, scope, execution_context)
+                // Event functions
                 rust_create_chained_event: create_chained_event(),
                 rust_create_text_event: create_text_event(text: String),
                 rust_create_warp_event: create_warp_event(map: String, x: u32, y: u32),
                 rust_add_event: add_event(chain_key: usize, new_event: usize),
                 rust_dispatch_event: dispatch_event(key: usize),
-                rust_create_npc: create_npc(x: u32, y: u32, kind: String, direction: u8),
+                // NPC functions
+                rust_create_npc: create_npc(map_id: String, x: u32, y: u32, kind: String, direction: u8),
                 rust_change_npc_direction: change_npc_direction(npc_key: usize, direction: u8),
                 rust_add_npc: add_npc(npc_key: usize)
             );

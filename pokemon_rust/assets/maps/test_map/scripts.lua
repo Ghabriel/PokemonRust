@@ -27,8 +27,8 @@ Directions = {
 NpcBuilder = {}
 NpcBuilder.__index = NpcBuilder
 
-function NpcBuilder:new(x, y, kind)
-    local obj = { rust_create_npc(x, y, kind, Directions["down"]) }
+function NpcBuilder:new(map, x, y, kind)
+    local obj = { rust_create_npc(map, x, y, kind, Directions["down"]) }
     setmetatable(obj, self)
     return obj
 end
@@ -44,12 +44,12 @@ end
 
 function on_map_load()
     FIRST_NPC = NpcBuilder
-        :new(30, 30, "example_npc")
+        :new("test_map", 30, 30, "example_npc")
         :facing_towards(Directions["right"])
         :build()
 
     SECOND_NPC = NpcBuilder
-        :new(34, 30, "example_npc2")
+        :new("test_map", 34, 30, "example_npc2")
         :facing_towards(Directions["right"])
         :build()
 end
