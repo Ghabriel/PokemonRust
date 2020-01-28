@@ -44,10 +44,19 @@ pub(super) fn change_npc_direction(context: &mut ExecutionContext, npc_key: usiz
     context.store_at(npc_key, npc);
 }
 
-pub(super) fn add_npc(context: &mut ExecutionContext, npc_key: usize) {
+pub(super) fn add_npc(context: &mut ExecutionContext, npc_key: usize) -> usize {
     let npc_entity = context.remove::<NpcEntity>(npc_key);
 
+    context.world.register::<Npc>();
+
+    let npc_count = context.world.read_storage::<Npc>().count();
+
     let npc = Npc {
+        // TODO: retrieve the correct map name
+        // TODO: find a better ID scheme that guarantees that no conflicts will
+        // occur within a map (the current strategy might, if a story event
+        // creates or removes NPCs dynamically).
+        id: npc_count,
         action: NpcAction::Idle,
         facing_direction: npc_entity.facing_direction,
         moving: false,
@@ -93,14 +102,14 @@ pub(super) fn add_npc(context: &mut ExecutionContext, npc_key: usize) {
     //     map.solids.insert(position, Tile);
     // }
 
-    context.world.register::<Npc>();
-
     context.world
         .create_entity()
         .with(npc)
         .with(transform)
         .with(sprite_render)
         .build();
+
+    npc_count
 }
 
 fn parse_lua_direction(direction: u8) -> Direction {
