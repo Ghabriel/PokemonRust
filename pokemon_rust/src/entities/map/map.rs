@@ -8,7 +8,7 @@ use crate::{
 use serde::{Deserialize, Serialize};
 
 use super::{
-    conversions::player_to_map_coordinates,
+    conversions::{map_to_world_coordinates, player_to_map_coordinates},
     MapCoordinates,
     MapId,
     PlayerCoordinates,
@@ -81,6 +81,10 @@ impl Map {
                 })
                 .collect(),
         }
+    }
+
+    pub(super) fn map_to_world_coordinates(&self, position: &MapCoordinates) -> WorldCoordinates {
+        map_to_world_coordinates(&position, &self.reference_point)
     }
 
     pub(super) fn player_to_map_coordinates(&self, position: &PlayerCoordinates) -> MapCoordinates {

@@ -7,11 +7,9 @@ use crate::{
     common::Direction,
     entities::{
         map::{
-            map_to_world_coordinates,
             MapCoordinates,
             MapHandler,
             PlayerCoordinates,
-            WorldCoordinates,
         },
         npc::{Npc, NpcAction},
         player::PlayerSpriteSheets,
@@ -56,11 +54,21 @@ pub(super) fn change_npc_direction(context: &mut ExecutionContext, npc_key: usiz
 pub(super) fn add_npc(context: &mut ExecutionContext, npc_key: usize) -> usize {
     let npc_entity = context.remove::<NpcEntity>(npc_key);
 
-    let npc_id = {
+    context.world.register::<Npc>();
+
+    let (npc_id, transform) = {
         let mut map_handler = context.world.write_resource::<MapHandler>();
         let map_id = map_handler.make_map_id(npc_entity.map_id);
 
-        map_handler.register_npc(map_id, &npc_entity.position)
+        let npc_id = map_handler.register_npc(&map_id, &npc_entity.position);
+
+        // TODO: use the appropriate coordinate system for NPC positions
+        let transform = PlayerCoordinates::from_world_coordinates(
+            &map_handler.map_to_world_coordinates(&map_id, &npc_entity.position)
+        )
+        .to_transform();
+
+        (npc_id, transform)
     };
 
     let npc = Npc {
@@ -70,16 +78,6 @@ pub(super) fn add_npc(context: &mut ExecutionContext, npc_key: usize) -> usize {
         moving: false,
         kind: npc_entity.kind,
     };
-
-    // TODO: use the appropriate coordinate system for NPC positions
-    let transform = PlayerCoordinates::from_world_coordinates(
-        &map_to_world_coordinates(
-            &npc_entity.position,
-            // TODO: retrieve the correct reference point
-            &WorldCoordinates::origin(),
-        ),
-    )
-    .to_transform();
 
     let sprite_render = {
         let sprite_sheets = context.world.read_resource::<PlayerSpriteSheets>();

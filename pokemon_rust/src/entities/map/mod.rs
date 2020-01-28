@@ -144,7 +144,7 @@ impl MapHandler {
         }
     }
 
-    pub fn register_npc(&mut self, map_id: MapId, position: &MapCoordinates) -> usize {
+    pub fn register_npc(&mut self, map_id: &MapId, position: &MapCoordinates) -> usize {
         let npc_id = self.next_npc_id;
         self.next_npc_id += 1;
 
@@ -164,6 +164,13 @@ impl MapHandler {
         map.solids.insert(position.clone(), Tile);
 
         npc_id
+    }
+
+    pub fn map_to_world_coordinates(&self, map_id: &MapId, tile: &MapCoordinates) -> WorldCoordinates {
+        self.loaded_maps
+            .get(&map_id.0)
+            .unwrap()
+            .map_to_world_coordinates(&tile)
     }
 }
 
