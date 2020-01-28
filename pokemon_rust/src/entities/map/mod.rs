@@ -134,6 +134,24 @@ impl MapHandler {
                     })
             })
     }
+
+    pub fn register_npc(&mut self, npc_id: usize, position: &MapCoordinates) {
+        // TODO: retrieve the correct map
+        let map = self.loaded_maps.get_mut(&self.current_map.0).unwrap();
+
+        map.script_repository.push(GameScript::Lua {
+            file: "assets/maps/test_map/scripts.lua".to_string(),
+            function: "interact_with_npc".to_string(),
+            parameters: Some(LuaGameScriptParameters::TargetNpc(npc_id)),
+        });
+
+        map.actions.insert(position.clone(), GameAction {
+            when: GameActionKind::OnInteraction,
+            script_index: map.script_repository.len() - 1,
+        });
+
+        map.solids.insert(position.clone(), Tile);
+    }
 }
 
 /// A global way to refer to a tile.

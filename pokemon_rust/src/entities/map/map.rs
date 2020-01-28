@@ -123,6 +123,7 @@ pub enum GameScript {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum LuaGameScriptParameters {
     SourceTile(MapCoordinates),
+    TargetNpc(usize),
 }
 
 impl Debug for GameScript {

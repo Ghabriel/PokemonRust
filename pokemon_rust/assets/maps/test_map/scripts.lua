@@ -43,13 +43,21 @@ function NpcBuilder:build()
 end
 
 function on_map_load()
-    NpcBuilder
+    FIRST_NPC = NpcBuilder
         :new(30, 30, "example_npc")
         :facing_towards(Directions["right"])
         :build()
 
-    NpcBuilder
+    SECOND_NPC = NpcBuilder
         :new(34, 30, "example_npc2")
         :facing_towards(Directions["right"])
         :build()
+end
+
+function interact_with_npc(npc)
+    if npc == FIRST_NPC then
+        print("Interacted with the first NPC")
+    elseif npc == SECOND_NPC then
+        print("Interacted with the second NPC")
+    end
 end

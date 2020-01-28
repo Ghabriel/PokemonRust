@@ -118,6 +118,8 @@ fn run_script(
             None => function.call(())?,
             Some(LuaGameScriptParameters::SourceTile(coordinates)) =>
                 function.call((coordinates.x(), coordinates.y()))?,
+            Some(LuaGameScriptParameters::TargetNpc(npc_id)) =>
+                function.call(*npc_id)?,
         }
 
         Ok(())

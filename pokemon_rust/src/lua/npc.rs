@@ -6,7 +6,13 @@ use amethyst::{
 use crate::{
     common::Direction,
     entities::{
-        map::{map_to_world_coordinates, MapCoordinates, PlayerCoordinates, WorldCoordinates},
+        map::{
+            map_to_world_coordinates,
+            MapCoordinates,
+            MapHandler,
+            PlayerCoordinates,
+            WorldCoordinates,
+        },
         npc::{Npc, NpcAction},
         player::PlayerSpriteSheets,
     },
@@ -81,26 +87,9 @@ pub(super) fn add_npc(context: &mut ExecutionContext, npc_key: usize) -> usize {
         }
     };
 
-    // {
-    //     let map_handler: &mut MapHandler = &mut context.world.write_resource::<MapHandler>();
-    //     let MapHandler { loaded_maps, current_map } = map_handler;
-
-    //     // TODO: retrieve the correct map
-    //     let map = loaded_maps.get_mut(&current_map.0).unwrap();
-
-    //     map.script_repository.push(GameScript::Lua {
-    //         file: "assets/maps/test_map/scripts.lua".to_string(),
-    //         function: "interact_with_npc".to_string(),
-    //         parameters: Some(LuaGameScriptParameters::SourceTile(position.clone())),
-    //     });
-
-    //     map.actions.insert(position.clone(), GameAction {
-    //         when: GameActionKind::OnInteraction,
-    //         script_index: map.script_repository.len() - 1,
-    //     });
-
-    //     map.solids.insert(position, Tile);
-    // }
+    context.world
+        .write_resource::<MapHandler>()
+        .register_npc(npc.id, &npc_entity.position);
 
     context.world
         .create_entity()
