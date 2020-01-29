@@ -22,3 +22,9 @@ end
 function NpcBuilder:build()
     return rust_add_npc(self[1])
 end
+
+NpcUtils = {}
+
+function NpcUtils.rotate_towards_player(npc)
+    rust_rotate_npc_towards_player(npc)
+end
