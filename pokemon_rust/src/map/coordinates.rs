@@ -1,4 +1,4 @@
-use amethyst::core::Transform;
+use amethyst::core::{math::Vector3, Transform};
 
 use crate::{
     common::{Direction, get_direction_offset},
@@ -165,6 +165,7 @@ impl PlayerCoordinates {
     pub fn to_transform(&self) -> Transform {
         let mut transform = Transform::default();
         transform.set_translation_xyz(self.x(), self.y(), 0.);
+        transform.set_scale(Vector3::new(2., 2., 2.));
 
         transform
     }

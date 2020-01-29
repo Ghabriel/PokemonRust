@@ -8,7 +8,7 @@ use amethyst::{
         get_animation_set,
     },
     assets::{Loader, ProgressCounter},
-    core::{ArcThreadPool, bundle::SystemBundle, Parent, Transform},
+    core::{ArcThreadPool, bundle::SystemBundle, math::Vector3, Parent, Transform},
     ecs::{
         Dispatcher,
         DispatcherBuilder,
@@ -36,6 +36,7 @@ use std::ops::Deref;
 pub fn initialise_camera(world: &mut World, player: Entity) {
     let mut transform = Transform::default();
     transform.set_translation_xyz(0., 0., 1.0);
+    transform.set_scale(Vector3::new(0.5, 0.5, 0.5));
 
     world
         .create_entity()
