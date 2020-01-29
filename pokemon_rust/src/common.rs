@@ -3,7 +3,13 @@ use amethyst::{
     core::bundle::SystemBundle,
     ecs::{DispatcherBuilder, World, WorldExt},
     error::Error,
-    renderer::{ImageFormat, sprite::{Sprite, TextureCoordinates}, SpriteSheet, SpriteSheetFormat},
+    renderer::{
+        ImageFormat,
+        sprite::{Sprite, TextureCoordinates},
+        SpriteSheet,
+        SpriteSheetFormat,
+        Texture,
+    },
     ui::FontHandle,
 };
 
@@ -21,6 +27,7 @@ pub struct CommonResources {
     pub font: FontHandle,
     pub text_box: Handle<SpriteSheet>,
     pub black: Handle<SpriteSheet>,
+    pub npc_texture: Handle<Texture>,
 }
 
 pub fn load_sprite_sheet(
@@ -36,6 +43,22 @@ pub fn load_sprite_sheet(
         &mut *progress_counter,
         &world.read_resource(),
     );
+
+    loader.load(
+        ron_name,
+        SpriteSheetFormat(texture_handle),
+        &mut *progress_counter,
+        &world.read_resource()
+    )
+}
+
+pub fn load_sprite_sheet_with_texture(
+    world: &World,
+    texture_handle: Handle<Texture>,
+    ron_name: &str,
+    progress_counter: &mut ProgressCounter,
+) -> Handle<SpriteSheet> {
+    let loader = world.read_resource::<Loader>();
 
     loader.load(
         ron_name,

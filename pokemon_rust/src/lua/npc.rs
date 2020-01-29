@@ -1,14 +1,12 @@
 use amethyst::{
+    assets::ProgressCounter,
     ecs::{world::Builder, WorldExt},
     renderer::SpriteRender,
 };
 
 use crate::{
-    common::Direction,
-    entities::{
-        npc::{Npc, NpcAction},
-        player::PlayerSpriteSheets,
-    },
+    common::{CommonResources, Direction, load_sprite_sheet_with_texture},
+    entities::npc::{Npc, NpcAction},
     map::{
         MapCoordinates,
         MapHandler,
@@ -80,11 +78,21 @@ pub(super) fn add_npc(context: &mut ExecutionContext, npc_key: usize) -> usize {
     };
 
     let sprite_render = {
-        let sprite_sheets = context.world.read_resource::<PlayerSpriteSheets>();
+        let resources = context.world.read_resource::<CommonResources>();
 
         SpriteRender {
-            sprite_sheet: sprite_sheets.walking.clone(),
-            sprite_number: 0,
+            sprite_sheet: load_sprite_sheet_with_texture(
+                context.world,
+                resources.npc_texture.clone(),
+                &format!("sprites/characters/{}/spritesheet.ron", npc.kind),
+                &mut ProgressCounter::new(),
+            ),
+            sprite_number: match npc.facing_direction {
+                Direction::Up => 0,
+                Direction::Down => 3,
+                Direction::Left => 6,
+                Direction::Right => 9,
+            },
         }
     };
 

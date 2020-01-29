@@ -21,12 +21,12 @@ end
 function on_map_load()
     FIRST_NPC = NpcBuilder
         :new("test_map", 30, 30, "example_npc")
-        :facing_towards(Directions["right"])
+        :facing_towards(Directions["down"])
         :build()
 
     SECOND_NPC = NpcBuilder
-        :new("test_map", 34, 30, "example_npc2")
-        :facing_towards(Directions["right"])
+        :new("test_map", 34, 30, "example_npc")
+        :facing_towards(Directions["down"])
         :build()
 end
 

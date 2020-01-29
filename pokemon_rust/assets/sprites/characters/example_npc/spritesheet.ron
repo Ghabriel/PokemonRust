@@ -1,0 +1,82 @@
+(
+    texture_width: 1054,
+    texture_height: 1152,
+    sprites: [
+        // Up
+        (
+            x: 95,
+            y: 130,
+            width: 32,
+            height: 32,
+        ),
+        (
+            x: 127,
+            y: 226,
+            width: 32,
+            height: 32,
+        ),
+        (
+            x: 159,
+            y: 130,
+            width: 32,
+            height: 32,
+        ),
+        // Down
+        (
+            x: 159,
+            y: 162,
+            width: 32,
+            height: 32,
+        ),
+        (
+            x: 159,
+            y: 194,
+            width: 32,
+            height: 32,
+        ),
+        (
+            x: 159,
+            y: 226,
+            width: 32,
+            height: 32,
+        ),
+        // Left
+        (
+            x: 95,
+            y: 194,
+            width: 32,
+            height: 32,
+        ),
+        (
+            x: 95,
+            y: 162,
+            width: 32,
+            height: 32,
+        ),
+        (
+            x: 95,
+            y: 226,
+            width: 32,
+            height: 32,
+        ),
+        // Right
+        (
+            x: 127,
+            y: 130,
+            width: 32,
+            height: 32,
+        ),
+        (
+            x: 127,
+            y: 162,
+            width: 32,
+            height: 32,
+        ),
+        (
+            x: 127,
+            y: 194,
+            width: 32,
+            height: 32,
+        ),
+    ]
+)
