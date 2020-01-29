@@ -186,22 +186,16 @@ impl PlayerCoordinates {
         let dx_is_0 = dx.abs() < std::f32::EPSILON;
         let dy_is_0 = dy.abs() < std::f32::EPSILON;
 
-        if dx_is_0 {
-            if dy_is_0 {
-                None
-            } else if dy < 0. {
-                Some(Direction::Up)
-            } else {
-                Some(Direction::Down)
-            }
-        } else if dy_is_0 {
-            if dx < 0. {
-                Some(Direction::Right)
-            } else {
-                Some(Direction::Left)
-            }
-        } else {
+        if dx_is_0 == dy_is_0 {
             None
+        } else if dx < 0. {
+            Some(Direction::Right)
+        } else if dx > 0. {
+            Some(Direction::Left)
+        } else if dy < 0. {
+            Some(Direction::Up)
+        } else {
+            Some(Direction::Down)
         }
     }
 }
