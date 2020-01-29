@@ -17,8 +17,8 @@ use amethyst::{
 };
 
 use crate::{
+    common::CommonResources,
     config::GameConfig,
-    entities::resources::Resources,
 };
 
 use super::{GameEvent, ShouldDisableInput};
@@ -84,7 +84,7 @@ impl GameEvent for FadeOutEvent {
 
 fn initialise_fade_entity(world: &mut World, anchor: Anchor, pivot: Anchor, id: u8) -> Entity {
     let sprite_render = SpriteRender {
-        sprite_sheet: world.read_resource::<Resources>().black.clone(),
+        sprite_sheet: world.read_resource::<CommonResources>().black.clone(),
         sprite_number: 0,
     };
 

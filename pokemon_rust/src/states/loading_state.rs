@@ -7,7 +7,7 @@ use amethyst::{
         EndControl,
         get_animation_set,
     },
-    assets::ProgressCounter,
+    assets::{Loader, ProgressCounter},
     core::{ArcThreadPool, bundle::SystemBundle, Parent, Transform},
     ecs::{
         Dispatcher,
@@ -16,16 +16,16 @@ use amethyst::{
         Join,
         world::{Builder, EntitiesRes},
         World,
+        WorldExt,
     },
     prelude::*,
     renderer::{Camera, SpriteRender},
+    ui::TtfFormat,
 };
 
 use crate::{
-    entities::{
-        player::{initialise_player, PlayerAnimation, PlayerEntity},
-        resources::initialise_resources,
-    },
+    common::{load_full_texture_sprite_sheet, CommonResources},
+    entities::player::{initialise_player, PlayerAnimation, PlayerEntity},
     events::EventQueue,
     map::initialise_map,
     states::OverworldState,
@@ -43,6 +43,31 @@ pub fn initialise_camera(world: &mut World, player: Entity) {
         .with(Parent { entity: player })
         .with(transform)
         .build();
+}
+
+pub fn initialise_resources(world: &mut World, progress_counter: &mut ProgressCounter) {
+    let font = world.read_resource::<Loader>().load(
+        "fonts/arial.ttf",
+        TtfFormat,
+        &mut *progress_counter,
+        &world.read_resource(),
+    );
+
+    let text_box = load_full_texture_sprite_sheet(
+        world,
+        "sprites/text_box.png",
+        &(800, 100),
+        &mut *progress_counter,
+    );
+
+    let black = load_full_texture_sprite_sheet(
+        world,
+        "sprites/black.png",
+        &(32, 32),
+        &mut *progress_counter,
+    );
+
+    world.insert(CommonResources { font, text_box, black });
 }
 
 #[derive(Default)]

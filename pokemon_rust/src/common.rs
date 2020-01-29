@@ -4,6 +4,7 @@ use amethyst::{
     ecs::{DispatcherBuilder, World, WorldExt},
     error::Error,
     renderer::{ImageFormat, sprite::{Sprite, TextureCoordinates}, SpriteSheet, SpriteSheetFormat},
+    ui::FontHandle,
 };
 
 use serde::{Deserialize, Serialize};
@@ -14,6 +15,12 @@ pub enum Direction {
     Down,
     Left,
     Right,
+}
+
+pub struct CommonResources {
+    pub font: FontHandle,
+    pub text_box: Handle<SpriteSheet>,
+    pub black: Handle<SpriteSheet>,
 }
 
 pub fn load_sprite_sheet(

@@ -18,8 +18,8 @@ use amethyst::{
 };
 
 use crate::{
+    common::CommonResources,
     config::GameConfig,
-    entities::{resources::Resources},
 };
 
 use super::{GameEvent, ShouldDisableInput};
@@ -138,7 +138,7 @@ impl GameEvent for TextEvent {
             WriteStorage<UiText>,
             WriteStorage<UiTransform>,
             Entities,
-            ReadExpect<Resources>,
+            ReadExpect<CommonResources>,
         )>::fetch(world);
 
         self.text_box = Some(TextBox {
@@ -206,7 +206,7 @@ fn initialise_box_entity(
     entities: &Entities,
     ui_images: &mut WriteStorage<UiImage>,
     ui_transforms: &mut WriteStorage<UiTransform>,
-    resources: &Resources,
+    resources: &CommonResources,
 ) -> Entity {
     let sprite_render = SpriteRender {
         sprite_sheet: resources.text_box.clone(),
@@ -229,7 +229,7 @@ fn initialise_text_entity(
     entities: &Entities,
     ui_texts: &mut WriteStorage<UiText>,
     ui_transforms: &mut WriteStorage<UiTransform>,
-    resources: &Resources,
+    resources: &CommonResources,
 ) -> Entity {
     let mut ui_text = UiText::new(
         resources.font.clone(),
