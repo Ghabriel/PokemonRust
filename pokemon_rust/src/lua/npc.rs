@@ -5,7 +5,12 @@ use amethyst::{
 };
 
 use crate::{
-    common::{CommonResources, Direction, load_sprite_sheet_with_texture},
+    common::{
+        CommonResources,
+        Direction,
+        get_character_sprite_index_from_direction,
+        load_sprite_sheet_with_texture,
+    },
     entities::npc::{Npc, NpcAction},
     map::{
         MapCoordinates,
@@ -87,12 +92,7 @@ pub(super) fn add_npc(context: &mut ExecutionContext, npc_key: usize) -> usize {
                 &format!("sprites/characters/{}/spritesheet.ron", npc.kind),
                 &mut ProgressCounter::new(),
             ),
-            sprite_number: match npc.facing_direction {
-                Direction::Up => 0,
-                Direction::Down => 3,
-                Direction::Left => 6,
-                Direction::Right => 9,
-            },
+            sprite_number: get_character_sprite_index_from_direction(&npc.facing_direction),
         }
     };
 

@@ -120,6 +120,15 @@ where
     (x.into(), y.into())
 }
 
+pub fn get_character_sprite_index_from_direction(direction: &Direction) -> usize {
+    match direction {
+        Direction::Up => 0,
+        Direction::Down => 3,
+        Direction::Left => 6,
+        Direction::Right => 9,
+    }
+}
+
 pub trait WithBundle<'a, 'b> {
     fn with_bundle<B>(self, world: &mut World, bundle: B) -> Result<Self, Error>
     where

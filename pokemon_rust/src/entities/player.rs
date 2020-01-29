@@ -24,7 +24,7 @@ use amethyst::{
 };
 
 use crate::{
-    common::{Direction, load_sprite_sheet},
+    common::{Direction, get_character_sprite_index_from_direction, load_sprite_sheet},
     config::GameConfig,
     map::{map_to_world_coordinates, MapCoordinates, PlayerCoordinates, WorldCoordinates},
 };
@@ -163,12 +163,7 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
 
     let sprite_render = SpriteRender {
         sprite_sheet: sprite_sheets.walking.clone(),
-        sprite_number: match player.facing_direction {
-            Direction::Up => 0,
-            Direction::Down => 3,
-            Direction::Left => 6,
-            Direction::Right => 9,
-        },
+        sprite_number: get_character_sprite_index_from_direction(&player.facing_direction),
     };
 
     let animation_set = get_player_animation_set(world, progress_counter);
