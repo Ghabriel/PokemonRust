@@ -4,7 +4,10 @@ mod load_map;
 mod map;
 mod serializable_map;
 
-use amethyst::core::Transform;
+use amethyst::{
+    core::Transform,
+    ecs::Entity,
+};
 
 use crate::{
     common::Direction,
@@ -144,7 +147,12 @@ impl MapHandler {
         }
     }
 
-    pub fn register_npc(&mut self, map_id: &MapId, position: &MapCoordinates) -> usize {
+    pub fn register_npc(
+        &mut self,
+        map_id: &MapId,
+        position: &MapCoordinates,
+        entity: Entity,
+    ) -> usize {
         let npc_id = self.next_npc_id;
         self.next_npc_id += 1;
 
@@ -163,7 +171,18 @@ impl MapHandler {
 
         map.solids.insert(position.clone(), Tile);
 
+        map.npcs.insert(npc_id, entity);
+
         npc_id
+    }
+
+    pub fn get_npc_by_id(&self, npc_id: usize) -> &Entity {
+        self.loaded_maps
+            .iter()
+            .flat_map(|(_, map)| map.npcs.iter())
+            .find(|(id, _)| **id == npc_id)
+            .map(|(_, npc)| npc)
+            .unwrap()
     }
 
     pub fn map_to_world_coordinates(&self, map_id: &MapId, tile: &MapCoordinates) -> WorldCoordinates {

@@ -36,6 +36,7 @@ pub struct Map {
     pub actions: HashMap<MapCoordinates, GameAction>,
     pub(super) map_scripts: Vec<MapScript>,
     pub(super) connections: HashMap<MapCoordinates, MapConnection>,
+    pub(super) npcs: HashMap<usize, Entity>,
 }
 
 impl Component for Map {
@@ -80,6 +81,7 @@ impl Map {
                     )
                 })
                 .collect(),
+            npcs: HashMap::new(),
         }
     }
 

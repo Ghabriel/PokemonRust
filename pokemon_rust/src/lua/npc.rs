@@ -1,5 +1,6 @@
 use amethyst::{
     assets::ProgressCounter,
+    core::Transform,
     ecs::{world::Builder, WorldExt},
     renderer::SpriteRender,
 };
@@ -11,7 +12,10 @@ use crate::{
         get_character_sprite_index_from_direction,
         load_sprite_sheet_with_texture,
     },
-    entities::npc::{Npc, NpcAction},
+    entities::{
+        npc::{Npc, NpcAction},
+        player::PlayerEntity,
+    },
     map::{
         MapCoordinates,
         MapHandler,
@@ -54,16 +58,45 @@ pub(super) fn change_npc_direction(context: &mut ExecutionContext, npc_key: usiz
     context.store_at(npc_key, npc);
 }
 
+pub(super) fn rotate_npc_towards_player(context: &mut ExecutionContext, npc_id: usize) {
+    let map_handler = context.world.write_resource::<MapHandler>();
+    let npc_entity = map_handler.get_npc_by_id(npc_id);
+
+    let npc_position = context.world.read_storage::<Transform>()
+        .get(*npc_entity)
+        .map(PlayerCoordinates::from_transform)
+        .unwrap();
+
+    let player_position = {
+        let player_entity = context.world.read_resource::<PlayerEntity>();
+
+        context.world.read_storage::<Transform>()
+            .get(player_entity.0)
+            .map(PlayerCoordinates::from_transform)
+            .unwrap()
+    };
+
+    let direction = npc_position.get_direction_to(&player_position).unwrap();
+
+    context.world.write_storage::<SpriteRender>()
+        .get_mut(*npc_entity)
+        .unwrap()
+        .sprite_number = get_character_sprite_index_from_direction(&direction);
+
+    context.world.write_storage::<Npc>()
+        .get_mut(*npc_entity)
+        .unwrap()
+        .facing_direction = direction;
+}
+
 pub(super) fn add_npc(context: &mut ExecutionContext, npc_key: usize) -> usize {
     let npc_entity = context.remove::<NpcEntity>(npc_key);
 
     context.world.register::<Npc>();
 
-    let (npc_id, transform) = {
-        let mut map_handler = context.world.write_resource::<MapHandler>();
+    let (map_id, transform) = {
+        let map_handler = context.world.read_resource::<MapHandler>();
         let map_id = map_handler.make_map_id(npc_entity.map_id);
-
-        let npc_id = map_handler.register_npc(&map_id, &npc_entity.position);
 
         // TODO: use the appropriate coordinate system for NPC positions
         let transform = PlayerCoordinates::from_world_coordinates(
@@ -71,11 +104,10 @@ pub(super) fn add_npc(context: &mut ExecutionContext, npc_key: usize) -> usize {
         )
         .to_transform();
 
-        (npc_id, transform)
+        (map_id, transform)
     };
 
     let npc = Npc {
-        id: npc_id,
         action: NpcAction::Idle,
         facing_direction: npc_entity.facing_direction,
         moving: false,
@@ -96,14 +128,15 @@ pub(super) fn add_npc(context: &mut ExecutionContext, npc_key: usize) -> usize {
         }
     };
 
-    context.world
+    let entity = context.world
         .create_entity()
         .with(npc)
         .with(transform)
         .with(sprite_render)
         .build();
 
-    npc_id
+    context.world.write_resource::<MapHandler>()
+        .register_npc(&map_id, &npc_entity.position, entity)
 }
 
 fn parse_lua_direction(direction: u8) -> Direction {

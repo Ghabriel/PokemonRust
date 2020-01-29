@@ -8,7 +8,6 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Npc {
-    pub id: usize,
     pub action: NpcAction,
     pub facing_direction: Direction,
     pub moving: bool,

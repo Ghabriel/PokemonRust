@@ -22,6 +22,7 @@ use self::{
     npc::{
         create_npc,
         change_npc_direction,
+        rotate_npc_towards_player,
         add_npc,
     },
     polymorphic_container::PolymorphicContainer,
@@ -168,6 +169,7 @@ where
                 // NPC functions
                 rust_create_npc: create_npc(map_id: String, x: u32, y: u32, kind: String, direction: u8),
                 rust_change_npc_direction: change_npc_direction(npc_key: usize, direction: u8),
+                rust_rotate_npc_towards_player: rotate_npc_towards_player(npc_id: usize),
                 rust_add_npc: add_npc(npc_key: usize)
             );
 

@@ -179,6 +179,31 @@ impl PlayerCoordinates {
             self.y() + tile_size * offset_y,
         )
     }
+
+    pub fn get_direction_to(&self, target: &PlayerCoordinates) -> Option<Direction> {
+        let dx = self.x() - target.x();
+        let dy = self.y() - target.y();
+        let dx_is_0 = dx.abs() < std::f32::EPSILON;
+        let dy_is_0 = dy.abs() < std::f32::EPSILON;
+
+        if dx_is_0 {
+            if dy_is_0 {
+                None
+            } else if dy < 0. {
+                Some(Direction::Up)
+            } else {
+                Some(Direction::Down)
+            }
+        } else if dy_is_0 {
+            if dx < 0. {
+                Some(Direction::Right)
+            } else {
+                Some(Direction::Left)
+            }
+        } else {
+            None
+        }
+    }
 }
 
 impl CoordinateSystem for PlayerCoordinates {

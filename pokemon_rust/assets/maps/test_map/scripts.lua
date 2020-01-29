@@ -31,6 +31,8 @@ function on_map_load()
 end
 
 function interact_with_npc(npc)
+    rust_rotate_npc_towards_player(npc)
+
     if npc == FIRST_NPC then
         print("Interacted with the first NPC")
     elseif npc == SECOND_NPC then
