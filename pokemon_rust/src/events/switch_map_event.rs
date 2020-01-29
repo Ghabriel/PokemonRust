@@ -5,11 +5,9 @@ use amethyst::{
 };
 
 use crate::{
-    entities::{
-        map::{change_tile, MapCoordinates, MapHandler, prepare_warp},
-        player::PlayerEntity,
-    },
+    entities::player::PlayerEntity,
     events::EventQueue,
+    map::{change_tile, MapCoordinates, MapHandler, prepare_warp},
 };
 
 use super::{GameEvent, ShouldDisableInput};

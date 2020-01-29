@@ -1,8 +1,8 @@
 use amethyst::ecs::{World, WorldExt};
 
 use crate::{
-    entities::map::{GameScript, MapHandler, MapId},
     lua::run_lua_script,
+    map::{GameScript, MapHandler, MapId},
 };
 
 use super::{GameEvent, ShouldDisableInput};

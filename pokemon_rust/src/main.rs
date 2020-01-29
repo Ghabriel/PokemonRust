@@ -24,6 +24,7 @@ mod constants;
 mod entities;
 mod events;
 mod lua;
+mod map;
 mod states;
 mod systems;
 

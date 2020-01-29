@@ -1,6 +1,6 @@
 use amethyst::ecs::World;
 
-use crate::entities::map::MapCoordinates;
+use crate::map::MapCoordinates;
 
 use super::{
     ChainedEvents,

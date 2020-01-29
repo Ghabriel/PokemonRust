@@ -7,7 +7,7 @@ use amethyst::{
     utils::application_root_dir,
 };
 
-use crate::entities::map::{CoordinateSystem, LuaGameScriptParameters};
+use crate::map::{CoordinateSystem, LuaGameScriptParameters};
 
 use rlua::{Context, Error as LuaError, Function, Lua};
 

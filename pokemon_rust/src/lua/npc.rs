@@ -6,13 +6,13 @@ use amethyst::{
 use crate::{
     common::Direction,
     entities::{
-        map::{
-            MapCoordinates,
-            MapHandler,
-            PlayerCoordinates,
-        },
         npc::{Npc, NpcAction},
         player::PlayerSpriteSheets,
+    },
+    map::{
+        MapCoordinates,
+        MapHandler,
+        PlayerCoordinates,
     },
 };
 

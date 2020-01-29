@@ -26,7 +26,7 @@ use amethyst::{
 use crate::{
     common::{Direction, load_sprite_sheet},
     config::GameConfig,
-    entities::map::{map_to_world_coordinates, MapCoordinates, PlayerCoordinates, WorldCoordinates},
+    map::{map_to_world_coordinates, MapCoordinates, PlayerCoordinates, WorldCoordinates},
 };
 
 use serde::{Deserialize, Serialize};

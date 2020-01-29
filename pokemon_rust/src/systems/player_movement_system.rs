@@ -18,11 +18,9 @@ use crate::{
     common::get_direction_offset,
     config::GameConfig,
     constants::TILE_SIZE,
-    entities::{
-        map::{change_tile, CoordinateSystem, MapHandler, MapId, TileData},
-        player::{Player, PlayerAction, StaticPlayer},
-    },
+    entities::player::{Player, PlayerAction, StaticPlayer},
     events::EventQueue,
+    map::{change_tile, CoordinateSystem, MapHandler, MapId, TileData},
 };
 
 use std::collections::HashMap;

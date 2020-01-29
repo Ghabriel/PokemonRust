@@ -1,8 +1,8 @@
 use amethyst::ecs::WorldExt;
 
 use crate::{
-    entities::map::MapCoordinates,
     events::{ChainedEvents, EventQueue, GameEvent, TextEvent, WarpEvent},
+    map::MapCoordinates,
 };
 
 use super::ExecutionContext;

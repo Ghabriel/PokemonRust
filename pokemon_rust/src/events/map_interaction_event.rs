@@ -4,11 +4,9 @@ use amethyst::{
 };
 
 use crate::{
-    entities::{
-        map::{GameActionKind, MapHandler, ValidatedGameAction},
-        player::{Player, PlayerEntity},
-    },
+    entities::player::{Player, PlayerEntity},
     events::EventQueue,
+    map::{GameActionKind, MapHandler, ValidatedGameAction},
 };
 
 use super::{GameEvent, ShouldDisableInput};
