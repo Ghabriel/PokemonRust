@@ -1,3 +1,8 @@
+//! Runs a [GameScript](../map/map/enum.GameScript.html) from the
+//! [script repository](../map/map/struct.Map.html#structfield.script_repository)
+//! of a map, given its corresponding [MapId](../map/struct.MapId.html) and the
+//! index of the script.
+
 use amethyst::ecs::{World, WorldExt};
 
 use crate::{

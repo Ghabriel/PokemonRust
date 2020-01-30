@@ -1,3 +1,5 @@
+//! Generic event. Chains multiple events so that they happen sequentially.
+
 use amethyst::ecs::World;
 
 use super::{GameEvent, ShouldDisableInput};

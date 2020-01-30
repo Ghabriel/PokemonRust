@@ -1,3 +1,6 @@
+//! Contains every possible game event. Events can trigger animations,
+//! textboxes, warps and much more.
+
 pub mod chained_events;
 pub mod event_executor;
 pub mod event_queue;

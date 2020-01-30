@@ -1,3 +1,8 @@
+//! Immediately switches the map that the player is in, without any animations.
+//! To fade the screen while the switch is happening, use a
+//! [WarpEvent](warp_event/struct.WarpEvent.html). This event only finishes
+//! when the target map finishes loading.
+
 use amethyst::{
     assets::ProgressCounter,
     core::Transform,

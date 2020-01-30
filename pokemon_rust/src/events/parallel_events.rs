@@ -1,3 +1,5 @@
+//! Generic event. Orchestrates multiple events so that they happen in parallel.
+
 use amethyst::ecs::World;
 
 use super::{GameEvent, ShouldDisableInput};
