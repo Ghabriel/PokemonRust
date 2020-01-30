@@ -128,20 +128,3 @@ pub fn get_character_sprite_index_from_direction(direction: &Direction) -> usize
         Direction::Right => 9,
     }
 }
-
-pub trait WithBundle<'a, 'b> {
-    fn with_bundle<B>(self, world: &mut World, bundle: B) -> Result<Self, Error>
-    where
-        Self: Sized,
-        B: SystemBundle<'a, 'b>;
-}
-
-impl<'a, 'b> WithBundle<'a, 'b> for DispatcherBuilder<'a, 'b> {
-    fn with_bundle<B>(mut self, world: &mut World, bundle: B) -> Result<Self, Error>
-    where
-        Self: Sized,
-        B: SystemBundle<'a, 'b>
-    {
-        bundle.build(world, &mut self).map(|_| self)
-    }
-}
