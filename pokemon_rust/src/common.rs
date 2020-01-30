@@ -1,3 +1,5 @@
+//! Contains common types and functions used throughout the entire game.
+
 use amethyst::{
     assets::{Handle, Loader, ProgressCounter},
     core::bundle::SystemBundle,
@@ -15,6 +17,7 @@ use amethyst::{
 
 use serde::{Deserialize, Serialize};
 
+/// A two-dimensional, four-axis direction enum.
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum Direction {
     Up,
@@ -23,6 +26,8 @@ pub enum Direction {
     Right,
 }
 
+/// A group of diverse resources that are used extensively by different parts
+/// of the game.
 pub struct CommonResources {
     pub font: FontHandle,
     pub text_box: Handle<SpriteSheet>,
@@ -30,6 +35,7 @@ pub struct CommonResources {
     pub npc_texture: Handle<Texture>,
 }
 
+/// Loads a texture + spritesheet from given image/ron filenames.
 pub fn load_sprite_sheet(
     world: &World,
     image_name: &str,
@@ -52,6 +58,7 @@ pub fn load_sprite_sheet(
     )
 }
 
+/// Loads a spritesheet from a texture handle and a given ron filename.
 pub fn load_sprite_sheet_with_texture(
     world: &World,
     texture_handle: Handle<Texture>,
@@ -68,6 +75,8 @@ pub fn load_sprite_sheet_with_texture(
     )
 }
 
+/// Loads a texture from a given image filename, and creates a spritesheet to
+/// it representing the entire texture.
 pub fn load_full_texture_sprite_sheet(
     world: &World,
     image_name: &str,
@@ -106,6 +115,19 @@ pub fn load_full_texture_sprite_sheet(
     )
 }
 
+/// Returns a pair of coordinates (x, y) representing a given direction,
+/// expressed in a given type.
+///
+/// # Examples
+///
+/// ```
+/// use pokemon_rust::common::get_direction_offset;
+///
+/// assert_eq!((0, 1), get_direction_offset::<i8>(Direction::Up));
+/// assert_eq!((0, -1), get_direction_offset::<i8>(Direction::Down));
+/// assert_eq!((-1, 0), get_direction_offset::<i8>(Direction::Left));
+/// assert_eq!((1, 0), get_direction_offset::<i8>(Direction::Right));
+/// ```
 pub fn get_direction_offset<T>(direction: &Direction) -> (T, T)
 where
     T: From<i8>
@@ -120,6 +142,8 @@ where
     (x.into(), y.into())
 }
 
+/// Returns the appropriate sprite index to use for a standing character that
+/// is facing a given direction.
 pub fn get_character_sprite_index_from_direction(direction: &Direction) -> usize {
     match direction {
         Direction::Up => 0,
