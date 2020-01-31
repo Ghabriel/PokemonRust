@@ -1,3 +1,8 @@
+//! Signals the game that the interaction button was pressed. If there's
+//! an [interaction event](../map/map/enum.GameActionKind.html#variant.OnInteraction)
+//! on the tile in front of the player, it is added to the
+//! [Event Queue](event_queue/struct.EventQueue.html).
+
 use amethyst::{
     core::Transform,
     ecs::{World, WorldExt},

@@ -1,5 +1,5 @@
 //! Hides the contents of the screen with an animation.
-//! Affected by [GameConfig::fade_duration](../config/struct.GameConfig.html#structfield.fade_duration).
+//! Affected by [`GameConfig::fade_duration`](../config/struct.GameConfig.html#structfield.fade_duration).
 
 use amethyst::{
     core::Time,

@@ -1,3 +1,6 @@
+//! A simple event queue. This is a resource that stays inside the World and
+//! is used to store events before they're processed by the game state.
+
 use super::GameEvent;
 
 use std::collections::VecDeque;

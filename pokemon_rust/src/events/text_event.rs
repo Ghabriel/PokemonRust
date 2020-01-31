@@ -1,3 +1,7 @@
+//! Displays a text box. Automatically wraps lines and splits the text in pages
+//! if needed. Affected by
+//! [`GameConfig::text_delay`](../config/struct.GameConfig.html#structfield.text_delay).
+
 use amethyst::{
     core::Time,
     ecs::{

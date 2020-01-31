@@ -1,5 +1,5 @@
 //! Undoes a fade out, revealing the contents of the screen beneath it.
-//! Affected by [GameConfig::fade_duration](../config/struct.GameConfig.html#structfield.fade_duration).
+//! Affected by [`GameConfig::fade_duration`](../config/struct.GameConfig.html#structfield.fade_duration).
 
 use amethyst::{
     core::Time,

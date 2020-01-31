@@ -1,3 +1,8 @@
+//! An event executor. This is stored inside each state and is responsible
+//! for executing events in parallel while handling the addition of new
+//! events, typically coming from the
+//! [Event Queue](event_queue/struct.EventQueue.html).
+
 use amethyst::ecs::World;
 
 use super::{GameEvent, ParallelEvents, ShouldDisableInput};

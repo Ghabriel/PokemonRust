@@ -1,3 +1,7 @@
+//! Fades out the screen, switches the location of the player and then fades
+//! the screen back in. This is the preferred event for doing any kind of warp
+//! between maps. The fade in will only occur when the map finishes loading.
+
 use amethyst::ecs::World;
 
 use crate::map::MapCoordinates;
