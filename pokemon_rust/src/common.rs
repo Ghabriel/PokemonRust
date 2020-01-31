@@ -2,9 +2,7 @@
 
 use amethyst::{
     assets::{Handle, Loader, ProgressCounter},
-    core::bundle::SystemBundle,
-    ecs::{DispatcherBuilder, World, WorldExt},
-    error::Error,
+    ecs::{World, WorldExt},
     renderer::{
         ImageFormat,
         sprite::{Sprite, TextureCoordinates},

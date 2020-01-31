@@ -6,6 +6,7 @@ use amethyst::{
 };
 
 use crate::{
+    config::GameConfig,
     events::{EventExecutor, EventQueue},
     states::OverworldAnimationState,
     systems::{
@@ -63,7 +64,9 @@ impl SimpleState for OverworldState<'_, '_> {
             dispatcher.dispatch(world);
         }
 
-        // println!("FPS: {}", world.read_resource::<FpsCounter>().sampled_fps());
+        if world.read_resource::<GameConfig>().show_fps {
+            println!("FPS: {}", world.read_resource::<FpsCounter>().sampled_fps());
+        }
 
         {
             let mut event_queue = world.write_resource::<EventQueue>();

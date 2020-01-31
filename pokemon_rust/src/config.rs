@@ -17,4 +17,6 @@ pub struct GameConfig {
     pub fade_duration: f32,
     /// The starting position of the player, in Map Coordinates.
     pub player_starting_position: (u32, u32),
+    /// Decides whether the FPS should be printed
+    pub show_fps: bool,
 }
