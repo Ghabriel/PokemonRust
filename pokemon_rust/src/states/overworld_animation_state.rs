@@ -70,7 +70,7 @@ impl SimpleState for OverworldAnimationState<'_, '_> {
             }
         }
 
-        if self.event_executor.borrow().is_complete() {
+        if self.event_executor.borrow().is_complete(world) {
             return Trans::Switch(Box::new(OverworldState::new(self.event_executor.clone())));
         }
 

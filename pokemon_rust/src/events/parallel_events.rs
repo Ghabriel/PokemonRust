@@ -34,7 +34,7 @@ impl GameEvent for ParallelEvents {
             .filter_map(|mut event| {
                 event.tick(world, disabled_inputs);
 
-                if event.is_complete() {
+                if event.is_complete(world) {
                     None
                 } else {
                     Some(event)
@@ -43,7 +43,7 @@ impl GameEvent for ParallelEvents {
             .collect();
     }
 
-    fn is_complete(&self) -> bool {
+    fn is_complete(&self, _world: &mut World) -> bool {
         self.events.is_empty()
     }
 }

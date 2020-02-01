@@ -44,7 +44,7 @@ impl GameEvent for WarpEvent {
         self.executor.tick(world, disabled_inputs);
     }
 
-    fn is_complete(&self) -> bool {
-        self.executor.is_complete()
+    fn is_complete(&self, world: &mut World) -> bool {
+        self.executor.is_complete(world)
     }
 }

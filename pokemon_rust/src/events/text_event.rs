@@ -201,7 +201,7 @@ impl GameEvent for TextEvent {
         }
     }
 
-    fn is_complete(&self) -> bool {
+    fn is_complete(&self, _world: &mut World) -> bool {
         self.finished
     }
 }

@@ -4,14 +4,10 @@ mod load_map;
 mod map;
 mod serializable_map;
 
-use amethyst::{
-    core::Transform,
-    ecs::Entity,
-};
+use amethyst::ecs::Entity;
 
 use crate::{
     common::Direction,
-    entities::player::Player,
     events::ScriptEvent,
 };
 
@@ -46,14 +42,16 @@ pub struct MapHandler {
 }
 
 impl MapHandler {
-    pub fn get_forward_tile(&self, player: &Player, player_position: &Transform) -> TileData {
-        let player_position = PlayerCoordinates::from_transform(&player_position);
-
+    pub fn get_forward_tile(
+        &self,
+        facing_direction: &Direction,
+        position: &PlayerCoordinates,
+    ) -> TileData {
         let current_map = &self.loaded_maps[&self.current_map.0];
-        let current_tile = current_map.player_to_map_coordinates(&player_position);
+        let current_tile = current_map.player_to_map_coordinates(&position);
         let connection = current_map.connections.get(&current_tile);
         let target_map = if let Some(connection) = connection {
-            if connection.directions.contains_key(&player.facing_direction) {
+            if connection.directions.contains_key(&facing_direction) {
                 MapId(connection.map.clone())
             } else {
                 self.current_map.clone()
@@ -63,7 +61,7 @@ impl MapHandler {
         };
 
         TileData {
-            position: player_position.offset_by_direction(&player.facing_direction),
+            position: position.offset_by_direction(&facing_direction),
             map_id: target_map,
         }
     }
@@ -190,6 +188,18 @@ impl MapHandler {
             .get(&map_id.0)
             .unwrap()
             .map_to_world_coordinates(&tile)
+    }
+
+    pub fn mark_tile_as_solid(&mut self, tile_data: &TileData) {
+        let map = self.loaded_maps.get_mut(&tile_data.map_id.0).unwrap();
+        let position = map.player_to_map_coordinates(&tile_data.position);
+        map.solids.insert(position, Tile);
+    }
+
+    pub fn remove_solid_mark(&mut self, tile_data: &TileData) {
+        let map = self.loaded_maps.get_mut(&tile_data.map_id.0).unwrap();
+        let position = map.player_to_map_coordinates(&tile_data.position);
+        map.solids.remove(&position);
     }
 }
 

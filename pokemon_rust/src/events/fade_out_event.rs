@@ -80,7 +80,7 @@ impl GameEvent for FadeOutEvent {
         self.completed = self.elapsed_time >= fade_duration;
     }
 
-    fn is_complete(&self) -> bool {
+    fn is_complete(&self, _world: &mut World) -> bool {
         self.completed
     }
 }

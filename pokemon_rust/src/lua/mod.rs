@@ -14,6 +14,7 @@ use rlua::{Context, Error as LuaError, Function, Lua};
 use self::{
     events::{
         create_chained_event,
+        create_npc_move_event,
         create_text_event,
         create_warp_event,
         add_event,
@@ -162,6 +163,7 @@ where
                 (globals, scope, execution_context)
                 // Event functions
                 rust_create_chained_event: create_chained_event(),
+                rust_create_npc_move_event: create_npc_move_event(npc_key: usize, num_tiles: usize),
                 rust_create_text_event: create_text_event(text: String),
                 rust_create_warp_event: create_warp_event(map: String, x: u32, y: u32),
                 rust_add_event: add_event(chain_key: usize, new_event: usize),

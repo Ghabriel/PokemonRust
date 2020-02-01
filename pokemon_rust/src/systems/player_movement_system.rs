@@ -20,7 +20,7 @@ use crate::{
     constants::TILE_SIZE,
     entities::player::{Player, PlayerAction, StaticPlayer},
     events::EventQueue,
-    map::{change_tile, CoordinateSystem, MapHandler, MapId, TileData},
+    map::{change_tile, CoordinateSystem, MapHandler, MapId, PlayerCoordinates, TileData},
 };
 
 use std::collections::HashMap;
@@ -108,7 +108,10 @@ impl<'a> System<'a> for PlayerMovementSystem {
                         continue;
                     }
 
-                    let final_tile_data = map.get_forward_tile(&player, &transform);
+                    let final_tile_data = map.get_forward_tile(
+                        &player.facing_direction,
+                        &PlayerCoordinates::from_transform(&transform),
+                    );
 
                     if map.is_tile_blocked(&final_tile_data) {
                         static_players

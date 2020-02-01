@@ -11,7 +11,7 @@ use amethyst::{
 use crate::{
     entities::player::{Player, PlayerEntity},
     events::EventQueue,
-    map::{GameActionKind, MapHandler, ValidatedGameAction},
+    map::{GameActionKind, MapHandler, PlayerCoordinates, ValidatedGameAction},
 };
 
 use super::{GameEvent, ShouldDisableInput};
@@ -37,7 +37,10 @@ impl GameEvent for MapInteractionEvent {
             .get(player_entity.0)
             .expect("Failed to retrieve Transform");
 
-        let interacted_position = map.get_forward_tile(&player, &transform);
+        let interacted_position = map.get_forward_tile(
+            &player.facing_direction,
+            &PlayerCoordinates::from_transform(&transform),
+        );
 
         match map.get_action_at(&interacted_position) {
             Some(
@@ -50,7 +53,7 @@ impl GameEvent for MapInteractionEvent {
         }
     }
 
-    fn is_complete(&self) -> bool {
+    fn is_complete(&self, _world: &mut World) -> bool {
         true
     }
 }

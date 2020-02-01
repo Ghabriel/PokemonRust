@@ -7,7 +7,10 @@ pub mod event_queue;
 pub mod fade_in_event;
 pub mod fade_out_event;
 pub mod map_interaction_event;
+pub mod npc_move_event;
+pub mod npc_single_move_event;
 pub mod parallel_events;
+pub mod repeated_event;
 pub mod script_event;
 pub mod switch_map_event;
 pub mod text_event;
@@ -22,7 +25,10 @@ pub use self::{
     fade_out_event::FadeOutEvent,
     fade_in_event::FadeInEvent,
     map_interaction_event::MapInteractionEvent,
+    npc_move_event::NpcMoveEvent,
+    npc_single_move_event::NpcSingleMoveEvent,
     parallel_events::ParallelEvents,
+    repeated_event::RepeatedEvent,
     script_event::ScriptEvent,
     switch_map_event::SwitchMapEvent,
     text_event::TextEvent,
@@ -34,5 +40,5 @@ pub struct ShouldDisableInput(pub bool);
 pub trait GameEvent {
     fn start(&mut self, world: &mut World) -> ShouldDisableInput;
     fn tick(&mut self, world: &mut World, disabled_inputs: bool);
-    fn is_complete(&self) -> bool;
+    fn is_complete(&self, world: &mut World) -> bool;
 }

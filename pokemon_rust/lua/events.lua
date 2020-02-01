@@ -12,6 +12,16 @@ function Event:dispatch()
 end
 
 
+NpcMoveEvent = Event:new()
+NpcMoveEvent.__index = NpcMoveEvent
+
+function NpcMoveEvent:new(npc, num_tiles)
+    local obj = { rust_create_npc_move_event(npc, num_tiles) }
+    setmetatable(obj, self)
+    return obj
+end
+
+
 TextEvent = Event:new()
 TextEvent.__index = TextEvent
 

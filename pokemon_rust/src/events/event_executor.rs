@@ -38,7 +38,7 @@ impl EventExecutor {
         self.root.tick(world, disabled_inputs);
     }
 
-    pub fn is_complete(&self) -> bool {
-        self.root.is_complete()
+    pub fn is_complete(&self, world: &mut World) -> bool {
+        self.root.is_complete(world)
     }
 }

@@ -1,7 +1,7 @@
 use amethyst::ecs::WorldExt;
 
 use crate::{
-    events::{ChainedEvents, EventQueue, GameEvent, TextEvent, WarpEvent},
+    events::{ChainedEvents, EventQueue, GameEvent, NpcMoveEvent, TextEvent, WarpEvent},
     map::MapCoordinates,
 };
 
@@ -9,6 +9,16 @@ use super::ExecutionContext;
 
 pub(super) fn create_chained_event(context: &mut ExecutionContext) -> usize {
     let event = ChainedEvents::default();
+
+    context.store(event)
+}
+
+pub(super) fn create_npc_move_event(
+    context: &mut ExecutionContext,
+    npc_id: usize,
+    num_tiles: usize,
+) -> usize {
+    let event = NpcMoveEvent::new(npc_id, num_tiles);
 
     context.store(event)
 }
@@ -47,6 +57,8 @@ fn remove_event(
 
     if event.is::<ChainedEvents>() {
         event.downcast::<ChainedEvents>().unwrap()
+    } else if event.is::<NpcMoveEvent>() {
+        event.downcast::<NpcMoveEvent>().unwrap()
     } else if event.is::<TextEvent>() {
         event.downcast::<TextEvent>().unwrap()
     } else if event.is::<WarpEvent>() {

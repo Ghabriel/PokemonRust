@@ -31,7 +31,8 @@ function on_map_load()
 end
 
 function interact_with_npc(npc)
-    NpcUtils.rotate_towards_player(npc)
+    -- NpcUtils.rotate_towards_player(npc)
+    NpcMoveEvent:new(npc, 5):dispatch()
 
     if npc == FIRST_NPC then
         print("Interacted with the first NPC")

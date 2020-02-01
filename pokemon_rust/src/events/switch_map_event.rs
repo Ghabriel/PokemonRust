@@ -61,7 +61,7 @@ impl GameEvent for SwitchMapEvent {
     fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) { }
 
 
-    fn is_complete(&self) -> bool {
+    fn is_complete(&self, _world: &mut World) -> bool {
         self.progress_counter.is_complete()
     }
 }

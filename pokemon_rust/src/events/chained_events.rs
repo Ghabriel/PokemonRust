@@ -14,7 +14,7 @@ pub struct ChainedEvents {
 
 impl ChainedEvents {
     pub fn add_event(&mut self, event: Box<dyn GameEvent + Sync + Send>) {
-        if self.is_complete() {
+        if self.chain.is_empty() {
             self.called_start = false;
         }
 
@@ -40,14 +40,14 @@ impl GameEvent for ChainedEvents {
 
             event.tick(world, disabled_inputs);
 
-            if event.is_complete() {
+            if event.is_complete(world) {
                 self.chain.pop_front();
                 self.called_start = false;
             }
         }
     }
 
-    fn is_complete(&self) -> bool {
+    fn is_complete(&self, _world: &mut World) -> bool {
         self.chain.is_empty()
     }
 }

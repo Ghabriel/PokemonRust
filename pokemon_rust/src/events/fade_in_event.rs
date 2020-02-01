@@ -81,7 +81,7 @@ impl GameEvent for FadeInEvent {
         }
     }
 
-    fn is_complete(&self) -> bool {
+    fn is_complete(&self, _world: &mut World) -> bool {
         self.completed
     }
 }
