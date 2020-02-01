@@ -47,7 +47,7 @@ use amethyst::{
 
 use crate::{
     config::GameConfig,
-    entities::player::PlayerAnimation,
+    entities::CharacterAnimation,
     states::LoadingState,
 };
 
@@ -79,7 +79,7 @@ fn main() -> amethyst::Result<()> {
         )?
         .with_bundle(UiBundle::<StringBindings>::new())?
         .with_bundle(AudioBundle::default())?
-        .with_bundle(AnimationBundle::<PlayerAnimation, SpriteRender>::new(
+        .with_bundle(AnimationBundle::<CharacterAnimation, SpriteRender>::new(
             "sprite_animation_control",
             "sprite_sampler_interpolation",
         ))?;

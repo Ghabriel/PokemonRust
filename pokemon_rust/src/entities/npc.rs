@@ -1,6 +1,7 @@
 use amethyst::{
+    animation::{AnimationCommand, AnimationControlSet, AnimationSet, EndControl, get_animation_set},
     assets::ProgressCounter,
-    ecs::{Component, DenseVecStorage, world::Builder, World, WorldExt},
+    ecs::{Component, DenseVecStorage, Entity, world::Builder, World, WorldExt},
     renderer::SpriteRender,
 };
 
@@ -11,6 +12,7 @@ use crate::{
         get_character_sprite_index_from_direction,
         load_sprite_sheet_with_texture,
     },
+    entities::{CharacterAnimation, make_sprite_animation},
     map::{MapCoordinates, MapHandler, PlayerCoordinates, TileData},
 };
 
@@ -63,10 +65,25 @@ pub enum NpcAnimation {
     IdleDown,
     IdleLeft,
     IdleRight,
-    MovingUp,
-    MovingDown,
-    MovingLeft,
-    MovingRight,
+    WalkUp,
+    WalkDown,
+    WalkLeft,
+    WalkRight,
+}
+
+impl From<NpcAnimation> for CharacterAnimation {
+    fn from(animation: NpcAnimation) -> CharacterAnimation {
+        match animation {
+            NpcAnimation::IdleUp => CharacterAnimation::IdleUp,
+            NpcAnimation::IdleDown => CharacterAnimation::IdleDown,
+            NpcAnimation::IdleLeft => CharacterAnimation::IdleLeft,
+            NpcAnimation::IdleRight => CharacterAnimation::IdleRight,
+            NpcAnimation::WalkUp => CharacterAnimation::NpcMoveUp,
+            NpcAnimation::WalkDown => CharacterAnimation::NpcMoveDown,
+            NpcAnimation::WalkLeft => CharacterAnimation::NpcMoveLeft,
+            NpcAnimation::WalkRight => CharacterAnimation::NpcMoveRight,
+        }
+    }
 }
 
 pub fn initialise_npc(
@@ -108,6 +125,10 @@ pub fn initialise_npc(
         }
     };
 
+    let animation_set = get_npc_animation_set(world, progress_counter);
+
+    world.register::<AnimationControlSet<CharacterAnimation, SpriteRender>>();
+    world.register::<AnimationSet<CharacterAnimation, SpriteRender>>();
     world.register::<Npc>();
 
     let entity = world
@@ -115,8 +136,102 @@ pub fn initialise_npc(
         .with(npc)
         .with(transform)
         .with(sprite_render)
+        .with(animation_set)
         .build();
+
+    attach_animation_control_sets(world, entity);
 
     world.write_resource::<MapHandler>()
         .register_npc(&map_id, &npc_builder.position, entity)
+}
+
+pub fn get_npc_animation_set(
+    world: &mut World,
+    progress_counter: &mut ProgressCounter,
+) -> AnimationSet<CharacterAnimation, SpriteRender> {
+    let mut animation_set = AnimationSet::new();
+
+    let idle_animation_timing = vec![0.0, 1.0];
+    let walk_animation_timing = vec![0.0, 0.1, 0.2, 0.3, 0.4];
+
+    animation_set.insert(NpcAnimation::IdleDown.into(), make_sprite_animation(
+        world,
+        idle_animation_timing.clone(),
+        vec![3],
+        progress_counter,
+    ));
+    animation_set.insert(NpcAnimation::IdleLeft.into(), make_sprite_animation(
+        world,
+        idle_animation_timing.clone(),
+        vec![6],
+        progress_counter,
+    ));
+    animation_set.insert(NpcAnimation::IdleRight.into(), make_sprite_animation(
+        world,
+        idle_animation_timing.clone(),
+        vec![9],
+        progress_counter,
+    ));
+    animation_set.insert(NpcAnimation::IdleUp.into(), make_sprite_animation(
+        world,
+        idle_animation_timing,
+        vec![0],
+        progress_counter,
+    ));
+
+    animation_set.insert(NpcAnimation::WalkDown.into(), make_sprite_animation(
+        world,
+        walk_animation_timing.clone(),
+        vec![3, 4, 3, 5],
+        progress_counter,
+    ));
+    animation_set.insert(NpcAnimation::WalkLeft.into(), make_sprite_animation(
+        world,
+        walk_animation_timing.clone(),
+        vec![6, 7, 6, 8],
+        progress_counter,
+    ));
+    animation_set.insert(NpcAnimation::WalkRight.into(), make_sprite_animation(
+        world,
+        walk_animation_timing.clone(),
+        vec![9, 10, 9, 11],
+        progress_counter,
+    ));
+    animation_set.insert(NpcAnimation::WalkUp.into(), make_sprite_animation(
+        world,
+        walk_animation_timing,
+        vec![0, 1, 0, 2],
+        progress_counter,
+    ));
+
+    animation_set
+}
+
+pub fn attach_animation_control_sets(world: &mut World, entity: Entity) {
+    let mut control_sets = world.write_storage::<AnimationControlSet<CharacterAnimation, SpriteRender>>();
+    let animation_control_set = get_animation_set(&mut control_sets, entity).unwrap();
+
+    let animation_sets = world.read_storage::<AnimationSet<CharacterAnimation, SpriteRender>>();
+    let animation_set = animation_sets.get(entity).unwrap();
+
+    let animations = [
+        NpcAnimation::IdleUp,
+        NpcAnimation::IdleDown,
+        NpcAnimation::IdleLeft,
+        NpcAnimation::IdleRight,
+        NpcAnimation::WalkUp,
+        NpcAnimation::WalkDown,
+        NpcAnimation::WalkLeft,
+        NpcAnimation::WalkRight,
+    ];
+
+    for &animation in &animations {
+        animation_control_set.add_animation(
+            animation.into(),
+            &animation_set.get(&animation.into()).unwrap(),
+            EndControl::Loop(None),
+            1.0,
+            AnimationCommand::Init,
+        );
+    }
 }

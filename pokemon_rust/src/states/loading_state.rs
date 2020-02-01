@@ -1,6 +1,5 @@
 use amethyst::{
     animation::{
-        AnimationBundle,
         AnimationCommand,
         AnimationControlSet,
         AnimationSet,
@@ -8,7 +7,7 @@ use amethyst::{
         get_animation_set,
     },
     assets::{Loader, ProgressCounter},
-    core::{ArcThreadPool, bundle::SystemBundle, math::Vector3, Parent, Transform},
+    core::{ArcThreadPool, math::Vector3, Parent, Transform},
     ecs::{
         Dispatcher,
         DispatcherBuilder,
@@ -25,7 +24,10 @@ use amethyst::{
 
 use crate::{
     common::{load_full_texture_sprite_sheet, CommonResources},
-    entities::player::{initialise_player, PlayerAnimation, PlayerEntity},
+    entities::{
+        CharacterAnimation,
+        player::{initialise_player, PlayerAnimation, PlayerEntity},
+    },
     events::EventQueue,
     map::initialise_map,
     states::OverworldState,
@@ -91,16 +93,10 @@ impl SimpleState for LoadingState<'_, '_> {
 
         let world = data.world;
 
-        let mut dispatcher_builder = DispatcherBuilder::new()
-            .with_pool(world.read_resource::<ArcThreadPool>().deref().clone());
+        let mut dispatcher = DispatcherBuilder::new()
+            .with_pool(world.read_resource::<ArcThreadPool>().deref().clone())
+            .build();
 
-        AnimationBundle::<PlayerAnimation, SpriteRender>::new(
-            "sprite_animation_control",
-            "sprite_sampler_interpolation",
-        ).build(world, &mut dispatcher_builder)
-            .expect("Failed to build AnimationBundle");
-
-        let mut dispatcher = dispatcher_builder.build();
         dispatcher.setup(world);
         self.dispatcher = Some(dispatcher);
 
@@ -119,8 +115,8 @@ impl SimpleState for LoadingState<'_, '_> {
 
         {
             let entities = world.read_resource::<EntitiesRes>();
-            let animation_sets = world.read_storage::<AnimationSet<PlayerAnimation, SpriteRender>>();
-            let mut control_sets = world.write_storage::<AnimationControlSet<PlayerAnimation, SpriteRender>>();
+            let animation_sets = world.read_storage::<AnimationSet<CharacterAnimation, SpriteRender>>();
+            let mut control_sets = world.write_storage::<AnimationControlSet<CharacterAnimation, SpriteRender>>();
             let animations = [
                 PlayerAnimation::IdleUp,
                 PlayerAnimation::IdleDown,
@@ -141,8 +137,8 @@ impl SimpleState for LoadingState<'_, '_> {
 
                 for &animation in &animations {
                     animation_control_set.add_animation(
-                        animation,
-                        &animation_set.get(&animation).unwrap(),
+                        animation.into(),
+                        &animation_set.get(&animation.into()).unwrap(),
                         EndControl::Loop(None),
                         1.0,
                         AnimationCommand::Init,

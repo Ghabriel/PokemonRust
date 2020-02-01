@@ -1,5 +1,5 @@
 use amethyst::{
-    animation::{AnimationCommand, AnimationControlSet, ControlState},
+    animation::AnimationControlSet,
     ecs::{
         BitSet,
         Join,
@@ -17,7 +17,11 @@ use amethyst::{
 
 use crate::{
     common::Direction,
-    entities::player::{Player, PlayerAction, PlayerAnimation, PlayerSpriteSheets},
+    entities::{
+        CharacterAnimation,
+        change_character_animation,
+        player::{Player, PlayerAction, PlayerAnimation, PlayerSpriteSheets},
+    },
 };
 
 pub struct PlayerAnimationSystem {
@@ -34,7 +38,7 @@ impl PlayerAnimationSystem {
 
 impl<'a> System<'a> for PlayerAnimationSystem {
     type SystemData = (
-        WriteStorage<'a, AnimationControlSet<PlayerAnimation, SpriteRender>>,
+        WriteStorage<'a, AnimationControlSet<CharacterAnimation, SpriteRender>>,
         ReadStorage<'a, Player>,
         WriteStorage<'a, SpriteRender>,
         ReadExpect<'a, PlayerSpriteSheets>,
@@ -70,12 +74,14 @@ impl<'a> System<'a> for PlayerAnimationSystem {
             };
 
             match actual_action {
-                PlayerAction::Idle | PlayerAction::Walk => player_walk(sprite_render, &sprite_sheets),
-                PlayerAction::Run => player_run(sprite_render, &sprite_sheets),
+                PlayerAction::Idle | PlayerAction::Walk => {
+                    sprite_render.sprite_sheet = sprite_sheets.walking.clone();
+                },
+                PlayerAction::Run => sprite_render.sprite_sheet = sprite_sheets.running.clone(),
             }
 
             let new_animation = get_new_animation(&actual_action, &player.facing_direction);
-            change_player_animation(new_animation, control_set);
+            change_character_animation(new_animation.into(), control_set);
         }
     }
 }
@@ -95,33 +101,4 @@ pub fn get_new_animation(action: &PlayerAction, direction: &Direction) -> Player
         (PlayerAction::Run, Direction::Left) => PlayerAnimation::RunLeft,
         (PlayerAction::Run, Direction::Right) => PlayerAnimation::RunRight,
     }
-}
-
-pub fn player_walk(sprite_render: &mut SpriteRender, sprite_sheets: &PlayerSpriteSheets) {
-    sprite_render.sprite_sheet = sprite_sheets.walking.clone();
-    sprite_render.sprite_number = 0;
-}
-
-pub fn player_run(sprite_render: &mut SpriteRender, sprite_sheets: &PlayerSpriteSheets) {
-    sprite_render.sprite_sheet = sprite_sheets.running.clone();
-    sprite_render.sprite_number = 0;
-}
-
-fn change_player_animation(
-    new_animation: PlayerAnimation,
-    control_set: &mut AnimationControlSet<PlayerAnimation, SpriteRender>,
-) {
-    control_set.animations
-        .iter_mut()
-        .filter(|(id, _)| *id != new_animation)
-        .for_each(|(_, animation)| {
-            animation.command = AnimationCommand::Pause;
-        });
-
-    let (_, animation) = control_set.animations
-        .iter_mut()
-        .find(|(id, _)| *id == new_animation)
-        .unwrap();
-    animation.state = ControlState::Requested;
-    animation.command = AnimationCommand::Start;
 }
