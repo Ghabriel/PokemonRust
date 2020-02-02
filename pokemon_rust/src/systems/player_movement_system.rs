@@ -1,8 +1,8 @@
 use amethyst::{
+    animation::AnimationControlSet,
     core::{math::Vector3, Time, Transform},
     ecs::{
         Entities,
-        Entity,
         Join,
         Read,
         ReadExpect,
@@ -12,42 +12,32 @@ use amethyst::{
         WriteExpect,
         WriteStorage,
     },
+    renderer::SpriteRender,
 };
 
 use crate::{
-    common::get_direction_offset,
-    config::GameConfig,
-    constants::TILE_SIZE,
-    entities::player::{Player, PlayerAction, StaticPlayer},
+    common::{Direction, get_direction_offset},
+    entities::{
+        CharacterAnimation,
+        change_character_animation,
+        player::{Player, PlayerAction, PlayerAnimation, PlayerMovement, PlayerSpriteSheets},
+    },
     events::EventQueue,
-    map::{change_tile, CoordinateSystem, MapHandler, MapId, PlayerCoordinates, TileData},
+    map::{change_tile, CoordinateSystem, MapHandler},
 };
 
-use std::collections::HashMap;
-
-struct MovementData {
-    /// Stores how much time it will take for the player to reach the next tile.
-    estimated_time: f32,
-    /// Stores the map that the player was in at the start of the movement.
-    /// Useful for detecting map changes.
-    starting_map_id: MapId,
-    /// Stores where the player will be after he reaches the next tile. This
-    /// is used to compensate for rounding errors and detecting map changes.
-    final_tile_data: TileData,
-}
-
 #[derive(Default)]
-pub struct PlayerMovementSystem {
-    movement_data: HashMap<Entity, MovementData>,
-}
+pub struct PlayerMovementSystem;
 
 impl<'a> System<'a> for PlayerMovementSystem {
     type SystemData = (
         ReadStorage<'a, Player>,
-        WriteStorage<'a, StaticPlayer>,
+        WriteStorage<'a, PlayerMovement>,
         WriteStorage<'a, Transform>,
+        WriteStorage<'a, AnimationControlSet<CharacterAnimation, SpriteRender>>,
+        WriteStorage<'a, SpriteRender>,
         Entities<'a>,
-        ReadExpect<'a, GameConfig>,
+        ReadExpect<'a, PlayerSpriteSheets>,
         WriteExpect<'a, MapHandler>,
         Write<'a, EventQueue>,
         Read<'a, Time>,
@@ -55,85 +45,96 @@ impl<'a> System<'a> for PlayerMovementSystem {
 
     fn run(&mut self, (
         players,
-        mut static_players,
+        mut movements,
         mut transforms,
+        mut control_sets,
+        mut sprite_renders,
         entities,
-        config,
+        sprite_sheets,
         mut map,
         mut event_queue,
         time,
     ): Self::SystemData) {
-        for (entity, player, transform) in (&entities, &players, &mut transforms).join() {
-            let velocity = match player.action {
-                PlayerAction::Idle => unreachable!(),
-                PlayerAction::Walk => config.player_walking_speed,
-                PlayerAction::Run => config.player_running_speed,
-            };
+        let mut static_players = Vec::new();
 
-            let movement_data = self.movement_data.get_mut(&entity);
+        for (entity, player, movement_data, transform, control_set, sprite_render) in (
+            &entities,
+            &players,
+            &mut movements,
+            &mut transforms,
+            &mut control_sets,
+            &mut sprite_renders,
+        ).join() {
+            let delta_seconds = time.delta_seconds();
 
-            match movement_data {
-                Some(movement_data) => {
-                    let delta_seconds = time.delta_seconds();
+            if !movement_data.started {
+                if map.is_tile_blocked(&movement_data.to) {
+                    static_players.push(entity);
+                    continue;
+                }
 
-                    if movement_data.estimated_time <= delta_seconds {
-                        transform.set_translation(Vector3::new(
-                            movement_data.final_tile_data.position.x(),
-                            movement_data.final_tile_data.position.y(),
-                            0.,
-                        ));
+                match movement_data.action {
+                    PlayerAction::Idle => unreachable!(),
+                    PlayerAction::Walk => sprite_render.sprite_sheet = sprite_sheets.walking.clone(),
+                    PlayerAction::Run => sprite_render.sprite_sheet = sprite_sheets.running.clone(),
+                }
 
-                        change_tile(
-                            &movement_data.starting_map_id,
-                            &movement_data.final_tile_data,
-                            &mut map,
-                            &mut event_queue,
-                        );
+                let new_animation = get_new_animation(&movement_data.action, &player.facing_direction);
+                change_character_animation(new_animation.into(), control_set);
 
-                        self.movement_data.remove(&entity);
-                        static_players
-                            .insert(entity, StaticPlayer)
-                            .expect("Failed to attach StaticPlayer");
-
-                        continue;
-                    }
-
-                    movement_data.estimated_time -= delta_seconds;
-                },
-                None => {
-                    if !player.moving {
-                        static_players
-                            .insert(entity, StaticPlayer)
-                            .expect("Failed to attach StaticPlayer");
-                        continue;
-                    }
-
-                    let final_tile_data = map.get_forward_tile(
-                        &player.facing_direction,
-                        &PlayerCoordinates::from_transform(&transform),
-                    );
-
-                    if map.is_tile_blocked(&final_tile_data) {
-                        static_players
-                            .insert(entity, StaticPlayer)
-                            .expect("Failed to attach StaticPlayer");
-                        continue;
-                    }
-
-                    let estimated_time = f32::from(TILE_SIZE) / velocity;
-
-                    self.movement_data.insert(entity, MovementData {
-                        estimated_time,
-                        starting_map_id: map.get_current_map_id(),
-                        final_tile_data,
-                    });
-                },
+                movement_data.started = true;
             }
 
-            static_players.remove(entity);
+            if movement_data.estimated_time <= delta_seconds {
+                transform.set_translation(Vector3::new(
+                    movement_data.to.position.x(),
+                    movement_data.to.position.y(),
+                    0.,
+                ));
+
+                change_tile(
+                    &movement_data.from,
+                    &movement_data.to,
+                    &mut map,
+                    &mut event_queue,
+                );
+
+                sprite_render.sprite_sheet = sprite_sheets.walking.clone();
+
+                let new_animation = get_new_animation(&PlayerAction::Idle, &player.facing_direction);
+                change_character_animation(new_animation.into(), control_set);
+
+                static_players.push(entity);
+                continue;
+            }
+
+            movement_data.estimated_time -= delta_seconds;
+
             let (offset_x, offset_y) = get_direction_offset::<f32>(&player.facing_direction);
-            transform.prepend_translation_x(offset_x * velocity * time.delta_seconds());
-            transform.prepend_translation_y(offset_y * velocity * time.delta_seconds());
+            let frame_velocity = movement_data.velocity * delta_seconds;
+            transform.prepend_translation_x(offset_x * frame_velocity);
+            transform.prepend_translation_y(offset_y * frame_velocity);
         }
+
+        for entity in static_players {
+            movements.remove(entity);
+        }
+    }
+}
+
+pub fn get_new_animation(action: &PlayerAction, direction: &Direction) -> PlayerAnimation {
+    match (action, direction) {
+        (PlayerAction::Idle, Direction::Up) => PlayerAnimation::IdleUp,
+        (PlayerAction::Idle, Direction::Down) => PlayerAnimation::IdleDown,
+        (PlayerAction::Idle, Direction::Left) => PlayerAnimation::IdleLeft,
+        (PlayerAction::Idle, Direction::Right) => PlayerAnimation::IdleRight,
+        (PlayerAction::Walk, Direction::Up) => PlayerAnimation::WalkUp,
+        (PlayerAction::Walk, Direction::Down) => PlayerAnimation::WalkDown,
+        (PlayerAction::Walk, Direction::Left) => PlayerAnimation::WalkLeft,
+        (PlayerAction::Walk, Direction::Right) => PlayerAnimation::WalkRight,
+        (PlayerAction::Run, Direction::Up) => PlayerAnimation::RunUp,
+        (PlayerAction::Run, Direction::Down) => PlayerAnimation::RunDown,
+        (PlayerAction::Run, Direction::Left) => PlayerAnimation::RunLeft,
+        (PlayerAction::Run, Direction::Right) => PlayerAnimation::RunRight,
     }
 }

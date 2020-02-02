@@ -51,12 +51,12 @@ use super::{
 };
 
 pub fn change_tile(
-    starting_map_id: &MapId,
+    initial_tile_data: &TileData,
     final_tile_data: &TileData,
     map: &mut MapHandler,
     event_queue: &mut EventQueue,
 ) {
-    if *starting_map_id != final_tile_data.map_id {
+    if initial_tile_data.map_id != final_tile_data.map_id {
         println!("Changing to map {}", final_tile_data.map_id.0);
         map.current_map = final_tile_data.map_id.clone();
 

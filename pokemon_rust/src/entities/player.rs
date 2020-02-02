@@ -5,8 +5,6 @@ use amethyst::{
         Component,
         DenseVecStorage,
         Entity,
-        FlaggedStorage,
-        NullStorage,
         world::Builder,
         World,
         WorldExt,
@@ -18,23 +16,10 @@ use crate::{
     common::{Direction, get_character_sprite_index_from_direction, load_sprite_sheet},
     config::GameConfig,
     entities::{CharacterAnimation, make_sprite_animation},
-    map::{map_to_world_coordinates, MapCoordinates, PlayerCoordinates, WorldCoordinates},
+    map::{map_to_world_coordinates, MapCoordinates, PlayerCoordinates, TileData, WorldCoordinates},
 };
 
 use serde::{Deserialize, Serialize};
-
-pub struct SimulatedPlayer(pub Player);
-
-impl Component for SimulatedPlayer {
-    type Storage = DenseVecStorage<Self>;
-}
-
-#[derive(Default)]
-pub struct StaticPlayer;
-
-impl Component for StaticPlayer {
-    type Storage = NullStorage<Self>;
-}
 
 /// Resource that stores the entity corresponding to the human player.
 pub struct PlayerEntity(pub Entity);
@@ -43,11 +28,31 @@ pub struct PlayerEntity(pub Entity);
 pub struct Player {
     pub action: PlayerAction,
     pub facing_direction: Direction,
-    pub moving: bool,
 }
 
 impl Component for Player {
-    type Storage = FlaggedStorage<Self, DenseVecStorage<Self>>;
+    type Storage = DenseVecStorage<Self>;
+}
+
+/// Represents a player movement in progress.
+pub struct PlayerMovement {
+    /// Stores how much time it will take for the player to reach the target tile.
+    pub estimated_time: f32,
+    /// Stores the velocity of this movement.
+    pub velocity: f32,
+    /// The action that the player is doing while moving. This determines which
+    /// animation to use.
+    pub action: PlayerAction,
+    /// Determines whether processing for this movement has already started.
+    pub started: bool,
+    /// The source tile.
+    pub from: TileData,
+    /// The target tile. Must be adjacent to the source tile.
+    pub to: TileData,
+}
+
+impl Component for PlayerMovement {
+    type Storage = DenseVecStorage<Self>;
 }
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
@@ -116,7 +121,6 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
     let player = Player {
         action: PlayerAction::Walk,
         facing_direction: Direction::Down,
-        moving: false,
     };
 
     let transform = {
@@ -139,11 +143,9 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
 
     world.register::<AnimationSet<CharacterAnimation, SpriteRender>>();
     world.register::<Player>();
-    world.register::<SimulatedPlayer>();
 
     world
         .create_entity()
-        .with(SimulatedPlayer(player.clone()))
         .with(player)
         .with(transform)
         .with(sprite_render)

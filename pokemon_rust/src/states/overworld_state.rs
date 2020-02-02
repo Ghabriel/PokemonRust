@@ -11,10 +11,8 @@ use crate::{
     states::OverworldAnimationState,
     systems::{
         NpcMovementSystem,
-        PlayerAnimationSystem,
         PlayerInputSystem,
         PlayerMovementSystem,
-        StaticPlayerSystem,
     },
 };
 
@@ -49,8 +47,6 @@ impl SimpleState for OverworldState<'_, '_> {
             .with(NpcMovementSystem, "npc_movement_system", &[])
             .with(PlayerInputSystem::new(world), "player_input_system", &[])
             .with(PlayerMovementSystem::default(), "player_movement_system", &["player_input_system"])
-            .with(StaticPlayerSystem, "static_player_system", &["player_movement_system"])
-            .with(PlayerAnimationSystem::new(world), "player_animation_system", &["static_player_system"])
             .with(FpsCounterSystem, "fps_counter_system", &[])
             .with_pool(world.read_resource::<ArcThreadPool>().deref().clone())
             .build();

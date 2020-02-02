@@ -10,6 +10,7 @@ pub mod map_interaction_event;
 pub mod npc_move_event;
 pub mod npc_single_move_event;
 pub mod parallel_events;
+pub mod player_single_move_event;
 pub mod repeated_event;
 pub mod script_event;
 pub mod switch_map_event;
@@ -28,6 +29,7 @@ pub use self::{
     npc_move_event::NpcMoveEvent,
     npc_single_move_event::NpcSingleMoveEvent,
     parallel_events::ParallelEvents,
+    player_single_move_event::PlayerSingleMoveEvent,
     repeated_event::RepeatedEvent,
     script_event::ScriptEvent,
     switch_map_event::SwitchMapEvent,

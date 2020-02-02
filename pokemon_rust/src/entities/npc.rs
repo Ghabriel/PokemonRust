@@ -29,7 +29,6 @@ pub struct NpcBuilder {
 pub struct Npc {
     pub action: NpcAction,
     pub facing_direction: Direction,
-    pub moving: bool,
     pub kind: String,
 }
 
@@ -107,7 +106,6 @@ pub fn initialise_npc(
     let npc = Npc {
         action: NpcAction::Idle,
         facing_direction: npc_builder.facing_direction,
-        moving: false,
         kind: npc_builder.kind,
     };
 

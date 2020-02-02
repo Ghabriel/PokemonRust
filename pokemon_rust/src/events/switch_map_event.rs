@@ -12,7 +12,7 @@ use amethyst::{
 use crate::{
     entities::player::PlayerEntity,
     events::EventQueue,
-    map::{change_tile, MapCoordinates, MapHandler, prepare_warp},
+    map::{change_tile, MapCoordinates, MapHandler, PlayerCoordinates, prepare_warp, TileData},
 };
 
 use super::{GameEvent, ShouldDisableInput};
@@ -38,18 +38,24 @@ impl SwitchMapEvent {
 
 impl GameEvent for SwitchMapEvent {
     fn start(&mut self, world: &mut World) -> ShouldDisableInput {
-        let starting_map_id = world.read_resource::<MapHandler>().get_current_map_id();
         let target_tile_data = prepare_warp(world, &self.map, &self.tile, &mut self.progress_counter);
 
+        let mut transforms = world.write_storage::<Transform>();
         let player_entity = world.read_resource::<PlayerEntity>();
 
-        world.write_storage::<Transform>()
+        let transform = transforms
             .get_mut(player_entity.0)
-            .expect("Failed to retrieve Transform")
-            .set_translation(*target_tile_data.position.to_transform().translation());
+            .expect("Failed to retrieve Transform");
+
+        let initial_tile_data = TileData {
+            position: PlayerCoordinates::from_transform(&transform),
+            map_id: world.read_resource::<MapHandler>().get_current_map_id(),
+        };
+
+        transform.set_translation(*target_tile_data.position.to_transform().translation());
 
         change_tile(
-            &starting_map_id,
+            &initial_tile_data,
             &target_tile_data,
             &mut world.write_resource::<MapHandler>(),
             &mut world.write_resource::<EventQueue>(),
