@@ -7,6 +7,7 @@ use std::{
     hash::Hash,
 };
 
+pub mod character;
 pub mod npc;
 pub mod player;
 

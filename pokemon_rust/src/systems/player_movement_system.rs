@@ -18,13 +18,15 @@ use crate::{
     entities::{
         AnimationTable,
         CharacterAnimation,
+        character::{
+            StepKind,
+        },
         player::{
             Player,
             PlayerAction,
             PlayerAnimation,
             PlayerMovement,
             PlayerSpriteSheets,
-            StepKind,
         },
     },
     events::EventQueue,

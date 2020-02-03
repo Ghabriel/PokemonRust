@@ -15,7 +15,7 @@ use crate::{
         AnimationData,
         AnimationTable,
         CharacterAnimation,
-        player::StepKind,
+        character::StepKind,
     },
     map::{MapCoordinates, MapHandler, PlayerCoordinates, TileData},
 };

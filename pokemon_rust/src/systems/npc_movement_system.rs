@@ -15,8 +15,8 @@ use crate::{
     entities::{
         AnimationTable,
         CharacterAnimation,
+        character::StepKind,
         npc::{Npc, NpcAction, NpcAnimation, NpcMovement},
-        player::StepKind,
     },
     map::{CoordinateSystem, MapHandler},
 };

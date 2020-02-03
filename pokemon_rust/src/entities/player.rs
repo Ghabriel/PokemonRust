@@ -14,7 +14,12 @@ use amethyst::{
 use crate::{
     common::{Direction, get_character_sprite_index_from_direction, load_sprite_sheet},
     config::GameConfig,
-    entities::{AnimationData, AnimationTable, CharacterAnimation},
+    entities::{
+        AnimationData,
+        AnimationTable,
+        CharacterAnimation,
+        character::StepKind,
+    },
     map::{map_to_world_coordinates, MapCoordinates, PlayerCoordinates, TileData, WorldCoordinates},
 };
 
@@ -63,21 +68,6 @@ pub enum PlayerAction {
     Idle,
     Walk,
     Run,
-}
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub enum StepKind {
-    Left,
-    Right,
-}
-
-impl StepKind {
-    pub fn invert(&mut self) {
-        *self = match *self {
-            StepKind::Left => StepKind::Right,
-            StepKind::Right => StepKind::Left,
-        };
-    }
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
