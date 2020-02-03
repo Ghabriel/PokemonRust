@@ -29,11 +29,8 @@ impl GameEvent for NpcSingleMoveEvent {
         let map_handler = world.read_resource::<MapHandler>();
         let npc_entity = map_handler.get_npc_by_id(self.npc_id);
 
-        let npc_facing_direction = &world.read_storage::<Npc>()
-            .get(*npc_entity)
-            .unwrap()
-            .facing_direction
-            .clone();
+        let npcs = world.read_storage::<Npc>();
+        let npc = npcs.get(*npc_entity).unwrap();
 
         let npc_position = world.read_storage::<Transform>()
             .get(*npc_entity)
@@ -43,6 +40,7 @@ impl GameEvent for NpcSingleMoveEvent {
         let movement = NpcMovement {
             // TODO: extract velocity to constant or use GameConfig::player_walking_speed
             estimated_time: f32::from(TILE_SIZE) / 160.,
+            step_kind: npc.next_step.clone(),
             started: false,
             from: TileData {
                 position: npc_position.clone(),
@@ -50,7 +48,7 @@ impl GameEvent for NpcSingleMoveEvent {
                 map_id: map_handler.get_current_map_id(),
             },
             // TODO: use the NPC's natural map
-            to: map_handler.get_forward_tile(&npc_facing_direction, &npc_position),
+            to: map_handler.get_forward_tile(&npc.facing_direction, &npc_position),
         };
 
         world.write_storage::<NpcMovement>()

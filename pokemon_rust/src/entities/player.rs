@@ -71,6 +71,15 @@ pub enum StepKind {
     Right,
 }
 
+impl StepKind {
+    pub fn invert(&mut self) {
+        *self = match *self {
+            StepKind::Left => StepKind::Right,
+            StepKind::Right => StepKind::Left,
+        };
+    }
+}
+
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum PlayerAnimation {
     IdleUp,

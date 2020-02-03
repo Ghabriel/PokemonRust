@@ -4,7 +4,6 @@ use amethyst::{
         Entities,
         Join,
         Read,
-        ReadStorage,
         System,
         WriteExpect,
         WriteStorage,
@@ -17,6 +16,7 @@ use crate::{
         AnimationTable,
         CharacterAnimation,
         npc::{Npc, NpcAction, NpcAnimation, NpcMovement},
+        player::StepKind,
     },
     map::{CoordinateSystem, MapHandler},
 };
@@ -26,7 +26,7 @@ pub struct NpcMovementSystem;
 
 impl<'a> System<'a> for NpcMovementSystem {
     type SystemData = (
-        ReadStorage<'a, Npc>,
+        WriteStorage<'a, Npc>,
         WriteStorage<'a, NpcMovement>,
         WriteStorage<'a, Transform>,
         WriteStorage<'a, AnimationTable<CharacterAnimation>>,
@@ -36,7 +36,7 @@ impl<'a> System<'a> for NpcMovementSystem {
     );
 
     fn run(&mut self, (
-        npcs,
+        mut npcs,
         mut npc_movements,
         mut transforms,
         mut animation_tables,
@@ -48,7 +48,7 @@ impl<'a> System<'a> for NpcMovementSystem {
 
         for (entity, npc, movement_data, transform, animation_table) in (
             &entities,
-            &npcs,
+            &mut npcs,
             &mut npc_movements,
             &mut transforms,
             &mut animation_tables,
@@ -61,6 +61,10 @@ impl<'a> System<'a> for NpcMovementSystem {
             if !movement_data.started {
                 let new_animation = get_new_animation(&NpcAction::Moving, &npc.facing_direction);
                 animation_table.change_animation(new_animation.into());
+
+                if movement_data.step_kind == StepKind::Right {
+                    animation_table.skip_to_frame_index(2);
+                }
 
                 map.mark_tile_as_solid(&movement_data.to);
                 movement_data.started = true;
@@ -75,6 +79,8 @@ impl<'a> System<'a> for NpcMovementSystem {
 
                 let new_animation = get_new_animation(&NpcAction::Idle, &npc.facing_direction);
                 animation_table.change_animation(new_animation.into());
+
+                npc.next_step.invert();
 
                 map.remove_solid_mark(&movement_data.from);
                 static_npcs.push(entity);

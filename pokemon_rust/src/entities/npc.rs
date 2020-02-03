@@ -11,7 +11,12 @@ use crate::{
         get_character_sprite_index_from_direction,
         load_sprite_sheet_with_texture,
     },
-    entities::{AnimationData, AnimationTable, CharacterAnimation},
+    entities::{
+        AnimationData,
+        AnimationTable,
+        CharacterAnimation,
+        player::StepKind,
+    },
     map::{MapCoordinates, MapHandler, PlayerCoordinates, TileData},
 };
 
@@ -29,6 +34,7 @@ pub struct Npc {
     pub action: NpcAction,
     pub facing_direction: Direction,
     pub kind: String,
+    pub next_step: StepKind,
 }
 
 impl Component for Npc {
@@ -39,6 +45,9 @@ impl Component for Npc {
 pub struct NpcMovement {
     /// Stores how much time it will take for the NPC to reach the target tile.
     pub estimated_time: f32,
+    /// The kind of step the player is doing while moving. This determines at
+    /// which point the animation starts.
+    pub step_kind: StepKind,
     /// Determines whether processing for this movement has already started.
     pub started: bool,
     /// The source tile.
@@ -106,6 +115,7 @@ pub fn initialise_npc(
         action: NpcAction::Idle,
         facing_direction: npc_builder.facing_direction,
         kind: npc_builder.kind,
+        next_step: StepKind::Left,
     };
 
     let sprite_render = {

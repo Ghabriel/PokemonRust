@@ -113,10 +113,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
                 let new_animation = get_new_animation(&PlayerAction::Idle, &player.facing_direction);
                 animation_table.change_animation(new_animation.into());
 
-                player.next_step = match movement_data.step_kind {
-                    StepKind::Left => StepKind::Right,
-                    StepKind::Right => StepKind::Left,
-                };
+                player.next_step.invert();
 
                 static_players.push(entity);
                 continue;
