@@ -20,12 +20,13 @@ use crate::{
         CharacterAnimation,
         character::{
             Character,
+            CharacterAction,
+            CharacterMovement,
             StepKind,
         },
         player::{
             PlayerAction,
             PlayerAnimation,
-            PlayerMovement,
             PlayerSpriteSheets,
         },
     },
@@ -39,7 +40,7 @@ pub struct PlayerMovementSystem;
 impl<'a> System<'a> for PlayerMovementSystem {
     type SystemData = (
         WriteStorage<'a, Character>,
-        WriteStorage<'a, PlayerMovement>,
+        WriteStorage<'a, CharacterMovement>,
         WriteStorage<'a, Transform>,
         WriteStorage<'a, AnimationTable<CharacterAnimation>>,
         WriteStorage<'a, SpriteRender>,
@@ -81,9 +82,10 @@ impl<'a> System<'a> for PlayerMovementSystem {
                 }
 
                 match movement_data.action {
-                    PlayerAction::Idle => unreachable!(),
-                    PlayerAction::Walk => sprite_render.sprite_sheet = sprite_sheets.walking.clone(),
-                    PlayerAction::Run => sprite_render.sprite_sheet = sprite_sheets.running.clone(),
+                    CharacterAction::Player(PlayerAction::Idle) => unreachable!(),
+                    CharacterAction::Player(PlayerAction::Walk) => sprite_render.sprite_sheet = sprite_sheets.walking.clone(),
+                    CharacterAction::Player(PlayerAction::Run) => sprite_render.sprite_sheet = sprite_sheets.running.clone(),
+                    _ => unreachable!(),
                 }
 
                 let new_animation = get_new_animation(&movement_data.action, &character.facing_direction);
@@ -112,7 +114,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
 
                 sprite_render.sprite_sheet = sprite_sheets.walking.clone();
 
-                let new_animation = get_new_animation(&PlayerAction::Idle, &character.facing_direction);
+                let new_animation = get_new_animation(&CharacterAction::Player(PlayerAction::Idle), &character.facing_direction);
                 animation_table.change_animation(new_animation.into());
 
                 character.next_step.invert();
@@ -135,19 +137,20 @@ impl<'a> System<'a> for PlayerMovementSystem {
     }
 }
 
-pub fn get_new_animation(action: &PlayerAction, direction: &Direction) -> PlayerAnimation {
+pub fn get_new_animation(action: &CharacterAction, direction: &Direction) -> PlayerAnimation {
     match (action, direction) {
-        (PlayerAction::Idle, Direction::Up) => PlayerAnimation::IdleUp,
-        (PlayerAction::Idle, Direction::Down) => PlayerAnimation::IdleDown,
-        (PlayerAction::Idle, Direction::Left) => PlayerAnimation::IdleLeft,
-        (PlayerAction::Idle, Direction::Right) => PlayerAnimation::IdleRight,
-        (PlayerAction::Walk, Direction::Up) => PlayerAnimation::WalkUp,
-        (PlayerAction::Walk, Direction::Down) => PlayerAnimation::WalkDown,
-        (PlayerAction::Walk, Direction::Left) => PlayerAnimation::WalkLeft,
-        (PlayerAction::Walk, Direction::Right) => PlayerAnimation::WalkRight,
-        (PlayerAction::Run, Direction::Up) => PlayerAnimation::RunUp,
-        (PlayerAction::Run, Direction::Down) => PlayerAnimation::RunDown,
-        (PlayerAction::Run, Direction::Left) => PlayerAnimation::RunLeft,
-        (PlayerAction::Run, Direction::Right) => PlayerAnimation::RunRight,
+        (CharacterAction::Player(PlayerAction::Idle), Direction::Up) => PlayerAnimation::IdleUp,
+        (CharacterAction::Player(PlayerAction::Idle), Direction::Down) => PlayerAnimation::IdleDown,
+        (CharacterAction::Player(PlayerAction::Idle), Direction::Left) => PlayerAnimation::IdleLeft,
+        (CharacterAction::Player(PlayerAction::Idle), Direction::Right) => PlayerAnimation::IdleRight,
+        (CharacterAction::Player(PlayerAction::Walk), Direction::Up) => PlayerAnimation::WalkUp,
+        (CharacterAction::Player(PlayerAction::Walk), Direction::Down) => PlayerAnimation::WalkDown,
+        (CharacterAction::Player(PlayerAction::Walk), Direction::Left) => PlayerAnimation::WalkLeft,
+        (CharacterAction::Player(PlayerAction::Walk), Direction::Right) => PlayerAnimation::WalkRight,
+        (CharacterAction::Player(PlayerAction::Run), Direction::Up) => PlayerAnimation::RunUp,
+        (CharacterAction::Player(PlayerAction::Run), Direction::Down) => PlayerAnimation::RunDown,
+        (CharacterAction::Player(PlayerAction::Run), Direction::Left) => PlayerAnimation::RunLeft,
+        (CharacterAction::Player(PlayerAction::Run), Direction::Right) => PlayerAnimation::RunRight,
+        _ => unreachable!(),
     }
 }

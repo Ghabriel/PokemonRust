@@ -7,8 +7,8 @@ use crate::{
     config::GameConfig,
     constants::TILE_SIZE,
     entities::{
-        character::Character,
-        player::{Player, PlayerAction, PlayerEntity, PlayerMovement},
+        character::{Character, CharacterAction, CharacterMovement},
+        player::{Player, PlayerAction, PlayerEntity},
     },
     map::{MapHandler, PlayerCoordinates, TileData},
 };
@@ -42,10 +42,10 @@ impl GameEvent for PlayerSingleMoveEvent {
 
         let map_handler = world.read_resource::<MapHandler>();
 
-        let movement = PlayerMovement {
+        let movement = CharacterMovement {
             estimated_time: f32::from(TILE_SIZE) / velocity,
             velocity,
-            action: player.action.clone(),
+            action: CharacterAction::Player(player.action.clone()),
             step_kind: character.next_step.clone(),
             started: false,
             from: TileData {
@@ -55,9 +55,9 @@ impl GameEvent for PlayerSingleMoveEvent {
             to: map_handler.get_forward_tile(&character.facing_direction, &player_position),
         };
 
-        world.write_storage::<PlayerMovement>()
+        world.write_storage::<CharacterMovement>()
             .insert(player_entity, movement)
-            .expect("Failed to attach PlayerMovement");
+            .expect("Failed to attach CharacterMovement");
 
         ShouldDisableInput(false)
     }
@@ -67,7 +67,7 @@ impl GameEvent for PlayerSingleMoveEvent {
     fn is_complete(&self, world: &mut World) -> bool {
         let player_entity = world.read_resource::<PlayerEntity>().0;
 
-        !world.read_storage::<PlayerMovement>()
+        !world.read_storage::<CharacterMovement>()
             .contains(player_entity)
     }
 }

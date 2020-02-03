@@ -37,30 +37,6 @@ impl Component for Player {
     type Storage = DenseVecStorage<Self>;
 }
 
-/// Represents a player movement in progress.
-pub struct PlayerMovement {
-    /// Stores how much time it will take for the player to reach the target tile.
-    pub estimated_time: f32,
-    /// Stores the velocity of this movement.
-    pub velocity: f32,
-    /// The action that the player is doing while moving. This determines which
-    /// animation to use.
-    pub action: PlayerAction,
-    /// The kind of step the player is doing while moving. This determines at
-    /// which point the animation starts.
-    pub step_kind: StepKind,
-    /// Determines whether processing for this movement has already started.
-    pub started: bool,
-    /// The source tile.
-    pub from: TileData,
-    /// The target tile. Must be adjacent to the source tile.
-    pub to: TileData,
-}
-
-impl Component for PlayerMovement {
-    type Storage = DenseVecStorage<Self>;
-}
-
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum PlayerAction {
     Idle,

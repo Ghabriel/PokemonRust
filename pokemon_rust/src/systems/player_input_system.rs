@@ -17,8 +17,8 @@ use amethyst::{
 use crate::{
     common::Direction,
     entities::{
-        character::Character,
-        player::{Player, PlayerAction, PlayerEntity, PlayerMovement},
+        character::{Character, CharacterMovement},
+        player::{Player, PlayerAction, PlayerEntity},
     },
     events::{EventQueue, MapInteractionEvent, PlayerSingleMoveEvent},
 };
@@ -40,7 +40,7 @@ impl<'a> System<'a> for PlayerInputSystem {
     type SystemData = (
         WriteStorage<'a, Character>,
         WriteStorage<'a, Player>,
-        ReadStorage<'a, PlayerMovement>,
+        ReadStorage<'a, CharacterMovement>,
         Write<'a, EventQueue>,
         Read<'a, EventChannel<InputEvent<StringBindings>>>,
         Read<'a, InputHandler<StringBindings>>,
