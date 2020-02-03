@@ -74,7 +74,7 @@ impl<'a> System<'a> for NpcMovementSystem {
                     0.,
                 ));
 
-                let new_animation = get_new_animation(&CharacterAction::Npc(NpcAction::Idle), &character.facing_direction);
+                let new_animation = get_new_animation(&CharacterAction::Idle, &character.facing_direction);
                 animation_table.change_animation(new_animation.into());
 
                 character.next_step.invert();
@@ -100,10 +100,10 @@ impl<'a> System<'a> for NpcMovementSystem {
 
 pub fn get_new_animation(action: &CharacterAction, direction: &Direction) -> NpcAnimation {
     match (action, direction) {
-        (CharacterAction::Npc(NpcAction::Idle), Direction::Up) => NpcAnimation::IdleUp,
-        (CharacterAction::Npc(NpcAction::Idle), Direction::Down) => NpcAnimation::IdleDown,
-        (CharacterAction::Npc(NpcAction::Idle), Direction::Left) => NpcAnimation::IdleLeft,
-        (CharacterAction::Npc(NpcAction::Idle), Direction::Right) => NpcAnimation::IdleRight,
+        (CharacterAction::Idle, Direction::Up) => NpcAnimation::IdleUp,
+        (CharacterAction::Idle, Direction::Down) => NpcAnimation::IdleDown,
+        (CharacterAction::Idle, Direction::Left) => NpcAnimation::IdleLeft,
+        (CharacterAction::Idle, Direction::Right) => NpcAnimation::IdleRight,
         (CharacterAction::Npc(NpcAction::Moving), Direction::Up) => NpcAnimation::WalkUp,
         (CharacterAction::Npc(NpcAction::Moving), Direction::Down) => NpcAnimation::WalkDown,
         (CharacterAction::Npc(NpcAction::Moving), Direction::Left) => NpcAnimation::WalkLeft,

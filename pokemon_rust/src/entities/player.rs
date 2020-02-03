@@ -39,7 +39,6 @@ impl Component for Player {
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum PlayerAction {
-    Idle,
     Walk,
     Run,
 }

@@ -35,7 +35,6 @@ impl GameEvent for PlayerSingleMoveEvent {
         let config = world.read_resource::<GameConfig>();
 
         let velocity = match player.action {
-            PlayerAction::Idle => unreachable!(),
             PlayerAction::Walk => config.player_walking_speed,
             PlayerAction::Run => config.player_running_speed,
         };

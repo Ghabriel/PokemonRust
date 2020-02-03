@@ -74,6 +74,7 @@ impl StepKind {
 }
 
 pub enum CharacterAction {
+    Idle,
     Player(PlayerAction),
     Npc(NpcAction),
 }

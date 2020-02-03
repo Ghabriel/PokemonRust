@@ -41,7 +41,6 @@ impl Component for Npc {
 
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum NpcAction {
-    Idle,
     Moving,
 }
 
@@ -96,7 +95,7 @@ pub fn initialise_npc(
     };
 
     let npc = Npc {
-        action: NpcAction::Idle,
+        action: NpcAction::Moving,
         kind: npc_builder.kind,
     };
 
