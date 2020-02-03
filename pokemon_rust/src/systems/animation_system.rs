@@ -44,7 +44,7 @@ where
                 let frame_index = animation_data.timings
                     .binary_search_by(|value| value.partial_cmp(&timing).unwrap());
                 let mut frame_index = match frame_index {
-                    Ok(index) => index,
+                    Ok(index) => index + 1,
                     Err(index) => index,
                 };
 

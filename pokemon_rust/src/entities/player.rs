@@ -27,6 +27,7 @@ pub struct PlayerEntity(pub Entity);
 pub struct Player {
     pub action: PlayerAction,
     pub facing_direction: Direction,
+    pub next_step: StepKind,
 }
 
 impl Component for Player {
@@ -42,6 +43,9 @@ pub struct PlayerMovement {
     /// The action that the player is doing while moving. This determines which
     /// animation to use.
     pub action: PlayerAction,
+    /// The kind of step the player is doing while moving. This determines at
+    /// which point the animation starts.
+    pub step_kind: StepKind,
     /// Determines whether processing for this movement has already started.
     pub started: bool,
     /// The source tile.
@@ -59,6 +63,12 @@ pub enum PlayerAction {
     Idle,
     Walk,
     Run,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum StepKind {
+    Left,
+    Right,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
@@ -120,6 +130,7 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
     let player = Player {
         action: PlayerAction::Walk,
         facing_direction: Direction::Down,
+        next_step: StepKind::Left,
     };
 
     let transform = {

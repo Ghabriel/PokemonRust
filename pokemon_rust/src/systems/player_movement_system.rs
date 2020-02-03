@@ -5,7 +5,6 @@ use amethyst::{
         Join,
         Read,
         ReadExpect,
-        ReadStorage,
         System,
         Write,
         WriteExpect,
@@ -19,7 +18,14 @@ use crate::{
     entities::{
         AnimationTable,
         CharacterAnimation,
-        player::{Player, PlayerAction, PlayerAnimation, PlayerMovement, PlayerSpriteSheets},
+        player::{
+            Player,
+            PlayerAction,
+            PlayerAnimation,
+            PlayerMovement,
+            PlayerSpriteSheets,
+            StepKind,
+        },
     },
     events::EventQueue,
     map::{change_tile, CoordinateSystem, MapHandler},
@@ -30,7 +36,7 @@ pub struct PlayerMovementSystem;
 
 impl<'a> System<'a> for PlayerMovementSystem {
     type SystemData = (
-        ReadStorage<'a, Player>,
+        WriteStorage<'a, Player>,
         WriteStorage<'a, PlayerMovement>,
         WriteStorage<'a, Transform>,
         WriteStorage<'a, AnimationTable<CharacterAnimation>>,
@@ -43,7 +49,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
     );
 
     fn run(&mut self, (
-        players,
+        mut players,
         mut movements,
         mut transforms,
         mut animation_tables,
@@ -58,7 +64,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
 
         for (entity, player, movement_data, transform, animation_table, sprite_render) in (
             &entities,
-            &players,
+            &mut players,
             &mut movements,
             &mut transforms,
             &mut animation_tables,
@@ -81,6 +87,10 @@ impl<'a> System<'a> for PlayerMovementSystem {
                 let new_animation = get_new_animation(&movement_data.action, &player.facing_direction);
                 animation_table.change_animation(new_animation.into());
 
+                if movement_data.step_kind == StepKind::Right {
+                    animation_table.skip_to_frame_index(2);
+                }
+
                 movement_data.started = true;
             }
 
@@ -102,6 +112,11 @@ impl<'a> System<'a> for PlayerMovementSystem {
 
                 let new_animation = get_new_animation(&PlayerAction::Idle, &player.facing_direction);
                 animation_table.change_animation(new_animation.into());
+
+                player.next_step = match movement_data.step_kind {
+                    StepKind::Left => StepKind::Right,
+                    StepKind::Right => StepKind::Left,
+                };
 
                 static_players.push(entity);
                 continue;

@@ -41,6 +41,7 @@ impl GameEvent for PlayerSingleMoveEvent {
             estimated_time: f32::from(TILE_SIZE) / velocity,
             velocity,
             action: player.action.clone(),
+            step_kind: player.next_step.clone(),
             started: false,
             from: TileData {
                 position: player_position.clone(),

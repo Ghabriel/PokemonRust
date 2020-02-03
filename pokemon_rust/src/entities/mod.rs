@@ -43,6 +43,17 @@ where
         self.active_animation = Some(new_animation);
         self.timing = 0.;
     }
+
+    pub fn skip_to_frame_index(&mut self, index: usize) {
+        if index == 0 {
+            self.timing = 0.;
+        } else {
+            self.timing = self.table
+                .get(self.active_animation.as_ref().unwrap())
+                .unwrap()
+                .timings[index - 1];
+        }
+    }
 }
 
 impl<T> Component for AnimationTable<T>
