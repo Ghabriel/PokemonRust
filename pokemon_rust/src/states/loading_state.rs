@@ -1,33 +1,22 @@
 use amethyst::{
-    animation::{
-        AnimationCommand,
-        AnimationControlSet,
-        AnimationSet,
-        EndControl,
-        get_animation_set,
-    },
     assets::{Loader, ProgressCounter},
     core::{ArcThreadPool, math::Vector3, Parent, Transform},
     ecs::{
         Dispatcher,
         DispatcherBuilder,
         Entity,
-        Join,
-        world::{Builder, EntitiesRes},
+        world::Builder,
         World,
         WorldExt,
     },
     prelude::*,
-    renderer::{Camera, ImageFormat, SpriteRender},
+    renderer::{Camera, ImageFormat},
     ui::TtfFormat,
 };
 
 use crate::{
     common::{load_full_texture_sprite_sheet, CommonResources},
-    entities::{
-        CharacterAnimation,
-        player::{initialise_player, PlayerAnimation, PlayerEntity},
-    },
+    entities::player::{initialise_player, PlayerEntity},
     events::EventQueue,
     map::initialise_map,
     states::OverworldState,
@@ -100,8 +89,6 @@ impl SimpleState for LoadingState<'_, '_> {
         dispatcher.setup(world);
         self.dispatcher = Some(dispatcher);
 
-        world.register::<AnimationControlSet<PlayerAnimation, SpriteRender>>();
-
         world.insert(EventQueue::default());
 
         let mut progress_counter = ProgressCounter::new();
@@ -112,40 +99,6 @@ impl SimpleState for LoadingState<'_, '_> {
         self.progress_counter = Some(progress_counter);
 
         world.insert(PlayerEntity(player));
-
-        {
-            let entities = world.read_resource::<EntitiesRes>();
-            let animation_sets = world.read_storage::<AnimationSet<CharacterAnimation, SpriteRender>>();
-            let mut control_sets = world.write_storage::<AnimationControlSet<CharacterAnimation, SpriteRender>>();
-            let animations = [
-                PlayerAnimation::IdleUp,
-                PlayerAnimation::IdleDown,
-                PlayerAnimation::IdleLeft,
-                PlayerAnimation::IdleRight,
-                PlayerAnimation::WalkUp,
-                PlayerAnimation::WalkDown,
-                PlayerAnimation::WalkLeft,
-                PlayerAnimation::WalkRight,
-                PlayerAnimation::RunUp,
-                PlayerAnimation::RunDown,
-                PlayerAnimation::RunLeft,
-                PlayerAnimation::RunRight,
-            ];
-
-            for (entity, animation_set) in (&entities, &animation_sets).join() {
-                let animation_control_set = get_animation_set(&mut control_sets, entity).unwrap();
-
-                for &animation in &animations {
-                    animation_control_set.add_animation(
-                        animation.into(),
-                        &animation_set.get(&animation.into()).unwrap(),
-                        EndControl::Loop(None),
-                        1.0,
-                        AnimationCommand::Init,
-                    );
-                }
-            }
-        }
     }
 
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {

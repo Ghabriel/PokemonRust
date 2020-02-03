@@ -1,23 +1,61 @@
-use amethyst::{
-    animation::{
-        Animation,
-        AnimationCommand,
-        AnimationControlSet,
-        ControlState,
-        InterpolationFunction,
-        Sampler,
-        SpriteRenderChannel,
-        SpriteRenderPrimitive,
-    },
-    assets::{AssetStorage, Handle, Loader, ProgressCounter},
-    ecs::{Read, ReadExpect, World},
-    renderer::SpriteRender,
-};
+use amethyst::ecs::{Component, DenseVecStorage};
 
 use serde::{Deserialize, Serialize};
 
+use std::{
+    collections::HashMap,
+    hash::Hash,
+};
+
 pub mod npc;
 pub mod player;
+
+pub struct AnimationTable<T>
+where
+    T: 'static + Eq + Hash + Sync + Send
+{
+    table: HashMap<T, AnimationData>,
+    pub active_animation: Option<T>,
+    pub timing: f32,
+}
+
+impl<T> AnimationTable<T>
+where
+    T: 'static + Eq + Hash + Sync + Send
+{
+    pub fn new() -> AnimationTable<T> {
+        AnimationTable {
+            table: HashMap::new(),
+            active_animation: None,
+            timing: 0.,
+        }
+    }
+
+    pub fn get(&self, key: &T) -> Option<&AnimationData> {
+        self.table.get(key)
+    }
+
+    pub fn insert(&mut self, key: T, value: AnimationData) {
+        self.table.insert(key, value);
+    }
+
+    pub fn change_animation(&mut self, new_animation: T) {
+        self.active_animation = Some(new_animation);
+        self.timing = 0.;
+    }
+}
+
+impl<T> Component for AnimationTable<T>
+where
+    T: 'static + Eq + Hash + Sync + Send
+{
+    type Storage = DenseVecStorage<Self>;
+}
+
+pub struct AnimationData {
+    pub timings: Vec<f32>,
+    pub frames: Vec<usize>,
+}
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum CharacterAnimation {
@@ -37,67 +75,4 @@ pub enum CharacterAnimation {
     RunDown,
     RunLeft,
     RunRight,
-}
-
-pub fn make_sprite_animation(
-    world: &mut World,
-    input: Vec<f32>,
-    output: Vec<usize>,
-    progress_counter: &mut ProgressCounter,
-) -> Handle<Animation<SpriteRender>> {
-    world.exec(|
-        (loader, sampler_storage, animation_storage): (
-            ReadExpect<Loader>,
-            Read<AssetStorage<Sampler<SpriteRenderPrimitive>>>,
-            Read<AssetStorage<Animation<SpriteRender>>>,
-        )
-    | {
-        let samplers = vec![
-            (
-                0,
-                SpriteRenderChannel::SpriteIndex,
-                Sampler {
-                    input,
-                    output: output.into_iter()
-                        .map(SpriteRenderPrimitive::SpriteIndex)
-                        .collect(),
-                    function: InterpolationFunction::Step,
-                }
-            )
-        ];
-
-        let animation = Animation::<SpriteRender> {
-            nodes: samplers
-                .iter()
-                .map(|(node_index, channel, sampler)| {
-                    (
-                        *node_index,
-                        channel.clone(),
-                        loader.load_from_data(sampler.clone(), &mut *progress_counter, &sampler_storage),
-                    )
-                })
-                .collect(),
-        };
-
-        loader.load_from_data(animation, progress_counter, &animation_storage)
-    })
-}
-
-pub fn change_character_animation(
-    new_animation: CharacterAnimation,
-    control_set: &mut AnimationControlSet<CharacterAnimation, SpriteRender>,
-) {
-    control_set.animations
-        .iter_mut()
-        .filter(|(id, _)| *id != new_animation)
-        .for_each(|(_, animation)| {
-            animation.command = AnimationCommand::Pause;
-        });
-
-    let (_, animation) = control_set.animations
-        .iter_mut()
-        .find(|(id, _)| *id == new_animation)
-        .unwrap();
-    animation.state = ControlState::Requested;
-    animation.command = AnimationCommand::Start;
 }

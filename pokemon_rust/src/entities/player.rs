@@ -1,5 +1,4 @@
 use amethyst::{
-    animation::AnimationSet,
     assets::{Handle, ProgressCounter},
     ecs::{
         Component,
@@ -15,7 +14,7 @@ use amethyst::{
 use crate::{
     common::{Direction, get_character_sprite_index_from_direction, load_sprite_sheet},
     config::GameConfig,
-    entities::{CharacterAnimation, make_sprite_animation},
+    entities::{AnimationData, AnimationTable, CharacterAnimation},
     map::{map_to_world_coordinates, MapCoordinates, PlayerCoordinates, TileData, WorldCoordinates},
 };
 
@@ -137,11 +136,11 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
         sprite_number: get_character_sprite_index_from_direction(&player.facing_direction),
     };
 
-    let animation_set = get_player_animation_set(world, progress_counter);
+    let animation_set = get_player_animation_set();
 
     world.insert(sprite_sheets);
 
-    world.register::<AnimationSet<CharacterAnimation, SpriteRender>>();
+    world.register::<AnimationTable<CharacterAnimation>>();
     world.register::<Player>();
 
     world
@@ -153,90 +152,63 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
         .build()
 }
 
-pub fn get_player_animation_set(
-    world: &mut World,
-    progress_counter: &mut ProgressCounter,
-) -> AnimationSet<CharacterAnimation, SpriteRender> {
-    let mut animation_set = AnimationSet::new();
+pub fn get_player_animation_set() -> AnimationTable<CharacterAnimation> {
+    let mut animation_table = AnimationTable::new();
 
-    let idle_animation_timing = vec![0.0, 1.0];
-    let walk_animation_timing = vec![0.0, 0.1, 0.2, 0.3, 0.4];
-    let run_animation_timing = vec![0.0, 0.0625, 0.125, 0.1875, 0.25];
+    let idle_animation_timing = vec![1.0];
+    let walk_animation_timing = vec![0.1, 0.2, 0.3, 0.4];
+    let run_animation_timing = vec![0.0625, 0.125, 0.1875, 0.25];
 
-    animation_set.insert(PlayerAnimation::IdleDown.into(), make_sprite_animation(
-        world,
-        idle_animation_timing.clone(),
-        vec![3],
-        progress_counter,
-    ));
-    animation_set.insert(PlayerAnimation::IdleLeft.into(), make_sprite_animation(
-        world,
-        idle_animation_timing.clone(),
-        vec![6],
-        progress_counter,
-    ));
-    animation_set.insert(PlayerAnimation::IdleRight.into(), make_sprite_animation(
-        world,
-        idle_animation_timing.clone(),
-        vec![9],
-        progress_counter,
-    ));
-    animation_set.insert(PlayerAnimation::IdleUp.into(), make_sprite_animation(
-        world,
-        idle_animation_timing,
-        vec![0],
-        progress_counter,
-    ));
+    animation_table.insert(PlayerAnimation::IdleDown.into(), AnimationData {
+        timings: idle_animation_timing.clone(),
+        frames: vec![3],
+    });
+    animation_table.insert(PlayerAnimation::IdleLeft.into(), AnimationData {
+        timings: idle_animation_timing.clone(),
+        frames: vec![6],
+    });
+    animation_table.insert(PlayerAnimation::IdleRight.into(), AnimationData {
+        timings: idle_animation_timing.clone(),
+        frames: vec![9],
+    });
+    animation_table.insert(PlayerAnimation::IdleUp.into(), AnimationData {
+        timings: idle_animation_timing,
+        frames: vec![0],
+    });
 
-    animation_set.insert(PlayerAnimation::WalkDown.into(), make_sprite_animation(
-        world,
-        walk_animation_timing.clone(),
-        vec![3, 4, 3, 5],
-        progress_counter,
-    ));
-    animation_set.insert(PlayerAnimation::WalkLeft.into(), make_sprite_animation(
-        world,
-        walk_animation_timing.clone(),
-        vec![6, 7, 6, 8],
-        progress_counter,
-    ));
-    animation_set.insert(PlayerAnimation::WalkRight.into(), make_sprite_animation(
-        world,
-        walk_animation_timing.clone(),
-        vec![9, 10, 9, 11],
-        progress_counter,
-    ));
-    animation_set.insert(PlayerAnimation::WalkUp.into(), make_sprite_animation(
-        world,
-        walk_animation_timing,
-        vec![0, 1, 0, 2],
-        progress_counter,
-    ));
+    animation_table.insert(PlayerAnimation::WalkDown.into(), AnimationData {
+        timings: walk_animation_timing.clone(),
+        frames: vec![3, 4, 3, 5],
+    });
+    animation_table.insert(PlayerAnimation::WalkLeft.into(), AnimationData {
+        timings: walk_animation_timing.clone(),
+        frames: vec![6, 7, 6, 8],
+    });
+    animation_table.insert(PlayerAnimation::WalkRight.into(), AnimationData {
+        timings: walk_animation_timing.clone(),
+        frames: vec![9, 10, 9, 11],
+    });
+    animation_table.insert(PlayerAnimation::WalkUp.into(), AnimationData {
+        timings: walk_animation_timing,
+        frames: vec![0, 1, 0, 2],
+    });
 
-    animation_set.insert(PlayerAnimation::RunDown.into(), make_sprite_animation(
-        world,
-        run_animation_timing.clone(),
-        vec![3, 4, 3, 5],
-        progress_counter,
-    ));
-    animation_set.insert(PlayerAnimation::RunLeft.into(), make_sprite_animation(
-        world,
-        run_animation_timing.clone(),
-        vec![6, 7, 6, 8],
-        progress_counter,
-    ));
-    animation_set.insert(PlayerAnimation::RunRight.into(), make_sprite_animation(
-        world,
-        run_animation_timing.clone(),
-        vec![9, 10, 9, 11],
-        progress_counter,
-    ));
-    animation_set.insert(PlayerAnimation::RunUp.into(), make_sprite_animation(
-        world,
-        run_animation_timing,
-        vec![0, 1, 0, 2],
-        progress_counter,
-    ));
+    animation_table.insert(PlayerAnimation::RunDown.into(), AnimationData {
+        timings: run_animation_timing.clone(),
+        frames: vec![3, 4, 3, 5],
+    });
+    animation_table.insert(PlayerAnimation::RunLeft.into(), AnimationData {
+        timings: run_animation_timing.clone(),
+        frames: vec![6, 7, 6, 8],
+    });
+    animation_table.insert(PlayerAnimation::RunRight.into(), AnimationData {
+        timings: run_animation_timing.clone(),
+        frames: vec![9, 10, 9, 11],
+    });
+    animation_table.insert(PlayerAnimation::RunUp.into(), AnimationData {
+        timings: run_animation_timing,
+        frames: vec![0, 1, 0, 2],
+    });
 
-    animation_set
+    animation_table
 }

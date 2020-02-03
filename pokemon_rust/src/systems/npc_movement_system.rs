@@ -1,5 +1,4 @@
 use amethyst::{
-    animation::AnimationControlSet,
     core::{math::Vector3, Time, Transform},
     ecs::{
         Entities,
@@ -10,14 +9,13 @@ use amethyst::{
         WriteExpect,
         WriteStorage,
     },
-    renderer::SpriteRender,
 };
 
 use crate::{
     common::{Direction, get_direction_offset},
     entities::{
+        AnimationTable,
         CharacterAnimation,
-        change_character_animation,
         npc::{Npc, NpcAction, NpcAnimation, NpcMovement},
     },
     map::{CoordinateSystem, MapHandler},
@@ -31,7 +29,7 @@ impl<'a> System<'a> for NpcMovementSystem {
         ReadStorage<'a, Npc>,
         WriteStorage<'a, NpcMovement>,
         WriteStorage<'a, Transform>,
-        WriteStorage<'a, AnimationControlSet<CharacterAnimation, SpriteRender>>,
+        WriteStorage<'a, AnimationTable<CharacterAnimation>>,
         WriteExpect<'a, MapHandler>,
         Entities<'a>,
         Read<'a, Time>,
@@ -41,19 +39,19 @@ impl<'a> System<'a> for NpcMovementSystem {
         npcs,
         mut npc_movements,
         mut transforms,
-        mut control_sets,
+        mut animation_tables,
         mut map,
         entities,
         time,
     ): Self::SystemData) {
         let mut static_npcs = Vec::new();
 
-        for (entity, npc, movement_data, transform, control_set) in (
+        for (entity, npc, movement_data, transform, animation_table) in (
             &entities,
             &npcs,
             &mut npc_movements,
             &mut transforms,
-            &mut control_sets,
+            &mut animation_tables,
         ).join() {
             // TODO: extract velocity to constant or use GameConfig::player_walking_speed
             let velocity = 160.;
@@ -62,7 +60,7 @@ impl<'a> System<'a> for NpcMovementSystem {
 
             if !movement_data.started {
                 let new_animation = get_new_animation(&NpcAction::Moving, &npc.facing_direction);
-                change_character_animation(new_animation.into(), control_set);
+                animation_table.change_animation(new_animation.into());
 
                 map.mark_tile_as_solid(&movement_data.to);
                 movement_data.started = true;
@@ -76,7 +74,7 @@ impl<'a> System<'a> for NpcMovementSystem {
                 ));
 
                 let new_animation = get_new_animation(&NpcAction::Idle, &npc.facing_direction);
-                change_character_animation(new_animation.into(), control_set);
+                animation_table.change_animation(new_animation.into());
 
                 map.remove_solid_mark(&movement_data.from);
                 static_npcs.push(entity);

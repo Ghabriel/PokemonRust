@@ -1,5 +1,4 @@
 use amethyst::{
-    animation::AnimationControlSet,
     core::{math::Vector3, Time, Transform},
     ecs::{
         Entities,
@@ -18,8 +17,8 @@ use amethyst::{
 use crate::{
     common::{Direction, get_direction_offset},
     entities::{
+        AnimationTable,
         CharacterAnimation,
-        change_character_animation,
         player::{Player, PlayerAction, PlayerAnimation, PlayerMovement, PlayerSpriteSheets},
     },
     events::EventQueue,
@@ -34,7 +33,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
         ReadStorage<'a, Player>,
         WriteStorage<'a, PlayerMovement>,
         WriteStorage<'a, Transform>,
-        WriteStorage<'a, AnimationControlSet<CharacterAnimation, SpriteRender>>,
+        WriteStorage<'a, AnimationTable<CharacterAnimation>>,
         WriteStorage<'a, SpriteRender>,
         Entities<'a>,
         ReadExpect<'a, PlayerSpriteSheets>,
@@ -47,7 +46,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
         players,
         mut movements,
         mut transforms,
-        mut control_sets,
+        mut animation_tables,
         mut sprite_renders,
         entities,
         sprite_sheets,
@@ -57,12 +56,12 @@ impl<'a> System<'a> for PlayerMovementSystem {
     ): Self::SystemData) {
         let mut static_players = Vec::new();
 
-        for (entity, player, movement_data, transform, control_set, sprite_render) in (
+        for (entity, player, movement_data, transform, animation_table, sprite_render) in (
             &entities,
             &players,
             &mut movements,
             &mut transforms,
-            &mut control_sets,
+            &mut animation_tables,
             &mut sprite_renders,
         ).join() {
             let delta_seconds = time.delta_seconds();
@@ -80,7 +79,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
                 }
 
                 let new_animation = get_new_animation(&movement_data.action, &player.facing_direction);
-                change_character_animation(new_animation.into(), control_set);
+                animation_table.change_animation(new_animation.into());
 
                 movement_data.started = true;
             }
@@ -102,7 +101,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
                 sprite_render.sprite_sheet = sprite_sheets.walking.clone();
 
                 let new_animation = get_new_animation(&PlayerAction::Idle, &player.facing_direction);
-                change_character_animation(new_animation.into(), control_set);
+                animation_table.change_animation(new_animation.into());
 
                 static_players.push(entity);
                 continue;
