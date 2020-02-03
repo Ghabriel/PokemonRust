@@ -15,7 +15,7 @@ use crate::{
     entities::{
         AnimationTable,
         CharacterAnimation,
-        character::StepKind,
+        character::{Character, StepKind},
         npc::{Npc, NpcAction, NpcAnimation, NpcMovement},
     },
     map::{CoordinateSystem, MapHandler},
@@ -26,7 +26,7 @@ pub struct NpcMovementSystem;
 
 impl<'a> System<'a> for NpcMovementSystem {
     type SystemData = (
-        WriteStorage<'a, Npc>,
+        WriteStorage<'a, Character>,
         WriteStorage<'a, NpcMovement>,
         WriteStorage<'a, Transform>,
         WriteStorage<'a, AnimationTable<CharacterAnimation>>,
@@ -36,7 +36,7 @@ impl<'a> System<'a> for NpcMovementSystem {
     );
 
     fn run(&mut self, (
-        mut npcs,
+        mut characters,
         mut npc_movements,
         mut transforms,
         mut animation_tables,
@@ -46,9 +46,9 @@ impl<'a> System<'a> for NpcMovementSystem {
     ): Self::SystemData) {
         let mut static_npcs = Vec::new();
 
-        for (entity, npc, movement_data, transform, animation_table) in (
+        for (entity, character, movement_data, transform, animation_table) in (
             &entities,
-            &mut npcs,
+            &mut characters,
             &mut npc_movements,
             &mut transforms,
             &mut animation_tables,
@@ -59,7 +59,7 @@ impl<'a> System<'a> for NpcMovementSystem {
             let delta_seconds = time.delta_seconds();
 
             if !movement_data.started {
-                let new_animation = get_new_animation(&NpcAction::Moving, &npc.facing_direction);
+                let new_animation = get_new_animation(&NpcAction::Moving, &character.facing_direction);
                 animation_table.change_animation(new_animation.into());
 
                 if movement_data.step_kind == StepKind::Right {
@@ -77,10 +77,10 @@ impl<'a> System<'a> for NpcMovementSystem {
                     0.,
                 ));
 
-                let new_animation = get_new_animation(&NpcAction::Idle, &npc.facing_direction);
+                let new_animation = get_new_animation(&NpcAction::Idle, &character.facing_direction);
                 animation_table.change_animation(new_animation.into());
 
-                npc.next_step.invert();
+                character.next_step.invert();
 
                 map.remove_solid_mark(&movement_data.from);
                 static_npcs.push(entity);
@@ -89,7 +89,7 @@ impl<'a> System<'a> for NpcMovementSystem {
 
             movement_data.estimated_time -= delta_seconds;
 
-            let (offset_x, offset_y) = get_direction_offset::<f32>(&npc.facing_direction);
+            let (offset_x, offset_y) = get_direction_offset::<f32>(&character.facing_direction);
             transform.prepend_translation_x(offset_x * velocity * time.delta_seconds());
             transform.prepend_translation_y(offset_y * velocity * time.delta_seconds());
         }

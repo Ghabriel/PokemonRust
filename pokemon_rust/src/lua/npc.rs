@@ -11,7 +11,8 @@ use crate::{
         get_character_sprite_index_from_direction,
     },
     entities::{
-        npc::{initialise_npc, Npc, NpcBuilder},
+        character::Character,
+        npc::{initialise_npc, NpcBuilder},
         player::PlayerEntity,
     },
     map::{
@@ -74,7 +75,7 @@ pub(super) fn rotate_npc_towards_player(context: &mut ExecutionContext, npc_id: 
         .unwrap()
         .sprite_number = get_character_sprite_index_from_direction(&direction);
 
-    context.world.write_storage::<Npc>()
+    context.world.write_storage::<Character>()
         .get_mut(*npc_entity)
         .unwrap()
         .facing_direction = direction;

@@ -15,7 +15,7 @@ use crate::{
         AnimationData,
         AnimationTable,
         CharacterAnimation,
-        character::StepKind,
+        character::{Character, StepKind},
     },
     map::{MapCoordinates, MapHandler, PlayerCoordinates, TileData},
 };
@@ -32,9 +32,7 @@ pub struct NpcBuilder {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Npc {
     pub action: NpcAction,
-    pub facing_direction: Direction,
     pub kind: String,
-    pub next_step: StepKind,
 }
 
 impl Component for Npc {
@@ -111,11 +109,14 @@ pub fn initialise_npc(
         (map_id, transform)
     };
 
+    let character = Character {
+        facing_direction: npc_builder.facing_direction,
+        next_step: StepKind::Left,
+    };
+
     let npc = Npc {
         action: NpcAction::Idle,
-        facing_direction: npc_builder.facing_direction,
         kind: npc_builder.kind,
-        next_step: StepKind::Left,
     };
 
     let sprite_render = {
@@ -128,7 +129,7 @@ pub fn initialise_npc(
                 &format!("sprites/characters/{}/spritesheet.ron", npc.kind),
                 progress_counter,
             ),
-            sprite_number: get_character_sprite_index_from_direction(&npc.facing_direction),
+            sprite_number: get_character_sprite_index_from_direction(&character.facing_direction),
         }
     };
 
@@ -139,6 +140,7 @@ pub fn initialise_npc(
 
     let entity = world
         .create_entity()
+        .with(character)
         .with(npc)
         .with(transform)
         .with(sprite_render)
