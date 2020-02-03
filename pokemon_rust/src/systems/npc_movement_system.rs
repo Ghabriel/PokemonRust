@@ -15,8 +15,8 @@ use crate::{
     entities::{
         AnimationTable,
         CharacterAnimation,
-        character::{Character, CharacterMovement, StepKind},
-        npc::{Npc, NpcAction, NpcAnimation},
+        character::{Character, CharacterAction, CharacterMovement, StepKind},
+        npc::{NpcAction, NpcAnimation},
     },
     map::{CoordinateSystem, MapHandler},
 };
@@ -53,13 +53,10 @@ impl<'a> System<'a> for NpcMovementSystem {
             &mut transforms,
             &mut animation_tables,
         ).join() {
-            // TODO: extract velocity to constant or use GameConfig::player_walking_speed
-            let velocity = 160.;
-
             let delta_seconds = time.delta_seconds();
 
             if !movement_data.started {
-                let new_animation = get_new_animation(&NpcAction::Moving, &character.facing_direction);
+                let new_animation = get_new_animation(&movement_data.action, &character.facing_direction);
                 animation_table.change_animation(new_animation.into());
 
                 if movement_data.step_kind == StepKind::Right {
@@ -77,7 +74,7 @@ impl<'a> System<'a> for NpcMovementSystem {
                     0.,
                 ));
 
-                let new_animation = get_new_animation(&NpcAction::Idle, &character.facing_direction);
+                let new_animation = get_new_animation(&CharacterAction::Npc(NpcAction::Idle), &character.facing_direction);
                 animation_table.change_animation(new_animation.into());
 
                 character.next_step.invert();
@@ -90,8 +87,9 @@ impl<'a> System<'a> for NpcMovementSystem {
             movement_data.estimated_time -= delta_seconds;
 
             let (offset_x, offset_y) = get_direction_offset::<f32>(&character.facing_direction);
-            transform.prepend_translation_x(offset_x * velocity * time.delta_seconds());
-            transform.prepend_translation_y(offset_y * velocity * time.delta_seconds());
+            let frame_velocity = movement_data.velocity * delta_seconds;
+            transform.prepend_translation_x(offset_x * frame_velocity);
+            transform.prepend_translation_y(offset_y * frame_velocity);
         }
 
         for entity in static_npcs {
@@ -100,15 +98,16 @@ impl<'a> System<'a> for NpcMovementSystem {
     }
 }
 
-pub fn get_new_animation(action: &NpcAction, direction: &Direction) -> NpcAnimation {
+pub fn get_new_animation(action: &CharacterAction, direction: &Direction) -> NpcAnimation {
     match (action, direction) {
-        (NpcAction::Idle, Direction::Up) => NpcAnimation::IdleUp,
-        (NpcAction::Idle, Direction::Down) => NpcAnimation::IdleDown,
-        (NpcAction::Idle, Direction::Left) => NpcAnimation::IdleLeft,
-        (NpcAction::Idle, Direction::Right) => NpcAnimation::IdleRight,
-        (NpcAction::Moving, Direction::Up) => NpcAnimation::WalkUp,
-        (NpcAction::Moving, Direction::Down) => NpcAnimation::WalkDown,
-        (NpcAction::Moving, Direction::Left) => NpcAnimation::WalkLeft,
-        (NpcAction::Moving, Direction::Right) => NpcAnimation::WalkRight,
+        (CharacterAction::Npc(NpcAction::Idle), Direction::Up) => NpcAnimation::IdleUp,
+        (CharacterAction::Npc(NpcAction::Idle), Direction::Down) => NpcAnimation::IdleDown,
+        (CharacterAction::Npc(NpcAction::Idle), Direction::Left) => NpcAnimation::IdleLeft,
+        (CharacterAction::Npc(NpcAction::Idle), Direction::Right) => NpcAnimation::IdleRight,
+        (CharacterAction::Npc(NpcAction::Moving), Direction::Up) => NpcAnimation::WalkUp,
+        (CharacterAction::Npc(NpcAction::Moving), Direction::Down) => NpcAnimation::WalkDown,
+        (CharacterAction::Npc(NpcAction::Moving), Direction::Left) => NpcAnimation::WalkLeft,
+        (CharacterAction::Npc(NpcAction::Moving), Direction::Right) => NpcAnimation::WalkRight,
+        _ => unreachable!(),
     }
 }
