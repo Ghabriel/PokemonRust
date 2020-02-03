@@ -19,10 +19,10 @@ use crate::{
         AnimationTable,
         CharacterAnimation,
         character::{
+            Character,
             StepKind,
         },
         player::{
-            Player,
             PlayerAction,
             PlayerAnimation,
             PlayerMovement,
@@ -38,7 +38,7 @@ pub struct PlayerMovementSystem;
 
 impl<'a> System<'a> for PlayerMovementSystem {
     type SystemData = (
-        WriteStorage<'a, Player>,
+        WriteStorage<'a, Character>,
         WriteStorage<'a, PlayerMovement>,
         WriteStorage<'a, Transform>,
         WriteStorage<'a, AnimationTable<CharacterAnimation>>,
@@ -51,7 +51,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
     );
 
     fn run(&mut self, (
-        mut players,
+        mut characters,
         mut movements,
         mut transforms,
         mut animation_tables,
@@ -64,9 +64,9 @@ impl<'a> System<'a> for PlayerMovementSystem {
     ): Self::SystemData) {
         let mut static_players = Vec::new();
 
-        for (entity, player, movement_data, transform, animation_table, sprite_render) in (
+        for (entity, character, movement_data, transform, animation_table, sprite_render) in (
             &entities,
-            &mut players,
+            &mut characters,
             &mut movements,
             &mut transforms,
             &mut animation_tables,
@@ -86,7 +86,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
                     PlayerAction::Run => sprite_render.sprite_sheet = sprite_sheets.running.clone(),
                 }
 
-                let new_animation = get_new_animation(&movement_data.action, &player.facing_direction);
+                let new_animation = get_new_animation(&movement_data.action, &character.facing_direction);
                 animation_table.change_animation(new_animation.into());
 
                 if movement_data.step_kind == StepKind::Right {
@@ -112,10 +112,10 @@ impl<'a> System<'a> for PlayerMovementSystem {
 
                 sprite_render.sprite_sheet = sprite_sheets.walking.clone();
 
-                let new_animation = get_new_animation(&PlayerAction::Idle, &player.facing_direction);
+                let new_animation = get_new_animation(&PlayerAction::Idle, &character.facing_direction);
                 animation_table.change_animation(new_animation.into());
 
-                player.next_step.invert();
+                character.next_step.invert();
 
                 static_players.push(entity);
                 continue;
@@ -123,7 +123,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
 
             movement_data.estimated_time -= delta_seconds;
 
-            let (offset_x, offset_y) = get_direction_offset::<f32>(&player.facing_direction);
+            let (offset_x, offset_y) = get_direction_offset::<f32>(&character.facing_direction);
             let frame_velocity = movement_data.velocity * delta_seconds;
             transform.prepend_translation_x(offset_x * frame_velocity);
             transform.prepend_translation_y(offset_y * frame_velocity);

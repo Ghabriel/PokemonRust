@@ -18,7 +18,7 @@ use crate::{
         AnimationData,
         AnimationTable,
         CharacterAnimation,
-        character::StepKind,
+        character::{Character, StepKind},
     },
     map::{map_to_world_coordinates, MapCoordinates, PlayerCoordinates, TileData, WorldCoordinates},
 };
@@ -31,8 +31,6 @@ pub struct PlayerEntity(pub Entity);
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Player {
     pub action: PlayerAction,
-    pub facing_direction: Direction,
-    pub next_step: StepKind,
 }
 
 impl Component for Player {
@@ -126,10 +124,13 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
         ),
     };
 
-    let player = Player {
-        action: PlayerAction::Walk,
+    let character = Character {
         facing_direction: Direction::Down,
         next_step: StepKind::Left,
+    };
+
+    let player = Player {
+        action: PlayerAction::Walk,
     };
 
     let transform = {
@@ -143,7 +144,7 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
 
     let sprite_render = SpriteRender {
         sprite_sheet: sprite_sheets.walking.clone(),
-        sprite_number: get_character_sprite_index_from_direction(&player.facing_direction),
+        sprite_number: get_character_sprite_index_from_direction(&character.facing_direction),
     };
 
     let animation_set = get_player_animation_set();
@@ -155,6 +156,7 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
 
     world
         .create_entity()
+        .with(character)
         .with(player)
         .with(transform)
         .with(sprite_render)

@@ -9,7 +9,10 @@ use amethyst::{
 };
 
 use crate::{
-    entities::player::{Player, PlayerEntity},
+    entities::{
+        character::Character,
+        player::PlayerEntity,
+    },
     events::EventQueue,
     map::{GameActionKind, MapHandler, PlayerCoordinates, ValidatedGameAction},
 };
@@ -26,19 +29,19 @@ impl GameEvent for MapInteractionEvent {
     fn tick(&mut self, world: &mut World, _disabled_inputs: bool) {
         let map = world.read_resource::<MapHandler>();
         let player_entity = world.read_resource::<PlayerEntity>();
-        let players = world.read_storage::<Player>();
+        let characters = world.read_storage::<Character>();
         let transforms = world.read_storage::<Transform>();
 
-        let player = players
+        let character = characters
             .get(player_entity.0)
-            .expect("Failed to retrieve Player");
+            .expect("Failed to retrieve Character");
 
         let transform = transforms
             .get(player_entity.0)
             .expect("Failed to retrieve Transform");
 
         let interacted_position = map.get_forward_tile(
-            &player.facing_direction,
+            &character.facing_direction,
             &PlayerCoordinates::from_transform(&transform),
         );
 

@@ -6,7 +6,10 @@ use amethyst::{
 use crate::{
     config::GameConfig,
     constants::TILE_SIZE,
-    entities::player::{Player, PlayerAction, PlayerEntity, PlayerMovement},
+    entities::{
+        character::Character,
+        player::{Player, PlayerAction, PlayerEntity, PlayerMovement},
+    },
     map::{MapHandler, PlayerCoordinates, TileData},
 };
 
@@ -20,6 +23,8 @@ impl GameEvent for PlayerSingleMoveEvent {
         let players = world.read_storage::<Player>();
         let player_entity = world.read_resource::<PlayerEntity>().0;
 
+        let characters = world.read_storage::<Character>();
+        let character = characters.get(player_entity).unwrap();
         let player = players.get(player_entity).unwrap();
 
         let player_position = world.read_storage::<Transform>()
@@ -41,13 +46,13 @@ impl GameEvent for PlayerSingleMoveEvent {
             estimated_time: f32::from(TILE_SIZE) / velocity,
             velocity,
             action: player.action.clone(),
-            step_kind: player.next_step.clone(),
+            step_kind: character.next_step.clone(),
             started: false,
             from: TileData {
                 position: player_position.clone(),
                 map_id: map_handler.get_current_map_id(),
             },
-            to: map_handler.get_forward_tile(&player.facing_direction, &player_position),
+            to: map_handler.get_forward_tile(&character.facing_direction, &player_position),
         };
 
         world.write_storage::<PlayerMovement>()

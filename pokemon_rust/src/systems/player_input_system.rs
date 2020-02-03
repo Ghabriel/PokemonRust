@@ -16,7 +16,10 @@ use amethyst::{
 
 use crate::{
     common::Direction,
-    entities::player::{Player, PlayerAction, PlayerEntity, PlayerMovement},
+    entities::{
+        character::Character,
+        player::{Player, PlayerAction, PlayerEntity, PlayerMovement},
+    },
     events::{EventQueue, MapInteractionEvent, PlayerSingleMoveEvent},
 };
 
@@ -35,6 +38,7 @@ impl PlayerInputSystem {
 
 impl<'a> System<'a> for PlayerInputSystem {
     type SystemData = (
+        WriteStorage<'a, Character>,
         WriteStorage<'a, Player>,
         ReadStorage<'a, PlayerMovement>,
         Write<'a, EventQueue>,
@@ -44,6 +48,7 @@ impl<'a> System<'a> for PlayerInputSystem {
     );
 
     fn run(&mut self, (
+        mut characters,
         mut players,
         movements,
         mut event_queue,
@@ -66,6 +71,10 @@ impl<'a> System<'a> for PlayerInputSystem {
             }
         }
 
+        let character = &mut characters
+            .get_mut(player_entity.0)
+            .expect("Failed to retrieve Character");
+
         let player = &mut players
             .get_mut(player_entity.0)
             .expect("Failed to retrieve Player");
@@ -81,10 +90,10 @@ impl<'a> System<'a> for PlayerInputSystem {
             .unwrap_or(0.);
 
         if horizontal_value < -0.2 {
-            player.facing_direction = Direction::Left;
+            character.facing_direction = Direction::Left;
             event_queue.push(PlayerSingleMoveEvent);
         } else if horizontal_value > 0.2 {
-            player.facing_direction = Direction::Right;
+            character.facing_direction = Direction::Right;
             event_queue.push(PlayerSingleMoveEvent);
         }
 
@@ -93,10 +102,10 @@ impl<'a> System<'a> for PlayerInputSystem {
             .unwrap_or(0.);
 
         if vertical_value < -0.2 {
-            player.facing_direction = Direction::Down;
+            character.facing_direction = Direction::Down;
             event_queue.push(PlayerSingleMoveEvent);
         } else if vertical_value > 0.2 {
-            player.facing_direction = Direction::Up;
+            character.facing_direction = Direction::Up;
             event_queue.push(PlayerSingleMoveEvent);
         }
     }
