@@ -39,25 +39,6 @@ impl Component for Npc {
     type Storage = DenseVecStorage<Self>;
 }
 
-/// Represents an NPC movement in progress.
-pub struct NpcMovement {
-    /// Stores how much time it will take for the NPC to reach the target tile.
-    pub estimated_time: f32,
-    /// The kind of step the player is doing while moving. This determines at
-    /// which point the animation starts.
-    pub step_kind: StepKind,
-    /// Determines whether processing for this movement has already started.
-    pub started: bool,
-    /// The source tile.
-    pub from: TileData,
-    /// The target tile. Must be adjacent to the source tile.
-    pub to: TileData,
-}
-
-impl Component for NpcMovement {
-    type Storage = DenseVecStorage<Self>;
-}
-
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum NpcAction {
     Idle,

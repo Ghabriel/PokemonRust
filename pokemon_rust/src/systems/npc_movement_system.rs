@@ -15,8 +15,8 @@ use crate::{
     entities::{
         AnimationTable,
         CharacterAnimation,
-        character::{Character, StepKind},
-        npc::{Npc, NpcAction, NpcAnimation, NpcMovement},
+        character::{Character, CharacterMovement, StepKind},
+        npc::{Npc, NpcAction, NpcAnimation},
     },
     map::{CoordinateSystem, MapHandler},
 };
@@ -27,7 +27,7 @@ pub struct NpcMovementSystem;
 impl<'a> System<'a> for NpcMovementSystem {
     type SystemData = (
         WriteStorage<'a, Character>,
-        WriteStorage<'a, NpcMovement>,
+        WriteStorage<'a, CharacterMovement>,
         WriteStorage<'a, Transform>,
         WriteStorage<'a, AnimationTable<CharacterAnimation>>,
         WriteExpect<'a, MapHandler>,

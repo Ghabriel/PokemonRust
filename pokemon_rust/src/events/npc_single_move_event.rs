@@ -6,8 +6,8 @@ use amethyst::{
 use crate::{
     constants::TILE_SIZE,
     entities::{
-        character::Character,
-        npc::NpcMovement,
+        character::{Character, CharacterAction, CharacterMovement},
+        npc::NpcAction,
     },
     map::{MapHandler, PlayerCoordinates, TileData},
 };
@@ -40,9 +40,13 @@ impl GameEvent for NpcSingleMoveEvent {
             .map(PlayerCoordinates::from_transform)
             .unwrap();
 
-        let movement = NpcMovement {
-            // TODO: extract velocity to constant or use GameConfig::player_walking_speed
-            estimated_time: f32::from(TILE_SIZE) / 160.,
+        // TODO: extract velocity to constant or use GameConfig::player_walking_speed
+        let velocity = 160.;
+
+        let movement = CharacterMovement {
+            estimated_time: f32::from(TILE_SIZE) / velocity,
+            velocity,
+            action: CharacterAction::Npc(NpcAction::Moving),
             step_kind: character.next_step.clone(),
             started: false,
             from: TileData {
@@ -54,9 +58,9 @@ impl GameEvent for NpcSingleMoveEvent {
             to: map_handler.get_forward_tile(&character.facing_direction, &npc_position),
         };
 
-        world.write_storage::<NpcMovement>()
+        world.write_storage::<CharacterMovement>()
             .insert(*npc_entity, movement)
-            .expect("Failed to attach NpcMovement");
+            .expect("Failed to attach CharacterMovement");
 
         ShouldDisableInput(false)
     }
@@ -67,7 +71,7 @@ impl GameEvent for NpcSingleMoveEvent {
         let map_handler = world.read_resource::<MapHandler>();
         let npc_entity = map_handler.get_npc_by_id(self.npc_id);
 
-        !world.read_storage::<NpcMovement>()
+        !world.read_storage::<CharacterMovement>()
             .contains(*npc_entity)
     }
 }
