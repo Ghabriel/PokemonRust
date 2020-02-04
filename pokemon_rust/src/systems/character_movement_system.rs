@@ -29,15 +29,15 @@ use crate::{
             PlayerEntity,
             PlayerSpriteSheets,
         },
+        npc::NpcAnimation,
     },
     events::EventQueue,
     map::{change_tile, CoordinateSystem, MapHandler},
 };
 
-#[derive(Default)]
-pub struct PlayerMovementSystem;
+pub struct CharacterMovementSystem;
 
-impl<'a> System<'a> for PlayerMovementSystem {
+impl<'a> System<'a> for CharacterMovementSystem {
     type SystemData = (
         WriteStorage<'a, Character>,
         WriteStorage<'a, CharacterMovement>,
@@ -65,7 +65,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
         mut event_queue,
         time,
     ): Self::SystemData) {
-        let mut static_players = Vec::new();
+        let mut static_characters = Vec::new();
 
         for (entity, character, movement_data, transform, animation_table, sprite_render) in (
             &entities,
@@ -78,22 +78,33 @@ impl<'a> System<'a> for PlayerMovementSystem {
             let delta_seconds = time.delta_seconds();
 
             if !movement_data.started {
-                if map.is_tile_blocked(&movement_data.to) {
-                    static_players.push(entity);
-                    continue;
-                }
+                if entity == player_entity.0 {
+                    if map.is_tile_blocked(&movement_data.to) {
+                        static_characters.push(entity);
+                        continue;
+                    }
 
-                match movement_data.movement_type {
-                    // TODO: use the sprite sheet inside MovementData
-                    MovementType::Walk => sprite_render.sprite_sheet = sprite_sheets.walking.clone(),
-                    MovementType::Run => sprite_render.sprite_sheet = sprite_sheets.running.clone(),
-                }
+                    match movement_data.movement_type {
+                        // TODO: use the sprite sheet inside MovementData
+                        MovementType::Walk => sprite_render.sprite_sheet = sprite_sheets.walking.clone(),
+                        MovementType::Run => sprite_render.sprite_sheet = sprite_sheets.running.clone(),
+                    }
 
-                let new_animation = get_new_animation(&movement_data.movement_type, &character.facing_direction);
-                animation_table.change_animation(new_animation.into());
+                    let new_animation = get_new_animation(&movement_data.movement_type, &character.facing_direction);
+                    animation_table.change_animation(new_animation.into());
 
-                if movement_data.step_kind == StepKind::Right {
-                    animation_table.skip_to_frame_index(2);
+                    if movement_data.step_kind == StepKind::Right {
+                        animation_table.skip_to_frame_index(2);
+                    }
+                } else {
+                    let new_animation = get_moving_animation(&character.facing_direction);
+                    animation_table.change_animation(new_animation.into());
+
+                    if movement_data.step_kind == StepKind::Right {
+                        animation_table.skip_to_frame_index(2);
+                    }
+
+                    map.mark_tile_as_solid(&movement_data.to);
                 }
 
                 movement_data.started = true;
@@ -114,14 +125,21 @@ impl<'a> System<'a> for PlayerMovementSystem {
                     &mut event_queue,
                 );
 
-                sprite_render.sprite_sheet = sprite_sheets.walking.clone();
+                if entity == player_entity.0 {
+                    sprite_render.sprite_sheet = sprite_sheets.walking.clone();
 
-                let new_animation = get_idle_animation(&character.facing_direction);
-                animation_table.change_animation(new_animation.into());
+                    let new_animation = get_player_idle_animation(&character.facing_direction);
+                    animation_table.change_animation(new_animation.into());
+                } else {
+                    let new_animation = get_npc_idle_animation(&character.facing_direction);
+                    animation_table.change_animation(new_animation.into());
+
+                    map.remove_solid_mark(&movement_data.from);
+                }
 
                 character.next_step.invert();
 
-                static_players.push(entity);
+                static_characters.push(entity);
                 continue;
             }
 
@@ -133,7 +151,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
             transform.prepend_translation_y(offset_y * frame_velocity);
         }
 
-        for entity in static_players {
+        for entity in static_characters {
             movements.remove(entity);
         }
     }
@@ -152,11 +170,29 @@ pub fn get_new_animation(movement_type: &MovementType, direction: &Direction) ->
     }
 }
 
-pub fn get_idle_animation(direction: &Direction) -> PlayerAnimation {
+pub fn get_player_idle_animation(direction: &Direction) -> PlayerAnimation {
     match direction {
         Direction::Up => PlayerAnimation::IdleUp,
         Direction::Down => PlayerAnimation::IdleDown,
         Direction::Left => PlayerAnimation::IdleLeft,
         Direction::Right => PlayerAnimation::IdleRight,
+    }
+}
+
+pub fn get_moving_animation(direction: &Direction) -> NpcAnimation {
+    match direction {
+        Direction::Up => NpcAnimation::WalkUp,
+        Direction::Down => NpcAnimation::WalkDown,
+        Direction::Left => NpcAnimation::WalkLeft,
+        Direction::Right => NpcAnimation::WalkRight,
+    }
+}
+
+pub fn get_npc_idle_animation(direction: &Direction) -> NpcAnimation {
+    match direction {
+        Direction::Up => NpcAnimation::IdleUp,
+        Direction::Down => NpcAnimation::IdleDown,
+        Direction::Left => NpcAnimation::IdleLeft,
+        Direction::Right => NpcAnimation::IdleRight,
     }
 }
