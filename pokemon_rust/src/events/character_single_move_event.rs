@@ -7,9 +7,8 @@ use crate::{
     config::GameConfig,
     constants::TILE_SIZE,
     entities::{
-        character::{Character, CharacterAction, CharacterMovement},
-        player::{Player, PlayerAction},
-        npc::NpcAction,
+        character::{Character, CharacterMovement, MovementType},
+        player::PlayerEntity,
     },
     map::{MapHandler, PlayerCoordinates, TileData},
 };
@@ -44,27 +43,22 @@ impl GameEvent for CharacterSingleMoveEvent {
 
         let config = world.read_resource::<GameConfig>();
 
-        let players = world.read_storage::<Player>();
-        let player = players.get(*entity);
+        let player_entity = world.read_resource::<PlayerEntity>().0;
 
-        let (velocity, action) = if let Some(player) = player {
-            let velocity = match player.action {
-                PlayerAction::Walk => config.player_walking_speed,
-                PlayerAction::Run => config.player_running_speed,
-            };
-
-            let action = CharacterAction::Player(player.action.clone());
-
-            (velocity, action)
+        let velocity = if *entity == player_entity {
+            match character.action {
+                MovementType::Walk => config.player_walking_speed,
+                MovementType::Run => config.player_running_speed,
+            }
         } else {
             // TODO: extract velocity to constant or use GameConfig::player_walking_speed
-            (160., CharacterAction::Npc(NpcAction::Moving))
+            160.
         };
 
         let movement = CharacterMovement {
             estimated_time: f32::from(TILE_SIZE) / velocity,
             velocity,
-            action,
+            movement_type: character.action.clone(),
             step_kind: character.next_step.clone(),
             started: false,
             from: TileData {

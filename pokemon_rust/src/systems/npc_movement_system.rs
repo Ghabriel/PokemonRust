@@ -15,8 +15,9 @@ use crate::{
     entities::{
         AnimationTable,
         CharacterAnimation,
-        character::{Character, CharacterAction, CharacterMovement, StepKind},
-        npc::{Npc, NpcAction, NpcAnimation},
+        character::{Character, CharacterMovement, MovementType, StepKind},
+        npc::NpcAnimation,
+        player::PlayerEntity,
     },
     map::{CoordinateSystem, MapHandler},
 };
@@ -26,40 +27,43 @@ pub struct NpcMovementSystem;
 
 impl<'a> System<'a> for NpcMovementSystem {
     type SystemData = (
-        WriteStorage<'a, Npc>,
         WriteStorage<'a, Character>,
         WriteStorage<'a, CharacterMovement>,
         WriteStorage<'a, Transform>,
         WriteStorage<'a, AnimationTable<CharacterAnimation>>,
+        WriteExpect<'a, PlayerEntity>,
         WriteExpect<'a, MapHandler>,
         Entities<'a>,
         Read<'a, Time>,
     );
 
     fn run(&mut self, (
-        mut npcs,
         mut characters,
         mut npc_movements,
         mut transforms,
         mut animation_tables,
+        player_entity,
         mut map,
         entities,
         time,
     ): Self::SystemData) {
         let mut static_npcs = Vec::new();
 
-        for (entity, _, character, movement_data, transform, animation_table) in (
+        for (entity, character, movement_data, transform, animation_table) in (
             &entities,
-            &mut npcs,
             &mut characters,
             &mut npc_movements,
             &mut transforms,
             &mut animation_tables,
         ).join() {
+            if entity == player_entity.0 {
+                continue;
+            }
+
             let delta_seconds = time.delta_seconds();
 
             if !movement_data.started {
-                let new_animation = get_new_animation(&movement_data.action, &character.facing_direction);
+                let new_animation = get_moving_animation(&character.facing_direction);
                 animation_table.change_animation(new_animation.into());
 
                 if movement_data.step_kind == StepKind::Right {
@@ -77,7 +81,7 @@ impl<'a> System<'a> for NpcMovementSystem {
                     0.,
                 ));
 
-                let new_animation = get_new_animation(&CharacterAction::Idle, &character.facing_direction);
+                let new_animation = get_idle_animation(&character.facing_direction);
                 animation_table.change_animation(new_animation.into());
 
                 character.next_step.invert();
@@ -101,16 +105,20 @@ impl<'a> System<'a> for NpcMovementSystem {
     }
 }
 
-pub fn get_new_animation(action: &CharacterAction, direction: &Direction) -> NpcAnimation {
-    match (action, direction) {
-        (CharacterAction::Idle, Direction::Up) => NpcAnimation::IdleUp,
-        (CharacterAction::Idle, Direction::Down) => NpcAnimation::IdleDown,
-        (CharacterAction::Idle, Direction::Left) => NpcAnimation::IdleLeft,
-        (CharacterAction::Idle, Direction::Right) => NpcAnimation::IdleRight,
-        (CharacterAction::Npc(NpcAction::Moving), Direction::Up) => NpcAnimation::WalkUp,
-        (CharacterAction::Npc(NpcAction::Moving), Direction::Down) => NpcAnimation::WalkDown,
-        (CharacterAction::Npc(NpcAction::Moving), Direction::Left) => NpcAnimation::WalkLeft,
-        (CharacterAction::Npc(NpcAction::Moving), Direction::Right) => NpcAnimation::WalkRight,
-        _ => unreachable!(),
+pub fn get_moving_animation(direction: &Direction) -> NpcAnimation {
+    match direction {
+        Direction::Up => NpcAnimation::WalkUp,
+        Direction::Down => NpcAnimation::WalkDown,
+        Direction::Left => NpcAnimation::WalkLeft,
+        Direction::Right => NpcAnimation::WalkRight,
+    }
+}
+
+pub fn get_idle_animation(direction: &Direction) -> NpcAnimation {
+    match direction {
+        Direction::Up => NpcAnimation::IdleUp,
+        Direction::Down => NpcAnimation::IdleDown,
+        Direction::Left => NpcAnimation::IdleLeft,
+        Direction::Right => NpcAnimation::IdleRight,
     }
 }

@@ -17,8 +17,8 @@ use amethyst::{
 use crate::{
     common::Direction,
     entities::{
-        character::{Character, CharacterMovement},
-        player::{Player, PlayerAction, PlayerEntity},
+        character::{Character, CharacterMovement, MovementType},
+        player::PlayerEntity,
     },
     events::{CharacterSingleMoveEvent, EventQueue, MapInteractionEvent},
     map::MapHandler,
@@ -40,7 +40,6 @@ impl PlayerInputSystem {
 impl<'a> System<'a> for PlayerInputSystem {
     type SystemData = (
         WriteStorage<'a, Character>,
-        WriteStorage<'a, Player>,
         ReadStorage<'a, CharacterMovement>,
         Write<'a, EventQueue>,
         Read<'a, EventChannel<InputEvent<StringBindings>>>,
@@ -51,7 +50,6 @@ impl<'a> System<'a> for PlayerInputSystem {
 
     fn run(&mut self, (
         mut characters,
-        mut players,
         movements,
         mut event_queue,
         input_event_channel,
@@ -78,14 +76,11 @@ impl<'a> System<'a> for PlayerInputSystem {
             .get_mut(player_entity.0)
             .expect("Failed to retrieve Character");
 
-        let player = &mut players
-            .get_mut(player_entity.0)
-            .expect("Failed to retrieve Player");
-
+        // TODO: check for the capabilities of running/walking
         if input_handler.action_is_down("cancel").unwrap_or(false) {
-            player.action = PlayerAction::Run;
+            character.action = MovementType::Run;
         } else {
-            player.action = PlayerAction::Walk;
+            character.action = MovementType::Walk;
         }
 
         let npc_id = map.get_player_id(&player_entity);

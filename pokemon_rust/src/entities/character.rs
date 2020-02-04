@@ -18,14 +18,15 @@ use crate::{
         AnimationData,
         AnimationTable,
         CharacterAnimation,
-        npc::NpcAction,
-        player::PlayerAction,
     },
     map::{map_to_world_coordinates, MapCoordinates, PlayerCoordinates, TileData, WorldCoordinates},
 };
 
+use std::collections::HashMap;
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Character {
+    pub action: MovementType,
     pub facing_direction: Direction,
     pub next_step: StepKind,
 }
@@ -40,9 +41,8 @@ pub struct CharacterMovement {
     pub estimated_time: f32,
     /// Stores the velocity of this movement.
     pub velocity: f32,
-    /// The action that the character is doing while moving. This determines which
-    /// animation to use.
-    pub action: CharacterAction,
+    /// The type of this movement. This determines which animation to use.
+    pub movement_type: MovementType,
     /// The kind of step the character is doing while moving. This determines at
     /// which point the animation starts.
     pub step_kind: StepKind,
@@ -73,8 +73,31 @@ impl StepKind {
     }
 }
 
-pub enum CharacterAction {
-    Idle,
-    Player(PlayerAction),
-    Npc(NpcAction),
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+pub enum MovementType {
+    Walk,
+    Run,
+}
+
+pub struct AllowedMovements {
+    movements: HashMap<MovementType, MovementData>,
+}
+
+impl AllowedMovements {
+    pub fn can_perform(&self, movement_type: &MovementType) -> bool {
+        self.movements.contains_key(movement_type)
+    }
+
+    pub fn get_movement_data(&self, movement_type: &MovementType) -> Option<&MovementData> {
+        self.movements.get(movement_type)
+    }
+}
+
+impl Component for AllowedMovements {
+    type Storage = DenseVecStorage<Self>;
+}
+
+pub struct MovementData {
+    pub sprite_sheet: Handle<SpriteSheet>,
+    pub velocity: f32,
 }

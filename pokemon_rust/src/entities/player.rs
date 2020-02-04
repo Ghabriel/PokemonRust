@@ -18,7 +18,7 @@ use crate::{
         AnimationData,
         AnimationTable,
         CharacterAnimation,
-        character::{Character, StepKind},
+        character::{Character, MovementType, StepKind},
     },
     map::{
         map_to_world_coordinates,
@@ -34,21 +34,6 @@ use serde::{Deserialize, Serialize};
 
 /// Resource that stores the entity corresponding to the human player.
 pub struct PlayerEntity(pub Entity);
-
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Player {
-    pub action: PlayerAction,
-}
-
-impl Component for Player {
-    type Storage = DenseVecStorage<Self>;
-}
-
-#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
-pub enum PlayerAction {
-    Walk,
-    Run,
-}
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum PlayerAnimation {
@@ -107,12 +92,9 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
     };
 
     let character = Character {
+        action: MovementType::Walk,
         facing_direction: Direction::Down,
         next_step: StepKind::Left,
-    };
-
-    let player = Player {
-        action: PlayerAction::Walk,
     };
 
     let transform = {
@@ -135,12 +117,10 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
 
     world.register::<AnimationTable<CharacterAnimation>>();
     world.register::<Character>();
-    world.register::<Player>();
 
     let entity = world
         .create_entity()
         .with(character)
-        .with(player)
         .with(transform)
         .with(sprite_render)
         .with(animation_set)

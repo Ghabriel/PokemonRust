@@ -15,7 +15,7 @@ use crate::{
         AnimationData,
         AnimationTable,
         CharacterAnimation,
-        character::{Character, StepKind},
+        character::{Character, MovementType, StepKind},
     },
     map::{MapCoordinates, MapHandler, PlayerCoordinates, TileData},
 };
@@ -31,17 +31,11 @@ pub struct NpcBuilder {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Npc {
-    pub action: NpcAction,
     pub kind: String,
 }
 
 impl Component for Npc {
     type Storage = DenseVecStorage<Self>;
-}
-
-#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
-pub enum NpcAction {
-    Moving,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
@@ -90,12 +84,13 @@ pub fn initialise_npc(
     };
 
     let character = Character {
+        // TODO: store some kind of default capability and use it here
+        action: MovementType::Walk,
         facing_direction: npc_builder.facing_direction,
         next_step: StepKind::Left,
     };
 
     let npc = Npc {
-        action: NpcAction::Moving,
         kind: npc_builder.kind,
     };
 
