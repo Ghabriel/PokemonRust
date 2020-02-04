@@ -32,41 +32,6 @@ use serde::{Deserialize, Serialize};
 /// Resource that stores the entity corresponding to the human player.
 pub struct PlayerEntity(pub Entity);
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
-pub enum PlayerAnimation {
-    IdleUp,
-    IdleDown,
-    IdleLeft,
-    IdleRight,
-    WalkUp,
-    WalkDown,
-    WalkLeft,
-    WalkRight,
-    RunUp,
-    RunDown,
-    RunLeft,
-    RunRight,
-}
-
-impl From<PlayerAnimation> for CharacterAnimation {
-    fn from(animation: PlayerAnimation) -> CharacterAnimation {
-        match animation {
-            PlayerAnimation::IdleUp => CharacterAnimation::IdleUp,
-            PlayerAnimation::IdleDown => CharacterAnimation::IdleDown,
-            PlayerAnimation::IdleLeft => CharacterAnimation::IdleLeft,
-            PlayerAnimation::IdleRight => CharacterAnimation::IdleRight,
-            PlayerAnimation::WalkUp => CharacterAnimation::WalkUp,
-            PlayerAnimation::WalkDown => CharacterAnimation::WalkDown,
-            PlayerAnimation::WalkLeft => CharacterAnimation::WalkLeft,
-            PlayerAnimation::WalkRight => CharacterAnimation::WalkRight,
-            PlayerAnimation::RunUp => CharacterAnimation::RunUp,
-            PlayerAnimation::RunDown => CharacterAnimation::RunDown,
-            PlayerAnimation::RunLeft => CharacterAnimation::RunLeft,
-            PlayerAnimation::RunRight => CharacterAnimation::RunRight,
-        }
-    }
-}
-
 pub struct PlayerSpriteSheets {
     pub walking: Handle<SpriteSheet>,
     pub running: Handle<SpriteSheet>,
@@ -155,53 +120,53 @@ pub fn get_player_animation_set() -> AnimationTable<CharacterAnimation> {
     let walk_animation_timing = vec![0.1, 0.2, 0.3, 0.4];
     let run_animation_timing = vec![0.0625, 0.125, 0.1875, 0.25];
 
-    animation_table.insert(PlayerAnimation::IdleDown.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::IdleDown, AnimationData {
         timings: idle_animation_timing.clone(),
         frames: vec![3],
     });
-    animation_table.insert(PlayerAnimation::IdleLeft.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::IdleLeft, AnimationData {
         timings: idle_animation_timing.clone(),
         frames: vec![6],
     });
-    animation_table.insert(PlayerAnimation::IdleRight.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::IdleRight, AnimationData {
         timings: idle_animation_timing.clone(),
         frames: vec![9],
     });
-    animation_table.insert(PlayerAnimation::IdleUp.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::IdleUp, AnimationData {
         timings: idle_animation_timing,
         frames: vec![0],
     });
 
-    animation_table.insert(PlayerAnimation::WalkDown.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::WalkDown, AnimationData {
         timings: walk_animation_timing.clone(),
         frames: vec![3, 4, 3, 5],
     });
-    animation_table.insert(PlayerAnimation::WalkLeft.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::WalkLeft, AnimationData {
         timings: walk_animation_timing.clone(),
         frames: vec![6, 7, 6, 8],
     });
-    animation_table.insert(PlayerAnimation::WalkRight.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::WalkRight, AnimationData {
         timings: walk_animation_timing.clone(),
         frames: vec![9, 10, 9, 11],
     });
-    animation_table.insert(PlayerAnimation::WalkUp.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::WalkUp, AnimationData {
         timings: walk_animation_timing,
         frames: vec![0, 1, 0, 2],
     });
 
-    animation_table.insert(PlayerAnimation::RunDown.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::RunDown, AnimationData {
         timings: run_animation_timing.clone(),
         frames: vec![3, 4, 3, 5],
     });
-    animation_table.insert(PlayerAnimation::RunLeft.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::RunLeft, AnimationData {
         timings: run_animation_timing.clone(),
         frames: vec![6, 7, 6, 8],
     });
-    animation_table.insert(PlayerAnimation::RunRight.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::RunRight, AnimationData {
         timings: run_animation_timing.clone(),
         frames: vec![9, 10, 9, 11],
     });
-    animation_table.insert(PlayerAnimation::RunUp.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::RunUp, AnimationData {
         timings: run_animation_timing,
         frames: vec![0, 1, 0, 2],
     });

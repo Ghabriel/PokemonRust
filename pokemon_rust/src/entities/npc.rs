@@ -38,33 +38,6 @@ impl Component for Npc {
     type Storage = DenseVecStorage<Self>;
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
-pub enum NpcAnimation {
-    IdleUp,
-    IdleDown,
-    IdleLeft,
-    IdleRight,
-    WalkUp,
-    WalkDown,
-    WalkLeft,
-    WalkRight,
-}
-
-impl From<NpcAnimation> for CharacterAnimation {
-    fn from(animation: NpcAnimation) -> CharacterAnimation {
-        match animation {
-            NpcAnimation::IdleUp => CharacterAnimation::IdleUp,
-            NpcAnimation::IdleDown => CharacterAnimation::IdleDown,
-            NpcAnimation::IdleLeft => CharacterAnimation::IdleLeft,
-            NpcAnimation::IdleRight => CharacterAnimation::IdleRight,
-            NpcAnimation::WalkUp => CharacterAnimation::NpcMoveUp,
-            NpcAnimation::WalkDown => CharacterAnimation::NpcMoveDown,
-            NpcAnimation::WalkLeft => CharacterAnimation::NpcMoveLeft,
-            NpcAnimation::WalkRight => CharacterAnimation::NpcMoveRight,
-        }
-    }
-}
-
 pub fn initialise_npc(
     world: &mut World,
     npc_builder: NpcBuilder,
@@ -148,36 +121,36 @@ pub fn get_npc_animation_set() -> AnimationTable<CharacterAnimation> {
     let idle_animation_timing = vec![1.0];
     let walk_animation_timing = vec![0.1, 0.2, 0.3, 0.4];
 
-    animation_table.insert(NpcAnimation::IdleDown.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::IdleDown, AnimationData {
         timings: idle_animation_timing.clone(),
         frames: vec![3],
     });
-    animation_table.insert(NpcAnimation::IdleLeft.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::IdleLeft, AnimationData {
         timings: idle_animation_timing.clone(),
         frames: vec![6],
     });
-    animation_table.insert(NpcAnimation::IdleRight.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::IdleRight, AnimationData {
         timings: idle_animation_timing.clone(),
         frames: vec![9],
     });
-    animation_table.insert(NpcAnimation::IdleUp.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::IdleUp, AnimationData {
         timings: idle_animation_timing,
         frames: vec![0],
     });
 
-    animation_table.insert(NpcAnimation::WalkDown.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::NpcMoveDown, AnimationData {
         timings: walk_animation_timing.clone(),
         frames: vec![3, 4, 3, 5],
     });
-    animation_table.insert(NpcAnimation::WalkLeft.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::NpcMoveLeft, AnimationData {
         timings: walk_animation_timing.clone(),
         frames: vec![6, 7, 6, 8],
     });
-    animation_table.insert(NpcAnimation::WalkRight.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::NpcMoveRight, AnimationData {
         timings: walk_animation_timing.clone(),
         frames: vec![9, 10, 9, 11],
     });
-    animation_table.insert(NpcAnimation::WalkUp.into(), AnimationData {
+    animation_table.insert(CharacterAnimation::NpcMoveUp, AnimationData {
         timings: walk_animation_timing,
         frames: vec![0, 1, 0, 2],
     });

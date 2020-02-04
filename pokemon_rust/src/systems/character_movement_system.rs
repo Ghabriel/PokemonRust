@@ -26,11 +26,7 @@ use crate::{
             MovementType,
             StepKind,
         },
-        player::{
-            PlayerAnimation,
-            PlayerEntity,
-        },
-        npc::NpcAnimation,
+        player::PlayerEntity,
     },
     events::EventQueue,
     map::{change_tile, CoordinateSystem, MapHandler},
@@ -159,18 +155,18 @@ impl<'a> System<'a> for CharacterMovementSystem {
 
 pub fn get_new_animation(is_player: bool, movement_type: &MovementType, direction: &Direction) -> CharacterAnimation {
     match (is_player, movement_type, direction) {
-        (true, MovementType::Walk, Direction::Up) => (PlayerAnimation::WalkUp).into(),
-        (true, MovementType::Walk, Direction::Down) => (PlayerAnimation::WalkDown).into(),
-        (true, MovementType::Walk, Direction::Left) => (PlayerAnimation::WalkLeft).into(),
-        (true, MovementType::Walk, Direction::Right) => (PlayerAnimation::WalkRight).into(),
-        (true, MovementType::Run, Direction::Up) => (PlayerAnimation::RunUp).into(),
-        (true, MovementType::Run, Direction::Down) => (PlayerAnimation::RunDown).into(),
-        (true, MovementType::Run, Direction::Left) => (PlayerAnimation::RunLeft).into(),
-        (true, MovementType::Run, Direction::Right) => (PlayerAnimation::RunRight).into(),
-        (false, _, Direction::Up) => (NpcAnimation::WalkUp).into(),
-        (false, _, Direction::Down) => (NpcAnimation::WalkDown).into(),
-        (false, _, Direction::Left) => (NpcAnimation::WalkLeft).into(),
-        (false, _, Direction::Right) => (NpcAnimation::WalkRight).into(),
+        (true, MovementType::Walk, Direction::Up) => CharacterAnimation::WalkUp,
+        (true, MovementType::Walk, Direction::Down) => CharacterAnimation::WalkDown,
+        (true, MovementType::Walk, Direction::Left) => CharacterAnimation::WalkLeft,
+        (true, MovementType::Walk, Direction::Right) => CharacterAnimation::WalkRight,
+        (true, MovementType::Run, Direction::Up) => CharacterAnimation::RunUp,
+        (true, MovementType::Run, Direction::Down) => CharacterAnimation::RunDown,
+        (true, MovementType::Run, Direction::Left) => CharacterAnimation::RunLeft,
+        (true, MovementType::Run, Direction::Right) => CharacterAnimation::RunRight,
+        (false, _, Direction::Up) => CharacterAnimation::NpcMoveUp,
+        (false, _, Direction::Down) => CharacterAnimation::NpcMoveDown,
+        (false, _, Direction::Left) => CharacterAnimation::NpcMoveLeft,
+        (false, _, Direction::Right) => CharacterAnimation::NpcMoveRight,
     }
 }
 
