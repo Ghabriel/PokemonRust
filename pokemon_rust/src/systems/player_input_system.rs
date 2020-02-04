@@ -20,7 +20,8 @@ use crate::{
         character::{Character, CharacterMovement},
         player::{Player, PlayerAction, PlayerEntity},
     },
-    events::{EventQueue, MapInteractionEvent, PlayerSingleMoveEvent},
+    events::{CharacterSingleMoveEvent, EventQueue, MapInteractionEvent},
+    map::MapHandler,
 };
 
 pub struct PlayerInputSystem {
@@ -45,6 +46,7 @@ impl<'a> System<'a> for PlayerInputSystem {
         Read<'a, EventChannel<InputEvent<StringBindings>>>,
         Read<'a, InputHandler<StringBindings>>,
         ReadExpect<'a, PlayerEntity>,
+        ReadExpect<'a, MapHandler>,
     );
 
     fn run(&mut self, (
@@ -55,6 +57,7 @@ impl<'a> System<'a> for PlayerInputSystem {
         input_event_channel,
         input_handler,
         player_entity,
+        map,
     ): Self::SystemData) {
         if movements.contains(player_entity.0) {
             // Ignores all incoming events
@@ -85,16 +88,18 @@ impl<'a> System<'a> for PlayerInputSystem {
             player.action = PlayerAction::Walk;
         }
 
+        let npc_id = map.get_player_id(&player_entity);
+
         let horizontal_value = input_handler
             .axis_value("horizontal")
             .unwrap_or(0.);
 
         if horizontal_value < -0.2 {
             character.facing_direction = Direction::Left;
-            event_queue.push(PlayerSingleMoveEvent);
+            event_queue.push(CharacterSingleMoveEvent::new(npc_id));
         } else if horizontal_value > 0.2 {
             character.facing_direction = Direction::Right;
-            event_queue.push(PlayerSingleMoveEvent);
+            event_queue.push(CharacterSingleMoveEvent::new(npc_id));
         }
 
         let vertical_value = input_handler
@@ -103,10 +108,10 @@ impl<'a> System<'a> for PlayerInputSystem {
 
         if vertical_value < -0.2 {
             character.facing_direction = Direction::Down;
-            event_queue.push(PlayerSingleMoveEvent);
+            event_queue.push(CharacterSingleMoveEvent::new(npc_id));
         } else if vertical_value > 0.2 {
             character.facing_direction = Direction::Up;
-            event_queue.push(PlayerSingleMoveEvent);
+            event_queue.push(CharacterSingleMoveEvent::new(npc_id));
         }
     }
 }
