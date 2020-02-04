@@ -17,7 +17,7 @@ use amethyst::{
 use crate::{
     common::Direction,
     entities::{
-        character::{Character, CharacterMovement, MovementType},
+        character::{AllowedMovements, Character, CharacterMovement, MovementType},
         player::PlayerEntity,
     },
     events::{CharacterSingleMoveEvent, EventQueue, MapInteractionEvent},
@@ -41,6 +41,7 @@ impl<'a> System<'a> for PlayerInputSystem {
     type SystemData = (
         WriteStorage<'a, Character>,
         ReadStorage<'a, CharacterMovement>,
+        ReadStorage<'a, AllowedMovements>,
         Write<'a, EventQueue>,
         Read<'a, EventChannel<InputEvent<StringBindings>>>,
         Read<'a, InputHandler<StringBindings>>,
@@ -51,6 +52,7 @@ impl<'a> System<'a> for PlayerInputSystem {
     fn run(&mut self, (
         mut characters,
         movements,
+        allowed_movements,
         mut event_queue,
         input_event_channel,
         input_handler,
@@ -76,8 +78,10 @@ impl<'a> System<'a> for PlayerInputSystem {
             .get_mut(player_entity.0)
             .expect("Failed to retrieve Character");
 
-        // TODO: check for the capabilities of running/walking
-        if input_handler.action_is_down("cancel").unwrap_or(false) {
+        let allowed_movements: &AllowedMovements = allowed_movements.get(player_entity.0).unwrap();
+        let cancel_is_down = input_handler.action_is_down("cancel").unwrap_or(false);
+
+        if allowed_movements.can_perform(&MovementType::Run) && cancel_is_down {
             character.action = MovementType::Run;
         } else {
             character.action = MovementType::Walk;

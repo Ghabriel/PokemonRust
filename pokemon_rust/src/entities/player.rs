@@ -1,8 +1,6 @@
 use amethyst::{
     assets::{Handle, ProgressCounter},
     ecs::{
-        Component,
-        DenseVecStorage,
         Entity,
         world::Builder,
         World,
@@ -18,14 +16,13 @@ use crate::{
         AnimationData,
         AnimationTable,
         CharacterAnimation,
-        character::{Character, MovementType, StepKind},
+        character::{AllowedMovements, Character, MovementData, MovementType, StepKind},
     },
     map::{
         map_to_world_coordinates,
         MapCoordinates,
         MapHandler,
         PlayerCoordinates,
-        TileData,
         WorldCoordinates,
     },
 };
@@ -97,6 +94,23 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
         next_step: StepKind::Left,
     };
 
+    let allowed_movements = {
+        let mut result = AllowedMovements::default();
+        let game_config = world.read_resource::<GameConfig>();
+
+        result.add_movement_type(MovementType::Walk, MovementData {
+            sprite_sheet: sprite_sheets.walking.clone(),
+            velocity: game_config.player_walking_speed,
+        });
+
+        result.add_movement_type(MovementType::Run, MovementData {
+            sprite_sheet: sprite_sheets.running.clone(),
+            velocity: game_config.player_running_speed,
+        });
+
+        result
+    };
+
     let transform = {
         let game_config = world.read_resource::<GameConfig>();
         let position = MapCoordinates::from_tuple(&game_config.player_starting_position);
@@ -116,11 +130,13 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
     world.insert(sprite_sheets);
 
     world.register::<AnimationTable<CharacterAnimation>>();
+    world.register::<AllowedMovements>();
     world.register::<Character>();
 
     let entity = world
         .create_entity()
         .with(character)
+        .with(allowed_movements)
         .with(transform)
         .with(sprite_render)
         .with(animation_set)

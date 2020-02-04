@@ -79,11 +79,16 @@ pub enum MovementType {
     Run,
 }
 
+#[derive(Default)]
 pub struct AllowedMovements {
     movements: HashMap<MovementType, MovementData>,
 }
 
 impl AllowedMovements {
+    pub fn add_movement_type(&mut self, movement_type: MovementType, data: MovementData) {
+        self.movements.insert(movement_type, data);
+    }
+
     pub fn can_perform(&self, movement_type: &MovementType) -> bool {
         self.movements.contains_key(movement_type)
     }

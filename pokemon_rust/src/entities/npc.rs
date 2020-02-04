@@ -15,9 +15,9 @@ use crate::{
         AnimationData,
         AnimationTable,
         CharacterAnimation,
-        character::{Character, MovementType, StepKind},
+        character::{AllowedMovements, Character, MovementData, MovementType, StepKind},
     },
-    map::{MapCoordinates, MapHandler, PlayerCoordinates, TileData},
+    map::{MapCoordinates, MapHandler, PlayerCoordinates},
 };
 
 use serde::{Deserialize, Serialize};
@@ -94,18 +94,33 @@ pub fn initialise_npc(
         kind: npc_builder.kind,
     };
 
-    let sprite_render = {
+    let sprite_sheet = {
         let resources = world.read_resource::<CommonResources>();
 
-        SpriteRender {
-            sprite_sheet: load_sprite_sheet_with_texture(
-                world,
-                resources.npc_texture.clone(),
-                &format!("sprites/characters/{}/spritesheet.ron", npc.kind),
-                progress_counter,
-            ),
-            sprite_number: get_character_sprite_index_from_direction(&character.facing_direction),
-        }
+        load_sprite_sheet_with_texture(
+            world,
+            resources.npc_texture.clone(),
+            &format!("sprites/characters/{}/spritesheet.ron", npc.kind),
+            progress_counter,
+        )
+    };
+
+    let allowed_movements = {
+        let mut result = AllowedMovements::default();
+
+        // TODO: decide the allowed movements based on the NPC kind and/or metadata
+        result.add_movement_type(MovementType::Walk, MovementData {
+            sprite_sheet: sprite_sheet.clone(),
+            // TODO: extract velocity to constant or use GameConfig::player_walking_speed
+            velocity: 160.,
+        });
+
+        result
+    };
+
+    let sprite_render = SpriteRender {
+        sprite_sheet,
+        sprite_number: get_character_sprite_index_from_direction(&character.facing_direction),
     };
 
     let animation_set = get_npc_animation_set();
@@ -116,6 +131,7 @@ pub fn initialise_npc(
     let entity = world
         .create_entity()
         .with(character)
+        .with(allowed_movements)
         .with(npc)
         .with(transform)
         .with(sprite_render)

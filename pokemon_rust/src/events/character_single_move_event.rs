@@ -4,12 +4,8 @@ use amethyst::{
 };
 
 use crate::{
-    config::GameConfig,
     constants::TILE_SIZE,
-    entities::{
-        character::{Character, CharacterMovement, MovementType},
-        player::PlayerEntity,
-    },
+    entities::character::{AllowedMovements, Character, CharacterMovement},
     map::{MapHandler, PlayerCoordinates, TileData},
 };
 
@@ -41,19 +37,12 @@ impl GameEvent for CharacterSingleMoveEvent {
             .map(PlayerCoordinates::from_transform)
             .unwrap();
 
-        let config = world.read_resource::<GameConfig>();
-
-        let player_entity = world.read_resource::<PlayerEntity>().0;
-
-        let velocity = if *entity == player_entity {
-            match character.action {
-                MovementType::Walk => config.player_walking_speed,
-                MovementType::Run => config.player_running_speed,
-            }
-        } else {
-            // TODO: extract velocity to constant or use GameConfig::player_walking_speed
-            160.
-        };
+        let velocity = world.read_storage::<AllowedMovements>()
+            .get(*entity)
+            .unwrap()
+            .get_movement_data(&character.action)
+            .unwrap()
+            .velocity;
 
         let movement = CharacterMovement {
             estimated_time: f32::from(TILE_SIZE) / velocity,
