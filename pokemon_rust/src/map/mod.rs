@@ -39,6 +39,7 @@ pub struct MapHandler {
     loaded_maps: HashMap<String, Map>,
     current_map: MapId,
     next_npc_id: usize,
+    characters: HashMap<usize, CharacterData>,
 }
 
 impl MapHandler {
@@ -169,18 +170,28 @@ impl MapHandler {
 
         map.solids.insert(position.clone(), Tile);
 
-        map.npcs.insert(npc_id, entity);
+        self.characters.insert(npc_id, CharacterData { entity, natural_map: map_id.clone() });
 
         npc_id
     }
 
+    pub fn register_player(&mut self, entity: Entity) {
+        let npc_id = self.next_npc_id;
+        self.next_npc_id += 1;
+
+        self.characters.insert(npc_id, CharacterData {
+            entity,
+            natural_map: self.get_current_map_id(),
+        });
+    }
+
     pub fn get_npc_by_id(&self, npc_id: usize) -> &Entity {
-        self.loaded_maps
+        &self.characters
             .iter()
-            .flat_map(|(_, map)| map.npcs.iter())
             .find(|(id, _)| **id == npc_id)
             .map(|(_, npc)| npc)
             .unwrap()
+            .entity
     }
 
     pub fn map_to_world_coordinates(&self, map_id: &MapId, tile: &MapCoordinates) -> WorldCoordinates {
@@ -201,6 +212,12 @@ impl MapHandler {
         let position = map.player_to_map_coordinates(&tile_data.position);
         map.solids.remove(&position);
     }
+}
+
+#[derive(Debug)]
+struct CharacterData {
+    entity: Entity,
+    natural_map: MapId,
 }
 
 /// A global way to refer to a tile.

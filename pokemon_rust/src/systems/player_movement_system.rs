@@ -27,6 +27,7 @@ use crate::{
         player::{
             PlayerAction,
             PlayerAnimation,
+            PlayerEntity,
             PlayerSpriteSheets,
         },
     },
@@ -46,6 +47,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
         WriteStorage<'a, SpriteRender>,
         Entities<'a>,
         ReadExpect<'a, PlayerSpriteSheets>,
+        ReadExpect<'a, PlayerEntity>,
         WriteExpect<'a, MapHandler>,
         Write<'a, EventQueue>,
         Read<'a, Time>,
@@ -59,6 +61,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
         mut sprite_renders,
         entities,
         sprite_sheets,
+        player_entity,
         mut map,
         mut event_queue,
         time,
@@ -107,6 +110,7 @@ impl<'a> System<'a> for PlayerMovementSystem {
                 change_tile(
                     &movement_data.from,
                     &movement_data.to,
+                    &player_entity,
                     &mut map,
                     &mut event_queue,
                 );

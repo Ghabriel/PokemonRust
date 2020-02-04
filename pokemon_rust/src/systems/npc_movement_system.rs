@@ -16,7 +16,7 @@ use crate::{
         AnimationTable,
         CharacterAnimation,
         character::{Character, CharacterAction, CharacterMovement, StepKind},
-        npc::{NpcAction, NpcAnimation},
+        npc::{Npc, NpcAction, NpcAnimation},
     },
     map::{CoordinateSystem, MapHandler},
 };
@@ -26,6 +26,7 @@ pub struct NpcMovementSystem;
 
 impl<'a> System<'a> for NpcMovementSystem {
     type SystemData = (
+        WriteStorage<'a, Npc>,
         WriteStorage<'a, Character>,
         WriteStorage<'a, CharacterMovement>,
         WriteStorage<'a, Transform>,
@@ -36,6 +37,7 @@ impl<'a> System<'a> for NpcMovementSystem {
     );
 
     fn run(&mut self, (
+        mut npcs,
         mut characters,
         mut npc_movements,
         mut transforms,
@@ -46,8 +48,9 @@ impl<'a> System<'a> for NpcMovementSystem {
     ): Self::SystemData) {
         let mut static_npcs = Vec::new();
 
-        for (entity, character, movement_data, transform, animation_table) in (
+        for (entity, _, character, movement_data, transform, animation_table) in (
             &entities,
+            &mut npcs,
             &mut characters,
             &mut npc_movements,
             &mut transforms,

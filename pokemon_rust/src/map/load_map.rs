@@ -53,12 +53,20 @@ use super::{
 pub fn change_tile(
     initial_tile_data: &TileData,
     final_tile_data: &TileData,
+    player_entity: &PlayerEntity,
     map: &mut MapHandler,
     event_queue: &mut EventQueue,
 ) {
     if initial_tile_data.map_id != final_tile_data.map_id {
         println!("Changing to map {}", final_tile_data.map_id.0);
         map.current_map = final_tile_data.map_id.clone();
+        let natural_map = map.characters
+            .iter_mut()
+            .map(|(_, c)| (c.entity, &mut c.natural_map))
+            .find(|(entity, _)| *entity == player_entity.0)
+            .map(|(_, natural_map)| natural_map)
+            .unwrap();
+        *natural_map = final_tile_data.map_id.clone();
 
         map.get_map_scripts(&final_tile_data.map_id, MapScriptKind::OnMapEnter)
             .for_each(|event| {
@@ -141,6 +149,7 @@ pub fn initialise_map(world: &mut World, progress_counter: &mut ProgressCounter)
         },
         current_map: MapId("test_map".to_string()),
         next_npc_id: 0,
+        characters: HashMap::new(),
     };
 
     {

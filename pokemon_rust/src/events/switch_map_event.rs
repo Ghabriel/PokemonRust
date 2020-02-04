@@ -57,6 +57,7 @@ impl GameEvent for SwitchMapEvent {
         change_tile(
             &initial_tile_data,
             &target_tile_data,
+            &world.read_resource::<PlayerEntity>(),
             &mut world.write_resource::<MapHandler>(),
             &mut world.write_resource::<EventQueue>(),
         );

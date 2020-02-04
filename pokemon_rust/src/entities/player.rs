@@ -20,7 +20,14 @@ use crate::{
         CharacterAnimation,
         character::{Character, StepKind},
     },
-    map::{map_to_world_coordinates, MapCoordinates, PlayerCoordinates, TileData, WorldCoordinates},
+    map::{
+        map_to_world_coordinates,
+        MapCoordinates,
+        MapHandler,
+        PlayerCoordinates,
+        TileData,
+        WorldCoordinates,
+    },
 };
 
 use serde::{Deserialize, Serialize};
@@ -127,16 +134,22 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
     world.insert(sprite_sheets);
 
     world.register::<AnimationTable<CharacterAnimation>>();
+    world.register::<Character>();
     world.register::<Player>();
 
-    world
+    let entity = world
         .create_entity()
         .with(character)
         .with(player)
         .with(transform)
         .with(sprite_render)
         .with(animation_set)
-        .build()
+        .build();
+
+    world.write_resource::<MapHandler>()
+        .register_player(entity);
+
+    entity
 }
 
 pub fn get_player_animation_set() -> AnimationTable<CharacterAnimation> {

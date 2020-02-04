@@ -93,8 +93,8 @@ impl SimpleState for LoadingState<'_, '_> {
 
         let mut progress_counter = ProgressCounter::new();
         initialise_resources(world, &mut progress_counter);
-        let player = initialise_player(world, &mut progress_counter);
         initialise_map(world, &mut progress_counter);
+        let player = initialise_player(world, &mut progress_counter);
         initialise_camera(world, player);
         self.progress_counter = Some(progress_counter);
 
