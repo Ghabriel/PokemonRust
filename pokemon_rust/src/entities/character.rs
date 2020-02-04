@@ -17,7 +17,6 @@ use crate::{
     entities::{
         AnimationData,
         AnimationTable,
-        CharacterAnimation,
     },
     map::{map_to_world_coordinates, MapCoordinates, PlayerCoordinates, TileData, WorldCoordinates},
 };
@@ -77,6 +76,12 @@ impl StepKind {
 pub enum MovementType {
     Walk,
     Run,
+}
+
+#[derive(Eq, Hash, PartialEq)]
+pub enum CharacterAnimation {
+    Idle(Direction),
+    Moving(MovementType, Direction),
 }
 
 #[derive(Default)]

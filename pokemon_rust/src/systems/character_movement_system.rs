@@ -15,13 +15,13 @@ use amethyst::{
 };
 
 use crate::{
-    common::{Direction, get_direction_offset},
+    common::get_direction_offset,
     entities::{
         AnimationTable,
-        CharacterAnimation,
         character::{
             AllowedMovements,
             Character,
+            CharacterAnimation,
             CharacterMovement,
             MovementType,
             StepKind,
@@ -89,8 +89,10 @@ impl<'a> System<'a> for CharacterMovementSystem {
                     .unwrap();
                 sprite_render.sprite_sheet = data.sprite_sheet.clone();
 
-                let new_animation = get_new_animation(is_player, &movement_data.movement_type, &character.facing_direction);
-                animation_table.change_animation(new_animation);
+                animation_table.change_animation(CharacterAnimation::Moving(
+                    movement_data.movement_type.clone(),
+                    character.facing_direction.clone(),
+                ));
 
                 if movement_data.step_kind == StepKind::Right {
                     animation_table.skip_to_frame_index(2);
@@ -126,8 +128,9 @@ impl<'a> System<'a> for CharacterMovementSystem {
                     sprite_render.sprite_sheet = data.sprite_sheet.clone();
                 }
 
-                let new_animation = get_idle_animation(&character.facing_direction);
-                animation_table.change_animation(new_animation);
+                animation_table.change_animation(CharacterAnimation::Idle(
+                    character.facing_direction.clone(),
+                ));
 
                 if !is_player {
                     map.remove_solid_mark(&movement_data.from);
@@ -150,31 +153,5 @@ impl<'a> System<'a> for CharacterMovementSystem {
         for entity in static_characters {
             movements.remove(entity);
         }
-    }
-}
-
-pub fn get_new_animation(is_player: bool, movement_type: &MovementType, direction: &Direction) -> CharacterAnimation {
-    match (is_player, movement_type, direction) {
-        (true, MovementType::Walk, Direction::Up) => CharacterAnimation::WalkUp,
-        (true, MovementType::Walk, Direction::Down) => CharacterAnimation::WalkDown,
-        (true, MovementType::Walk, Direction::Left) => CharacterAnimation::WalkLeft,
-        (true, MovementType::Walk, Direction::Right) => CharacterAnimation::WalkRight,
-        (true, MovementType::Run, Direction::Up) => CharacterAnimation::RunUp,
-        (true, MovementType::Run, Direction::Down) => CharacterAnimation::RunDown,
-        (true, MovementType::Run, Direction::Left) => CharacterAnimation::RunLeft,
-        (true, MovementType::Run, Direction::Right) => CharacterAnimation::RunRight,
-        (false, _, Direction::Up) => CharacterAnimation::NpcMoveUp,
-        (false, _, Direction::Down) => CharacterAnimation::NpcMoveDown,
-        (false, _, Direction::Left) => CharacterAnimation::NpcMoveLeft,
-        (false, _, Direction::Right) => CharacterAnimation::NpcMoveRight,
-    }
-}
-
-pub fn get_idle_animation(direction: &Direction) -> CharacterAnimation {
-    match direction {
-        Direction::Up => CharacterAnimation::IdleUp,
-        Direction::Down => CharacterAnimation::IdleDown,
-        Direction::Left => CharacterAnimation::IdleLeft,
-        Direction::Right => CharacterAnimation::IdleRight,
     }
 }

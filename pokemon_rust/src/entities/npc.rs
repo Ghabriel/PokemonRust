@@ -14,13 +14,17 @@ use crate::{
     entities::{
         AnimationData,
         AnimationTable,
-        CharacterAnimation,
-        character::{AllowedMovements, Character, MovementData, MovementType, StepKind},
+        character::{
+            AllowedMovements,
+            Character,
+            CharacterAnimation,
+            MovementData,
+            MovementType,
+            StepKind,
+        },
     },
     map::{MapCoordinates, MapHandler, PlayerCoordinates},
 };
-
-use serde::{Deserialize, Serialize};
 
 pub struct NpcBuilder {
     pub map_id: String,
@@ -121,36 +125,36 @@ pub fn get_npc_animation_set() -> AnimationTable<CharacterAnimation> {
     let idle_animation_timing = vec![1.0];
     let walk_animation_timing = vec![0.1, 0.2, 0.3, 0.4];
 
-    animation_table.insert(CharacterAnimation::IdleDown, AnimationData {
+    animation_table.insert(CharacterAnimation::Idle(Direction::Down), AnimationData {
         timings: idle_animation_timing.clone(),
         frames: vec![3],
     });
-    animation_table.insert(CharacterAnimation::IdleLeft, AnimationData {
+    animation_table.insert(CharacterAnimation::Idle(Direction::Left), AnimationData {
         timings: idle_animation_timing.clone(),
         frames: vec![6],
     });
-    animation_table.insert(CharacterAnimation::IdleRight, AnimationData {
+    animation_table.insert(CharacterAnimation::Idle(Direction::Right), AnimationData {
         timings: idle_animation_timing.clone(),
         frames: vec![9],
     });
-    animation_table.insert(CharacterAnimation::IdleUp, AnimationData {
+    animation_table.insert(CharacterAnimation::Idle(Direction::Up), AnimationData {
         timings: idle_animation_timing,
         frames: vec![0],
     });
 
-    animation_table.insert(CharacterAnimation::NpcMoveDown, AnimationData {
+    animation_table.insert(CharacterAnimation::Moving(MovementType::Walk, Direction::Down), AnimationData {
         timings: walk_animation_timing.clone(),
         frames: vec![3, 4, 3, 5],
     });
-    animation_table.insert(CharacterAnimation::NpcMoveLeft, AnimationData {
+    animation_table.insert(CharacterAnimation::Moving(MovementType::Walk, Direction::Left), AnimationData {
         timings: walk_animation_timing.clone(),
         frames: vec![6, 7, 6, 8],
     });
-    animation_table.insert(CharacterAnimation::NpcMoveRight, AnimationData {
+    animation_table.insert(CharacterAnimation::Moving(MovementType::Walk, Direction::Right), AnimationData {
         timings: walk_animation_timing.clone(),
         frames: vec![9, 10, 9, 11],
     });
-    animation_table.insert(CharacterAnimation::NpcMoveUp, AnimationData {
+    animation_table.insert(CharacterAnimation::Moving(MovementType::Walk, Direction::Up), AnimationData {
         timings: walk_animation_timing,
         frames: vec![0, 1, 0, 2],
     });

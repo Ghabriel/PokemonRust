@@ -15,8 +15,14 @@ use crate::{
     entities::{
         AnimationData,
         AnimationTable,
-        CharacterAnimation,
-        character::{AllowedMovements, Character, MovementData, MovementType, StepKind},
+        character::{
+            AllowedMovements,
+            Character,
+            CharacterAnimation,
+            MovementData,
+            MovementType,
+            StepKind,
+        },
     },
     map::{
         map_to_world_coordinates,
@@ -108,53 +114,53 @@ pub fn get_player_animation_set() -> AnimationTable<CharacterAnimation> {
     let walk_animation_timing = vec![0.1, 0.2, 0.3, 0.4];
     let run_animation_timing = vec![0.0625, 0.125, 0.1875, 0.25];
 
-    animation_table.insert(CharacterAnimation::IdleDown, AnimationData {
+    animation_table.insert(CharacterAnimation::Idle(Direction::Down), AnimationData {
         timings: idle_animation_timing.clone(),
         frames: vec![3],
     });
-    animation_table.insert(CharacterAnimation::IdleLeft, AnimationData {
+    animation_table.insert(CharacterAnimation::Idle(Direction::Left), AnimationData {
         timings: idle_animation_timing.clone(),
         frames: vec![6],
     });
-    animation_table.insert(CharacterAnimation::IdleRight, AnimationData {
+    animation_table.insert(CharacterAnimation::Idle(Direction::Right), AnimationData {
         timings: idle_animation_timing.clone(),
         frames: vec![9],
     });
-    animation_table.insert(CharacterAnimation::IdleUp, AnimationData {
+    animation_table.insert(CharacterAnimation::Idle(Direction::Up), AnimationData {
         timings: idle_animation_timing,
         frames: vec![0],
     });
 
-    animation_table.insert(CharacterAnimation::WalkDown, AnimationData {
+    animation_table.insert(CharacterAnimation::Moving(MovementType::Walk, Direction::Down), AnimationData {
         timings: walk_animation_timing.clone(),
         frames: vec![3, 4, 3, 5],
     });
-    animation_table.insert(CharacterAnimation::WalkLeft, AnimationData {
+    animation_table.insert(CharacterAnimation::Moving(MovementType::Walk, Direction::Left), AnimationData {
         timings: walk_animation_timing.clone(),
         frames: vec![6, 7, 6, 8],
     });
-    animation_table.insert(CharacterAnimation::WalkRight, AnimationData {
+    animation_table.insert(CharacterAnimation::Moving(MovementType::Walk, Direction::Right), AnimationData {
         timings: walk_animation_timing.clone(),
         frames: vec![9, 10, 9, 11],
     });
-    animation_table.insert(CharacterAnimation::WalkUp, AnimationData {
+    animation_table.insert(CharacterAnimation::Moving(MovementType::Walk, Direction::Up), AnimationData {
         timings: walk_animation_timing,
         frames: vec![0, 1, 0, 2],
     });
 
-    animation_table.insert(CharacterAnimation::RunDown, AnimationData {
+    animation_table.insert(CharacterAnimation::Moving(MovementType::Run, Direction::Down), AnimationData {
         timings: run_animation_timing.clone(),
         frames: vec![3, 4, 3, 5],
     });
-    animation_table.insert(CharacterAnimation::RunLeft, AnimationData {
+    animation_table.insert(CharacterAnimation::Moving(MovementType::Run, Direction::Left), AnimationData {
         timings: run_animation_timing.clone(),
         frames: vec![6, 7, 6, 8],
     });
-    animation_table.insert(CharacterAnimation::RunRight, AnimationData {
+    animation_table.insert(CharacterAnimation::Moving(MovementType::Run, Direction::Right), AnimationData {
         timings: run_animation_timing.clone(),
         frames: vec![9, 10, 9, 11],
     });
-    animation_table.insert(CharacterAnimation::RunUp, AnimationData {
+    animation_table.insert(CharacterAnimation::Moving(MovementType::Run, Direction::Up), AnimationData {
         timings: run_animation_timing,
         frames: vec![0, 1, 0, 2],
     });

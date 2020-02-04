@@ -7,7 +7,7 @@ use amethyst::{
 
 use crate::{
     config::GameConfig,
-    entities::CharacterAnimation,
+    entities::character::CharacterAnimation,
     events::{EventExecutor, EventQueue},
     states::OverworldAnimationState,
     systems::{
