@@ -135,15 +135,6 @@ pub struct NpcBuilder {
     pub facing_direction: Direction,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Npc {
-    pub kind: String,
-}
-
-impl Component for Npc {
-    type Storage = DenseVecStorage<Self>;
-}
-
 pub fn initialise_npc(
     world: &mut World,
     npc_builder: NpcBuilder,
@@ -169,17 +160,13 @@ pub fn initialise_npc(
         next_step: StepKind::Left,
     };
 
-    let npc = Npc {
-        kind: npc_builder.kind,
-    };
-
     let sprite_sheet = {
         let resources = world.read_resource::<CommonResources>();
 
         load_sprite_sheet_with_texture(
             world,
             resources.npc_texture.clone(),
-            &format!("sprites/characters/{}/spritesheet.ron", npc.kind),
+            &format!("sprites/characters/{}/spritesheet.ron", npc_builder.kind),
             progress_counter,
         )
     };
@@ -205,13 +192,11 @@ pub fn initialise_npc(
     let animation_set = get_npc_animation_set();
 
     world.register::<AnimationTable<CharacterAnimation>>();
-    world.register::<Npc>();
 
     let entity = world
         .create_entity()
         .with(character)
         .with(allowed_movements)
-        .with(npc)
         .with(transform)
         .with(sprite_render)
         .with(animation_set)
