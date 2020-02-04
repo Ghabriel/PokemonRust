@@ -10,11 +10,7 @@ use crate::{
         Direction,
         get_character_sprite_index_from_direction,
     },
-    entities::{
-        character::Character,
-        npc::{initialise_npc, NpcBuilder},
-        player::PlayerEntity,
-    },
+    entities::character::{Character, initialise_npc, NpcBuilder, PlayerEntity},
     map::{
         MapCoordinates,
         MapHandler,

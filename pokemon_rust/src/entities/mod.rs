@@ -6,8 +6,6 @@ use std::{
 };
 
 pub mod character;
-pub mod npc;
-pub mod player;
 
 pub struct AnimationTable<T>
 where

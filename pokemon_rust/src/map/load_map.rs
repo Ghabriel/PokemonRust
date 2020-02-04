@@ -9,9 +9,7 @@ use amethyst::{
 use crate::{
     common::load_full_texture_sprite_sheet,
     constants::{MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
-    entities::{
-        player::PlayerEntity,
-    },
+    entities::character::PlayerEntity,
     events::EventQueue,
 };
 

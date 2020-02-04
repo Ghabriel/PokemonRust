@@ -16,7 +16,7 @@ use amethyst::{
 
 use crate::{
     common::{load_full_texture_sprite_sheet, CommonResources},
-    entities::player::{initialise_player, PlayerEntity},
+    entities::character::{initialise_player, PlayerEntity},
     events::EventQueue,
     map::initialise_map,
     states::OverworldState,

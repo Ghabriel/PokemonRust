@@ -16,9 +16,12 @@ use amethyst::{
 
 use crate::{
     common::Direction,
-    entities::{
-        character::{AllowedMovements, Character, CharacterMovement, MovementType},
-        player::PlayerEntity,
+    entities::character::{
+        AllowedMovements,
+        Character,
+        CharacterMovement,
+        MovementType,
+        PlayerEntity,
     },
     events::{CharacterSingleMoveEvent, EventQueue, MapInteractionEvent},
     map::MapHandler,

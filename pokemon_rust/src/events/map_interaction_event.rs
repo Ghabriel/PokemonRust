@@ -9,10 +9,7 @@ use amethyst::{
 };
 
 use crate::{
-    entities::{
-        character::Character,
-        player::PlayerEntity,
-    },
+    entities::character::{Character, PlayerEntity},
     events::EventQueue,
     map::{GameActionKind, MapHandler, PlayerCoordinates, ValidatedGameAction},
 };

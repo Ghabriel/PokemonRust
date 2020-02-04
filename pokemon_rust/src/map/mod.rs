@@ -8,7 +8,7 @@ use amethyst::ecs::Entity;
 
 use crate::{
     common::Direction,
-    entities::player::PlayerEntity,
+    entities::character::PlayerEntity,
     events::ScriptEvent,
 };
 
