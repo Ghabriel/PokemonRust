@@ -64,7 +64,15 @@ impl<'a> System<'a> for CharacterMovementSystem {
     ): Self::SystemData) {
         let mut static_characters = Vec::new();
 
-        for (entity, character, movement_data, allowed_movements, transform, animation_table, sprite_render) in (
+        for (
+            entity,
+            character,
+            movement_data,
+            allowed_movements,
+            transform,
+            animation_table,
+            sprite_render
+        ) in (
             &entities,
             &mut characters,
             &mut movements,
@@ -84,19 +92,13 @@ impl<'a> System<'a> for CharacterMovementSystem {
                     }
                 }
 
-                let data = allowed_movements
-                    .get_movement_data(&movement_data.movement_type)
-                    .unwrap();
-                sprite_render.sprite_sheet = data.sprite_sheet.clone();
-
-                animation_table.change_animation(CharacterAnimation::Moving(
-                    movement_data.movement_type.clone(),
-                    character.facing_direction.clone(),
-                ));
-
-                if movement_data.step_kind == StepKind::Right {
-                    animation_table.skip_to_frame_index(2);
-                }
+                on_movement_start(
+                    character,
+                    movement_data,
+                    allowed_movements,
+                    animation_table,
+                    sprite_render,
+                );
 
                 if !is_player {
                     map.mark_tile_as_solid(&movement_data.to);
@@ -106,37 +108,21 @@ impl<'a> System<'a> for CharacterMovementSystem {
             }
 
             if movement_data.estimated_time <= delta_seconds {
-                transform.set_translation(Vector3::new(
-                    movement_data.to.position.x(),
-                    movement_data.to.position.y(),
-                    0.,
-                ));
-
-                change_tile(
-                    &movement_data.from,
-                    &movement_data.to,
+                on_movement_finish(
+                    character,
+                    movement_data,
+                    allowed_movements,
+                    transform,
+                    animation_table,
+                    sprite_render,
                     &player_entity,
                     &mut map,
                     &mut event_queue,
                 );
 
-                if movement_data.movement_type == MovementType::Run {
-                    let data = allowed_movements
-                        .get_movement_data(&MovementType::Walk)
-                        .unwrap();
-
-                    sprite_render.sprite_sheet = data.sprite_sheet.clone();
-                }
-
-                animation_table.change_animation(CharacterAnimation::Idle(
-                    character.facing_direction.clone(),
-                ));
-
                 if !is_player {
                     map.remove_solid_mark(&movement_data.from);
                 }
-
-                character.next_step.invert();
 
                 static_characters.push(entity);
                 continue;
@@ -154,4 +140,66 @@ impl<'a> System<'a> for CharacterMovementSystem {
             movements.remove(entity);
         }
     }
+}
+
+fn on_movement_start(
+    character: &Character,
+    movement_data: &mut CharacterMovement,
+    allowed_movements: &AllowedMovements,
+    animation_table: &mut AnimationTable<CharacterAnimation>,
+    sprite_render: &mut SpriteRender,
+) {
+    let data = allowed_movements
+        .get_movement_data(&movement_data.movement_type)
+        .unwrap();
+    sprite_render.sprite_sheet = data.sprite_sheet.clone();
+
+    animation_table.change_animation(CharacterAnimation::Moving(
+        movement_data.movement_type.clone(),
+        character.facing_direction.clone(),
+    ));
+
+    if movement_data.step_kind == StepKind::Right {
+        animation_table.skip_to_frame_index(2);
+    }
+}
+
+fn on_movement_finish(
+    character: &mut Character,
+    movement_data: &mut CharacterMovement,
+    allowed_movements: &AllowedMovements,
+    transform: &mut Transform,
+    animation_table: &mut AnimationTable<CharacterAnimation>,
+    sprite_render: &mut SpriteRender,
+    player_entity: &PlayerEntity,
+    map: &mut MapHandler,
+    event_queue: &mut EventQueue,
+) {
+    transform.set_translation(Vector3::new(
+        movement_data.to.position.x(),
+        movement_data.to.position.y(),
+        0.,
+    ));
+
+    change_tile(
+        &movement_data.from,
+        &movement_data.to,
+        &player_entity,
+        map,
+        event_queue,
+    );
+
+    if movement_data.movement_type == MovementType::Run {
+        let data = allowed_movements
+            .get_movement_data(&MovementType::Walk)
+            .unwrap();
+
+        sprite_render.sprite_sheet = data.sprite_sheet.clone();
+    }
+
+    animation_table.change_animation(CharacterAnimation::Idle(
+        character.facing_direction.clone(),
+    ));
+
+    character.next_step.invert();
 }
