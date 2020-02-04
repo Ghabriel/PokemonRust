@@ -1,12 +1,12 @@
 use amethyst::{
-    assets::{Handle, ProgressCounter},
+    assets::ProgressCounter,
     ecs::{
         Entity,
         world::Builder,
         World,
         WorldExt,
     },
-    renderer::{SpriteRender, SpriteSheet},
+    renderer::SpriteRender,
 };
 
 use crate::{
@@ -27,49 +27,39 @@ use crate::{
     },
 };
 
-use serde::{Deserialize, Serialize};
-
 /// Resource that stores the entity corresponding to the human player.
 pub struct PlayerEntity(pub Entity);
 
-pub struct PlayerSpriteSheets {
-    pub walking: Handle<SpriteSheet>,
-    pub running: Handle<SpriteSheet>,
-}
-
 pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCounter) -> Entity {
-    let sprite_sheets = PlayerSpriteSheets {
-        walking: load_sprite_sheet(
-            world,
-            "sprites/characters/lucas/lucas.png",
-            "sprites/characters/lucas/lucas-walking.ron",
-            progress_counter,
-        ),
-        running: load_sprite_sheet(
-            world,
-            "sprites/characters/lucas/lucas.png",
-            "sprites/characters/lucas/lucas-running.ron",
-            progress_counter,
-        ),
-    };
-
     let character = Character {
         action: MovementType::Walk,
         facing_direction: Direction::Down,
         next_step: StepKind::Left,
     };
 
+    let walking_sprite_sheet = load_sprite_sheet(
+        world,
+        "sprites/characters/lucas/lucas.png",
+        "sprites/characters/lucas/lucas-walking.ron",
+        progress_counter,
+    );
+
     let allowed_movements = {
         let mut result = AllowedMovements::default();
         let game_config = world.read_resource::<GameConfig>();
 
         result.add_movement_type(MovementType::Walk, MovementData {
-            sprite_sheet: sprite_sheets.walking.clone(),
+            sprite_sheet: walking_sprite_sheet.clone(),
             velocity: game_config.player_walking_speed,
         });
 
         result.add_movement_type(MovementType::Run, MovementData {
-            sprite_sheet: sprite_sheets.running.clone(),
+            sprite_sheet: load_sprite_sheet(
+                world,
+                "sprites/characters/lucas/lucas.png",
+                "sprites/characters/lucas/lucas-running.ron",
+                progress_counter,
+            ),
             velocity: game_config.player_running_speed,
         });
 
@@ -86,13 +76,11 @@ pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCount
     };
 
     let sprite_render = SpriteRender {
-        sprite_sheet: sprite_sheets.walking.clone(),
+        sprite_sheet: walking_sprite_sheet,
         sprite_number: get_character_sprite_index_from_direction(&character.facing_direction),
     };
 
     let animation_set = get_player_animation_set();
-
-    world.insert(sprite_sheets);
 
     world.register::<AnimationTable<CharacterAnimation>>();
     world.register::<AllowedMovements>();
