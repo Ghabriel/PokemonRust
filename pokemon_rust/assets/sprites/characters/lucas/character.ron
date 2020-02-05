@@ -1,0 +1,13 @@
+(
+    texture_file_name: "lucas.png",
+    allowed_movements: {
+        Walk: (
+            sprite_sheet: "lucas-walking.ron",
+            velocity: 160,
+        ),
+        Run: (
+            sprite_sheet: "lucas-running.ron",
+            velocity: 256,
+        ),
+    }
+)

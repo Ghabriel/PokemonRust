@@ -9,15 +9,14 @@ use amethyst::{
         WorldExt,
     },
     renderer::{SpriteRender, SpriteSheet},
+    utils::application_root_dir,
 };
 
 use crate::{
     common::{
-        CommonResources,
         Direction,
         get_character_sprite_index_from_direction,
         load_sprite_sheet,
-        load_sprite_sheet_with_texture,
     },
     config::GameConfig,
     entities::{
@@ -34,7 +33,26 @@ use crate::{
     },
 };
 
-use std::collections::HashMap;
+use ron::de::from_reader;
+
+use serde::{Deserialize, Serialize};
+
+use std::{
+    collections::HashMap,
+    fs::File,
+};
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct SerializableCharacter {
+    texture_file_name: String,
+    allowed_movements: HashMap<MovementType, SerializableMovementData>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct SerializableMovementData {
+    sprite_sheet: String,
+    velocity: f32,
+}
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Character {
@@ -85,7 +103,7 @@ impl StepKind {
     }
 }
 
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum MovementType {
     Walk,
     Run,
@@ -133,6 +151,7 @@ pub struct NpcBuilder {
     pub position: MapCoordinates,
     pub kind: String,
     pub facing_direction: Direction,
+    pub initial_action: MovementType,
 }
 
 pub fn initialise_npc(
@@ -140,6 +159,8 @@ pub fn initialise_npc(
     npc_builder: NpcBuilder,
     progress_counter: &mut ProgressCounter,
 ) -> usize {
+    let character_data = read_character_file(&npc_builder.kind);
+
     let (map_id, transform) = {
         let map_handler = world.read_resource::<MapHandler>();
         let map_id = map_handler.make_map_id(npc_builder.map_id);
@@ -154,38 +175,55 @@ pub fn initialise_npc(
     };
 
     let character = Character {
-        // TODO: store some kind of default capability and use it here
-        action: MovementType::Walk,
+        action: npc_builder.initial_action,
         facing_direction: npc_builder.facing_direction,
         next_step: StepKind::Left,
     };
 
-    let sprite_sheet = {
-        let resources = world.read_resource::<CommonResources>();
-
-        load_sprite_sheet_with_texture(
-            world,
-            resources.npc_texture.clone(),
-            &format!("sprites/characters/{}/spritesheet.ron", npc_builder.kind),
-            progress_counter,
-        )
-    };
+    let mut default_sprite_sheet = None;
 
     let allowed_movements = {
         let mut result = AllowedMovements::default();
 
-        // TODO: decide the allowed movements based on the NPC kind and/or metadata
-        result.add_movement_type(MovementType::Walk, MovementData {
-            sprite_sheet: sprite_sheet.clone(),
-            // TODO: extract velocity to constant or use GameConfig::player_walking_speed
-            velocity: 160.,
-        });
+        for (movement_type, movement_data) in character_data.allowed_movements {
+            let texture_file_name = format!(
+                "sprites/characters/{}/{}",
+                npc_builder.kind,
+                character_data.texture_file_name,
+            );
+
+            let sprite_sheet_file_name = format!(
+                "sprites/characters/{}/{}",
+                npc_builder.kind,
+                movement_data.sprite_sheet,
+            );
+
+            let sprite_sheet = load_sprite_sheet(
+                world,
+                &texture_file_name,
+                &sprite_sheet_file_name,
+                progress_counter,
+            );
+
+            if movement_type == character.action {
+                default_sprite_sheet = Some(sprite_sheet.clone());
+            }
+
+            result.add_movement_type(movement_type, MovementData {
+                sprite_sheet,
+                velocity: movement_data.velocity,
+            });
+        }
 
         result
     };
 
+    if default_sprite_sheet.is_none() {
+        panic!("Invalid initial action for NPC of kind {}", npc_builder.kind);
+    }
+
     let sprite_render = SpriteRender {
-        sprite_sheet,
+        sprite_sheet: default_sprite_sheet.unwrap(),
         sprite_number: get_character_sprite_index_from_direction(&character.facing_direction),
     };
 
@@ -204,6 +242,20 @@ pub fn initialise_npc(
 
     world.write_resource::<MapHandler>()
         .register_npc(&map_id, &npc_builder.position, entity)
+}
+
+fn read_character_file(character_kind: &str) -> SerializableCharacter {
+    let character_file = application_root_dir()
+        .unwrap()
+        .join("assets")
+        .join("sprites")
+        .join("characters")
+        .join(character_kind)
+        .join("character.ron");
+
+    let file = File::open(character_file).expect("Failed opening character file");
+
+    from_reader(file).expect("Failed deserializing character")
 }
 
 pub fn get_npc_animation_set() -> AnimationTable<CharacterAnimation> {

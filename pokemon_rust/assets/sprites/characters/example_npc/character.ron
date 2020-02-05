@@ -1,0 +1,9 @@
+(
+    texture_file_name: "../npc.png",
+    allowed_movements: {
+        Walk: (
+            sprite_sheet: "spritesheet.ron",
+            velocity: 160,
+        ),
+    }
+)

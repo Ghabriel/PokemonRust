@@ -10,7 +10,7 @@ use crate::{
         Direction,
         get_character_sprite_index_from_direction,
     },
-    entities::character::{Character, initialise_npc, NpcBuilder, PlayerEntity},
+    entities::character::{Character, initialise_npc, MovementType, NpcBuilder, PlayerEntity},
     map::{
         MapCoordinates,
         MapHandler,
@@ -33,6 +33,8 @@ pub(super) fn create_npc(
         position: MapCoordinates::new(x, y),
         kind,
         facing_direction: parse_lua_direction(direction),
+        // TODO: this should be a parameter
+        initial_action: MovementType::Walk,
     };
 
     context.store(npc)
