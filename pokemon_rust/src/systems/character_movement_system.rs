@@ -100,9 +100,7 @@ impl<'a> System<'a> for CharacterMovementSystem {
                     sprite_render,
                 );
 
-                if !is_player {
-                    map.mark_tile_as_solid(&movement_data.to);
-                }
+                map.mark_tile_as_solid(&movement_data.to);
 
                 movement_data.started = true;
             }
@@ -120,9 +118,7 @@ impl<'a> System<'a> for CharacterMovementSystem {
                     &mut event_queue,
                 );
 
-                if !is_player {
-                    map.remove_solid_mark(&movement_data.from);
-                }
+                map.remove_solid_mark(&movement_data.from);
 
                 static_characters.push(entity);
                 continue;
