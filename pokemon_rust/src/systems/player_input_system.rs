@@ -90,7 +90,7 @@ impl<'a> System<'a> for PlayerInputSystem {
             character.action = MovementType::Walk;
         }
 
-        let npc_id = map.get_player_id(&player_entity);
+        let npc_id = map.get_character_id_by_entity(&player_entity.0);
 
         let horizontal_value = input_handler
             .axis_value("horizontal")

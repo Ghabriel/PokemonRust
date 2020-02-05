@@ -8,7 +8,6 @@ use amethyst::ecs::Entity;
 
 use crate::{
     common::Direction,
-    entities::character::PlayerEntity,
     events::ScriptEvent,
 };
 
@@ -186,11 +185,11 @@ impl MapHandler {
         });
     }
 
-    pub fn get_player_id(&self, player_entity: &PlayerEntity) -> usize {
+    pub fn get_character_id_by_entity(&self, entity: &Entity) -> usize {
         *self.characters
             .iter()
             .map(|(id, c)| (id, c.entity))
-            .find(|(_, entity)| *entity == player_entity.0)
+            .find(|(_, e)| *e == *entity)
             .map(|(id, _)| id)
             .unwrap()
     }
