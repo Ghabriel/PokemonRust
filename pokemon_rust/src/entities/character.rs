@@ -192,13 +192,13 @@ pub fn initialise_npc(
             }
 
             let texture_file_name = format!(
-                "sprites/characters/{}/{}",
+                "characters/{}/{}",
                 npc_builder.kind,
                 character_data.texture_file_name,
             );
 
             let sprite_sheet_file_name = format!(
-                "sprites/characters/{}/{}",
+                "characters/{}/{}",
                 npc_builder.kind,
                 movement_data.sprite_sheet,
             );
@@ -254,7 +254,6 @@ fn read_character_file(character_kind: &str) -> SerializableCharacter {
     let character_file = application_root_dir()
         .unwrap()
         .join("assets")
-        .join("sprites")
         .join("characters")
         .join(character_kind)
         .join("character.ron");

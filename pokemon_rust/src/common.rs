@@ -8,7 +8,6 @@ use amethyst::{
         sprite::{Sprite, TextureCoordinates},
         SpriteSheet,
         SpriteSheetFormat,
-        Texture,
     },
     ui::FontHandle,
 };
@@ -30,7 +29,6 @@ pub struct CommonResources {
     pub font: FontHandle,
     pub text_box: Handle<SpriteSheet>,
     pub black: Handle<SpriteSheet>,
-    pub npc_texture: Handle<Texture>,
 }
 
 /// Loads a texture + spritesheet from given image/ron filenames.

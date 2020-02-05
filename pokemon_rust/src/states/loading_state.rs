@@ -10,7 +10,7 @@ use amethyst::{
         WorldExt,
     },
     prelude::*,
-    renderer::{Camera, ImageFormat},
+    renderer::Camera,
     ui::TtfFormat,
 };
 
@@ -60,14 +60,7 @@ pub fn initialise_resources(world: &mut World, progress_counter: &mut ProgressCo
         &mut *progress_counter,
     );
 
-    let npc_texture = world.read_resource::<Loader>().load(
-        "sprites/characters/npc.png",
-        ImageFormat::default(),
-        &mut *progress_counter,
-        &world.read_resource(),
-    );
-
-    world.insert(CommonResources { font, text_box, black, npc_texture });
+    world.insert(CommonResources { font, text_box, black });
 }
 
 #[derive(Default)]
