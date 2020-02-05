@@ -24,12 +24,10 @@ use crate::{
         AnimationTable,
     },
     map::{
-        map_to_world_coordinates,
         MapCoordinates,
         MapHandler,
         PlayerCoordinates,
         TileData,
-        WorldCoordinates,
     },
 };
 
@@ -182,10 +180,18 @@ pub fn initialise_npc(
 
     let mut default_sprite_sheet = None;
 
-    let allowed_movements = {
-        let mut result = AllowedMovements::default();
+    let (animation_table, allowed_movements) = {
+        let mut animation_table = AnimationTable::new();
+        let mut allowed_movements = AllowedMovements::default();
+
+        add_idle_animations(&mut animation_table);
 
         for (movement_type, movement_data) in character_data.allowed_movements {
+            match movement_type {
+                MovementType::Walk => add_walk_animations(&mut animation_table),
+                MovementType::Run => add_run_animations(&mut animation_table),
+            }
+
             let texture_file_name = format!(
                 "sprites/characters/{}/{}",
                 npc_builder.kind,
@@ -209,13 +215,13 @@ pub fn initialise_npc(
                 default_sprite_sheet = Some(sprite_sheet.clone());
             }
 
-            result.add_movement_type(movement_type, MovementData {
+            allowed_movements.add_movement_type(movement_type, MovementData {
                 sprite_sheet,
                 velocity: movement_data.velocity,
             });
         }
 
-        result
+        (animation_table, allowed_movements)
     };
 
     if default_sprite_sheet.is_none() {
@@ -227,9 +233,10 @@ pub fn initialise_npc(
         sprite_number: get_character_sprite_index_from_direction(&character.facing_direction),
     };
 
-    let animation_set = get_npc_animation_set();
 
     world.register::<AnimationTable<CharacterAnimation>>();
+    world.register::<AllowedMovements>();
+    world.register::<Character>();
 
     let entity = world
         .create_entity()
@@ -237,7 +244,7 @@ pub fn initialise_npc(
         .with(allowed_movements)
         .with(transform)
         .with(sprite_render)
-        .with(animation_set)
+        .with(animation_table)
         .build();
 
     world.write_resource::<MapHandler>()
@@ -258,94 +265,26 @@ fn read_character_file(character_kind: &str) -> SerializableCharacter {
     from_reader(file).expect("Failed deserializing character")
 }
 
-pub fn get_npc_animation_set() -> AnimationTable<CharacterAnimation> {
-    let mut animation_table = AnimationTable::new();
-
-    add_idle_animations(&mut animation_table);
-    add_walk_animations(&mut animation_table);
-
-    animation_table
-}
-
 pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCounter) -> Entity {
-    let character = Character {
-        action: MovementType::Walk,
-        facing_direction: Direction::Down,
-        next_step: StepKind::Left,
+    let position = {
+        let game_config = world.read_resource::<GameConfig>();
+
+        MapCoordinates::from_tuple(&game_config.player_starting_position)
     };
 
-    let walking_sprite_sheet = load_sprite_sheet(
+    let player_id = initialise_npc(
         world,
-        "sprites/characters/lucas/lucas.png",
-        "sprites/characters/lucas/lucas-walking.ron",
-        progress_counter,
+        NpcBuilder {
+            map_id: "test_map".to_string(),
+            position,
+            kind: "lucas".to_string(),
+            facing_direction: Direction::Down,
+            initial_action: MovementType::Walk,
+        },
+        progress_counter
     );
 
-    let allowed_movements = {
-        let mut result = AllowedMovements::default();
-        let game_config = world.read_resource::<GameConfig>();
-
-        result.add_movement_type(MovementType::Walk, MovementData {
-            sprite_sheet: walking_sprite_sheet.clone(),
-            velocity: game_config.player_walking_speed,
-        });
-
-        result.add_movement_type(MovementType::Run, MovementData {
-            sprite_sheet: load_sprite_sheet(
-                world,
-                "sprites/characters/lucas/lucas.png",
-                "sprites/characters/lucas/lucas-running.ron",
-                progress_counter,
-            ),
-            velocity: game_config.player_running_speed,
-        });
-
-        result
-    };
-
-    let transform = {
-        let game_config = world.read_resource::<GameConfig>();
-        let position = MapCoordinates::from_tuple(&game_config.player_starting_position);
-        let position = map_to_world_coordinates(&position, &WorldCoordinates::origin());
-
-        PlayerCoordinates::from_world_coordinates(&position)
-            .to_transform()
-    };
-
-    let sprite_render = SpriteRender {
-        sprite_sheet: walking_sprite_sheet,
-        sprite_number: get_character_sprite_index_from_direction(&character.facing_direction),
-    };
-
-    let animation_set = get_player_animation_set();
-
-    world.register::<AnimationTable<CharacterAnimation>>();
-    world.register::<AllowedMovements>();
-    world.register::<Character>();
-
-    let entity = world
-        .create_entity()
-        .with(character)
-        .with(allowed_movements)
-        .with(transform)
-        .with(sprite_render)
-        .with(animation_set)
-        .build();
-
-    world.write_resource::<MapHandler>()
-        .register_player(entity);
-
-    entity
-}
-
-pub fn get_player_animation_set() -> AnimationTable<CharacterAnimation> {
-    let mut animation_table = AnimationTable::new();
-
-    add_idle_animations(&mut animation_table);
-    add_walk_animations(&mut animation_table);
-    add_run_animations(&mut animation_table);
-
-    animation_table
+    *world.read_resource::<MapHandler>().get_character_by_id(player_id)
 }
 
 pub fn add_idle_animations(animation_table: &mut AnimationTable<CharacterAnimation>) {

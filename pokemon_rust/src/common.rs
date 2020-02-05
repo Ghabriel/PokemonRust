@@ -56,23 +56,6 @@ pub fn load_sprite_sheet(
     )
 }
 
-/// Loads a spritesheet from a texture handle and a given ron filename.
-pub fn load_sprite_sheet_with_texture(
-    world: &World,
-    texture_handle: Handle<Texture>,
-    ron_name: &str,
-    progress_counter: &mut ProgressCounter,
-) -> Handle<SpriteSheet> {
-    let loader = world.read_resource::<Loader>();
-
-    loader.load(
-        ron_name,
-        SpriteSheetFormat(texture_handle),
-        &mut *progress_counter,
-        &world.read_resource()
-    )
-}
-
 /// Loads a texture from a given image filename, and creates a spritesheet to
 /// it representing the entire texture.
 pub fn load_full_texture_sprite_sheet(

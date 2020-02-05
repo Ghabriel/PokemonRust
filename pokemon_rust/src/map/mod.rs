@@ -175,16 +175,6 @@ impl MapHandler {
         character_id
     }
 
-    pub fn register_player(&mut self, entity: Entity) {
-        let character_id = self.next_character_id;
-        self.next_character_id += 1;
-
-        self.characters.insert(character_id, CharacterData {
-            entity,
-            natural_map: self.get_current_map_id(),
-        });
-    }
-
     pub fn get_character_id_by_entity(&self, entity: &Entity) -> usize {
         *self.characters
             .iter()
