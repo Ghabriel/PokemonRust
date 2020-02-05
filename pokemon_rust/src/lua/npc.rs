@@ -10,10 +10,7 @@ use crate::{
         Direction,
         get_character_sprite_index_from_direction,
     },
-    entities::{
-        npc::{initialise_npc, Npc, NpcBuilder},
-        player::PlayerEntity,
-    },
+    entities::character::{Character, initialise_npc, NpcBuilder, PlayerEntity},
     map::{
         MapCoordinates,
         MapHandler,
@@ -49,9 +46,9 @@ pub(super) fn change_npc_direction(context: &mut ExecutionContext, npc_key: usiz
     context.store_at(npc_key, npc);
 }
 
-pub(super) fn rotate_npc_towards_player(context: &mut ExecutionContext, npc_id: usize) {
+pub(super) fn rotate_npc_towards_player(context: &mut ExecutionContext, character_id: usize) {
     let map_handler = context.world.write_resource::<MapHandler>();
-    let npc_entity = map_handler.get_npc_by_id(npc_id);
+    let npc_entity = map_handler.get_character_by_id(character_id);
 
     let npc_position = context.world.read_storage::<Transform>()
         .get(*npc_entity)
@@ -74,7 +71,7 @@ pub(super) fn rotate_npc_towards_player(context: &mut ExecutionContext, npc_id: 
         .unwrap()
         .sprite_number = get_character_sprite_index_from_direction(&direction);
 
-    context.world.write_storage::<Npc>()
+    context.world.write_storage::<Character>()
         .get_mut(*npc_entity)
         .unwrap()
         .facing_direction = direction;

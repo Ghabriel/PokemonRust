@@ -16,8 +16,15 @@ use amethyst::{
 
 use crate::{
     common::Direction,
-    entities::player::{Player, PlayerAction, PlayerEntity, PlayerMovement},
-    events::{EventQueue, MapInteractionEvent, PlayerSingleMoveEvent},
+    entities::character::{
+        AllowedMovements,
+        Character,
+        CharacterMovement,
+        MovementType,
+        PlayerEntity,
+    },
+    events::{CharacterSingleMoveEvent, EventQueue, MapInteractionEvent},
+    map::MapHandler,
 };
 
 pub struct PlayerInputSystem {
@@ -35,21 +42,25 @@ impl PlayerInputSystem {
 
 impl<'a> System<'a> for PlayerInputSystem {
     type SystemData = (
-        WriteStorage<'a, Player>,
-        ReadStorage<'a, PlayerMovement>,
+        WriteStorage<'a, Character>,
+        ReadStorage<'a, CharacterMovement>,
+        ReadStorage<'a, AllowedMovements>,
         Write<'a, EventQueue>,
         Read<'a, EventChannel<InputEvent<StringBindings>>>,
         Read<'a, InputHandler<StringBindings>>,
         ReadExpect<'a, PlayerEntity>,
+        ReadExpect<'a, MapHandler>,
     );
 
     fn run(&mut self, (
-        mut players,
+        mut characters,
         movements,
+        allowed_movements,
         mut event_queue,
         input_event_channel,
         input_handler,
         player_entity,
+        map,
     ): Self::SystemData) {
         if movements.contains(player_entity.0) {
             // Ignores all incoming events
@@ -66,26 +77,31 @@ impl<'a> System<'a> for PlayerInputSystem {
             }
         }
 
-        let player = &mut players
+        let character = &mut characters
             .get_mut(player_entity.0)
-            .expect("Failed to retrieve Player");
+            .expect("Failed to retrieve Character");
 
-        if input_handler.action_is_down("cancel").unwrap_or(false) {
-            player.action = PlayerAction::Run;
+        let allowed_movements: &AllowedMovements = allowed_movements.get(player_entity.0).unwrap();
+        let cancel_is_down = input_handler.action_is_down("cancel").unwrap_or(false);
+
+        if allowed_movements.can_perform(&MovementType::Run) && cancel_is_down {
+            character.action = MovementType::Run;
         } else {
-            player.action = PlayerAction::Walk;
+            character.action = MovementType::Walk;
         }
+
+        let character_id = map.get_character_id_by_entity(&player_entity.0);
 
         let horizontal_value = input_handler
             .axis_value("horizontal")
             .unwrap_or(0.);
 
         if horizontal_value < -0.2 {
-            player.facing_direction = Direction::Left;
-            event_queue.push(PlayerSingleMoveEvent);
+            character.facing_direction = Direction::Left;
+            event_queue.push(CharacterSingleMoveEvent::new(character_id));
         } else if horizontal_value > 0.2 {
-            player.facing_direction = Direction::Right;
-            event_queue.push(PlayerSingleMoveEvent);
+            character.facing_direction = Direction::Right;
+            event_queue.push(CharacterSingleMoveEvent::new(character_id));
         }
 
         let vertical_value = input_handler
@@ -93,11 +109,11 @@ impl<'a> System<'a> for PlayerInputSystem {
             .unwrap_or(0.);
 
         if vertical_value < -0.2 {
-            player.facing_direction = Direction::Down;
-            event_queue.push(PlayerSingleMoveEvent);
+            character.facing_direction = Direction::Down;
+            event_queue.push(CharacterSingleMoveEvent::new(character_id));
         } else if vertical_value > 0.2 {
-            player.facing_direction = Direction::Up;
-            event_queue.push(PlayerSingleMoveEvent);
+            character.facing_direction = Direction::Up;
+            event_queue.push(CharacterSingleMoveEvent::new(character_id));
         }
     }
 }

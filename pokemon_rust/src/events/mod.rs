@@ -2,15 +2,14 @@
 //! textboxes, warps and much more.
 
 pub mod chained_events;
+pub mod character_move_event;
+pub mod character_single_move_event;
 pub mod event_executor;
 pub mod event_queue;
 pub mod fade_in_event;
 pub mod fade_out_event;
 pub mod map_interaction_event;
-pub mod npc_move_event;
-pub mod npc_single_move_event;
 pub mod parallel_events;
-pub mod player_single_move_event;
 pub mod repeated_event;
 pub mod script_event;
 pub mod switch_map_event;
@@ -21,15 +20,14 @@ use amethyst::ecs::World;
 
 pub use self::{
     chained_events::ChainedEvents,
+    character_move_event::CharacterMoveEvent,
+    character_single_move_event::CharacterSingleMoveEvent,
     event_executor::EventExecutor,
     event_queue::EventQueue,
     fade_out_event::FadeOutEvent,
     fade_in_event::FadeInEvent,
     map_interaction_event::MapInteractionEvent,
-    npc_move_event::NpcMoveEvent,
-    npc_single_move_event::NpcSingleMoveEvent,
     parallel_events::ParallelEvents,
-    player_single_move_event::PlayerSingleMoveEvent,
     repeated_event::RepeatedEvent,
     script_event::ScriptEvent,
     switch_map_event::SwitchMapEvent,

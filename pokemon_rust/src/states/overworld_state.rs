@@ -7,14 +7,13 @@ use amethyst::{
 
 use crate::{
     config::GameConfig,
-    entities::CharacterAnimation,
+    entities::character::CharacterAnimation,
     events::{EventExecutor, EventQueue},
     states::OverworldAnimationState,
     systems::{
         AnimationSystem,
-        NpcMovementSystem,
+        CharacterMovementSystem,
         PlayerInputSystem,
-        PlayerMovementSystem,
     },
 };
 
@@ -47,9 +46,8 @@ impl SimpleState for OverworldState<'_, '_> {
 
         let mut dispatcher = DispatcherBuilder::new()
             .with(AnimationSystem::<CharacterAnimation>::new(), "animation_system", &[])
-            .with(NpcMovementSystem, "npc_movement_system", &[])
             .with(PlayerInputSystem::new(world), "player_input_system", &[])
-            .with(PlayerMovementSystem::default(), "player_movement_system", &["player_input_system"])
+            .with(CharacterMovementSystem, "character_movement_system", &["player_input_system"])
             .with(FpsCounterSystem, "fps_counter_system", &[])
             .with_pool(world.read_resource::<ArcThreadPool>().deref().clone())
             .build();

@@ -9,9 +9,7 @@ use amethyst::{
 use crate::{
     common::load_full_texture_sprite_sheet,
     constants::{MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
-    entities::{
-        player::PlayerEntity,
-    },
+    entities::character::PlayerEntity,
     events::EventQueue,
 };
 
@@ -53,12 +51,20 @@ use super::{
 pub fn change_tile(
     initial_tile_data: &TileData,
     final_tile_data: &TileData,
+    player_entity: &PlayerEntity,
     map: &mut MapHandler,
     event_queue: &mut EventQueue,
 ) {
     if initial_tile_data.map_id != final_tile_data.map_id {
         println!("Changing to map {}", final_tile_data.map_id.0);
         map.current_map = final_tile_data.map_id.clone();
+        let natural_map = map.characters
+            .iter_mut()
+            .map(|(_, c)| (c.entity, &mut c.natural_map))
+            .find(|(entity, _)| *entity == player_entity.0)
+            .map(|(_, natural_map)| natural_map)
+            .unwrap();
+        *natural_map = final_tile_data.map_id.clone();
 
         map.get_map_scripts(&final_tile_data.map_id, MapScriptKind::OnMapEnter)
             .for_each(|event| {
@@ -140,7 +146,8 @@ pub fn initialise_map(world: &mut World, progress_counter: &mut ProgressCounter)
             loaded_maps
         },
         current_map: MapId("test_map".to_string()),
-        next_npc_id: 0,
+        next_character_id: 0,
+        characters: HashMap::new(),
     };
 
     {

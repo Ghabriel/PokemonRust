@@ -1,23 +1,23 @@
 use amethyst::ecs::World;
 
-use super::{GameEvent, NpcSingleMoveEvent, RepeatedEvent, ShouldDisableInput};
+use super::{CharacterSingleMoveEvent, GameEvent, RepeatedEvent, ShouldDisableInput};
 
-pub struct NpcMoveEvent {
-    executor: RepeatedEvent<NpcSingleMoveEvent>,
+pub struct CharacterMoveEvent {
+    executor: RepeatedEvent<CharacterSingleMoveEvent>,
 }
 
-impl NpcMoveEvent {
-    pub fn new(npc_id: usize, num_tiles: usize) -> NpcMoveEvent {
-        NpcMoveEvent {
+impl CharacterMoveEvent {
+    pub fn new(character_id: usize, num_tiles: usize) -> CharacterMoveEvent {
+        CharacterMoveEvent {
             executor: RepeatedEvent::from_prototype(
-                &NpcSingleMoveEvent::new(npc_id),
+                &CharacterSingleMoveEvent::new(character_id),
                 num_tiles,
             ),
         }
     }
 }
 
-impl GameEvent for NpcMoveEvent {
+impl GameEvent for CharacterMoveEvent {
     fn start(&mut self, world: &mut World) -> ShouldDisableInput {
         self.executor.start(world)
     }

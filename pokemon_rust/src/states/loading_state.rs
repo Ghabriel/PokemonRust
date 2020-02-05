@@ -16,7 +16,7 @@ use amethyst::{
 
 use crate::{
     common::{load_full_texture_sprite_sheet, CommonResources},
-    entities::player::{initialise_player, PlayerEntity},
+    entities::character::{initialise_player, PlayerEntity},
     events::EventQueue,
     map::initialise_map,
     states::OverworldState,
@@ -93,8 +93,8 @@ impl SimpleState for LoadingState<'_, '_> {
 
         let mut progress_counter = ProgressCounter::new();
         initialise_resources(world, &mut progress_counter);
-        let player = initialise_player(world, &mut progress_counter);
         initialise_map(world, &mut progress_counter);
+        let player = initialise_player(world, &mut progress_counter);
         initialise_camera(world, player);
         self.progress_counter = Some(progress_counter);
 

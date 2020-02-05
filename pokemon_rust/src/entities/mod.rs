@@ -1,14 +1,11 @@
 use amethyst::ecs::{Component, DenseVecStorage};
 
-use serde::{Deserialize, Serialize};
-
 use std::{
     collections::HashMap,
     hash::Hash,
 };
 
-pub mod npc;
-pub mod player;
+pub mod character;
 
 pub struct AnimationTable<T>
 where
@@ -66,24 +63,4 @@ where
 pub struct AnimationData {
     pub timings: Vec<f32>,
     pub frames: Vec<usize>,
-}
-
-#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
-pub enum CharacterAnimation {
-    IdleUp,
-    IdleDown,
-    IdleLeft,
-    IdleRight,
-    NpcMoveUp,
-    NpcMoveDown,
-    NpcMoveLeft,
-    NpcMoveRight,
-    WalkUp,
-    WalkDown,
-    WalkLeft,
-    WalkRight,
-    RunUp,
-    RunDown,
-    RunLeft,
-    RunRight,
 }
