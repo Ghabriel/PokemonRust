@@ -38,7 +38,7 @@ pub use self::{
 pub struct MapHandler {
     loaded_maps: HashMap<String, Map>,
     current_map: MapId,
-    next_npc_id: usize,
+    next_character_id: usize,
     characters: HashMap<usize, CharacterData>,
 }
 
@@ -152,15 +152,15 @@ impl MapHandler {
         position: &MapCoordinates,
         entity: Entity,
     ) -> usize {
-        let npc_id = self.next_npc_id;
-        self.next_npc_id += 1;
+        let character_id = self.next_character_id;
+        self.next_character_id += 1;
 
         let map = self.loaded_maps.get_mut(&map_id.0).unwrap();
 
         map.script_repository.push(GameScript::Lua {
             file: format!("assets/maps/{}/scripts.lua", map_id.0),
             function: "interact_with_npc".to_string(),
-            parameters: Some(LuaGameScriptParameters::TargetNpc(npc_id)),
+            parameters: Some(LuaGameScriptParameters::TargetNpc(character_id)),
         });
 
         map.actions.insert(position.clone(), GameAction {
@@ -170,16 +170,16 @@ impl MapHandler {
 
         map.solids.insert(position.clone(), Tile);
 
-        self.characters.insert(npc_id, CharacterData { entity, natural_map: map_id.clone() });
+        self.characters.insert(character_id, CharacterData { entity, natural_map: map_id.clone() });
 
-        npc_id
+        character_id
     }
 
     pub fn register_player(&mut self, entity: Entity) {
-        let npc_id = self.next_npc_id;
-        self.next_npc_id += 1;
+        let character_id = self.next_character_id;
+        self.next_character_id += 1;
 
-        self.characters.insert(npc_id, CharacterData {
+        self.characters.insert(character_id, CharacterData {
             entity,
             natural_map: self.get_current_map_id(),
         });
@@ -194,10 +194,10 @@ impl MapHandler {
             .unwrap()
     }
 
-    pub fn get_npc_by_id(&self, npc_id: usize) -> &Entity {
+    pub fn get_character_by_id(&self, character_id: usize) -> &Entity {
         &self.characters
             .iter()
-            .find(|(id, _)| **id == npc_id)
+            .find(|(id, _)| **id == character_id)
             .map(|(_, npc)| npc)
             .unwrap()
             .entity

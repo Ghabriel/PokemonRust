@@ -90,7 +90,7 @@ impl<'a> System<'a> for PlayerInputSystem {
             character.action = MovementType::Walk;
         }
 
-        let npc_id = map.get_character_id_by_entity(&player_entity.0);
+        let character_id = map.get_character_id_by_entity(&player_entity.0);
 
         let horizontal_value = input_handler
             .axis_value("horizontal")
@@ -98,10 +98,10 @@ impl<'a> System<'a> for PlayerInputSystem {
 
         if horizontal_value < -0.2 {
             character.facing_direction = Direction::Left;
-            event_queue.push(CharacterSingleMoveEvent::new(npc_id));
+            event_queue.push(CharacterSingleMoveEvent::new(character_id));
         } else if horizontal_value > 0.2 {
             character.facing_direction = Direction::Right;
-            event_queue.push(CharacterSingleMoveEvent::new(npc_id));
+            event_queue.push(CharacterSingleMoveEvent::new(character_id));
         }
 
         let vertical_value = input_handler
@@ -110,10 +110,10 @@ impl<'a> System<'a> for PlayerInputSystem {
 
         if vertical_value < -0.2 {
             character.facing_direction = Direction::Down;
-            event_queue.push(CharacterSingleMoveEvent::new(npc_id));
+            event_queue.push(CharacterSingleMoveEvent::new(character_id));
         } else if vertical_value > 0.2 {
             character.facing_direction = Direction::Up;
-            event_queue.push(CharacterSingleMoveEvent::new(npc_id));
+            event_queue.push(CharacterSingleMoveEvent::new(character_id));
         }
     }
 }

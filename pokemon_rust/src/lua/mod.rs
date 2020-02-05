@@ -120,8 +120,8 @@ fn run_script(
             None => function.call(())?,
             Some(LuaGameScriptParameters::SourceTile(coordinates)) =>
                 function.call((coordinates.x(), coordinates.y()))?,
-            Some(LuaGameScriptParameters::TargetNpc(npc_id)) =>
-                function.call(*npc_id)?,
+            Some(LuaGameScriptParameters::TargetNpc(character_id)) =>
+                function.call(*character_id)?,
         }
 
         Ok(())
@@ -171,7 +171,7 @@ where
                 // NPC functions
                 rust_create_npc: create_npc(map_id: String, x: u32, y: u32, kind: String, direction: u8),
                 rust_change_npc_direction: change_npc_direction(npc_key: usize, direction: u8),
-                rust_rotate_npc_towards_player: rotate_npc_towards_player(npc_id: usize),
+                rust_rotate_npc_towards_player: rotate_npc_towards_player(character_id: usize),
                 rust_add_npc: add_npc(npc_key: usize)
             );
 

@@ -7,10 +7,10 @@ pub struct CharacterMoveEvent {
 }
 
 impl CharacterMoveEvent {
-    pub fn new(npc_id: usize, num_tiles: usize) -> CharacterMoveEvent {
+    pub fn new(character_id: usize, num_tiles: usize) -> CharacterMoveEvent {
         CharacterMoveEvent {
             executor: RepeatedEvent::from_prototype(
-                &CharacterSingleMoveEvent::new(npc_id),
+                &CharacterSingleMoveEvent::new(character_id),
                 num_tiles,
             ),
         }

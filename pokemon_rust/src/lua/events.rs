@@ -15,10 +15,10 @@ pub(super) fn create_chained_event(context: &mut ExecutionContext) -> usize {
 
 pub(super) fn create_npc_move_event(
     context: &mut ExecutionContext,
-    npc_id: usize,
+    character_id: usize,
     num_tiles: usize,
 ) -> usize {
-    let event = CharacterMoveEvent::new(npc_id, num_tiles);
+    let event = CharacterMoveEvent::new(character_id, num_tiles);
 
     context.store(event)
 }

@@ -13,13 +13,13 @@ use super::{GameEvent, ShouldDisableInput};
 
 #[derive(Clone)]
 pub struct CharacterSingleMoveEvent {
-    npc_id: usize,
+    character_id: usize,
 }
 
 impl CharacterSingleMoveEvent {
-    pub fn new(npc_id: usize) -> CharacterSingleMoveEvent {
+    pub fn new(character_id: usize) -> CharacterSingleMoveEvent {
         CharacterSingleMoveEvent {
-            npc_id,
+            character_id,
         }
     }
 }
@@ -27,7 +27,7 @@ impl CharacterSingleMoveEvent {
 impl GameEvent for CharacterSingleMoveEvent {
     fn start(&mut self, world: &mut World) -> ShouldDisableInput {
         let map_handler = world.read_resource::<MapHandler>();
-        let entity = map_handler.get_npc_by_id(self.npc_id);
+        let entity = map_handler.get_character_by_id(self.character_id);
 
         let characters = world.read_storage::<Character>();
         let character = characters.get(*entity).unwrap();
@@ -70,7 +70,7 @@ impl GameEvent for CharacterSingleMoveEvent {
 
     fn is_complete(&self, world: &mut World) -> bool {
         let map_handler = world.read_resource::<MapHandler>();
-        let entity = map_handler.get_npc_by_id(self.npc_id);
+        let entity = map_handler.get_character_by_id(self.character_id);
 
         !world.read_storage::<CharacterMovement>()
             .contains(*entity)
