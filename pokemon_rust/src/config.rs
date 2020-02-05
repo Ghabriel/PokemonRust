@@ -15,6 +15,8 @@ pub struct GameConfig {
     pub text_delay: f32,
     /// The duration of fade in/out animations, in seconds.
     pub fade_duration: f32,
+    /// The starting map of the player.
+    pub player_starting_map: String,
     /// The starting position of the player, in Map Coordinates.
     pub player_starting_position: (u32, u32),
     /// Decides whether the FPS should be printed

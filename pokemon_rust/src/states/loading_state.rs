@@ -16,9 +16,10 @@ use amethyst::{
 
 use crate::{
     common::{load_full_texture_sprite_sheet, CommonResources},
+    config::GameConfig,
     entities::character::{initialise_player, PlayerEntity},
     events::EventQueue,
-    map::initialise_map,
+    map::{initialise_map, MapCoordinates},
     states::OverworldState,
 };
 
@@ -92,10 +93,26 @@ impl SimpleState for LoadingState<'_, '_> {
         world.insert(EventQueue::default());
 
         let mut progress_counter = ProgressCounter::new();
+
+        let (starting_map, starting_position) = {
+            let game_config = world.read_resource::<GameConfig>();
+
+            (
+                game_config.player_starting_map.clone(),
+                MapCoordinates::from_tuple(&game_config.player_starting_position),
+            )
+        };
+
         initialise_resources(world, &mut progress_counter);
-        initialise_map(world, &mut progress_counter);
-        let player = initialise_player(world, &mut progress_counter);
+        initialise_map(world, &starting_map, &mut progress_counter);
+        let player = initialise_player(
+            world,
+            &starting_map,
+            starting_position,
+            &mut progress_counter,
+        );
         initialise_camera(world, player);
+
         self.progress_counter = Some(progress_counter);
 
         world.insert(PlayerEntity(player));

@@ -136,16 +136,16 @@ pub fn load_detached_map(
     load_map(world, &map_name, reference_point, progress_counter)
 }
 
-pub fn initialise_map(world: &mut World, progress_counter: &mut ProgressCounter) {
-    let map = load_map(world, "test_map", WorldCoordinates::origin(), progress_counter);
+pub fn initialise_map(world: &mut World, starting_map: &str, progress_counter: &mut ProgressCounter) {
+    let map = load_map(world, starting_map, WorldCoordinates::origin(), progress_counter);
 
     let map_handler = MapHandler {
         loaded_maps: {
             let mut loaded_maps = HashMap::new();
-            loaded_maps.insert("test_map".to_string(), map);
+            loaded_maps.insert(starting_map.to_string(), map);
             loaded_maps
         },
-        current_map: MapId("test_map".to_string()),
+        current_map: MapId(starting_map.to_string()),
         next_character_id: 0,
         characters: HashMap::new(),
     };

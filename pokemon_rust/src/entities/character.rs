@@ -18,7 +18,6 @@ use crate::{
         get_character_sprite_index_from_direction,
         load_sprite_sheet,
     },
-    config::GameConfig,
     entities::{
         AnimationData,
         AnimationTable,
@@ -265,18 +264,17 @@ fn read_character_file(character_kind: &str) -> SerializableCharacter {
     from_reader(file).expect("Failed deserializing character")
 }
 
-pub fn initialise_player(world: &mut World, progress_counter: &mut ProgressCounter) -> Entity {
-    let position = {
-        let game_config = world.read_resource::<GameConfig>();
-
-        MapCoordinates::from_tuple(&game_config.player_starting_position)
-    };
-
+pub fn initialise_player(
+    world: &mut World,
+    starting_map: &str,
+    starting_position: MapCoordinates,
+    progress_counter: &mut ProgressCounter,
+) -> Entity {
     let player_id = initialise_npc(
         world,
         NpcBuilder {
-            map_id: "test_map".to_string(),
-            position,
+            map_id: starting_map.to_string(),
+            position: starting_position,
             kind: "lucas".to_string(),
             facing_direction: Direction::Down,
             initial_action: MovementType::Walk,
