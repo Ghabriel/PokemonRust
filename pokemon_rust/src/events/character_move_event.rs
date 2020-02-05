@@ -2,13 +2,13 @@ use amethyst::ecs::World;
 
 use super::{CharacterSingleMoveEvent, GameEvent, RepeatedEvent, ShouldDisableInput};
 
-pub struct NpcMoveEvent {
+pub struct CharacterMoveEvent {
     executor: RepeatedEvent<CharacterSingleMoveEvent>,
 }
 
-impl NpcMoveEvent {
-    pub fn new(npc_id: usize, num_tiles: usize) -> NpcMoveEvent {
-        NpcMoveEvent {
+impl CharacterMoveEvent {
+    pub fn new(npc_id: usize, num_tiles: usize) -> CharacterMoveEvent {
+        CharacterMoveEvent {
             executor: RepeatedEvent::from_prototype(
                 &CharacterSingleMoveEvent::new(npc_id),
                 num_tiles,
@@ -17,7 +17,7 @@ impl NpcMoveEvent {
     }
 }
 
-impl GameEvent for NpcMoveEvent {
+impl GameEvent for CharacterMoveEvent {
     fn start(&mut self, world: &mut World) -> ShouldDisableInput {
         self.executor.start(world)
     }
