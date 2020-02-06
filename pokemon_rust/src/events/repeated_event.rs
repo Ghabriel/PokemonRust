@@ -1,6 +1,6 @@
 use amethyst::ecs::World;
 
-use super::{ChainedEvents, GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, ChainedEvents, GameEvent, ShouldDisableInput};
 
 use std::marker::PhantomData;
 
@@ -15,7 +15,7 @@ where
 impl<T> RepeatedEvent<T>
 where
     T: 'static + GameEvent + Sync + Send + Clone
- {
+{
     pub fn from_prototype(prototype: &T, repetitions: usize) -> RepeatedEvent<T> {
         let mut chain = ChainedEvents::default();
         for _ in 0..repetitions {
@@ -29,10 +29,29 @@ where
     }
 }
 
+impl<T> Clone for RepeatedEvent<T>
+where
+    T: 'static + GameEvent + Sync + Send
+{
+    fn clone(&self) -> RepeatedEvent<T> {
+        RepeatedEvent::<T> {
+            chain: self.chain.clone(),
+            phantom_data: PhantomData,
+        }
+    }
+}
+
 impl<T> GameEvent for RepeatedEvent<T>
 where
     T: 'static + GameEvent + Sync + Send
 {
+    fn boxed_clone(&self) -> BoxedGameEvent {
+        Box::new(RepeatedEvent::<T> {
+            chain: self.chain.clone(),
+            phantom_data: PhantomData,
+        })
+    }
+
     fn start(&mut self, world: &mut World) -> ShouldDisableInput {
         self.chain.start(world)
     }

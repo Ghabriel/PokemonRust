@@ -10,8 +10,9 @@ use crate::{
     map::{GameScript, MapHandler, MapId},
 };
 
-use super::{GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
 
+#[derive(Clone)]
 pub struct ScriptEvent {
     map: MapId,
     script_index: usize,
@@ -27,6 +28,10 @@ impl ScriptEvent {
 }
 
 impl GameEvent for ScriptEvent {
+    fn boxed_clone(&self) -> BoxedGameEvent {
+        Box::new(self.clone())
+    }
+
     fn start(&mut self, _world: &mut World) -> ShouldDisableInput {
         // TODO: is this always correct?
         ShouldDisableInput(false)

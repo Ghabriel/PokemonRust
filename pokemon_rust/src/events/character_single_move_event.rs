@@ -9,7 +9,7 @@ use crate::{
     map::{MapHandler, PlayerCoordinates, TileData},
 };
 
-use super::{GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
 
 #[derive(Clone)]
 pub struct CharacterSingleMoveEvent {
@@ -25,6 +25,10 @@ impl CharacterSingleMoveEvent {
 }
 
 impl GameEvent for CharacterSingleMoveEvent {
+    fn boxed_clone(&self) -> BoxedGameEvent {
+        Box::new(self.clone())
+    }
+
     fn start(&mut self, world: &mut World) -> ShouldDisableInput {
         let map_handler = world.read_resource::<MapHandler>();
         let entity = map_handler.get_character_by_id(self.character_id);

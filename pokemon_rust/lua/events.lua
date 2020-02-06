@@ -12,6 +12,16 @@ function Event:dispatch()
 end
 
 
+CyclicEvent = Event:new()
+CyclicEvent.__index = CyclicEvent
+
+function CyclicEvent:new(event)
+    local obj = { rust_create_cyclic_event(event[1]) }
+    setmetatable(obj, self)
+    return obj
+end
+
+
 NpcMoveEvent = Event:new()
 NpcMoveEvent.__index = NpcMoveEvent
 

@@ -23,9 +23,9 @@ use crate::{
     events::fade_out_event::Fade,
 };
 
-use super::{GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct FadeInEvent {
     top_fade: Option<Entity>,
     bottom_fade: Option<Entity>,
@@ -34,6 +34,10 @@ pub struct FadeInEvent {
 }
 
 impl GameEvent for FadeInEvent {
+    fn boxed_clone(&self) -> BoxedGameEvent {
+        Box::new(self.clone())
+    }
+
     fn start(&mut self, world: &mut World) -> ShouldDisableInput {
         let entities = world.read_resource::<EntitiesRes>();
         let fades = world.read_component::<Fade>();

@@ -14,11 +14,16 @@ use crate::{
     map::{GameActionKind, MapHandler, PlayerCoordinates, ValidatedGameAction},
 };
 
-use super::{GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
 
+#[derive(Clone)]
 pub struct MapInteractionEvent;
 
 impl GameEvent for MapInteractionEvent {
+    fn boxed_clone(&self) -> BoxedGameEvent {
+        Box::new(self.clone())
+    }
+
     fn start(&mut self, _world: &mut World) -> ShouldDisableInput {
         ShouldDisableInput(false)
     }

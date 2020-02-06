@@ -26,7 +26,7 @@ use crate::{
     config::GameConfig,
 };
 
-use super::{GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
 
 pub struct TextBox {
     full_text: String,
@@ -130,6 +130,11 @@ impl TextEvent {
 }
 
 impl GameEvent for TextEvent {
+    fn boxed_clone(&self) -> BoxedGameEvent {
+        // TODO
+        unimplemented!();
+    }
+
     fn start(&mut self, world: &mut World) -> ShouldDisableInput {
         let (
             mut ui_images,

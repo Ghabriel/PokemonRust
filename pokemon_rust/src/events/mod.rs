@@ -4,6 +4,7 @@
 pub mod chained_events;
 pub mod character_move_event;
 pub mod character_single_move_event;
+pub mod cyclic_event;
 pub mod event_executor;
 pub mod event_queue;
 pub mod fade_in_event;
@@ -22,6 +23,7 @@ pub use self::{
     chained_events::ChainedEvents,
     character_move_event::CharacterMoveEvent,
     character_single_move_event::CharacterSingleMoveEvent,
+    cyclic_event::CyclicEvent,
     event_executor::EventExecutor,
     event_queue::EventQueue,
     fade_out_event::FadeOutEvent,
@@ -37,7 +39,10 @@ pub use self::{
 
 pub struct ShouldDisableInput(pub bool);
 
+pub type BoxedGameEvent = Box<dyn GameEvent + Sync + Send>;
+
 pub trait GameEvent {
+    fn boxed_clone(&self) -> BoxedGameEvent;
     fn start(&mut self, world: &mut World) -> ShouldDisableInput;
     fn tick(&mut self, world: &mut World, disabled_inputs: bool);
     fn is_complete(&self, world: &mut World) -> bool;

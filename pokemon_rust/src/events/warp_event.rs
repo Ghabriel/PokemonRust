@@ -7,6 +7,7 @@ use amethyst::ecs::World;
 use crate::map::MapCoordinates;
 
 use super::{
+    BoxedGameEvent,
     ChainedEvents,
     FadeInEvent,
     FadeOutEvent,
@@ -15,6 +16,7 @@ use super::{
     SwitchMapEvent,
 };
 
+#[derive(Clone)]
 pub struct WarpEvent {
     executor: ChainedEvents,
 }
@@ -36,6 +38,10 @@ impl WarpEvent {
 }
 
 impl GameEvent for WarpEvent {
+    fn boxed_clone(&self) -> BoxedGameEvent {
+        Box::new(self.clone())
+    }
+
     fn start(&mut self, world: &mut World) -> ShouldDisableInput {
         self.executor.start(world)
     }

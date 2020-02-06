@@ -2,7 +2,7 @@
 
 use amethyst::ecs::World;
 
-use super::{GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
 
 use std::collections::VecDeque;
 
@@ -22,7 +22,20 @@ impl ChainedEvents {
     }
 }
 
+impl Clone for ChainedEvents {
+    fn clone(&self) -> ChainedEvents {
+        ChainedEvents {
+            chain: self.chain.iter().map(|event| event.boxed_clone()).collect(),
+            called_start: self.called_start,
+        }
+    }
+}
+
 impl GameEvent for ChainedEvents {
+    fn boxed_clone(&self) -> BoxedGameEvent {
+        Box::new(self.clone())
+    }
+
     fn start(&mut self, world: &mut World) -> ShouldDisableInput {
         self.called_start = true;
 

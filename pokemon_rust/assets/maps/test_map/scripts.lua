@@ -32,11 +32,15 @@ end
 
 function interact_with_npc(npc)
     -- NpcUtils.rotate_towards_player(npc)
-    NpcMoveEvent:new(npc, 5):dispatch()
+    -- NpcMoveEvent:new(npc, 5):dispatch()
 
     if npc == FIRST_NPC then
         print("Interacted with the first NPC")
     elseif npc == SECOND_NPC then
         print("Interacted with the second NPC")
     end
+
+    CyclicEvent:new(
+        WarpEvent:new("test_map", 10, 10)
+    ):dispatch()
 end

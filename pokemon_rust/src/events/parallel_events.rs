@@ -2,7 +2,7 @@
 
 use amethyst::ecs::World;
 
-use super::{GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
 
 #[derive(Default)]
 pub struct ParallelEvents {
@@ -18,6 +18,12 @@ impl ParallelEvents {
 }
 
 impl GameEvent for ParallelEvents {
+    fn boxed_clone(&self) -> BoxedGameEvent {
+        Box::new(ParallelEvents {
+            events: self.events.iter().map(|event| event.boxed_clone()).collect(),
+        })
+    }
+
     fn start(&mut self, world: &mut World) -> ShouldDisableInput {
         let mut should_disable_input = false;
 

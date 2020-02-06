@@ -1,7 +1,8 @@
 use amethyst::ecs::World;
 
-use super::{CharacterSingleMoveEvent, GameEvent, RepeatedEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, CharacterSingleMoveEvent, GameEvent, RepeatedEvent, ShouldDisableInput};
 
+#[derive(Clone)]
 pub struct CharacterMoveEvent {
     executor: RepeatedEvent<CharacterSingleMoveEvent>,
 }
@@ -18,6 +19,10 @@ impl CharacterMoveEvent {
 }
 
 impl GameEvent for CharacterMoveEvent {
+    fn boxed_clone(&self) -> BoxedGameEvent {
+        Box::new(self.clone())
+    }
+
     fn start(&mut self, world: &mut World) -> ShouldDisableInput {
         self.executor.start(world)
     }

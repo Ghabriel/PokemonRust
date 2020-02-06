@@ -15,7 +15,7 @@ use crate::{
     map::{change_tile, MapCoordinates, MapHandler, PlayerCoordinates, prepare_warp, TileData},
 };
 
-use super::{GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
 
 pub struct SwitchMapEvent {
     map: String,
@@ -36,7 +36,21 @@ impl SwitchMapEvent {
     }
 }
 
+impl Clone for SwitchMapEvent {
+    fn clone(&self) -> SwitchMapEvent {
+        SwitchMapEvent {
+            map: self.map.clone(),
+            tile: self.tile.clone(),
+            progress_counter: ProgressCounter::new(),
+        }
+    }
+}
+
 impl GameEvent for SwitchMapEvent {
+    fn boxed_clone(&self) -> BoxedGameEvent {
+        Box::new(self.clone())
+    }
+
     fn start(&mut self, world: &mut World) -> ShouldDisableInput {
         let target_tile_data = prepare_warp(world, &self.map, &self.tile, &mut self.progress_counter);
 
