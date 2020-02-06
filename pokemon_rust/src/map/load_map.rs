@@ -7,7 +7,7 @@ use amethyst::{
 };
 
 use crate::{
-    common::load_full_texture_sprite_sheet,
+    common::{AssetTracker, load_full_texture_sprite_sheet},
     constants::{MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
     entities::character::PlayerEntity,
     events::EventQueue,
@@ -162,7 +162,7 @@ pub fn initialise_map(world: &mut World, starting_map: &str, progress_counter: &
     world.insert(map_handler);
 }
 
-fn load_nearby_connections(world: &mut World) {
+fn load_nearby_connections(world: &mut World, progress_counter: &mut ProgressCounter) {
     let (nearby_connections, reference_point) = {
         let map = world.read_resource::<MapHandler>();
         let player_position = get_player_position(world);
@@ -197,9 +197,7 @@ fn load_nearby_connections(world: &mut World) {
                 &connection,
                 &reference_point,
             );
-            // TODO: use the Progress trait to avoid needing to construct a ProgressCounter
-            let mut progress_counter = ProgressCounter::new();
-            let map = load_map(world, &connection.map, reference_point, &mut progress_counter);
+            let map = load_map(world, &connection.map, reference_point, progress_counter);
 
             (connection.map.clone(), map)
         })
@@ -344,7 +342,11 @@ fn initialise_map_layer(
 }
 
 fn add_intrinsic_scripts(map: &mut Map) {
-    map.script_repository.push(GameScript::Native(load_nearby_connections));
+    map.script_repository.push(GameScript::Native(|world| {
+        let mut asset_tracker = world.remove::<AssetTracker>().unwrap();
+        load_nearby_connections(world, &mut asset_tracker.get_progress_counter_mut());
+        world.insert(asset_tracker);
+    }));
 
     map.map_scripts.push(MapScript {
         when: MapScriptKind::OnTileChange,

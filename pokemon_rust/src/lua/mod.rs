@@ -7,7 +7,10 @@ use amethyst::{
     utils::application_root_dir,
 };
 
-use crate::map::{CoordinateSystem, LuaGameScriptParameters};
+use crate::{
+    common::AssetTracker,
+    map::{CoordinateSystem, LuaGameScriptParameters},
+};
 
 use rlua::{Context, Error as LuaError, Function, Lua};
 
@@ -38,6 +41,7 @@ use std::{
 };
 
 struct ExecutionContext<'a> {
+    asset_tracker: AssetTracker,
     lua_variables: PolymorphicContainer,
     world: &'a mut World,
 }
@@ -150,12 +154,15 @@ fn run_with_native_functions<F, R>(world: &mut World, lua: &Lua, callback: F) ->
 where
     F: FnOnce(&Context) -> Result<R, LuaScriptError>,
 {
+    let asset_tracker = world.remove::<AssetTracker>().unwrap();
+
     let execution_context = RefCell::new(ExecutionContext {
         world,
+        asset_tracker,
         lua_variables: PolymorphicContainer::default(),
     });
 
-    lua.context(|context| {
+    let result = lua.context(|context| {
         context.scope(|scope| {
             let globals = context.globals();
 
@@ -177,5 +184,10 @@ where
 
             callback(&context)
         })
-    })
+    });
+
+    let asset_tracker = execution_context.into_inner().asset_tracker;
+    world.insert(asset_tracker);
+
+    result
 }

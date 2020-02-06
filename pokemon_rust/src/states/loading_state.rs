@@ -15,7 +15,7 @@ use amethyst::{
 };
 
 use crate::{
-    common::{load_full_texture_sprite_sheet, CommonResources},
+    common::{AssetTracker, CommonResources, load_full_texture_sprite_sheet},
     config::GameConfig,
     entities::character::{initialise_player, PlayerEntity},
     events::EventQueue,
@@ -66,7 +66,6 @@ pub fn initialise_resources(world: &mut World, progress_counter: &mut ProgressCo
 #[derive(Default)]
 pub struct LoadingState<'a, 'b> {
     pub dispatcher: Option<Dispatcher<'a, 'b>>,
-    pub progress_counter: Option<ProgressCounter>,
     pub cached_num_loaded_assets: usize,
 }
 
@@ -85,8 +84,6 @@ impl SimpleState for LoadingState<'_, '_> {
 
         world.insert(EventQueue::default());
 
-        let mut progress_counter = ProgressCounter::new();
-
         let (starting_map, starting_position) = {
             let game_config = world.read_resource::<GameConfig>();
 
@@ -96,8 +93,11 @@ impl SimpleState for LoadingState<'_, '_> {
             )
         };
 
+        let mut progress_counter = ProgressCounter::new();
+
         initialise_resources(world, &mut progress_counter);
         initialise_map(world, &starting_map, &mut progress_counter);
+
         let player = initialise_player(
             world,
             &starting_map,
@@ -106,8 +106,7 @@ impl SimpleState for LoadingState<'_, '_> {
         );
         initialise_camera(world, player);
 
-        self.progress_counter = Some(progress_counter);
-
+        world.insert(AssetTracker::new(progress_counter));
         world.insert(PlayerEntity(player));
     }
 
@@ -116,23 +115,22 @@ impl SimpleState for LoadingState<'_, '_> {
             dispatcher.dispatch(data.world);
         }
 
-        if let Some(progress_counter) = &self.progress_counter {
-            let num_finished = progress_counter.num_finished();
+        let asset_tracker = data.world.read_resource::<AssetTracker>();
+        let progress_counter = asset_tracker.get_progress_counter();
+        let num_finished = progress_counter.num_finished();
 
-            if num_finished != self.cached_num_loaded_assets {
-                self.cached_num_loaded_assets = num_finished;
+        if num_finished != self.cached_num_loaded_assets {
+            self.cached_num_loaded_assets = num_finished;
 
-                let total = progress_counter.num_assets();
-                let percentage = 100 * num_finished / total;
-                println!("Loading... {}% ({}/{})", percentage, num_finished, total);
-            }
+            let total = progress_counter.num_assets();
+            let percentage = 100 * num_finished / total;
+            println!("Loading... {}% ({}/{})", percentage, num_finished, total);
         }
 
-        match &self.progress_counter {
-            Some(progress_counter) if progress_counter.is_complete() => {
-                Trans::Switch(Box::new(OverworldState::default()))
-            },
-            _ => Trans::None,
+        if progress_counter.is_complete() {
+            Trans::Switch(Box::new(OverworldState::default()))
+        } else {
+            Trans::None
         }
     }
 }

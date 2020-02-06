@@ -1,5 +1,4 @@
 use amethyst::{
-    assets::ProgressCounter,
     core::Transform,
     ecs::WorldExt,
     renderer::SpriteRender,
@@ -82,7 +81,7 @@ pub(super) fn rotate_npc_towards_player(context: &mut ExecutionContext, characte
 pub(super) fn add_npc(context: &mut ExecutionContext, npc_key: usize) -> usize {
     let npc_builder = context.remove::<NpcBuilder>(npc_key);
 
-    initialise_npc(context.world, *npc_builder, &mut ProgressCounter::new())
+    initialise_npc(context.world, *npc_builder, context.asset_tracker.get_progress_counter_mut())
 }
 
 fn parse_lua_direction(direction: u8) -> Direction {

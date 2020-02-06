@@ -14,6 +14,29 @@ use amethyst::{
 
 use serde::{Deserialize, Serialize};
 
+/// A wrapper around a progress counter that is inserted into the world as a
+/// resource. This allows different parts of the game to use the same progress
+/// counter.
+pub struct AssetTracker {
+    progress_counter: ProgressCounter,
+}
+
+impl AssetTracker {
+    pub fn new(progress_counter: ProgressCounter) -> AssetTracker {
+        AssetTracker {
+            progress_counter,
+        }
+    }
+
+    pub fn get_progress_counter(&self) -> &ProgressCounter {
+        &self.progress_counter
+    }
+
+    pub fn get_progress_counter_mut(&mut self) -> &mut ProgressCounter {
+        &mut self.progress_counter
+    }
+}
+
 /// A two-dimensional, four-axis direction enum.
 #[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
 pub enum Direction {
