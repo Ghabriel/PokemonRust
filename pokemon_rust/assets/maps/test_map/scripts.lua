@@ -20,7 +20,7 @@ end
 
 function on_map_load()
     FIRST_NPC = NpcBuilder
-        :new("test_map", 30, 30, "example_npc")
+        :new("test_map", 30, 25, "example_npc")
         :facing_towards(Directions["down"])
         :build()
 
@@ -33,14 +33,22 @@ end
 function interact_with_npc(npc)
     -- NpcUtils.rotate_towards_player(npc)
     -- NpcMoveEvent:new(npc, 5):dispatch()
+    CyclicEvent:new(
+        ChainedEvents:new({
+            NpcRotateEvent:new(npc, Directions["right"]),
+            NpcMoveEvent:new(npc, 5),
+            NpcRotateEvent:new(npc, Directions["down"]),
+            NpcMoveEvent:new(npc, 5),
+            NpcRotateEvent:new(npc, Directions["left"]),
+            NpcMoveEvent:new(npc, 5),
+            NpcRotateEvent:new(npc, Directions["up"]),
+            NpcMoveEvent:new(npc, 5),
+        })
+    ):dispatch()
 
     if npc == FIRST_NPC then
         print("Interacted with the first NPC")
     elseif npc == SECOND_NPC then
         print("Interacted with the second NPC")
     end
-
-    CyclicEvent:new(
-        WarpEvent:new("test_map", 10, 10)
-    ):dispatch()
 end

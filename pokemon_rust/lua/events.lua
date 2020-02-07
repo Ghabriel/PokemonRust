@@ -32,6 +32,16 @@ function NpcMoveEvent:new(npc, num_tiles)
 end
 
 
+NpcRotateEvent = Event:new()
+NpcRotateEvent.__index = NpcRotateEvent
+
+function NpcRotateEvent:new(npc, direction)
+    local obj = { rust_create_npc_rotate_event(npc, direction) }
+    setmetatable(obj, self)
+    return obj
+end
+
+
 TextEvent = Event:new()
 TextEvent.__index = TextEvent
 

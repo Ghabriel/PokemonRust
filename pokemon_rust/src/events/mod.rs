@@ -3,6 +3,7 @@
 
 pub mod chained_events;
 pub mod character_move_event;
+pub mod character_rotate_event;
 pub mod character_single_move_event;
 pub mod cyclic_event;
 pub mod event_executor;
@@ -22,6 +23,7 @@ use amethyst::ecs::World;
 pub use self::{
     chained_events::ChainedEvents,
     character_move_event::CharacterMoveEvent,
+    character_rotate_event::CharacterRotateEvent,
     character_single_move_event::CharacterSingleMoveEvent,
     cyclic_event::CyclicEvent,
     event_executor::EventExecutor,

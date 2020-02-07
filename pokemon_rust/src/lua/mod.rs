@@ -8,7 +8,7 @@ use amethyst::{
 };
 
 use crate::{
-    common::AssetTracker,
+    common::{AssetTracker, Direction},
     map::{CoordinateSystem, LuaGameScriptParameters},
 };
 
@@ -19,6 +19,7 @@ use self::{
         create_chained_event,
         create_cyclic_event,
         create_npc_move_event,
+        create_npc_rotate_event,
         create_text_event,
         create_warp_event,
         add_event,
@@ -172,7 +173,8 @@ where
                 // Event functions
                 rust_create_chained_event: create_chained_event(),
                 rust_create_cyclic_event: create_cyclic_event(event_key: usize),
-                rust_create_npc_move_event: create_npc_move_event(npc_key: usize, num_tiles: usize),
+                rust_create_npc_move_event: create_npc_move_event(character_id: usize, num_tiles: usize),
+                rust_create_npc_rotate_event: create_npc_rotate_event(character_id: usize, direction: u8),
                 rust_create_text_event: create_text_event(text: String),
                 rust_create_warp_event: create_warp_event(map: String, x: u32, y: u32),
                 rust_add_event: add_event(chain_key: usize, new_event: usize),
@@ -192,4 +194,14 @@ where
     world.insert(asset_tracker);
 
     result
+}
+
+fn parse_lua_direction(direction: u8) -> Direction {
+    match direction {
+        0 => Direction::Up,
+        1 => Direction::Down,
+        2 => Direction::Left,
+        3 => Direction::Right,
+        _ => panic!("Invalid direction"),
+    }
 }

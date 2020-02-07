@@ -4,6 +4,7 @@ use crate::{
     events::{
         ChainedEvents,
         CharacterMoveEvent,
+        CharacterRotateEvent,
         CyclicEvent,
         EventQueue,
         GameEvent,
@@ -13,7 +14,7 @@ use crate::{
     map::MapCoordinates,
 };
 
-use super::ExecutionContext;
+use super::{ExecutionContext, parse_lua_direction};
 
 pub(super) fn create_chained_event(context: &mut ExecutionContext) -> usize {
     let event = ChainedEvents::default();
@@ -33,6 +34,16 @@ pub(super) fn create_npc_move_event(
     num_tiles: usize,
 ) -> usize {
     let event = CharacterMoveEvent::new(character_id, num_tiles);
+
+    context.store(event)
+}
+
+pub(super) fn create_npc_rotate_event(
+    context: &mut ExecutionContext,
+    character_id: usize,
+    direction: u8,
+) -> usize {
+    let event = CharacterRotateEvent::new(character_id, parse_lua_direction(direction));
 
     context.store(event)
 }
@@ -73,6 +84,8 @@ fn remove_event(
         event.downcast::<ChainedEvents>().unwrap()
     } else if event.is::<CharacterMoveEvent>() {
         event.downcast::<CharacterMoveEvent>().unwrap()
+    } else if event.is::<CharacterRotateEvent>() {
+        event.downcast::<CharacterRotateEvent>().unwrap()
     } else if event.is::<CyclicEvent>() {
         event.downcast::<CyclicEvent>().unwrap()
     } else if event.is::<TextEvent>() {

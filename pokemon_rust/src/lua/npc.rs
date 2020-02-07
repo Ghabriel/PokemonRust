@@ -5,10 +5,7 @@ use amethyst::{
 };
 
 use crate::{
-    common::{
-        Direction,
-        get_character_sprite_index_from_direction,
-    },
+    common::get_character_sprite_index_from_direction,
     entities::character::{Character, initialise_npc, MovementType, NpcBuilder, PlayerEntity},
     map::{
         MapCoordinates,
@@ -17,7 +14,7 @@ use crate::{
     },
 };
 
-use super::ExecutionContext;
+use super::{ExecutionContext, parse_lua_direction};
 
 pub(super) fn create_npc(
     context: &mut ExecutionContext,
@@ -82,14 +79,4 @@ pub(super) fn add_npc(context: &mut ExecutionContext, npc_key: usize) -> usize {
     let npc_builder = context.remove::<NpcBuilder>(npc_key);
 
     initialise_npc(context.world, *npc_builder, context.asset_tracker.get_progress_counter_mut())
-}
-
-fn parse_lua_direction(direction: u8) -> Direction {
-    match direction {
-        0 => Direction::Up,
-        1 => Direction::Down,
-        2 => Direction::Left,
-        3 => Direction::Right,
-        _ => panic!("Invalid direction"),
-    }
 }
