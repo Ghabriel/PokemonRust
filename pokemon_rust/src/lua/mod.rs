@@ -20,6 +20,7 @@ use self::{
         create_cyclic_event,
         create_npc_move_event,
         create_npc_rotate_event,
+        create_npc_rotate_towards_player_event,
         create_text_event,
         create_warp_event,
         add_event,
@@ -173,14 +174,19 @@ where
                 // Event functions
                 rust_create_chained_event: create_chained_event(),
                 rust_create_cyclic_event: create_cyclic_event(event_key: usize),
-                rust_create_npc_move_event: create_npc_move_event(character_id: usize, num_tiles: usize),
-                rust_create_npc_rotate_event: create_npc_rotate_event(character_id: usize, direction: u8),
+                rust_create_npc_move_event:
+                    create_npc_move_event(character_id: usize, num_tiles: usize),
+                rust_create_npc_rotate_event:
+                    create_npc_rotate_event(character_id: usize, direction: u8),
+                rust_create_npc_rotate_towards_player_event:
+                    create_npc_rotate_towards_player_event(character_id: usize),
                 rust_create_text_event: create_text_event(text: String),
                 rust_create_warp_event: create_warp_event(map: String, x: u32, y: u32),
                 rust_add_event: add_event(chain_key: usize, new_event: usize),
                 rust_dispatch_event: dispatch_event(key: usize),
                 // NPC functions
-                rust_create_npc: create_npc(map_id: String, x: u32, y: u32, kind: String, direction: u8),
+                rust_create_npc:
+                    create_npc(map_id: String, x: u32, y: u32, kind: String, direction: u8),
                 rust_change_npc_direction: change_npc_direction(npc_key: usize, direction: u8),
                 rust_rotate_npc_towards_player: rotate_npc_towards_player(character_id: usize),
                 rust_add_npc: add_npc(npc_key: usize)

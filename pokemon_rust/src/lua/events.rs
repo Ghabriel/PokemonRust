@@ -48,6 +48,15 @@ pub(super) fn create_npc_rotate_event(
     context.store(event)
 }
 
+pub(super) fn create_npc_rotate_towards_player_event(
+    context: &mut ExecutionContext,
+    character_id: usize,
+) -> usize {
+    let event = CharacterRotateEvent::towards_player(character_id);
+
+    context.store(event)
+}
+
 pub(super) fn create_text_event(context: &mut ExecutionContext, text: String) -> usize {
     let event = TextEvent::new(text, context.world);
 

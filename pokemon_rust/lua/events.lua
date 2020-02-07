@@ -41,6 +41,12 @@ function NpcRotateEvent:new(npc, direction)
     return obj
 end
 
+function NpcRotateEvent:towards_player(npc)
+    local obj = { rust_create_npc_rotate_towards_player_event(npc) }
+    setmetatable(obj, self)
+    return obj
+end
+
 
 TextEvent = Event:new()
 TextEvent.__index = TextEvent
