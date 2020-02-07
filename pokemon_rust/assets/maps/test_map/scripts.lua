@@ -19,32 +19,37 @@ function interact_with_tree()
 end
 
 function on_map_load()
+    local square_movement = function(id)
+        return CyclicEvent:new(
+            ChainedEvents:new({
+                NpcRotateEvent:new(id, Directions["right"]),
+                NpcMoveEvent:new(id, 4),
+                NpcRotateEvent:new(id, Directions["down"]),
+                NpcMoveEvent:new(id, 4),
+                NpcRotateEvent:new(id, Directions["left"]),
+                NpcMoveEvent:new(id, 4),
+                NpcRotateEvent:new(id, Directions["up"]),
+                NpcMoveEvent:new(id, 4),
+            })
+        )
+    end
+
     FIRST_NPC = NpcBuilder
-        :new("test_map", 30, 25, "example_npc")
-        :facing_towards(Directions["down"])
+        :new("test_map", 30, 30, "example_npc")
+        :facing_towards(Directions["right"])
+        :event_driven(square_movement)
         :build()
 
     SECOND_NPC = NpcBuilder
-        :new("test_map", 34, 30, "example_npc")
+        :new("test_map", 35, 30, "example_npc")
         :facing_towards(Directions["down"])
+        :event_driven(square_movement)
         :build()
 end
 
 function interact_with_npc(npc)
     -- NpcUtils.rotate_towards_player(npc)
     -- NpcMoveEvent:new(npc, 5):dispatch()
-    CyclicEvent:new(
-        ChainedEvents:new({
-            NpcRotateEvent:new(npc, Directions["right"]),
-            NpcMoveEvent:new(npc, 5),
-            NpcRotateEvent:new(npc, Directions["down"]),
-            NpcMoveEvent:new(npc, 5),
-            NpcRotateEvent:new(npc, Directions["left"]),
-            NpcMoveEvent:new(npc, 5),
-            NpcRotateEvent:new(npc, Directions["up"]),
-            NpcMoveEvent:new(npc, 5),
-        })
-    ):dispatch()
 
     if npc == FIRST_NPC then
         print("Interacted with the first NPC")

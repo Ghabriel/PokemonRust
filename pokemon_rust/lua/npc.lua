@@ -19,8 +19,19 @@ function NpcBuilder:facing_towards(direction)
     return self
 end
 
+function NpcBuilder:event_driven(event_generator)
+    self["event_generator"] = event_generator
+    return self
+end
+
 function NpcBuilder:build()
-    return rust_add_npc(self[1])
+    local character_id = rust_add_npc(self[1])
+
+    if self["event_generator"] ~= nil then
+        self["event_generator"](character_id):dispatch()
+    end
+
+    return character_id
 end
 
 NpcUtils = {}
