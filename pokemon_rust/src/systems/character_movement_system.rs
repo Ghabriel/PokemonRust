@@ -29,7 +29,7 @@ use crate::{
         },
     },
     events::EventQueue,
-    map::{change_tile, CoordinateSystem, MapHandler},
+    map::{change_player_tile, CoordinateSystem, MapHandler},
 };
 
 pub struct CharacterMovementSystem;
@@ -102,6 +102,10 @@ impl<'a> System<'a> for CharacterMovementSystem {
 
                 map.mark_tile_as_solid(&movement_data.to);
 
+                if !is_player {
+                    map.change_npc_tile(&movement_data.from, &movement_data.to);
+                }
+
                 movement_data.started = true;
             }
 
@@ -113,12 +117,10 @@ impl<'a> System<'a> for CharacterMovementSystem {
                     transform,
                     animation_table,
                     sprite_render,
-                    &player_entity,
+                    if is_player { Some(&player_entity) } else { None },
                     &mut map,
                     &mut event_queue,
                 );
-
-                map.remove_solid_mark(&movement_data.from);
 
                 static_characters.push(entity);
                 continue;
@@ -167,7 +169,7 @@ fn on_movement_finish(
     transform: &mut Transform,
     animation_table: &mut AnimationTable<CharacterAnimation>,
     sprite_render: &mut SpriteRender,
-    player_entity: &PlayerEntity,
+    player_entity: Option<&PlayerEntity>,
     map: &mut MapHandler,
     event_queue: &mut EventQueue,
 ) {
@@ -177,13 +179,15 @@ fn on_movement_finish(
         0.,
     ));
 
-    change_tile(
-        &movement_data.from,
-        &movement_data.to,
-        &player_entity,
-        map,
-        event_queue,
-    );
+    if let Some(player_entity) = player_entity {
+        change_player_tile(
+            &movement_data.from,
+            &movement_data.to,
+            &player_entity,
+            map,
+            event_queue,
+        );
+    }
 
     if movement_data.movement_type == MovementType::Run {
         let data = allowed_movements
@@ -198,4 +202,6 @@ fn on_movement_finish(
     ));
 
     character.next_step.invert();
+
+    map.remove_solid_mark(&movement_data.from);
 }

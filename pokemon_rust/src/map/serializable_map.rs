@@ -10,9 +10,9 @@ use super::{
     coordinates::WorldCoordinates,
     GameAction,
     GameScript,
+    GameScriptParameters,
     MapId,
     MapScript,
-    LuaGameScriptParameters,
 };
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -34,7 +34,7 @@ pub enum SerializableGameScript {
     Lua {
         file: String,
         function: String,
-        parameters: Option<LuaGameScriptParameters>,
+        parameters: Option<GameScriptParameters>,
     },
 }
 

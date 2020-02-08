@@ -4,10 +4,11 @@ mod load_map;
 mod map;
 mod serializable_map;
 
-use amethyst::ecs::Entity;
+use amethyst::ecs::{Entity, WorldExt};
 
 use crate::{
     common::Direction,
+    entities::character::Character,
     events::ScriptEvent,
 };
 
@@ -21,13 +22,13 @@ use std::{
 pub use self::{
     coordinates::{CoordinateSystem, MapCoordinates, PlayerCoordinates, WorldCoordinates},
     conversions::map_to_world_coordinates,
-    load_map::{change_tile, initialise_map, prepare_warp},
+    load_map::{change_player_tile, initialise_map, prepare_warp},
     map::{
         GameAction,
         GameActionKind,
         GameScript,
+        GameScriptParameters,
         MapConnection,
-        LuaGameScriptParameters,
         MapScript,
         MapScriptKind,
         Tile,
@@ -157,10 +158,23 @@ impl MapHandler {
 
         let map = self.loaded_maps.get_mut(&map_id.0).unwrap();
 
-        map.script_repository.push(GameScript::Lua {
-            file: format!("assets/maps/{}/scripts.lua", map_id.0),
-            function: "interact_with_npc".to_string(),
-            parameters: Some(LuaGameScriptParameters::TargetNpc(character_id)),
+        map.script_repository.push(GameScript::Native {
+            script: |world, params| {
+                let character_id = match params {
+                    Some(GameScriptParameters::TargetCharacter(character_id)) => character_id,
+                    _ => unreachable!(),
+                };
+
+                let map_handler = world.read_resource::<MapHandler>();
+                let entity = map_handler.get_character_by_id(*character_id);
+
+                world
+                    .write_storage::<Character>()
+                    .get_mut(*entity)
+                    .unwrap()
+                    .pending_interaction = true;
+            },
+            parameters: Some(GameScriptParameters::TargetCharacter(character_id)),
         });
 
         map.actions.insert(position.clone(), GameAction {
@@ -211,6 +225,27 @@ impl MapHandler {
         let position = map.player_to_map_coordinates(&tile_data.position);
         map.solids.remove(&position);
     }
+
+    pub fn get_character_natural_map(&self, character_id: usize) -> &MapId {
+        &self.characters
+            .get(&character_id)
+            .unwrap()
+            .natural_map
+    }
+
+    pub fn change_npc_tile(&mut self, from: &TileData, to: &TileData) {
+        let initial_map = self.loaded_maps.get_mut(&from.map_id.0).unwrap();
+        let initial_tile = initial_map.player_to_map_coordinates(&from.position);
+
+        let interaction_action = initial_map.actions.remove(&initial_tile);
+
+        if let Some(action) = interaction_action {
+            let final_map = self.loaded_maps.get_mut(&to.map_id.0).unwrap();
+            let final_tile = final_map.player_to_map_coordinates(&to.position);
+
+            final_map.actions.insert(final_tile, action);
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -220,6 +255,7 @@ struct CharacterData {
 }
 
 /// A global way to refer to a tile.
+#[derive(Debug)]
 pub struct TileData {
     /// The position of the tile.
     pub position: PlayerCoordinates,
@@ -228,7 +264,7 @@ pub struct TileData {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct MapId(String);
+pub struct MapId(pub String);
 
 // TODO: find a better name
 pub struct ValidatedGameAction {

@@ -12,7 +12,7 @@ use amethyst::{
 use crate::{
     entities::character::PlayerEntity,
     events::EventQueue,
-    map::{change_tile, MapCoordinates, MapHandler, PlayerCoordinates, prepare_warp, TileData},
+    map::{change_player_tile, MapCoordinates, MapHandler, PlayerCoordinates, prepare_warp, TileData},
 };
 
 use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
@@ -68,7 +68,7 @@ impl GameEvent for SwitchMapEvent {
 
         transform.set_translation(*target_tile_data.position.to_transform().translation());
 
-        change_tile(
+        change_player_tile(
             &initial_tile_data,
             &target_tile_data,
             &world.read_resource::<PlayerEntity>(),

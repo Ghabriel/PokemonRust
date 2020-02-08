@@ -9,7 +9,7 @@ use amethyst::{
 
 use crate::{
     common::{AssetTracker, Direction},
-    map::{CoordinateSystem, LuaGameScriptParameters},
+    map::{CoordinateSystem, GameScriptParameters},
 };
 
 use rlua::{Context, Error as LuaError, Function, Lua};
@@ -98,7 +98,7 @@ pub fn run_lua_script(
     world: &mut World,
     file: &str,
     function: &str,
-    parameters: &Option<LuaGameScriptParameters>,
+    parameters: &Option<GameScriptParameters>,
 ) -> Result<(), LuaScriptError> {
     LUA.with(|lua| {
         run_script(world, &lua, &file, &function, &parameters)
@@ -110,7 +110,7 @@ fn run_script(
     lua: &Lua,
     file: &str,
     function: &str,
-    parameters: &Option<LuaGameScriptParameters>,
+    parameters: &Option<GameScriptParameters>,
 ) -> Result<(), LuaScriptError> {
     run_with_native_functions(world, lua, |context| {
         let path = application_root_dir()
@@ -125,9 +125,9 @@ fn run_script(
 
         match parameters {
             None => function.call(())?,
-            Some(LuaGameScriptParameters::SourceTile(coordinates)) =>
+            Some(GameScriptParameters::SourceTile(coordinates)) =>
                 function.call((coordinates.x(), coordinates.y()))?,
-            Some(LuaGameScriptParameters::TargetNpc(character_id)) =>
+            Some(GameScriptParameters::TargetCharacter(character_id)) =>
                 function.call(*character_id)?,
         }
 

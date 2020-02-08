@@ -76,7 +76,14 @@ impl GameEvent for CharacterSingleMoveEvent {
         let map_handler = world.read_resource::<MapHandler>();
         let entity = map_handler.get_character_by_id(self.character_id);
 
-        !world.read_storage::<CharacterMovement>()
-            .contains(*entity)
+        let has_pending_interaction = world
+            .read_storage::<Character>()
+            .get(*entity)
+            .unwrap()
+            .pending_interaction;
+
+        let is_moving = world.read_storage::<CharacterMovement>().contains(*entity);
+
+        !has_pending_interaction && !is_moving
     }
 }

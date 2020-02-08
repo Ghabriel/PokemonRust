@@ -13,6 +13,7 @@ use crate::{
     systems::{
         AnimationSystem,
         CharacterMovementSystem,
+        NpcInteractionSystem,
         PlayerInputSystem,
     },
 };
@@ -48,6 +49,7 @@ impl SimpleState for OverworldState<'_, '_> {
             .with(AnimationSystem::<CharacterAnimation>::new(), "animation_system", &[])
             .with(PlayerInputSystem::new(world), "player_input_system", &[])
             .with(CharacterMovementSystem, "character_movement_system", &["player_input_system"])
+            .with(NpcInteractionSystem, "npc_interaction_system", &["player_input_system"])
             .with(FpsCounterSystem, "fps_counter_system", &[])
             .with_pool(world.read_resource::<ArcThreadPool>().deref().clone())
             .build();

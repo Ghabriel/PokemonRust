@@ -116,24 +116,27 @@ impl Component for Tile {
 
 #[derive(Clone)]
 pub enum GameScript {
-    Native(fn(&mut World) -> ()),
+    Native {
+        script: fn(&mut World, &Option<GameScriptParameters>) -> (),
+        parameters: Option<GameScriptParameters>,
+    },
     Lua {
         file: String,
         function: String,
-        parameters: Option<LuaGameScriptParameters>,
+        parameters: Option<GameScriptParameters>,
     },
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
-pub enum LuaGameScriptParameters {
+pub enum GameScriptParameters {
     SourceTile(MapCoordinates),
-    TargetNpc(usize),
+    TargetCharacter(usize),
 }
 
 impl Debug for GameScript {
     fn fmt(&self, formatter: &mut Formatter) -> Result<(), Error> {
         match self {
-            GameScript::Native(_) => write!(formatter, "Native Script"),
+            GameScript::Native { .. } => write!(formatter, "Native Script"),
             GameScript::Lua { file, function, parameters } => {
                 write!(formatter, "Lua Script({}, {}, {:?})", file, function, parameters)
             },

@@ -48,7 +48,7 @@ use super::{
     ValidatedGameAction,
 };
 
-pub fn change_tile(
+pub fn change_player_tile(
     initial_tile_data: &TileData,
     final_tile_data: &TileData,
     player_entity: &PlayerEntity,
@@ -342,11 +342,14 @@ fn initialise_map_layer(
 }
 
 fn add_intrinsic_scripts(map: &mut Map) {
-    map.script_repository.push(GameScript::Native(|world| {
-        let mut asset_tracker = world.remove::<AssetTracker>().unwrap();
-        load_nearby_connections(world, &mut asset_tracker.get_progress_counter_mut());
-        world.insert(asset_tracker);
-    }));
+    map.script_repository.push(GameScript::Native {
+        script: |world, _| {
+            let mut asset_tracker = world.remove::<AssetTracker>().unwrap();
+            load_nearby_connections(world, &mut asset_tracker.get_progress_counter_mut());
+            world.insert(asset_tracker);
+        },
+        parameters: None,
+    });
 
     map.map_scripts.push(MapScript {
         when: MapScriptKind::OnTileChange,

@@ -133,7 +133,7 @@ impl CoordinateSystem for MapCoordinates {
 
 /// Represents a position possibly occupied by a player, expressed in World
 /// Coordinates. The universal player offset is included.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct PlayerCoordinates(f32, f32);
 
 impl PlayerCoordinates {

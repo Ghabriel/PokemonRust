@@ -14,15 +14,31 @@ use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
 
 #[derive(Clone)]
 pub struct ScriptEvent {
-    map: MapId,
-    script_index: usize,
+    script: Script,
+}
+
+#[derive(Clone)]
+enum Script {
+    Reference {
+        map: MapId,
+        script_index: usize,
+    },
+    Instance(GameScript),
 }
 
 impl ScriptEvent {
     pub fn new(map: MapId, script_index: usize) -> ScriptEvent {
         ScriptEvent {
-            map,
-            script_index,
+            script: Script::Reference {
+                map,
+                script_index,
+            }
+        }
+    }
+
+    pub fn from_script(script: GameScript) -> ScriptEvent {
+        ScriptEvent {
+            script: Script::Instance(script),
         }
     }
 }
@@ -38,13 +54,16 @@ impl GameEvent for ScriptEvent {
     }
 
     fn tick<'a>(&mut self, world: &'a mut World, _disabled_inputs: bool) {
-        let game_script = world
-            .read_resource::<MapHandler>()
-            .get_script(&self.map, self.script_index)
-            .clone();
+        let game_script = match &self.script {
+            Script::Reference { map, script_index } => world
+                .read_resource::<MapHandler>()
+                .get_script(&map, *script_index)
+                .clone(),
+            Script::Instance(script) => script.clone(),
+        };
 
         match game_script {
-            GameScript::Native(script) => script(world),
+            GameScript::Native { script, parameters } => script(world, &parameters),
             GameScript::Lua { file, function, parameters } => {
                 let result = run_lua_script(world, &file, &function, &parameters);
 

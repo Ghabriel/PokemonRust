@@ -56,6 +56,7 @@ pub struct Character {
     pub action: MovementType,
     pub facing_direction: Direction,
     pub next_step: StepKind,
+    pub pending_interaction: bool,
 }
 
 impl Component for Character {
@@ -175,6 +176,7 @@ pub fn initialise_npc(
         action: npc_builder.initial_action,
         facing_direction: npc_builder.facing_direction,
         next_step: StepKind::Left,
+        pending_interaction: false,
     };
 
     let mut default_sprite_sheet = None;
