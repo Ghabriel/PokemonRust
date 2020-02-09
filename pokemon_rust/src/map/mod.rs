@@ -22,7 +22,7 @@ use std::{
 pub use self::{
     coordinates::{CoordinateSystem, MapCoordinates, PlayerCoordinates, WorldCoordinates},
     conversions::map_to_world_coordinates,
-    load_map::{change_player_tile, initialise_map, prepare_warp},
+    load_map::{change_player_tile, initialise_map, interact_with_npc, prepare_warp},
     map::{
         GameAction,
         GameActionKind,
@@ -264,7 +264,7 @@ pub struct TileData {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct MapId(pub String);
+pub struct MapId(String);
 
 // TODO: find a better name
 pub struct ValidatedGameAction {

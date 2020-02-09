@@ -10,7 +10,7 @@ use crate::{
     common::{AssetTracker, load_full_texture_sprite_sheet},
     constants::{MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
     entities::character::PlayerEntity,
-    events::EventQueue,
+    events::{EventQueue, ScriptEvent},
 };
 
 use ron::de::from_reader;
@@ -36,6 +36,7 @@ use super::{
     map::{
         GameActionKind,
         GameScript,
+        GameScriptParameters,
         Map,
         MapConnection,
         MapScript,
@@ -47,6 +48,16 @@ use super::{
     TileData,
     ValidatedGameAction,
 };
+
+pub fn interact_with_npc(character_id: usize, map_id: &MapId, event_queue: &mut EventQueue) {
+    event_queue.push(ScriptEvent::from_script(
+        GameScript::Lua {
+            file: format!("assets/maps/{}/scripts.lua", map_id.0),
+            function: "interact_with_npc".to_string(),
+            parameters: Some(GameScriptParameters::TargetCharacter(character_id)),
+        }
+    ));
+}
 
 pub fn change_player_tile(
     initial_tile_data: &TileData,

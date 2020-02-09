@@ -4,8 +4,8 @@ use amethyst::{
 
 use crate::{
     entities::character::{Character, CharacterMovement},
-    events::{EventQueue, ScriptEvent},
-    map::{GameScript, GameScriptParameters, MapHandler},
+    events::EventQueue,
+    map::{interact_with_npc, MapHandler},
 };
 
 pub struct NpcInteractionSystem;
@@ -25,13 +25,7 @@ impl<'a> System<'a> for NpcInteractionSystem {
                 let character_id = map.get_character_id_by_entity(&entity);
                 let map_id = map.get_character_natural_map(character_id);
 
-                event_queue.push(ScriptEvent::from_script(
-                    GameScript::Lua {
-                        file: format!("assets/maps/{}/scripts.lua", map_id.0),
-                        function: "interact_with_npc".to_string(),
-                        parameters: Some(GameScriptParameters::TargetCharacter(character_id)),
-                    }
-                ));
+                interact_with_npc(character_id, &map_id, &mut event_queue);
 
                 character.pending_interaction = false;
             }
