@@ -3,136 +3,43 @@
 //! [`GameConfig::text_delay`](../config/struct.GameConfig.html#structfield.text_delay).
 
 use amethyst::{
-    core::Time,
     ecs::{
         Entities,
         Entity,
-        Read,
         ReadExpect,
-        ReaderId,
         SystemData,
+        world::Builder,
         World,
         WorldExt,
         WriteStorage,
     },
-    input::{InputEvent, StringBindings},
     renderer::SpriteRender,
-    shrev::EventChannel,
     ui::{Anchor, LineMode, UiImage, UiText, UiTransform},
 };
 
 use crate::{
     common::CommonResources,
-    config::GameConfig,
+    entities::text_box::TextBox,
 };
 
 use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
-pub struct TextBox {
-    full_text: String,
-    displayed_text_start: usize,
-    displayed_text_end: usize,
-    awaiting_keypress: bool,
-    cooldown: f32,
-    box_entity: Entity,
-    text_entity: Entity,
-}
-
-#[derive(Debug, Eq, PartialEq)]
-enum TextState {
-    Running,
-    Closed,
-}
-
+#[derive(Clone)]
 pub struct TextEvent {
     text: String,
-    input_event_reader: ReaderId<InputEvent<StringBindings>>,
-    text_box: Option<TextBox>,
-    finished: bool,
 }
 
 impl TextEvent {
-    pub fn new<T>(text: T, world: &mut World) -> TextEvent
-    where
-        T: Into<String>
-    {
+    pub fn new(text: impl Into<String>) -> TextEvent {
         TextEvent {
             text: text.into(),
-            input_event_reader: world
-                .write_resource::<EventChannel<InputEvent<StringBindings>>>()
-                .register_reader(),
-            text_box: None,
-            finished: false,
-        }
-    }
-
-    fn advance_text(
-        &mut self,
-        pressed_action_key: bool,
-        game_config: &GameConfig,
-        time: &Time,
-        ui_texts: &mut WriteStorage<UiText>,
-    ) -> TextState {
-        if let Some(text_box) = self.text_box.as_mut() {
-            let full_text_length = text_box.full_text.len();
-            let maximum_display_length = 150;
-
-            match (pressed_action_key, text_box.awaiting_keypress) {
-                (true, true) => {
-                    if text_box.displayed_text_end == full_text_length {
-                        return TextState::Closed;
-                    } else {
-                        text_box.displayed_text_start = text_box.displayed_text_end;
-                        text_box.awaiting_keypress = false;
-                    }
-                },
-                (true, false) => {
-                    text_box.displayed_text_end = full_text_length.min(
-                        text_box.displayed_text_start + maximum_display_length
-                    );
-                },
-                (false, false) => {
-                    text_box.cooldown += time.delta_seconds();
-                    while text_box.cooldown >= game_config.text_delay {
-                        text_box.cooldown -= game_config.text_delay;
-
-                        let displayed_length = text_box.displayed_text_end - text_box.displayed_text_start;
-
-                        if text_box.displayed_text_end == full_text_length || displayed_length == maximum_display_length {
-                            text_box.awaiting_keypress = true;
-                        } else {
-                            text_box.displayed_text_end += 1;
-                        }
-                    }
-                }
-                _ => {},
-            }
-
-            ui_texts
-                .get_mut(text_box.text_entity)
-                .expect("Failed to retrieve UiText")
-                .text = text_box.full_text[
-                    text_box.displayed_text_start..text_box.displayed_text_end
-                ].to_string();
-
-            TextState::Running
-        } else {
-            TextState::Closed
-        }
-    }
-
-    fn close_text_box(&mut self, entities: &Entities) {
-        if let Some(text_box) = self.text_box.take() {
-            entities.delete(text_box.box_entity).expect("Failed to delete text box");
-            entities.delete(text_box.text_entity).expect("Failed to delete text");
         }
     }
 }
 
 impl GameEvent for TextEvent {
     fn boxed_clone(&self) -> BoxedGameEvent {
-        // TODO
-        unimplemented!();
+        Box::new(self.clone())
     }
 
     fn get_execution_conditions(&self) -> ExecutionConditions {
@@ -142,76 +49,52 @@ impl GameEvent for TextEvent {
     }
 
     fn start(&mut self, world: &mut World) {
-        let (
-            mut ui_images,
-            mut ui_texts,
-            mut ui_transforms,
-            entities,
-            resources,
-        ) = <(
-            WriteStorage<UiImage>,
-            WriteStorage<UiText>,
-            WriteStorage<UiTransform>,
-            Entities,
-            ReadExpect<CommonResources>,
-        )>::fetch(world);
+        let text_box = {
+            let (
+                mut ui_images,
+                mut ui_texts,
+                mut ui_transforms,
+                entities,
+                resources,
+            ) = <(
+                WriteStorage<UiImage>,
+                WriteStorage<UiText>,
+                WriteStorage<UiTransform>,
+                Entities,
+                ReadExpect<CommonResources>,
+            )>::fetch(world);
 
-        self.text_box = Some(TextBox {
-            full_text: self.text.clone(),
-            displayed_text_start: 0,
-            displayed_text_end: 0,
-            awaiting_keypress: false,
-            cooldown: 0.,
-            box_entity: initialise_box_entity(
-                &entities,
-                &mut ui_images,
-                &mut ui_transforms,
-                &resources,
-            ),
-            text_entity: initialise_text_entity(
-                &entities,
-                &mut ui_texts,
-                &mut ui_transforms,
-                &resources,
-            ),
-        });
-    }
-
-    fn tick(&mut self, world: &mut World, _disabled_inputs: bool) {
-        let (
-            mut ui_texts,
-            entities,
-            game_config,
-            time,
-            input_event_channel,
-        ) = <(
-            WriteStorage<UiText>,
-            Entities,
-            ReadExpect<GameConfig>,
-            Read<Time>,
-            Read<EventChannel<InputEvent<StringBindings>>>,
-        )>::fetch(world);
-
-        let mut pressed_action_key = false;
-        for event in input_event_channel.read(&mut self.input_event_reader) {
-            match event {
-                InputEvent::ActionPressed(action) if action == "action" => {
-                    pressed_action_key = true;
-                },
-                _ => {},
+            TextBox {
+                full_text: self.text.clone(),
+                displayed_text_start: 0,
+                displayed_text_end: 0,
+                awaiting_keypress: false,
+                cooldown: 0.,
+                box_entity: initialise_box_entity(
+                    &entities,
+                    &mut ui_images,
+                    &mut ui_transforms,
+                    &resources,
+                ),
+                text_entity: initialise_text_entity(
+                    &entities,
+                    &mut ui_texts,
+                    &mut ui_transforms,
+                    &resources,
+                ),
             }
-        }
+        };
 
-        let state = self.advance_text(pressed_action_key, &game_config, &time, &mut ui_texts);
-
-        if state == TextState::Closed {
-            self.close_text_box(&entities);
-            self.finished = true;
-        }
+        world
+            .create_entity()
+            .with(text_box)
+            .build();
     }
 
-    fn is_complete(&self, _world: &mut World) -> bool {
-        self.finished
+    fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) { }
+
+    fn is_complete(&self, world: &mut World) -> bool {
+        world.read_storage::<TextBox>().is_empty()
     }
 }
 

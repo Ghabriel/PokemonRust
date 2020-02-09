@@ -15,6 +15,7 @@ use crate::{
         AnimationSystem,
         CharacterMovementSystem,
         NpcInteractionSystem,
+        TextSystem,
     },
 };
 
@@ -49,6 +50,7 @@ impl SimpleState for OverworldAnimationState<'_, '_> {
             .with(AnimationSystem::<CharacterAnimation>::new(), "animation_system", &[])
             .with(CharacterMovementSystem, "character_movement_system", &[])
             .with(NpcInteractionSystem, "npc_interaction_system", &[])
+            .with(TextSystem::new(world), "text_system", &[])
             .with_pool(world.read_resource::<ArcThreadPool>().deref().clone())
             .build();
 

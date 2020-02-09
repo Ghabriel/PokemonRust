@@ -6,6 +6,7 @@ use std::{
 };
 
 pub mod character;
+pub mod text_box;
 
 pub struct AnimationTable<T>
 where
