@@ -9,10 +9,10 @@ use crate::map::MapCoordinates;
 use super::{
     BoxedGameEvent,
     ChainedEvents,
+    ExecutionConditions,
     FadeInEvent,
     FadeOutEvent,
     GameEvent,
-    ShouldDisableInput,
     SwitchMapEvent,
 };
 
@@ -42,8 +42,12 @@ impl GameEvent for WarpEvent {
         Box::new(self.clone())
     }
 
-    fn start(&mut self, world: &mut World) -> ShouldDisableInput {
-        self.executor.start(world)
+    fn get_execution_conditions(&self) -> ExecutionConditions {
+        self.executor.get_execution_conditions()
+    }
+
+    fn start(&mut self, world: &mut World) {
+        self.executor.start(world);
     }
 
     fn tick(&mut self, world: &mut World, disabled_inputs: bool) {

@@ -14,7 +14,7 @@ use crate::{
     map::{GameActionKind, MapHandler, PlayerCoordinates, ValidatedGameAction},
 };
 
-use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
 #[derive(Clone)]
 pub struct MapInteractionEvent;
@@ -24,9 +24,13 @@ impl GameEvent for MapInteractionEvent {
         Box::new(self.clone())
     }
 
-    fn start(&mut self, _world: &mut World) -> ShouldDisableInput {
-        ShouldDisableInput(false)
+    fn get_execution_conditions(&self) -> ExecutionConditions {
+        ExecutionConditions {
+            requires_disabled_input: false,
+        }
     }
+
+    fn start(&mut self, _world: &mut World) { }
 
     fn tick(&mut self, world: &mut World, _disabled_inputs: bool) {
         let map = world.read_resource::<MapHandler>();

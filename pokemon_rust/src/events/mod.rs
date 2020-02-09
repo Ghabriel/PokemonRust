@@ -39,13 +39,25 @@ pub use self::{
     warp_event::WarpEvent,
 };
 
-pub struct ShouldDisableInput(pub bool);
+#[derive(Default)]
+pub struct ExecutionConditions {
+    pub requires_disabled_input: bool,
+}
+
+impl ExecutionConditions {
+    fn merge_with(&self, other: &ExecutionConditions) -> ExecutionConditions {
+        ExecutionConditions {
+            requires_disabled_input: self.requires_disabled_input || other.requires_disabled_input,
+        }
+    }
+}
 
 pub type BoxedGameEvent = Box<dyn GameEvent + Sync + Send>;
 
 pub trait GameEvent {
     fn boxed_clone(&self) -> BoxedGameEvent;
-    fn start(&mut self, world: &mut World) -> ShouldDisableInput;
+    fn get_execution_conditions(&self) -> ExecutionConditions;
+    fn start(&mut self, world: &mut World);
     fn tick(&mut self, world: &mut World, disabled_inputs: bool);
     fn is_complete(&self, world: &mut World) -> bool;
 }

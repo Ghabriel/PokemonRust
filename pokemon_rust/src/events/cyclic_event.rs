@@ -2,7 +2,7 @@
 
 use amethyst::ecs::World;
 
-use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
 pub struct CyclicEvent {
     prototype: BoxedGameEvent,
@@ -35,10 +35,13 @@ impl GameEvent for CyclicEvent {
         Box::new(self.clone())
     }
 
-    fn start(&mut self, world: &mut World) -> ShouldDisableInput {
-        self.called_start = true;
+    fn get_execution_conditions(&self) -> ExecutionConditions {
+        self.event.get_execution_conditions()
+    }
 
-        self.event.start(world)
+    fn start(&mut self, world: &mut World) {
+        self.event.start(world);
+        self.called_start = true;
     }
 
     fn tick(&mut self, world: &mut World, disabled_inputs: bool) {

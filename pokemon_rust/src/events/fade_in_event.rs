@@ -23,7 +23,7 @@ use crate::{
     events::fade_out_event::Fade,
 };
 
-use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
 #[derive(Clone, Default)]
 pub struct FadeInEvent {
@@ -38,7 +38,13 @@ impl GameEvent for FadeInEvent {
         Box::new(self.clone())
     }
 
-    fn start(&mut self, world: &mut World) -> ShouldDisableInput {
+    fn get_execution_conditions(&self) -> ExecutionConditions {
+        ExecutionConditions {
+            requires_disabled_input: true,
+        }
+    }
+
+    fn start(&mut self, world: &mut World) {
         let entities = world.read_resource::<EntitiesRes>();
         let fades = world.read_component::<Fade>();
 
@@ -49,8 +55,6 @@ impl GameEvent for FadeInEvent {
                 _ => panic!("Invalid Fade ID"),
             }
         }
-
-        ShouldDisableInput(true)
     }
 
     fn tick(&mut self, world: &mut World, _disabled_inputs: bool) {

@@ -26,7 +26,7 @@ use crate::{
     config::GameConfig,
 };
 
-use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
 pub struct TextBox {
     full_text: String,
@@ -135,7 +135,13 @@ impl GameEvent for TextEvent {
         unimplemented!();
     }
 
-    fn start(&mut self, world: &mut World) -> ShouldDisableInput {
+    fn get_execution_conditions(&self) -> ExecutionConditions {
+        ExecutionConditions {
+            requires_disabled_input: true,
+        }
+    }
+
+    fn start(&mut self, world: &mut World) {
         let (
             mut ui_images,
             mut ui_texts,
@@ -169,8 +175,6 @@ impl GameEvent for TextEvent {
                 &resources,
             ),
         });
-
-        ShouldDisableInput(true)
     }
 
     fn tick(&mut self, world: &mut World, _disabled_inputs: bool) {

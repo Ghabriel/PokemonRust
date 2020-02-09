@@ -1,6 +1,6 @@
 use amethyst::ecs::World;
 
-use super::{BoxedGameEvent, ChainedEvents, GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, ChainedEvents, ExecutionConditions, GameEvent};
 
 use std::marker::PhantomData;
 
@@ -52,8 +52,12 @@ where
         })
     }
 
-    fn start(&mut self, world: &mut World) -> ShouldDisableInput {
-        self.chain.start(world)
+    fn get_execution_conditions(&self) -> ExecutionConditions {
+        self.chain.get_execution_conditions()
+    }
+
+    fn start(&mut self, world: &mut World) {
+        self.chain.start(world);
     }
 
     fn tick(&mut self, world: &mut World, disabled_inputs: bool) {

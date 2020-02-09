@@ -1,6 +1,6 @@
 use amethyst::ecs::World;
 
-use super::{BoxedGameEvent, CharacterSingleMoveEvent, GameEvent, RepeatedEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, CharacterSingleMoveEvent, ExecutionConditions, GameEvent, RepeatedEvent};
 
 #[derive(Clone)]
 pub struct CharacterMoveEvent {
@@ -23,8 +23,12 @@ impl GameEvent for CharacterMoveEvent {
         Box::new(self.clone())
     }
 
-    fn start(&mut self, world: &mut World) -> ShouldDisableInput {
-        self.executor.start(world)
+    fn get_execution_conditions(&self) -> ExecutionConditions {
+        self.executor.get_execution_conditions()
+    }
+
+    fn start(&mut self, world: &mut World) {
+        self.executor.start(world);
     }
 
     fn tick(&mut self, world: &mut World, disabled_inputs: bool) {

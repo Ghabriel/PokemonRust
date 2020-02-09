@@ -5,7 +5,7 @@
 
 use amethyst::ecs::World;
 
-use super::{GameEvent, ParallelEvents, ShouldDisableInput};
+use super::{GameEvent, ParallelEvents};
 
 #[derive(Default)]
 pub struct EventExecutor {
@@ -22,23 +22,21 @@ impl EventExecutor {
         !self.incoming_events.is_empty()
     }
 
-    pub fn start_new_events(&mut self, world: &mut World) -> ShouldDisableInput {
-        let mut should_disable_input = false;
+    pub fn requires_disabled_input(&self) -> bool {
+        self.root
+            .get_execution_conditions()
+            .requires_disabled_input
+    }
 
+    pub fn start_new_events(&mut self, world: &mut World) {
         for event in &mut self.incoming_events {
-            should_disable_input = should_disable_input || event.start(world).0;
+            event.start(world);
         }
 
         self.root.add_events(self.incoming_events.drain(..));
-
-        ShouldDisableInput(should_disable_input)
     }
 
     pub fn tick(&mut self, world: &mut World, disabled_inputs: bool) {
         self.root.tick(world, disabled_inputs);
-    }
-
-    pub fn is_complete(&self, world: &mut World) -> bool {
-        self.root.is_complete(world)
     }
 }

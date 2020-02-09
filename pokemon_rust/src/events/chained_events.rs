@@ -2,7 +2,7 @@
 
 use amethyst::ecs::World;
 
-use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
 use std::collections::VecDeque;
 
@@ -36,12 +36,22 @@ impl GameEvent for ChainedEvents {
         Box::new(self.clone())
     }
 
-    fn start(&mut self, world: &mut World) -> ShouldDisableInput {
+    fn get_execution_conditions(&self) -> ExecutionConditions {
+        if let Some(event) = self.chain.front() {
+            event.get_execution_conditions()
+        } else {
+            ExecutionConditions {
+                requires_disabled_input: false
+            }
+        }
+    }
+
+    fn start(&mut self, world: &mut World) {
         self.called_start = true;
 
-        self.chain
-            .front_mut()
-            .map_or(ShouldDisableInput(false), |event| event.start(world))
+        if let Some(event) = self.chain.front_mut() {
+            event.start(world);
+        }
     }
 
     fn tick(&mut self, world: &mut World, disabled_inputs: bool) {

@@ -24,7 +24,7 @@ use crate::{
     config::GameConfig,
 };
 
-use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
 /// A marker component to allow easy retrieval of the fade-related entities.
 pub struct Fade {
@@ -48,7 +48,13 @@ impl GameEvent for FadeOutEvent {
         Box::new(self.clone())
     }
 
-    fn start(&mut self, world: &mut World) -> ShouldDisableInput {
+    fn get_execution_conditions(&self) -> ExecutionConditions {
+        ExecutionConditions {
+            requires_disabled_input: true,
+        }
+    }
+
+    fn start(&mut self, world: &mut World) {
         self.top_fade = Some(
             initialise_fade_entity(world, Anchor::TopMiddle, Anchor::TopMiddle, 0)
         );
@@ -56,8 +62,6 @@ impl GameEvent for FadeOutEvent {
         self.bottom_fade = Some(
             initialise_fade_entity(world, Anchor::BottomMiddle, Anchor::BottomMiddle, 1)
         );
-
-        ShouldDisableInput(true)
     }
 
     fn tick(&mut self, world: &mut World, _disabled_inputs: bool) {

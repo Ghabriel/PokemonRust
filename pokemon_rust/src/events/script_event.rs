@@ -10,7 +10,7 @@ use crate::{
     map::{GameScript, MapHandler, MapId},
 };
 
-use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
 #[derive(Clone)]
 pub struct ScriptEvent {
@@ -48,10 +48,14 @@ impl GameEvent for ScriptEvent {
         Box::new(self.clone())
     }
 
-    fn start(&mut self, _world: &mut World) -> ShouldDisableInput {
+    fn get_execution_conditions(&self) -> ExecutionConditions {
         // TODO: is this always correct?
-        ShouldDisableInput(false)
+        ExecutionConditions {
+            requires_disabled_input: false,
+        }
     }
+
+    fn start(&mut self, _world: &mut World) { }
 
     fn tick<'a>(&mut self, world: &'a mut World, _disabled_inputs: bool) {
         let game_script = match &self.script {

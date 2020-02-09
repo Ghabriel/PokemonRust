@@ -2,7 +2,7 @@
 
 use amethyst::ecs::World;
 
-use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
 #[derive(Default)]
 pub struct ParallelEvents {
@@ -24,14 +24,17 @@ impl GameEvent for ParallelEvents {
         })
     }
 
-    fn start(&mut self, world: &mut World) -> ShouldDisableInput {
-        let mut should_disable_input = false;
+    fn get_execution_conditions(&self) -> ExecutionConditions {
+        self.events
+            .iter()
+            .map(|event| event.get_execution_conditions())
+            .fold(ExecutionConditions::default(), |acc, c| acc.merge_with(&c))
+    }
 
+    fn start(&mut self, world: &mut World) {
         for event in &mut self.events {
-            should_disable_input = should_disable_input || event.start(world).0;
+            event.start(world);
         }
-
-        ShouldDisableInput(should_disable_input)
     }
 
     fn tick(&mut self, world: &mut World, disabled_inputs: bool) {

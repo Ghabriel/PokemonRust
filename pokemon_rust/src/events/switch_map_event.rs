@@ -15,7 +15,7 @@ use crate::{
     map::{change_player_tile, MapCoordinates, MapHandler, PlayerCoordinates, prepare_warp, TileData},
 };
 
-use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
 pub struct SwitchMapEvent {
     map: String,
@@ -51,7 +51,13 @@ impl GameEvent for SwitchMapEvent {
         Box::new(self.clone())
     }
 
-    fn start(&mut self, world: &mut World) -> ShouldDisableInput {
+    fn get_execution_conditions(&self) -> ExecutionConditions {
+        ExecutionConditions {
+            requires_disabled_input: true,
+        }
+    }
+
+    fn start(&mut self, world: &mut World) {
         let target_tile_data = prepare_warp(world, &self.map, &self.tile, &mut self.progress_counter);
 
         let mut transforms = world.write_storage::<Transform>();
@@ -75,8 +81,6 @@ impl GameEvent for SwitchMapEvent {
             &mut world.write_resource::<MapHandler>(),
             &mut world.write_resource::<EventQueue>(),
         );
-
-        ShouldDisableInput(true)
     }
 
     fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) { }

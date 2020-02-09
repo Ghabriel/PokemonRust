@@ -9,7 +9,7 @@ use crate::{
     map::{MapHandler, PlayerCoordinates, TileData},
 };
 
-use super::{BoxedGameEvent, GameEvent, ShouldDisableInput};
+use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
 #[derive(Clone)]
 pub struct CharacterSingleMoveEvent {
@@ -29,7 +29,13 @@ impl GameEvent for CharacterSingleMoveEvent {
         Box::new(self.clone())
     }
 
-    fn start(&mut self, world: &mut World) -> ShouldDisableInput {
+    fn get_execution_conditions(&self) -> ExecutionConditions {
+        ExecutionConditions {
+            requires_disabled_input: false,
+        }
+    }
+
+    fn start(&mut self, world: &mut World) {
         let map_handler = world.read_resource::<MapHandler>();
         let entity = map_handler.get_character_by_id(self.character_id);
 
@@ -66,8 +72,6 @@ impl GameEvent for CharacterSingleMoveEvent {
         world.write_storage::<CharacterMovement>()
             .insert(*entity, movement)
             .expect("Failed to attach CharacterMovement");
-
-        ShouldDisableInput(false)
     }
 
     fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) { }
