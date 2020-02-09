@@ -8,14 +8,20 @@ use amethyst::{
 };
 
 use crate::{
+    entities::character::CharacterAnimation,
     events::{EventExecutor, EventQueue},
     states::OverworldState,
+    systems::{
+        AnimationSystem,
+        CharacterMovementSystem,
+        NpcInteractionSystem,
+    },
 };
 
 use std::{
     cell::RefCell,
-    rc::Rc,
     ops::Deref,
+    rc::Rc,
 };
 
 #[derive(Default)]
@@ -40,6 +46,9 @@ impl SimpleState for OverworldAnimationState<'_, '_> {
         let world = data.world;
 
         let mut dispatcher = DispatcherBuilder::new()
+            .with(AnimationSystem::<CharacterAnimation>::new(), "animation_system", &[])
+            .with(CharacterMovementSystem, "character_movement_system", &[])
+            .with(NpcInteractionSystem, "npc_interaction_system", &[])
             .with_pool(world.read_resource::<ArcThreadPool>().deref().clone())
             .build();
 
