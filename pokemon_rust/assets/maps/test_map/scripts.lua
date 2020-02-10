@@ -53,6 +53,7 @@ function interact_with_npc(npc)
 
     if npc == FIRST_NPC then
         print("Interacted with the first NPC")
+        TextEvent:new("Hello, world!"):dispatch()
     elseif npc == SECOND_NPC then
         print("Interacted with the second NPC")
     end

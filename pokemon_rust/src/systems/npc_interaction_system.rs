@@ -26,8 +26,6 @@ impl<'a> System<'a> for NpcInteractionSystem {
                 let map_id = map.get_character_natural_map(character_id);
 
                 interact_with_npc(character_id, &map_id, &mut event_queue);
-
-                character.pending_interaction = false;
             }
         }
     }
