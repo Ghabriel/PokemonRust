@@ -5,7 +5,7 @@ use amethyst::{
 };
 
 use crate::{
-    common::get_character_sprite_index_from_direction,
+    common::{Direction, get_character_sprite_index_from_direction},
     entities::character::{
         Character,
         CharacterId,
@@ -21,7 +21,7 @@ use crate::{
     },
 };
 
-use super::{ExecutionContext, parse_lua_direction};
+use super::ExecutionContext;
 
 pub(super) fn create_npc(
     context: &mut ExecutionContext,
@@ -29,13 +29,13 @@ pub(super) fn create_npc(
     x: u32,
     y: u32,
     kind: String,
-    direction: u8,
+    direction: Direction,
 ) -> usize {
     let npc = NpcBuilder {
         map_id,
         position: MapCoordinates::new(x, y),
         kind,
-        facing_direction: parse_lua_direction(direction),
+        facing_direction: direction,
         // TODO: this should be a parameter
         initial_action: MovementType::Walk,
     };
@@ -43,10 +43,14 @@ pub(super) fn create_npc(
     context.store(npc)
 }
 
-pub(super) fn change_npc_direction(context: &mut ExecutionContext, npc_key: usize, direction: u8) {
+pub(super) fn change_npc_direction(
+    context: &mut ExecutionContext,
+    npc_key: usize,
+    direction: Direction,
+) {
     let mut npc = context.remove::<NpcBuilder>(npc_key);
 
-    npc.facing_direction = parse_lua_direction(direction);
+    npc.facing_direction = direction;
 
     context.store_at(npc_key, npc);
 }

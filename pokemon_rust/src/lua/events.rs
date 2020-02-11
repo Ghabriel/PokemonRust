@@ -1,6 +1,7 @@
 use amethyst::ecs::WorldExt;
 
 use crate::{
+    common::Direction,
     entities::character::CharacterId,
     events::{
         ChainedEvents,
@@ -15,7 +16,7 @@ use crate::{
     map::MapCoordinates,
 };
 
-use super::{ExecutionContext, parse_lua_direction};
+use super::ExecutionContext;
 
 pub(super) fn create_chained_event(context: &mut ExecutionContext) -> usize {
     let event = ChainedEvents::default();
@@ -42,9 +43,9 @@ pub(super) fn create_npc_move_event(
 pub(super) fn create_npc_rotate_event(
     context: &mut ExecutionContext,
     character_id: CharacterId,
-    direction: u8,
+    direction: Direction,
 ) -> usize {
-    let event = CharacterRotateEvent::new(character_id, parse_lua_direction(direction));
+    let event = CharacterRotateEvent::new(character_id, direction);
 
     context.store(event)
 }

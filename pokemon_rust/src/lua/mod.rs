@@ -45,8 +45,43 @@ use std::{
 };
 
 impl<'lua> FromLua<'lua> for CharacterId {
-    fn from_lua(lua_value: Value<'lua>, context: Context<'lua>) -> LuaResult<CharacterId> {
+    fn from_lua(lua_value: Value<'lua>, context: Context<'lua>) -> LuaResult<Self> {
         Ok(CharacterId(usize::from_lua(lua_value, context)?))
+    }
+}
+
+impl<'lua> FromLua<'lua> for Direction {
+    fn from_lua(lua_value: Value<'lua>, context: Context<'lua>) -> LuaResult<Self> {
+        let direction = match context.coerce_integer(lua_value.clone())? {
+            Some(0) => Direction::Up,
+            Some(1) => Direction::Down,
+            Some(2) => Direction::Left,
+            Some(3) => Direction::Right,
+            _ => return Err(LuaError::FromLuaConversionError {
+                from: get_lua_type_name(&lua_value),
+                to: "Direction",
+                message: Some("expected a value in the range 1..=4".to_string()),
+            }),
+        };
+
+        Ok(direction)
+    }
+}
+
+/// Returns a string represention of a Lua type. This is a copy of
+/// `Value::type_name()`, which for some reason is private...
+fn get_lua_type_name(value: &Value) -> &'static str {
+    match value {
+        Value::Nil => "nil",
+        Value::Boolean(_) => "boolean",
+        Value::LightUserData(_) => "light userdata",
+        Value::Integer(_) => "integer",
+        Value::Number(_) => "number",
+        Value::String(_) => "string",
+        Value::Table(_) => "table",
+        Value::Function(_) => "function",
+        Value::Thread(_) => "thread",
+        Value::UserData(_) | Value::Error(_) => "userdata",
     }
 }
 
@@ -186,7 +221,7 @@ where
                 rust_create_npc_move_event:
                     create_npc_move_event(character_id: CharacterId, num_tiles: usize),
                 rust_create_npc_rotate_event:
-                    create_npc_rotate_event(character_id: CharacterId, direction: u8),
+                    create_npc_rotate_event(character_id: CharacterId, direction: Direction),
                 rust_create_npc_rotate_towards_player_event:
                     create_npc_rotate_towards_player_event(character_id: CharacterId),
                 rust_create_text_event: create_text_event(text: String),
@@ -195,8 +230,8 @@ where
                 rust_dispatch_event: dispatch_event(key: usize),
                 // NPC functions
                 rust_create_npc:
-                    create_npc(map_id: String, x: u32, y: u32, kind: String, direction: u8),
-                rust_change_npc_direction: change_npc_direction(npc_key: usize, direction: u8),
+                    create_npc(map_id: String, x: u32, y: u32, kind: String, direction: Direction),
+                rust_change_npc_direction: change_npc_direction(npc_key: usize, direction: Direction),
                 rust_rotate_npc_towards_player: rotate_npc_towards_player(character_id: CharacterId),
                 rust_add_npc: add_npc(npc_key: usize)
             );
@@ -209,14 +244,4 @@ where
     world.insert(asset_tracker);
 
     result
-}
-
-fn parse_lua_direction(direction: u8) -> Direction {
-    match direction {
-        0 => Direction::Up,
-        1 => Direction::Down,
-        2 => Direction::Left,
-        3 => Direction::Right,
-        _ => panic!("Invalid direction"),
-    }
 }
