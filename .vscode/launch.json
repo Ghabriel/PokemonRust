@@ -1,0 +1,21 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "type": "lldb",
+        "request": "launch",
+        "name": "Launch",
+        "args": [],
+        "program": "./target/debug/pokemon_rust",
+        "cwd": "${workspaceFolder}",
+        "stopOnEntry": false,
+        "sourceLanguages": ["rust"],
+        "sourceMap": {
+          "/rustc/*": "${env:HOME}/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust"
+        },
+        "env": {
+            "CARGO_MANIFEST_DIR": "${workspaceFolder}/pokemon_rust"
+        }
+      },
+    ],
+}
