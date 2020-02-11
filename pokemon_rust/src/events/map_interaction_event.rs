@@ -11,7 +11,7 @@ use amethyst::{
 use crate::{
     entities::character::{Character, PlayerEntity},
     events::EventQueue,
-    map::{GameActionKind, MapHandler, PlayerCoordinates, ValidatedGameAction},
+    map::{GameActionKind, MapHandler, PlayerCoordinates, TileData, ValidatedGameAction},
 };
 
 use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
@@ -38,6 +38,8 @@ impl GameEvent for MapInteractionEvent {
         let characters = world.read_storage::<Character>();
         let transforms = world.read_storage::<Transform>();
 
+        let character_id = map.get_character_id_by_entity(&player_entity.0);
+
         let character = characters
             .get(player_entity.0)
             .expect("Failed to retrieve Character");
@@ -48,7 +50,10 @@ impl GameEvent for MapInteractionEvent {
 
         let interacted_position = map.get_forward_tile(
             &character.facing_direction,
-            &PlayerCoordinates::from_transform(&transform),
+            &TileData {
+                map_id: map.get_character_current_map(character_id).clone(),
+                position: PlayerCoordinates::from_transform(&transform),
+            },
         );
 
         match map.get_action_at(&interacted_position) {

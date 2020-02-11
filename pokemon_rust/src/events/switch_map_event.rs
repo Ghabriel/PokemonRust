@@ -62,6 +62,9 @@ impl GameEvent for SwitchMapEvent {
 
         let mut transforms = world.write_storage::<Transform>();
         let player_entity = world.read_resource::<PlayerEntity>();
+        let map = world.read_resource::<MapHandler>();
+
+        let character_id = map.get_character_id_by_entity(&player_entity.0);
 
         let transform = transforms
             .get_mut(player_entity.0)
@@ -69,7 +72,7 @@ impl GameEvent for SwitchMapEvent {
 
         let initial_tile_data = TileData {
             position: PlayerCoordinates::from_transform(&transform),
-            map_id: world.read_resource::<MapHandler>().get_current_map_id(),
+            map_id: map.get_character_current_map(character_id).clone(),
         };
 
         transform.set_translation(*target_tile_data.position.to_transform().translation());

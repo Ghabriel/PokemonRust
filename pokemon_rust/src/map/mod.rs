@@ -38,7 +38,6 @@ pub use self::{
 // TODO: find a better name
 pub struct MapHandler {
     loaded_maps: HashMap<String, Map>,
-    current_map: MapId,
     next_character_id: usize,
     characters: HashMap<CharacterId, CharacterData>,
 }
@@ -47,19 +46,20 @@ impl MapHandler {
     pub fn get_forward_tile(
         &self,
         facing_direction: &Direction,
-        position: &PlayerCoordinates,
+        tile_data: &TileData,
     ) -> TileData {
-        let current_map = &self.loaded_maps[&self.current_map.0];
-        let current_tile = current_map.player_to_map_coordinates(&position);
-        let connection = current_map.connections.get(&current_tile);
+        let TileData { map_id, position } = tile_data;
+        let map = &self.loaded_maps[&map_id.0];
+        let current_tile = map.player_to_map_coordinates(&position);
+        let connection = map.connections.get(&current_tile);
         let target_map = if let Some(connection) = connection {
             if connection.directions.contains_key(&facing_direction) {
                 MapId(connection.map.clone())
             } else {
-                self.current_map.clone()
+                map_id.clone()
             }
         } else {
-            self.current_map.clone()
+            map_id.clone()
         };
 
         TileData {
@@ -105,16 +105,12 @@ impl MapHandler {
             .get_map_scripts(kind)
     }
 
-    pub fn get_current_map_id(&self) -> MapId {
-        self.current_map.clone()
-    }
-
     pub fn get_nearby_connections(
         &self,
-        position: &PlayerCoordinates,
+        tile_data: &TileData,
     ) -> impl Iterator<Item = (&MapCoordinates, &MapConnection)> {
-        let map = &self.loaded_maps[&self.current_map.0];
-        let position = map.player_to_map_coordinates(&position);
+        let map = &self.loaded_maps[&tile_data.map_id.0];
+        let position = map.player_to_map_coordinates(&tile_data.position);
 
         map.connections
             .iter()
@@ -177,7 +173,11 @@ impl MapHandler {
 
         map.solids.insert(position, Tile);
 
-        self.characters.insert(character_id, CharacterData { entity, natural_map: map_id.clone() });
+        self.characters.insert(character_id, CharacterData {
+            entity,
+            current_map: map_id.clone(),
+            natural_map: map_id.clone(),
+        });
 
         character_id
     }
@@ -185,8 +185,7 @@ impl MapHandler {
     pub fn get_character_id_by_entity(&self, entity: &Entity) -> CharacterId {
         *self.characters
             .iter()
-            .map(|(id, c)| (id, c.entity))
-            .find(|(_, e)| *e == *entity)
+            .find(|(_, c)| c.entity == *entity)
             .map(|(id, _)| id)
             .unwrap()
     }
@@ -219,6 +218,13 @@ impl MapHandler {
         map.solids.remove(&position);
     }
 
+    pub fn get_character_current_map(&self, character_id: CharacterId) -> &MapId {
+        &self.characters
+            .get(&character_id)
+            .unwrap()
+            .current_map
+    }
+
     pub fn get_character_natural_map(&self, character_id: CharacterId) -> &MapId {
         &self.characters
             .get(&character_id)
@@ -243,7 +249,14 @@ impl MapHandler {
 
 #[derive(Debug)]
 struct CharacterData {
+    /// The Entity corresponding to this character.
     entity: Entity,
+    /// The map that this character is currently in.
+    current_map: MapId,
+    /// The "natural map" of this character. The natural map is defined
+    /// depending on the type of this character:
+    /// * NPC: the map that contains the script that created this NPC;
+    /// * Player: equal to the current map.
     natural_map: MapId,
 }
 

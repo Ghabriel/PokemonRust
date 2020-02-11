@@ -63,19 +63,19 @@ impl GameEvent for CharacterSingleMoveEvent {
             .unwrap()
             .velocity;
 
+        let tile_data = TileData {
+            position: character_position.clone(),
+            map_id: map_handler.get_character_current_map(self.character_id).clone(),
+        };
+
         let movement = CharacterMovement {
             estimated_time: f32::from(TILE_SIZE) / velocity,
             velocity,
             movement_type: character.action.clone(),
             step_kind: character.next_step.clone(),
             started: false,
-            from: TileData {
-                position: character_position.clone(),
-                // TODO: use the NPC's natural map
-                map_id: map_handler.get_current_map_id(),
-            },
-            // TODO: use the NPC's natural map
-            to: map_handler.get_forward_tile(&character.facing_direction, &character_position),
+            to: map_handler.get_forward_tile(&character.facing_direction, &tile_data),
+            from: tile_data,
         };
 
         world.write_storage::<CharacterMovement>()

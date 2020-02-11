@@ -77,12 +77,17 @@ pub fn change_player_tile(
 ) {
     if initial_tile_data.map_id != final_tile_data.map_id {
         println!("Changing to map {}", final_tile_data.map_id.0);
-        map.current_map = final_tile_data.map_id.clone();
+        let current_map = map.characters
+            .iter_mut()
+            .find(|(_, c)| c.entity == player_entity.0)
+            .map(|(_, c)| &mut c.current_map)
+            .unwrap();
+        *current_map = final_tile_data.map_id.clone();
+
         let natural_map = map.characters
             .iter_mut()
-            .map(|(_, c)| (c.entity, &mut c.natural_map))
-            .find(|(entity, _)| *entity == player_entity.0)
-            .map(|(_, natural_map)| natural_map)
+            .find(|(_, c)| c.entity == player_entity.0)
+            .map(|(_, c)| &mut c.natural_map)
             .unwrap();
         *natural_map = final_tile_data.map_id.clone();
 
@@ -165,15 +170,15 @@ pub fn initialise_map(world: &mut World, starting_map: &str, progress_counter: &
             loaded_maps.insert(starting_map.to_string(), map);
             loaded_maps
         },
-        current_map: MapId(starting_map.to_string()),
         next_character_id: 0,
         characters: HashMap::new(),
     };
 
     {
+        let starting_map_id = MapId(starting_map.to_string());
         let mut event_queue = world.write_resource::<EventQueue>();
 
-        map_handler.get_map_scripts(&map_handler.current_map, MapScriptKind::OnMapEnter)
+        map_handler.get_map_scripts(&starting_map_id, MapScriptKind::OnMapEnter)
             .for_each(|event| {
                 event_queue.push(event);
             });
@@ -185,10 +190,21 @@ pub fn initialise_map(world: &mut World, starting_map: &str, progress_counter: &
 fn load_nearby_connections(world: &mut World, progress_counter: &mut ProgressCounter) {
     let (nearby_connections, reference_point) = {
         let map = world.read_resource::<MapHandler>();
-        let player_position = get_player_position(world);
+        let player_entity = world.read_resource::<PlayerEntity>();
+        let character_id = map.get_character_id_by_entity(&player_entity.0);
+
+        let character_position = world.read_storage::<Transform>()
+            .get(player_entity.0)
+            .map(PlayerCoordinates::from_transform)
+            .expect("Failed to retrieve Transform");
+
+        let tile_data = TileData {
+            position: character_position.clone(),
+            map_id: map.get_character_current_map(character_id).clone(),
+        };
 
         let mut nearby_connections: Vec<_> = map
-            .get_nearby_connections(&player_position)
+            .get_nearby_connections(&tile_data)
             .filter(|(_, connection)| !map.loaded_maps.contains_key(&connection.map))
             .map(|(tile, connection)| (tile.clone(), connection.clone()))
             .collect();
@@ -202,7 +218,7 @@ fn load_nearby_connections(world: &mut World, progress_counter: &mut ProgressCou
         });
 
         let reference_point = map
-            .loaded_maps[&map.current_map.0]
+            .loaded_maps[&map.get_character_current_map(character_id).0]
             .reference_point
             .clone();
 
@@ -227,15 +243,6 @@ fn load_nearby_connections(world: &mut World, progress_counter: &mut ProgressCou
         .write_resource::<MapHandler>()
         .loaded_maps
         .extend(loaded_maps);
-}
-
-fn get_player_position(world: &World) -> PlayerCoordinates {
-    let player_entity = world.read_resource::<PlayerEntity>();
-
-    world.read_storage::<Transform>()
-        .get(player_entity.0)
-        .map(PlayerCoordinates::from_transform)
-        .expect("Failed to retrieve Transform")
 }
 
 fn get_new_map_reference_point(
