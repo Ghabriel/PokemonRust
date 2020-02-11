@@ -2,6 +2,7 @@ use amethyst::ecs::{Component, DenseVecStorage, Entity, World};
 
 use crate::{
     common::Direction,
+    entities::character::CharacterId,
     events::ScriptEvent,
 };
 
@@ -130,7 +131,7 @@ pub enum GameScript {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub enum GameScriptParameters {
     SourceTile(MapCoordinates),
-    TargetCharacter(usize),
+    TargetCharacter(CharacterId),
 }
 
 impl Debug for GameScript {

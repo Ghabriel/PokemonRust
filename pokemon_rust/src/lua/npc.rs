@@ -6,7 +6,14 @@ use amethyst::{
 
 use crate::{
     common::get_character_sprite_index_from_direction,
-    entities::character::{Character, initialise_npc, MovementType, NpcBuilder, PlayerEntity},
+    entities::character::{
+        Character,
+        CharacterId,
+        initialise_npc,
+        MovementType,
+        NpcBuilder,
+        PlayerEntity,
+    },
     map::{
         MapCoordinates,
         MapHandler,
@@ -44,7 +51,7 @@ pub(super) fn change_npc_direction(context: &mut ExecutionContext, npc_key: usiz
     context.store_at(npc_key, npc);
 }
 
-pub(super) fn rotate_npc_towards_player(context: &mut ExecutionContext, character_id: usize) {
+pub(super) fn rotate_npc_towards_player(context: &mut ExecutionContext, character_id: CharacterId) {
     let map_handler = context.world.write_resource::<MapHandler>();
     let npc_entity = map_handler.get_character_by_id(character_id);
 
@@ -78,5 +85,11 @@ pub(super) fn rotate_npc_towards_player(context: &mut ExecutionContext, characte
 pub(super) fn add_npc(context: &mut ExecutionContext, npc_key: usize) -> usize {
     let npc_builder = context.remove::<NpcBuilder>(npc_key);
 
-    initialise_npc(context.world, *npc_builder, context.asset_tracker.get_progress_counter_mut())
+    let character_id = initialise_npc(
+        context.world,
+        *npc_builder,
+        context.asset_tracker.get_progress_counter_mut(),
+    );
+
+    character_id.0
 }

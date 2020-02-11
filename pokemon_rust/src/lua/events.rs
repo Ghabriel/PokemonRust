@@ -1,6 +1,7 @@
 use amethyst::ecs::WorldExt;
 
 use crate::{
+    entities::character::CharacterId,
     events::{
         ChainedEvents,
         CharacterMoveEvent,
@@ -30,7 +31,7 @@ pub(super) fn create_cyclic_event(context: &mut ExecutionContext, event_key: usi
 
 pub(super) fn create_npc_move_event(
     context: &mut ExecutionContext,
-    character_id: usize,
+    character_id: CharacterId,
     num_tiles: usize,
 ) -> usize {
     let event = CharacterMoveEvent::new(character_id, num_tiles);
@@ -40,7 +41,7 @@ pub(super) fn create_npc_move_event(
 
 pub(super) fn create_npc_rotate_event(
     context: &mut ExecutionContext,
-    character_id: usize,
+    character_id: CharacterId,
     direction: u8,
 ) -> usize {
     let event = CharacterRotateEvent::new(character_id, parse_lua_direction(direction));
@@ -50,7 +51,7 @@ pub(super) fn create_npc_rotate_event(
 
 pub(super) fn create_npc_rotate_towards_player_event(
     context: &mut ExecutionContext,
-    character_id: usize,
+    character_id: CharacterId,
 ) -> usize {
     let event = CharacterRotateEvent::towards_player(character_id);
 

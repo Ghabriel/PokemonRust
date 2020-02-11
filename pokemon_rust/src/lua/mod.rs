@@ -9,10 +9,11 @@ use amethyst::{
 
 use crate::{
     common::{AssetTracker, Direction},
+    entities::character::CharacterId,
     map::{CoordinateSystem, GameScriptParameters},
 };
 
-use rlua::{Context, Error as LuaError, Function, Lua};
+use rlua::{Context, Error as LuaError, FromLua, Function, Lua, Result as LuaResult, Value};
 
 use self::{
     events::{
@@ -42,6 +43,12 @@ use std::{
     io::Error as IoError,
     ops::{Deref, DerefMut},
 };
+
+impl<'lua> FromLua<'lua> for CharacterId {
+    fn from_lua(lua_value: Value<'lua>, context: Context<'lua>) -> LuaResult<CharacterId> {
+        Ok(CharacterId(usize::from_lua(lua_value, context)?))
+    }
+}
 
 struct ExecutionContext<'a> {
     asset_tracker: AssetTracker,
@@ -128,7 +135,7 @@ fn run_script(
             Some(GameScriptParameters::SourceTile(coordinates)) =>
                 function.call((coordinates.x(), coordinates.y()))?,
             Some(GameScriptParameters::TargetCharacter(character_id)) =>
-                function.call(*character_id)?,
+                function.call(character_id.0)?,
         }
 
         Ok(())
@@ -142,11 +149,13 @@ macro_rules! native_functions {
     ) => {
         $(
             #[allow(unused_parens)]
-            let $target_name = $scope.create_function_mut(|_, ($( $param_name ),*): ($( $param_type ),*)| {
-                Ok(
-                    $original_name(&mut $context.borrow_mut(), $( $param_name ),*)
-                )
-            })?;
+            let $target_name = $scope.create_function_mut(
+                |_, ($( $param_name ),*): ($( $param_type ),*)| {
+                    Ok(
+                        $original_name(&mut $context.borrow_mut(), $( $param_name ),*)
+                    )
+                }
+            )?;
 
             $globals.set(stringify!($target_name), $target_name)?;
         )*
@@ -175,11 +184,11 @@ where
                 rust_create_chained_event: create_chained_event(),
                 rust_create_cyclic_event: create_cyclic_event(event_key: usize),
                 rust_create_npc_move_event:
-                    create_npc_move_event(character_id: usize, num_tiles: usize),
+                    create_npc_move_event(character_id: CharacterId, num_tiles: usize),
                 rust_create_npc_rotate_event:
-                    create_npc_rotate_event(character_id: usize, direction: u8),
+                    create_npc_rotate_event(character_id: CharacterId, direction: u8),
                 rust_create_npc_rotate_towards_player_event:
-                    create_npc_rotate_towards_player_event(character_id: usize),
+                    create_npc_rotate_towards_player_event(character_id: CharacterId),
                 rust_create_text_event: create_text_event(text: String),
                 rust_create_warp_event: create_warp_event(map: String, x: u32, y: u32),
                 rust_add_event: add_event(chain_key: usize, new_event: usize),
@@ -188,7 +197,7 @@ where
                 rust_create_npc:
                     create_npc(map_id: String, x: u32, y: u32, kind: String, direction: u8),
                 rust_change_npc_direction: change_npc_direction(npc_key: usize, direction: u8),
-                rust_rotate_npc_towards_player: rotate_npc_towards_player(character_id: usize),
+                rust_rotate_npc_towards_player: rotate_npc_towards_player(character_id: CharacterId),
                 rust_add_npc: add_npc(npc_key: usize)
             );
 

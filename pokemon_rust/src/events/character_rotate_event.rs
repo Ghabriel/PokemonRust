@@ -6,7 +6,7 @@ use amethyst::{
 
 use crate::{
     common::{Direction, get_character_sprite_index_from_direction},
-    entities::character::{Character, PlayerEntity},
+    entities::character::{Character, CharacterId, PlayerEntity},
     map::{MapHandler, PlayerCoordinates},
 };
 
@@ -14,7 +14,7 @@ use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
 #[derive(Clone)]
 pub struct CharacterRotateEvent {
-    character_id: usize,
+    character_id: CharacterId,
     direction_type: DirectionType,
 }
 
@@ -25,7 +25,7 @@ enum DirectionType {
 }
 
 impl DirectionType {
-    fn get_direction(&self, world: &World, character_id: usize) -> Option<Direction> {
+    fn get_direction(&self, world: &World, character_id: CharacterId) -> Option<Direction> {
         match self {
             DirectionType::Fixed(direction) => Some(direction.clone()),
             DirectionType::TowardsPlayer => {
@@ -51,14 +51,14 @@ impl DirectionType {
 }
 
 impl CharacterRotateEvent {
-    pub fn new(character_id: usize, direction: Direction) -> CharacterRotateEvent {
+    pub fn new(character_id: CharacterId, direction: Direction) -> CharacterRotateEvent {
         CharacterRotateEvent {
             character_id,
             direction_type: DirectionType::Fixed(direction),
         }
     }
 
-    pub fn towards_player(character_id: usize) -> CharacterRotateEvent {
+    pub fn towards_player(character_id: CharacterId) -> CharacterRotateEvent {
         CharacterRotateEvent {
             character_id,
             direction_type: DirectionType::TowardsPlayer,

@@ -51,6 +51,10 @@ pub struct SerializableMovementData {
     velocity: f32,
 }
 
+/// Represents the ID of a character.
+#[derive(Clone, Copy, Debug, Deserialize, Eq, Hash, PartialEq, Serialize)]
+pub struct CharacterId(pub usize);
+
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Character {
     pub action: MovementType,
@@ -65,7 +69,7 @@ impl Component for Character {
 /// A resource that's present in the world whenever there's a pending
 /// interaction with an NPC.
 pub struct PendingInteraction {
-    pub character_id: usize,
+    pub character_id: CharacterId,
 }
 
 /// Represents a character movement in progress.
@@ -161,7 +165,7 @@ pub fn initialise_npc(
     world: &mut World,
     npc_builder: NpcBuilder,
     progress_counter: &mut ProgressCounter,
-) -> usize {
+) -> CharacterId {
     let character_data = read_character_file(&npc_builder.kind);
 
     let (map_id, transform) = {

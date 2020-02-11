@@ -9,7 +9,7 @@ use amethyst::{
 use crate::{
     common::{AssetTracker, load_full_texture_sprite_sheet},
     constants::{MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
-    entities::character::{PendingInteraction, PlayerEntity},
+    entities::character::{CharacterId, PendingInteraction, PlayerEntity},
     events::{EventQueue, ScriptEvent},
 };
 
@@ -49,7 +49,7 @@ use super::{
     ValidatedGameAction,
 };
 
-pub fn interact_with_npc(character_id: usize, map_id: &MapId, event_queue: &mut EventQueue) {
+pub fn interact_with_npc(character_id: CharacterId, map_id: &MapId, event_queue: &mut EventQueue) {
     event_queue.push(ScriptEvent::from_script(
         GameScript::Lua {
             file: format!("assets/maps/{}/scripts.lua", map_id.0),

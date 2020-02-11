@@ -1,5 +1,7 @@
 use amethyst::ecs::World;
 
+use crate::entities::character::CharacterId;
+
 use super::{BoxedGameEvent, CharacterSingleMoveEvent, ExecutionConditions, GameEvent, RepeatedEvent};
 
 #[derive(Clone)]
@@ -8,7 +10,7 @@ pub struct CharacterMoveEvent {
 }
 
 impl CharacterMoveEvent {
-    pub fn new(character_id: usize, num_tiles: usize) -> CharacterMoveEvent {
+    pub fn new(character_id: CharacterId, num_tiles: usize) -> CharacterMoveEvent {
         CharacterMoveEvent {
             executor: RepeatedEvent::from_prototype(
                 &CharacterSingleMoveEvent::new(character_id),

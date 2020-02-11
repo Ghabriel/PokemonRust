@@ -8,7 +8,7 @@ use amethyst::ecs::Entity;
 
 use crate::{
     common::Direction,
-    entities::character::PendingInteraction,
+    entities::character::{CharacterId, PendingInteraction},
     events::ScriptEvent,
 };
 
@@ -40,7 +40,7 @@ pub struct MapHandler {
     loaded_maps: HashMap<String, Map>,
     current_map: MapId,
     next_character_id: usize,
-    characters: HashMap<usize, CharacterData>,
+    characters: HashMap<CharacterId, CharacterData>,
 }
 
 impl MapHandler {
@@ -152,8 +152,8 @@ impl MapHandler {
         map_id: &MapId,
         position: &MapCoordinates,
         entity: Entity,
-    ) -> usize {
-        let character_id = self.next_character_id;
+    ) -> CharacterId {
+        let character_id = CharacterId(self.next_character_id);
         self.next_character_id += 1;
 
         let map = self.loaded_maps.get_mut(&map_id.0).unwrap();
@@ -182,7 +182,7 @@ impl MapHandler {
         character_id
     }
 
-    pub fn get_character_id_by_entity(&self, entity: &Entity) -> usize {
+    pub fn get_character_id_by_entity(&self, entity: &Entity) -> CharacterId {
         *self.characters
             .iter()
             .map(|(id, c)| (id, c.entity))
@@ -191,7 +191,7 @@ impl MapHandler {
             .unwrap()
     }
 
-    pub fn get_character_by_id(&self, character_id: usize) -> &Entity {
+    pub fn get_character_by_id(&self, character_id: CharacterId) -> &Entity {
         &self.characters
             .iter()
             .find(|(id, _)| **id == character_id)
@@ -219,7 +219,7 @@ impl MapHandler {
         map.solids.remove(&position);
     }
 
-    pub fn get_character_natural_map(&self, character_id: usize) -> &MapId {
+    pub fn get_character_natural_map(&self, character_id: CharacterId) -> &MapId {
         &self.characters
             .get(&character_id)
             .unwrap()

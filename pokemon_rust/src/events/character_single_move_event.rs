@@ -6,7 +6,13 @@ use amethyst::{
 use crate::{
     constants::TILE_SIZE,
     entities::{
-        character::{AllowedMovements, Character, CharacterMovement, PendingInteraction},
+        character::{
+            AllowedMovements,
+            Character,
+            CharacterId,
+            CharacterMovement,
+            PendingInteraction,
+        },
         text_box::TextBox,
     },
     map::{MapHandler, PlayerCoordinates, TileData},
@@ -16,11 +22,11 @@ use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
 #[derive(Clone)]
 pub struct CharacterSingleMoveEvent {
-    character_id: usize,
+    character_id: CharacterId,
 }
 
 impl CharacterSingleMoveEvent {
-    pub fn new(character_id: usize) -> CharacterSingleMoveEvent {
+    pub fn new(character_id: CharacterId) -> CharacterSingleMoveEvent {
         CharacterSingleMoveEvent {
             character_id,
         }
