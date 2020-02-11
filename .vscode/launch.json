@@ -4,9 +4,8 @@
       {
         "type": "lldb",
         "request": "launch",
-        "name": "Launch",
+        "name": "Debug pokemon_rust",
         "args": [],
-        "program": "./target/debug/pokemon_rust",
         "cwd": "${workspaceFolder}",
         "stopOnEntry": false,
         "sourceLanguages": ["rust"],
@@ -15,7 +14,19 @@
         },
         "env": {
             "CARGO_MANIFEST_DIR": "${workspaceFolder}/pokemon_rust"
-        }
+        },
+        "cargo": {
+            "args": [
+                "+nightly",
+                "build",
+                "--bin=pokemon_rust",
+                "--package=pokemon_rust"
+            ],
+            "filter": {
+                "name": "pokemon_rust",
+                "kind": "bin"
+            }
+        },
       },
     ],
 }
