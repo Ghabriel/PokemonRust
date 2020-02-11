@@ -29,11 +29,12 @@ impl DirectionType {
         match self {
             DirectionType::Fixed(direction) => Some(direction.clone()),
             DirectionType::TowardsPlayer => {
-                let map_handler = world.read_resource::<MapHandler>();
-                let npc_entity = map_handler.get_character_by_id(character_id);
+                let npc_entity = world
+                    .read_resource::<MapHandler>()
+                    .get_character_by_id(character_id);
 
                 let npc_position = world.read_storage::<Transform>()
-                    .get(*npc_entity)
+                    .get(npc_entity)
                     .map(PlayerCoordinates::from_transform)
                     .unwrap();
 
@@ -80,17 +81,18 @@ impl GameEvent for CharacterRotateEvent {
     fn start(&mut self, _world: &mut World) { }
 
     fn tick(&mut self, world: &mut World, _disabled_inputs: bool) {
-        let map_handler = world.read_resource::<MapHandler>();
-        let entity = map_handler.get_character_by_id(self.character_id);
+        let entity = world
+            .read_resource::<MapHandler>()
+            .get_character_by_id(self.character_id);
 
         if let Some(direction) = self.direction_type.get_direction(world, self.character_id) {
             world.write_storage::<SpriteRender>()
-                .get_mut(*entity)
+                .get_mut(entity)
                 .unwrap()
                 .sprite_number = get_character_sprite_index_from_direction(&direction);
 
             world.write_storage::<Character>()
-                .get_mut(*entity)
+                .get_mut(entity)
                 .unwrap()
                 .facing_direction = direction;
         }

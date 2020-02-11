@@ -1,7 +1,4 @@
-use amethyst::{
-    core::Transform,
-    ecs::{World, WorldExt},
-};
+use amethyst::ecs::{World, WorldExt};
 
 use crate::{
     constants::TILE_SIZE,
@@ -15,7 +12,7 @@ use crate::{
         },
         text_box::TextBox,
     },
-    map::{MapHandler, PlayerCoordinates, TileData},
+    map::{MapHandler, TileDataBuilder},
 };
 
 use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
@@ -45,49 +42,53 @@ impl GameEvent for CharacterSingleMoveEvent {
     }
 
     fn start(&mut self, world: &mut World) {
-        let map_handler = world.read_resource::<MapHandler>();
-        let entity = map_handler.get_character_by_id(self.character_id);
+        let entity = world
+            .read_resource::<MapHandler>()
+            .get_character_by_id(self.character_id);
 
-        let characters = world.read_storage::<Character>();
-        let character = characters.get(*entity).unwrap();
-
-        let character_position = world.read_storage::<Transform>()
-            .get(*entity)
-            .map(PlayerCoordinates::from_transform)
-            .unwrap();
+        let character = world
+            .read_storage::<Character>()
+            .get(entity)
+            .unwrap()
+            .clone();
 
         let velocity = world.read_storage::<AllowedMovements>()
-            .get(*entity)
+            .get(entity)
             .unwrap()
             .get_movement_data(&character.action)
             .unwrap()
             .velocity;
 
-        let tile_data = TileData {
-            position: character_position.clone(),
-            map_id: map_handler.get_character_current_map(self.character_id).clone(),
-        };
+        let initial_tile_data = TileDataBuilder::default()
+            .with_entity(entity)
+            .with_character_id(self.character_id)
+            .build(world);
+
+        let final_tile_data = world
+            .read_resource::<MapHandler>()
+            .get_forward_tile(&character.facing_direction, &initial_tile_data);
 
         let movement = CharacterMovement {
             estimated_time: f32::from(TILE_SIZE) / velocity,
             velocity,
-            movement_type: character.action.clone(),
-            step_kind: character.next_step.clone(),
+            movement_type: character.action,
+            step_kind: character.next_step,
             started: false,
-            to: map_handler.get_forward_tile(&character.facing_direction, &tile_data),
-            from: tile_data,
+            from: initial_tile_data,
+            to: final_tile_data,
         };
 
         world.write_storage::<CharacterMovement>()
-            .insert(*entity, movement)
+            .insert(entity, movement)
             .expect("Failed to attach CharacterMovement");
     }
 
     fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) { }
 
     fn is_complete(&self, world: &mut World) -> bool {
-        let map_handler = world.read_resource::<MapHandler>();
-        let entity = map_handler.get_character_by_id(self.character_id);
+        let entity = world
+            .read_resource::<MapHandler>()
+            .get_character_by_id(self.character_id);
 
         let has_pending_interaction = world.has_value::<PendingInteraction>();
 
@@ -95,7 +96,7 @@ impl GameEvent for CharacterSingleMoveEvent {
             .read_storage::<TextBox>()
             .is_empty();
 
-        let is_moving = world.read_storage::<CharacterMovement>().contains(*entity);
+        let is_moving = world.read_storage::<CharacterMovement>().contains(entity);
 
         !has_pending_interaction && !has_text_box && !is_moving
     }

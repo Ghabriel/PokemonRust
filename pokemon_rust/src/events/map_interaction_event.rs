@@ -3,15 +3,12 @@
 //! on the tile in front of the player, it is added to the
 //! [Event Queue](event_queue/struct.EventQueue.html).
 
-use amethyst::{
-    core::Transform,
-    ecs::{World, WorldExt},
-};
+use amethyst::ecs::{World, WorldExt};
 
 use crate::{
     entities::character::{Character, PlayerEntity},
     events::EventQueue,
-    map::{GameActionKind, MapHandler, PlayerCoordinates, TileData, ValidatedGameAction},
+    map::{GameActionKind, MapHandler, TileDataBuilder, ValidatedGameAction},
 };
 
 use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
@@ -33,27 +30,22 @@ impl GameEvent for MapInteractionEvent {
     fn start(&mut self, _world: &mut World) { }
 
     fn tick(&mut self, world: &mut World, _disabled_inputs: bool) {
+        let player_entity = world.read_resource::<PlayerEntity>().0;
+
+        let tile_data = TileDataBuilder::default()
+            .with_entity(player_entity)
+            .build(world);
+
         let map = world.read_resource::<MapHandler>();
-        let player_entity = world.read_resource::<PlayerEntity>();
+
         let characters = world.read_storage::<Character>();
-        let transforms = world.read_storage::<Transform>();
-
-        let character_id = map.get_character_id_by_entity(&player_entity.0);
-
         let character = characters
-            .get(player_entity.0)
+            .get(player_entity)
             .expect("Failed to retrieve Character");
-
-        let transform = transforms
-            .get(player_entity.0)
-            .expect("Failed to retrieve Transform");
 
         let interacted_position = map.get_forward_tile(
             &character.facing_direction,
-            &TileData {
-                map_id: map.get_character_current_map(character_id).clone(),
-                position: PlayerCoordinates::from_transform(&transform),
-            },
+            &tile_data,
         );
 
         match map.get_action_at(&interacted_position) {

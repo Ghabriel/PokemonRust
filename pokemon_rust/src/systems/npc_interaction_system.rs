@@ -23,7 +23,7 @@ impl<'a> System<'a> for NpcInteractionSystem {
             let character_id = pending_interaction.character_id;
             let entity = map.get_character_by_id(character_id);
 
-            if !movements.contains(*entity) {
+            if !movements.contains(entity) {
                 let map_id = map.get_character_natural_map(character_id);
 
                 interact_with_npc(character_id, &map_id, &mut event_queue);

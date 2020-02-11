@@ -1,6 +1,5 @@
 use amethyst::{
     assets::ProgressCounter,
-    core::Transform,
     ecs::{Entity, world::Builder, World, WorldExt},
     renderer::SpriteRender,
     utils::application_root_dir,
@@ -45,6 +44,7 @@ use super::{
     MapHandler,
     MapId,
     serializable_map::{InitializedMap, SerializableMap},
+    tile_data_builder::TileDataBuilder,
     TileData,
     ValidatedGameAction,
 };
@@ -189,19 +189,16 @@ pub fn initialise_map(world: &mut World, starting_map: &str, progress_counter: &
 
 fn load_nearby_connections(world: &mut World, progress_counter: &mut ProgressCounter) {
     let (nearby_connections, reference_point) = {
+        let player_entity = world.read_resource::<PlayerEntity>().0;
+        let character_id = world
+            .read_resource::<MapHandler>()
+            .get_character_id_by_entity(player_entity);
+
+        let tile_data = TileDataBuilder::default()
+            .with_character_id(character_id)
+            .build(world);
+
         let map = world.read_resource::<MapHandler>();
-        let player_entity = world.read_resource::<PlayerEntity>();
-        let character_id = map.get_character_id_by_entity(&player_entity.0);
-
-        let character_position = world.read_storage::<Transform>()
-            .get(player_entity.0)
-            .map(PlayerCoordinates::from_transform)
-            .expect("Failed to retrieve Transform");
-
-        let tile_data = TileData {
-            position: character_position.clone(),
-            map_id: map.get_character_current_map(character_id).clone(),
-        };
 
         let mut nearby_connections: Vec<_> = map
             .get_nearby_connections(&tile_data)

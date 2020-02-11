@@ -3,6 +3,7 @@ mod coordinates;
 mod load_map;
 mod map;
 mod serializable_map;
+mod tile_data_builder;
 
 use amethyst::ecs::Entity;
 
@@ -33,6 +34,7 @@ pub use self::{
         MapScriptKind,
         Tile,
     },
+    tile_data_builder::{PreparedTileDataBuilder, TileDataBuilder},
 };
 
 // TODO: find a better name
@@ -182,16 +184,16 @@ impl MapHandler {
         character_id
     }
 
-    pub fn get_character_id_by_entity(&self, entity: &Entity) -> CharacterId {
+    pub fn get_character_id_by_entity(&self, entity: Entity) -> CharacterId {
         *self.characters
             .iter()
-            .find(|(_, c)| c.entity == *entity)
+            .find(|(_, c)| c.entity == entity)
             .map(|(id, _)| id)
             .unwrap()
     }
 
-    pub fn get_character_by_id(&self, character_id: CharacterId) -> &Entity {
-        &self.characters
+    pub fn get_character_by_id(&self, character_id: CharacterId) -> Entity {
+        self.characters
             .iter()
             .find(|(id, _)| **id == character_id)
             .map(|(_, npc)| npc)

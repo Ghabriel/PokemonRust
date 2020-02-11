@@ -291,7 +291,7 @@ pub fn initialise_player(
         progress_counter
     );
 
-    *world.read_resource::<MapHandler>().get_character_by_id(player_id)
+    world.read_resource::<MapHandler>().get_character_by_id(player_id)
 }
 
 pub fn add_idle_animations(animation_table: &mut AnimationTable<CharacterAnimation>) {

@@ -56,11 +56,12 @@ pub(super) fn change_npc_direction(
 }
 
 pub(super) fn rotate_npc_towards_player(context: &mut ExecutionContext, character_id: CharacterId) {
-    let map_handler = context.world.write_resource::<MapHandler>();
-    let npc_entity = map_handler.get_character_by_id(character_id);
+    let npc_entity = context.world
+        .write_resource::<MapHandler>()
+        .get_character_by_id(character_id);
 
     let npc_position = context.world.read_storage::<Transform>()
-        .get(*npc_entity)
+        .get(npc_entity)
         .map(PlayerCoordinates::from_transform)
         .unwrap();
 
@@ -76,12 +77,12 @@ pub(super) fn rotate_npc_towards_player(context: &mut ExecutionContext, characte
     let direction = npc_position.get_direction_to(&player_position).unwrap();
 
     context.world.write_storage::<SpriteRender>()
-        .get_mut(*npc_entity)
+        .get_mut(npc_entity)
         .unwrap()
         .sprite_number = get_character_sprite_index_from_direction(&direction);
 
     context.world.write_storage::<Character>()
-        .get_mut(*npc_entity)
+        .get_mut(npc_entity)
         .unwrap()
         .facing_direction = direction;
 }

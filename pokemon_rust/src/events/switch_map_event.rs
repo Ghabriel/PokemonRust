@@ -12,7 +12,14 @@ use amethyst::{
 use crate::{
     entities::character::PlayerEntity,
     events::EventQueue,
-    map::{change_player_tile, MapCoordinates, MapHandler, PlayerCoordinates, prepare_warp, TileData},
+    map::{
+        change_player_tile,
+        MapCoordinates,
+        MapHandler,
+        PlayerCoordinates,
+        prepare_warp,
+        TileDataBuilder,
+    },
 };
 
 use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
@@ -58,36 +65,48 @@ impl GameEvent for SwitchMapEvent {
     }
 
     fn start(&mut self, world: &mut World) {
-        let target_tile_data = prepare_warp(world, &self.map, &self.tile, &mut self.progress_counter);
+        let entity = world.read_resource::<PlayerEntity>().0;
 
-        let mut transforms = world.write_storage::<Transform>();
-        let player_entity = world.read_resource::<PlayerEntity>();
-        let mut map = world.write_resource::<MapHandler>();
+        let character_id = world
+            .read_resource::<MapHandler>()
+            .get_character_id_by_entity(entity);
 
-        let character_id = map.get_character_id_by_entity(&player_entity.0);
-
-        let transform = transforms
-            .get_mut(player_entity.0)
+        let player_coordinates = world
+            .read_storage::<Transform>()
+            .get(entity)
+            .map(PlayerCoordinates::from_transform)
             .expect("Failed to retrieve Transform");
 
-        let initial_tile_data = TileData {
-            position: PlayerCoordinates::from_transform(&transform),
-            map_id: map.get_character_current_map(character_id).clone(),
-        };
+        let initial_tile_data = TileDataBuilder::default()
+            .with_character_id(character_id)
+            .with_player_coordinates(player_coordinates)
+            .build(world);
 
-        transform.set_translation(*target_tile_data.position.to_transform().translation());
+        let target_tile_data = prepare_warp(
+            world,
+            &self.map,
+            &self.tile,
+            &mut self.progress_counter,
+        );
+
+        let target_transform = target_tile_data.position.to_transform();
+
+        world
+            .write_storage::<Transform>()
+            .get_mut(entity)
+            .unwrap()
+            .set_translation(*target_transform.translation());
 
         change_player_tile(
             &initial_tile_data,
             &target_tile_data,
             &world.read_resource::<PlayerEntity>(),
-            &mut map,
+            &mut world.write_resource::<MapHandler>(),
             &mut world.write_resource::<EventQueue>(),
         );
     }
 
     fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) { }
-
 
     fn is_complete(&self, _world: &mut World) -> bool {
         self.progress_counter.is_complete()
