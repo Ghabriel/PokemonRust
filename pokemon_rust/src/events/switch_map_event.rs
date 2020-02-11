@@ -62,7 +62,7 @@ impl GameEvent for SwitchMapEvent {
 
         let mut transforms = world.write_storage::<Transform>();
         let player_entity = world.read_resource::<PlayerEntity>();
-        let map = world.read_resource::<MapHandler>();
+        let mut map = world.write_resource::<MapHandler>();
 
         let character_id = map.get_character_id_by_entity(&player_entity.0);
 
@@ -81,7 +81,7 @@ impl GameEvent for SwitchMapEvent {
             &initial_tile_data,
             &target_tile_data,
             &world.read_resource::<PlayerEntity>(),
-            &mut world.write_resource::<MapHandler>(),
+            &mut map,
             &mut world.write_resource::<EventQueue>(),
         );
     }
