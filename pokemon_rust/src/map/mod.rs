@@ -150,7 +150,7 @@ impl MapHandler {
     pub fn register_npc(
         &mut self,
         map_id: &MapId,
-        position: &MapCoordinates,
+        position: MapCoordinates,
         entity: Entity,
     ) -> CharacterId {
         let character_id = CharacterId(self.next_character_id);
@@ -175,7 +175,7 @@ impl MapHandler {
             script_index: map.script_repository.len() - 1,
         });
 
-        map.solids.insert(position.clone(), Tile);
+        map.solids.insert(position, Tile);
 
         self.characters.insert(character_id, CharacterData { entity, natural_map: map_id.clone() });
 

@@ -210,7 +210,7 @@ fn load_nearby_connections(world: &mut World, progress_counter: &mut ProgressCou
     };
 
     let loaded_maps: Vec<_> = nearby_connections
-        .iter()
+        .into_iter()
         .map(|(tile, connection)| {
             let reference_point = get_new_map_reference_point(
                 &tile,
@@ -219,7 +219,7 @@ fn load_nearby_connections(world: &mut World, progress_counter: &mut ProgressCou
             );
             let map = load_map(world, &connection.map, reference_point, progress_counter);
 
-            (connection.map.clone(), map)
+            (connection.map, map)
         })
         .collect();
 

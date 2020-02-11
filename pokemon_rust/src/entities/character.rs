@@ -257,7 +257,7 @@ pub fn initialise_npc(
         .build();
 
     world.write_resource::<MapHandler>()
-        .register_npc(&map_id, &npc_builder.position, entity)
+        .register_npc(&map_id, npc_builder.position, entity)
 }
 
 fn read_character_file(character_kind: &str) -> SerializableCharacter {

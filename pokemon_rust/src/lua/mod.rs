@@ -52,13 +52,14 @@ impl<'lua> FromLua<'lua> for CharacterId {
 
 impl<'lua> FromLua<'lua> for Direction {
     fn from_lua(lua_value: Value<'lua>, context: Context<'lua>) -> LuaResult<Self> {
-        let direction = match context.coerce_integer(lua_value.clone())? {
+        let lua_type_name = get_lua_type_name(&lua_value);
+        let direction = match context.coerce_integer(lua_value)? {
             Some(0) => Direction::Up,
             Some(1) => Direction::Down,
             Some(2) => Direction::Left,
             Some(3) => Direction::Right,
             _ => return Err(LuaError::FromLuaConversionError {
-                from: get_lua_type_name(&lua_value),
+                from: lua_type_name,
                 to: "Direction",
                 message: Some("expected a value in the range 1..=4".to_string()),
             }),
