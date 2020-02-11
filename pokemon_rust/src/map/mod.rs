@@ -4,11 +4,11 @@ mod load_map;
 mod map;
 mod serializable_map;
 
-use amethyst::ecs::{Entity, WorldExt};
+use amethyst::ecs::Entity;
 
 use crate::{
     common::Direction,
-    entities::character::Character,
+    entities::character::PendingInteraction,
     events::ScriptEvent,
 };
 
@@ -165,14 +165,7 @@ impl MapHandler {
                     _ => unreachable!(),
                 };
 
-                let map_handler = world.read_resource::<MapHandler>();
-                let entity = map_handler.get_character_by_id(*character_id);
-
-                world
-                    .write_storage::<Character>()
-                    .get_mut(*entity)
-                    .unwrap()
-                    .pending_interaction = true;
+                world.insert(PendingInteraction { character_id: *character_id });
             },
             parameters: Some(GameScriptParameters::TargetCharacter(character_id)),
         });

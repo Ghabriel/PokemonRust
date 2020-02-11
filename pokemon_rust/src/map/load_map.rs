@@ -9,7 +9,7 @@ use amethyst::{
 use crate::{
     common::{AssetTracker, load_full_texture_sprite_sheet},
     constants::{MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
-    entities::character::{Character, PlayerEntity},
+    entities::character::{PendingInteraction, PlayerEntity},
     events::{EventQueue, ScriptEvent},
 };
 
@@ -60,22 +60,10 @@ pub fn interact_with_npc(character_id: usize, map_id: &MapId, event_queue: &mut 
 
     event_queue.push(ScriptEvent::from_script(
         GameScript::Native {
-            script: |world, params| {
-                let character_id = match params {
-                    Some(GameScriptParameters::TargetCharacter(character_id)) => character_id,
-                    _ => unreachable!(),
-                };
-
-                let map_handler = world.read_resource::<MapHandler>();
-                let entity = map_handler.get_character_by_id(*character_id);
-
-                world
-                    .write_storage::<Character>()
-                    .get_mut(*entity)
-                    .unwrap()
-                    .pending_interaction = false;
+            script: |world, _| {
+                world.remove::<PendingInteraction>();
             },
-            parameters: Some(GameScriptParameters::TargetCharacter(character_id)),
+            parameters: None,
         }
     ))
 }

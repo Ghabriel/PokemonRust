@@ -1,9 +1,9 @@
 use amethyst::{
-    ecs::{Entities, Join, ReadExpect, ReadStorage, System, WriteExpect, WriteStorage},
+    ecs::{ReadExpect, ReadStorage, System, WriteExpect},
 };
 
 use crate::{
-    entities::character::{Character, CharacterMovement},
+    entities::character::{CharacterMovement, PendingInteraction},
     events::EventQueue,
     map::{interact_with_npc, MapHandler},
 };
@@ -12,17 +12,18 @@ pub struct NpcInteractionSystem;
 
 impl<'a> System<'a> for NpcInteractionSystem {
     type SystemData = (
-        WriteStorage<'a, Character>,
         ReadStorage<'a, CharacterMovement>,
-        Entities<'a>,
+        Option<ReadExpect<'a, PendingInteraction>>,
         ReadExpect<'a, MapHandler>,
         WriteExpect<'a, EventQueue>,
     );
 
-    fn run(&mut self, (mut characters, movements, entities, map, mut event_queue): Self::SystemData) {
-        for (entity, character, _) in (&entities, &mut characters, !&movements).join() {
-            if character.pending_interaction {
-                let character_id = map.get_character_id_by_entity(&entity);
+    fn run(&mut self, (movements, pending_interaction, map, mut event_queue): Self::SystemData) {
+        if let Some(pending_interaction) = pending_interaction {
+            let character_id = pending_interaction.character_id;
+            let entity = map.get_character_by_id(character_id);
+
+            if !movements.contains(*entity) {
                 let map_id = map.get_character_natural_map(character_id);
 
                 interact_with_npc(character_id, &map_id, &mut event_queue);

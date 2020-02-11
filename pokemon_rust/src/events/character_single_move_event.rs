@@ -6,7 +6,7 @@ use amethyst::{
 use crate::{
     constants::TILE_SIZE,
     entities::{
-        character::{AllowedMovements, Character, CharacterMovement},
+        character::{AllowedMovements, Character, CharacterMovement, PendingInteraction},
         text_box::TextBox,
     },
     map::{MapHandler, PlayerCoordinates, TileData},
@@ -83,11 +83,7 @@ impl GameEvent for CharacterSingleMoveEvent {
         let map_handler = world.read_resource::<MapHandler>();
         let entity = map_handler.get_character_by_id(self.character_id);
 
-        let has_pending_interaction = world
-            .read_storage::<Character>()
-            .get(*entity)
-            .unwrap()
-            .pending_interaction;
+        let has_pending_interaction = world.has_value::<PendingInteraction>();
 
         let has_text_box = !world
             .read_storage::<TextBox>()
