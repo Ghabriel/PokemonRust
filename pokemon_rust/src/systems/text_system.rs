@@ -7,6 +7,7 @@ use amethyst::{
 };
 
 use crate::{
+    audio::{Sound, SoundKit},
     config::GameConfig,
     entities::text_box::TextBox,
 };
@@ -91,6 +92,7 @@ impl<'a> System<'a> for TextSystem {
         ReadExpect<'a, GameConfig>,
         Read<'a, Time>,
         Read<'a, EventChannel<InputEvent<StringBindings>>>,
+        SoundKit<'a>,
     );
 
     fn run(&mut self, (
@@ -100,6 +102,7 @@ impl<'a> System<'a> for TextSystem {
         game_config,
         time,
         input_event_channel,
+        sound_kit,
     ): Self::SystemData) {
         for (entity, text_box) in (&entities, &mut text_boxes).join() {
             let mut pressed_action_key = false;
@@ -107,6 +110,7 @@ impl<'a> System<'a> for TextSystem {
                 match event {
                     InputEvent::ActionPressed(action) if action == "action" => {
                         pressed_action_key = true;
+                        sound_kit.play_sound(Sound::SelectOption);
                     },
                     _ => {},
                 }

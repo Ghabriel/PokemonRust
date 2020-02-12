@@ -1,6 +1,6 @@
 use amethyst::{
     assets::{Loader, ProgressCounter},
-    audio::{AudioSink, DjSystem, output::init_output},
+    audio::{DjSystem, output::init_output},
     core::{ArcThreadPool, math::Vector3, Parent, Transform},
     ecs::{
         Dispatcher,
@@ -92,7 +92,6 @@ impl SimpleState for LoadingState<'_, '_> {
         world.insert(EventQueue::default());
 
         init_output(world);
-        // world.write_resource::<AudioSink>().set_volume(0.25);
         initialise_audio(world);
 
         let (starting_map, starting_position) = {
