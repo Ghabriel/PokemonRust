@@ -1,4 +1,5 @@
 use amethyst::{
+    audio::{DjSystem, output::init_output},
     core::ArcThreadPool,
     ecs::{Dispatcher, DispatcherBuilder},
     prelude::*,
@@ -6,6 +7,7 @@ use amethyst::{
 };
 
 use crate::{
+    audio::Music,
     config::GameConfig,
     entities::character::CharacterAnimation,
     events::{EventExecutor, EventQueue},
@@ -47,6 +49,11 @@ impl SimpleState for OverworldState<'_, '_> {
         let world = data.world;
 
         let mut dispatcher = DispatcherBuilder::new()
+            .with(
+                DjSystem::new(|music: &mut Music| music.test.next()),
+                "dj_system",
+                &[],
+            )
             .with(AnimationSystem::<CharacterAnimation>::new(), "animation_system", &[])
             .with(PlayerInputSystem::new(world), "player_input_system", &[])
             .with(CharacterMovementSystem, "character_movement_system", &["player_input_system"])
@@ -58,6 +65,8 @@ impl SimpleState for OverworldState<'_, '_> {
 
         dispatcher.setup(world);
         self.dispatcher = Some(dispatcher);
+
+        init_output(world);
     }
 
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
