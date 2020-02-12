@@ -1,12 +1,14 @@
 use amethyst::{
     core::Transform,
     ecs::{World, WorldExt},
-    renderer::SpriteRender,
 };
 
 use crate::{
-    common::{Direction, get_character_sprite_index_from_direction},
-    entities::character::{Character, CharacterId, PlayerEntity},
+    common::Direction,
+    entities::{
+        AnimationTable,
+        character::{Character, CharacterAnimation, CharacterId, PlayerEntity},
+    },
     map::{MapHandler, PlayerCoordinates},
 };
 
@@ -86,10 +88,12 @@ impl GameEvent for CharacterRotateEvent {
             .get_character_by_id(self.character_id);
 
         if let Some(direction) = self.direction_type.get_direction(world, self.character_id) {
-            world.write_storage::<SpriteRender>()
+            world.write_storage::<AnimationTable<CharacterAnimation>>()
                 .get_mut(entity)
                 .unwrap()
-                .sprite_number = get_character_sprite_index_from_direction(&direction);
+                .change_animation(CharacterAnimation::Idle(
+                    direction.clone(),
+                ));
 
             world.write_storage::<Character>()
                 .get_mut(entity)

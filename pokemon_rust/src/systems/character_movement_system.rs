@@ -85,11 +85,11 @@ impl<'a> System<'a> for CharacterMovementSystem {
             let is_player = entity == player_entity.0;
 
             if !movement_data.started {
-                if is_player {
-                    if map.is_tile_blocked(&movement_data.to) {
+                if map.is_tile_blocked(&movement_data.to) {
+                    if is_player {
                         static_characters.push(entity);
-                        continue;
                     }
+                    continue;
                 }
 
                 on_movement_start(
