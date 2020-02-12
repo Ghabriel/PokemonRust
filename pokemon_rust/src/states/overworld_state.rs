@@ -1,5 +1,5 @@
 use amethyst::{
-    audio::{DjSystem, output::init_output},
+    audio::output::init_output,
     core::ArcThreadPool,
     ecs::{Dispatcher, DispatcherBuilder},
     prelude::*,
@@ -7,13 +7,13 @@ use amethyst::{
 };
 
 use crate::{
-    audio::Music,
     config::GameConfig,
     entities::character::CharacterAnimation,
     events::{EventExecutor, EventQueue},
     states::OverworldAnimationState,
     systems::{
         AnimationSystem,
+        AudioSystem,
         CharacterMovementSystem,
         NpcInteractionSystem,
         PlayerInputSystem,
@@ -49,12 +49,8 @@ impl SimpleState for OverworldState<'_, '_> {
         let world = data.world;
 
         let mut dispatcher = DispatcherBuilder::new()
-            .with(
-                DjSystem::new(|music: &mut Music| music.test.next()),
-                "dj_system",
-                &[],
-            )
             .with(AnimationSystem::<CharacterAnimation>::new(), "animation_system", &[])
+            .with(AudioSystem::default(), "audio_system", &[])
             .with(PlayerInputSystem::new(world), "player_input_system", &[])
             .with(CharacterMovementSystem, "character_movement_system", &["player_input_system"])
             .with(NpcInteractionSystem, "npc_interaction_system", &["player_input_system"])

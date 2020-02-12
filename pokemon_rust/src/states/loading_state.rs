@@ -1,6 +1,6 @@
 use amethyst::{
     assets::{Loader, ProgressCounter},
-    audio::{DjSystem, output::init_output},
+    audio::output::init_output,
     core::{ArcThreadPool, math::Vector3, Parent, Transform},
     ecs::{
         Dispatcher,
@@ -16,13 +16,14 @@ use amethyst::{
 };
 
 use crate::{
-    audio::{initialise_audio, Music},
+    audio::initialise_audio,
     common::{AssetTracker, CommonResources, load_full_texture_sprite_sheet},
     config::GameConfig,
     entities::character::{initialise_player, PlayerEntity},
     events::EventQueue,
     map::{initialise_map, MapCoordinates},
     states::OverworldState,
+    systems::AudioSystem,
 };
 
 use std::ops::Deref;
@@ -78,11 +79,7 @@ impl SimpleState for LoadingState<'_, '_> {
         let world = data.world;
 
         let mut dispatcher = DispatcherBuilder::new()
-            .with(
-                DjSystem::new(|music: &mut Music| music.test.next()),
-                "dj_system",
-                &[],
-            )
+            .with(AudioSystem::default(), "audio_system", &[])
             .with_pool(world.read_resource::<ArcThreadPool>().deref().clone())
             .build();
 
