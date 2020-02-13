@@ -2,6 +2,7 @@ require("pokemon_rust.lua.events");
 require("pokemon_rust.lua.npc");
 
 function on_map_enter()
+    BgmChangeEvent:new("littleroot-town.wav"):dispatch()
     print("Welcome to Test Map!")
 end
 

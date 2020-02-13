@@ -1,5 +1,5 @@
 use amethyst::{
-    assets::{Asset, AssetStorage, Loader},
+    assets::{AssetStorage, Loader},
     audio::{
         FlacFormat,
         Mp3Format,
@@ -27,11 +27,7 @@ use std::{
     vec::IntoIter,
 };
 
-const TEST_TRACK: &str = "bgm/littleroot-town.wav";
-
 const SELECT_OPTION_SOUND: &str = "sfx/select_option.wav";
-
-type AudioData = <Source as Asset>::Data;
 
 #[derive(Default)]
 pub struct Music {
@@ -40,7 +36,7 @@ pub struct Music {
 }
 
 impl Music {
-    pub fn push_bgm(
+    pub fn play_bgm(
         &mut self,
         bgm: String,
         format: AudioFileFormat,

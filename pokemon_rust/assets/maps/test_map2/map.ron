@@ -1077,7 +1077,8 @@
         (57, 0),
     ],
     script_repository: [
-        Lua(file:  "assets/maps/test_map2/scripts.lua", function: "enter_cave"),
+        Lua(file: "assets/maps/test_map2/scripts.lua", function: "enter_cave"),
+        Lua(file: "assets/maps/test_map2/scripts.lua", function: "on_map_enter"),
     ],
     actions: {
         (38, 14): (
@@ -1085,7 +1086,12 @@
             script_index: 0,
         ),
     },
-    map_scripts: [],
+    map_scripts: [
+        (
+            when: OnMapEnter,
+            script_index: 1,
+        ),
+    ],
     connections: {
         (24, 0): (
             map: "test_map",

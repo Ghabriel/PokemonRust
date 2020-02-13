@@ -10,14 +10,14 @@ use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
 #[derive(Clone)]
 pub struct BgmChangeEvent {
-    bgm: String,
+    filename: String,
     format: AudioFileFormat,
 }
 
 impl BgmChangeEvent {
-    pub fn new(bgm: impl Into<String>, format: AudioFileFormat) -> BgmChangeEvent {
+    pub fn new(filename: impl Into<String>, format: AudioFileFormat) -> BgmChangeEvent {
         BgmChangeEvent {
-            bgm: bgm.into(),
+            filename: filename.into(),
             format,
         }
     }
@@ -38,12 +38,12 @@ impl GameEvent for BgmChangeEvent {
 
     fn tick(&mut self, world: &mut World, _disabled_inputs: bool) {
         let mut music = world.write_resource::<Music>();
-        let bgm = self.bgm.clone();
+        let filename = format!("bgm/{}", self.filename);
         let format = self.format.clone();
         let loader = world.read_resource::<Loader>();
         let storage = world.read_resource::<AssetStorage<Source>>();
 
-        music.push_bgm(bgm, format, &loader, &storage);
+        music.play_bgm(filename, format, &loader, &storage);
     }
 
     fn is_complete(&self, _world: &mut World) -> bool {

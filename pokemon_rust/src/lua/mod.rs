@@ -17,6 +17,7 @@ use rlua::{Context, Error as LuaError, FromLua, Function, Lua, Result as LuaResu
 
 use self::{
     events::{
+        create_bgm_change_event,
         create_chained_event,
         create_cyclic_event,
         create_npc_move_event,
@@ -217,6 +218,7 @@ where
             native_functions!(
                 (globals, scope, execution_context)
                 // Event functions
+                rust_create_bgm_change_event: create_bgm_change_event(filename: String),
                 rust_create_chained_event: create_chained_event(),
                 rust_create_cyclic_event: create_cyclic_event(event_key: usize),
                 rust_create_npc_move_event:
