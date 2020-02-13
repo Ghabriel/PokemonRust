@@ -1,6 +1,9 @@
 use amethyst::{
-    assets::{AssetStorage, Loader},
+    assets::{Asset, AssetStorage, Loader},
     audio::{
+        FlacFormat,
+        Mp3Format,
+        OggFormat,
         Source,
         SourceHandle,
         output::Output,
@@ -28,14 +31,47 @@ const TEST_TRACK: &str = "bgm/littleroot-town.wav";
 
 const SELECT_OPTION_SOUND: &str = "sfx/select_option.wav";
 
+type AudioData = <Source as Asset>::Data;
+
+#[derive(Default)]
 pub struct Music {
-    pub test: Cycle<IntoIter<SourceHandle>>,
+    storage: HashMap<String, SourceHandle>,
+    active_bgm: Option<Cycle<IntoIter<SourceHandle>>>,
 }
 
 impl Music {
-    pub fn next(&mut self) -> Option<SourceHandle> {
-        self.test.next()
+    pub fn push_bgm(
+        &mut self,
+        bgm: String,
+        format: AudioFileFormat,
+        loader: &Loader,
+        storage: &AssetStorage<Source>,
+    ) {
+        if !self.storage.contains_key(&bgm) {
+            let handle = match format {
+                AudioFileFormat::Flac => loader.load(bgm.clone(), FlacFormat, (), &storage),
+                AudioFileFormat::Mp3 => loader.load(bgm.clone(), Mp3Format, (), &storage),
+                AudioFileFormat::Ogg => loader.load(bgm.clone(), OggFormat, (), &storage),
+                AudioFileFormat::Wav => loader.load(bgm.clone(), WavFormat, (), &storage),
+            };
+            self.storage.insert(bgm.clone(), handle);
+        }
+
+        let handle = self.storage.get(&bgm).unwrap().clone();
+        self.active_bgm = Some(vec![handle].into_iter().cycle());
     }
+
+    pub fn next(&mut self) -> Option<SourceHandle> {
+        self.active_bgm.as_mut().and_then(|bgm| bgm.next())
+    }
+}
+
+#[derive(Clone)]
+pub enum AudioFileFormat {
+    Flac,
+    Mp3,
+    Ogg,
+    Wav,
 }
 
 #[derive(Eq, Hash, PartialEq)]
@@ -51,10 +87,6 @@ pub struct SoundKit<'a> {
 }
 
 impl<'a> SoundKit<'a> {
-    pub fn from_world(world: &World) -> SoundKit {
-        SoundKit::fetch(world)
-    }
-
     pub fn play_sound(&self, sound: Sound) {
         if self.game_config.play_sfx {
             let handle = self.sound_storage.sounds.get(&sound).unwrap();
@@ -111,19 +143,8 @@ pub struct SoundStorage {
 }
 
 pub fn initialise_audio(world: &mut World) {
-    let (sound_storage, music) = {
+    let sound_storage = {
         let loader = world.read_resource::<Loader>();
-
-        let test = (&[TEST_TRACK])
-            .iter()
-            .map(|file| loader.load(*file, WavFormat, (), &world.read_resource()))
-            .collect::<Vec<_>>()
-            .into_iter()
-            .cycle();
-
-        let music = Music {
-            test,
-        };
 
         let mut sound_storage = SoundStorage { sounds: HashMap::new() };
         sound_storage.sounds.insert(
@@ -131,9 +152,9 @@ pub fn initialise_audio(world: &mut World) {
             loader.load(SELECT_OPTION_SOUND, WavFormat, (), &world.read_resource()),
         );
 
-        (sound_storage, music)
+        sound_storage
     };
 
     world.insert(sound_storage);
-    world.insert(music);
+    world.insert(Music::default());
 }
