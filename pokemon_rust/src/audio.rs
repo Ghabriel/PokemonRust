@@ -32,6 +32,7 @@ const SELECT_OPTION_SOUND: &str = "sfx/select_option.wav";
 #[derive(Default)]
 pub struct Music {
     storage: HashMap<String, SourceHandle>,
+    changed_bgm: bool,
     active_bgm: Option<Cycle<IntoIter<SourceHandle>>>,
 }
 
@@ -54,10 +55,16 @@ impl Music {
         }
 
         let handle = self.storage.get(&bgm).unwrap().clone();
+        self.changed_bgm = true;
         self.active_bgm = Some(vec![handle].into_iter().cycle());
     }
 
+    pub fn changed_bgm(&self) -> bool {
+        self.changed_bgm
+    }
+
     pub fn next(&mut self) -> Option<SourceHandle> {
+        self.changed_bgm = false;
         self.active_bgm.as_mut().and_then(|bgm| bgm.next())
     }
 }
