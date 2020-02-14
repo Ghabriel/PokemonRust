@@ -1,9 +1,11 @@
 use amethyst::ecs::WorldExt;
 
 use crate::{
+    audio::AudioFileFormat,
     common::Direction,
     entities::character::CharacterId,
     events::{
+        BgmChangeEvent,
         ChainedEvents,
         CharacterMoveEvent,
         CharacterRotateEvent,
@@ -17,6 +19,24 @@ use crate::{
 };
 
 use super::ExecutionContext;
+
+pub(super) fn create_bgm_change_event(context: &mut ExecutionContext, filename: String) -> usize {
+    let format = if filename.ends_with(".flac") {
+        AudioFileFormat::Flac
+    } else if filename.ends_with(".mp3") {
+        AudioFileFormat::Mp3
+    } else if filename.ends_with(".ogg") {
+        AudioFileFormat::Ogg
+    } else if filename.ends_with(".wav") {
+        AudioFileFormat::Wav
+    } else {
+        panic!("Invalid filename");
+    };
+
+    let event = BgmChangeEvent::new(filename, format);
+
+    context.store(event)
+}
 
 pub(super) fn create_chained_event(context: &mut ExecutionContext) -> usize {
     let event = ChainedEvents::default();
@@ -91,7 +111,9 @@ fn remove_event(
 ) -> Box<dyn GameEvent + Send + Sync> {
     let event = context.remove_boxed(key);
 
-    if event.is::<ChainedEvents>() {
+    if event.is::<BgmChangeEvent>() {
+        event.downcast::<BgmChangeEvent>().unwrap()
+    } else if event.is::<ChainedEvents>() {
         event.downcast::<ChainedEvents>().unwrap()
     } else if event.is::<CharacterMoveEvent>() {
         event.downcast::<CharacterMoveEvent>().unwrap()

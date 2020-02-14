@@ -18,6 +18,7 @@
     clippy::type_complexity,
 )]
 
+mod audio;
 mod common;
 mod config;
 mod constants;

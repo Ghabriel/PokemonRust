@@ -1,6 +1,4 @@
-use amethyst::{
-    ecs::{ReadExpect, ReadStorage, System, WriteExpect},
-};
+use amethyst::ecs::{ReadExpect, ReadStorage, System, WriteExpect};
 
 use crate::{
     entities::character::{CharacterMovement, PendingInteraction},
@@ -18,7 +16,12 @@ impl<'a> System<'a> for NpcInteractionSystem {
         WriteExpect<'a, EventQueue>,
     );
 
-    fn run(&mut self, (movements, pending_interaction, map, mut event_queue): Self::SystemData) {
+    fn run(&mut self, (
+        movements,
+        pending_interaction,
+        map,
+        mut event_queue,
+    ): Self::SystemData) {
         if let Some(pending_interaction) = pending_interaction {
             let character_id = pending_interaction.character_id;
             let entity = map.get_character_by_id(character_id);

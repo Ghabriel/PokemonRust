@@ -12,6 +12,16 @@ function Event:dispatch()
 end
 
 
+BgmChangeEvent = Event:new()
+BgmChangeEvent.__index = BgmChangeEvent
+
+function BgmChangeEvent:new(filename)
+    local obj = { rust_create_bgm_change_event(filename) }
+    setmetatable(obj, self)
+    return obj
+end
+
+
 CyclicEvent = Event:new()
 CyclicEvent.__index = CyclicEvent
 

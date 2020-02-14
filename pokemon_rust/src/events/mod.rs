@@ -1,6 +1,7 @@
 //! Contains every possible game event. Events can trigger animations,
 //! textboxes, warps and much more.
 
+pub mod bgm_change_event;
 pub mod chained_events;
 pub mod character_move_event;
 pub mod character_rotate_event;
@@ -21,6 +22,7 @@ pub mod warp_event;
 use amethyst::ecs::World;
 
 pub use self::{
+    bgm_change_event::BgmChangeEvent,
     chained_events::ChainedEvents,
     character_move_event::CharacterMoveEvent,
     character_rotate_event::CharacterRotateEvent,

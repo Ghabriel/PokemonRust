@@ -3,9 +3,10 @@
 //! on the tile in front of the player, it is added to the
 //! [Event Queue](event_queue/struct.EventQueue.html).
 
-use amethyst::ecs::{World, WorldExt};
+use amethyst::ecs::{SystemData, World, WorldExt};
 
 use crate::{
+    audio::{Sound, SoundKit},
     entities::character::{Character, PlayerEntity},
     events::EventQueue,
     map::{GameActionKind, MapHandler, TileDataBuilder, ValidatedGameAction},
@@ -52,6 +53,8 @@ impl GameEvent for MapInteractionEvent {
             Some(
                 ValidatedGameAction { when, script_event }
             ) if when == GameActionKind::OnInteraction => {
+                SoundKit::fetch(world).play_sound(Sound::SelectOption);
+
                 world.write_resource::<EventQueue>()
                     .push(script_event);
             },
