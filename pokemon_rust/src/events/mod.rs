@@ -11,6 +11,7 @@ pub mod event_executor;
 pub mod event_queue;
 pub mod fade_in_event;
 pub mod fade_out_event;
+pub mod map_change_event;
 pub mod map_interaction_event;
 pub mod parallel_events;
 pub mod repeated_event;
@@ -32,6 +33,7 @@ pub use self::{
     event_queue::EventQueue,
     fade_out_event::FadeOutEvent,
     fade_in_event::FadeInEvent,
+    map_change_event::MapChangeEvent,
     map_interaction_event::MapInteractionEvent,
     parallel_events::ParallelEvents,
     repeated_event::RepeatedEvent,

@@ -9,7 +9,7 @@ use crate::{
     common::{AssetTracker, load_full_texture_sprite_sheet},
     constants::{MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
     entities::character::{CharacterId, PendingInteraction, PlayerEntity},
-    events::{EventQueue, ScriptEvent},
+    events::{EventQueue, MapChangeEvent, ScriptEvent},
 };
 
 use ron::de::from_reader;
@@ -377,6 +377,25 @@ fn add_intrinsic_scripts(map: &mut Map) {
 
     map.map_scripts.push(MapScript {
         when: MapScriptKind::OnTileChange,
+        script_index: map.script_repository.len() - 1,
+    });
+
+    map.script_repository.push(GameScript::Native {
+        script: |world, params| {
+            let map_name = match params {
+                Some(GameScriptParameters::SourceMap(map_name)) => map_name,
+                _ => unreachable!(),
+            };
+
+            world
+                .write_resource::<EventQueue>()
+                .push(MapChangeEvent::new(map_name));
+        },
+        parameters: Some(GameScriptParameters::SourceMap(map.map_name.clone())),
+    });
+
+    map.map_scripts.push(MapScript {
+        when: MapScriptKind::OnMapEnter,
         script_index: map.script_repository.len() - 1,
     });
 }

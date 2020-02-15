@@ -173,6 +173,8 @@ fn run_script(
                 function.call((coordinates.x(), coordinates.y()))?,
             Some(GameScriptParameters::TargetCharacter(character_id)) =>
                 function.call(character_id.0)?,
+            Some(GameScriptParameters::SourceMap(map_name)) =>
+                function.call(map_name.clone())?,
         }
 
         Ok(())

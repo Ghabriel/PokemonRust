@@ -132,6 +132,7 @@ pub enum GameScript {
 pub enum GameScriptParameters {
     SourceTile(MapCoordinates),
     TargetCharacter(CharacterId),
+    SourceMap(String),
 }
 
 impl Debug for GameScript {
