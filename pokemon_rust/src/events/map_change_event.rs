@@ -6,7 +6,6 @@ use amethyst::{
         Entity,
         ReadExpect,
         SystemData,
-        world::Builder,
         World,
         WorldExt,
         WriteStorage,
@@ -17,7 +16,11 @@ use amethyst::{
 
 use crate::{
     common::CommonResources,
-    entities::map_change_announcement::{MapChangeAnnouncement, MapChangeAnnouncementState},
+    entities::map_change_announcement::{
+        MapChangeAnnouncement,
+        MapChangeAnnouncementQueue,
+        MapChangeAnnouncementState,
+    },
 };
 
 use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
@@ -47,8 +50,6 @@ impl GameEvent for MapChangeEvent {
     }
 
     fn start(&mut self, world: &mut World) {
-        world.register::<MapChangeAnnouncement>();
-
         let announcement = {
             let (
                 mut ui_images,
@@ -84,15 +85,14 @@ impl GameEvent for MapChangeEvent {
         };
 
         world
-            .create_entity()
-            .with(announcement)
-            .build();
+            .write_resource::<MapChangeAnnouncementQueue>()
+            .push(announcement);
     }
 
     fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) { }
 
     fn is_complete(&self, world: &mut World) -> bool {
-        world.read_storage::<MapChangeAnnouncement>().is_empty()
+        world.read_resource::<MapChangeAnnouncementQueue>().is_empty()
     }
 }
 
