@@ -17,6 +17,7 @@ use rlua::{Context, Error as LuaError, FromLua, Function, Lua, Result as LuaResu
 
 use self::{
     events::{
+        add_event,
         create_bgm_change_event,
         create_chained_event,
         create_cyclic_event,
@@ -25,14 +26,14 @@ use self::{
         create_npc_rotate_towards_player_event,
         create_text_event,
         create_warp_event,
-        add_event,
         dispatch_event,
+        preload_bgm,
     },
     npc::{
-        create_npc,
-        change_npc_direction,
-        rotate_npc_towards_player,
         add_npc,
+        change_npc_direction,
+        create_npc,
+        rotate_npc_towards_player,
     },
     polymorphic_container::PolymorphicContainer,
 };
@@ -221,6 +222,7 @@ where
                 (globals, scope, execution_context)
                 // Event functions
                 rust_create_bgm_change_event: create_bgm_change_event(filename: String),
+                rust_preload_bgm: preload_bgm(filename: String),
                 rust_create_chained_event: create_chained_event(),
                 rust_create_cyclic_event: create_cyclic_event(event_key: usize),
                 rust_create_npc_move_event:

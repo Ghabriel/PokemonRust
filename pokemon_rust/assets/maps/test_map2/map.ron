@@ -1077,16 +1077,21 @@
         (57, 0),
     ],
     script_repository: [
-        Lua(file: "assets/maps/test_map2/scripts.lua", function: "enter_cave"),
+        Lua(file: "assets/maps/test_map2/scripts.lua", function: "on_map_load"),
         Lua(file: "assets/maps/test_map2/scripts.lua", function: "on_map_enter"),
+        Lua(file: "assets/maps/test_map2/scripts.lua", function: "enter_cave"),
     ],
     actions: {
         (38, 14): (
             when: OnStep,
-            script_index: 0,
+            script_index: 2,
         ),
     },
     map_scripts: [
+        (
+            when: OnMapLoad,
+            script_index: 0,
+        ),
         (
             when: OnMapEnter,
             script_index: 1,

@@ -21,6 +21,10 @@ function BgmChangeEvent:new(filename)
     return obj
 end
 
+function BgmChangeEvent.preload(filename)
+    rust_preload_bgm(filename)
+end
+
 
 CyclicEvent = Event:new()
 CyclicEvent.__index = CyclicEvent

@@ -1,7 +1,11 @@
-use amethyst::ecs::WorldExt;
+use amethyst::{
+    assets::{AssetStorage, Loader},
+    audio::Source,
+    ecs::WorldExt,
+};
 
 use crate::{
-    audio::AudioFileFormat,
+    audio::{AudioFileFormat, Music},
     common::Direction,
     entities::character::CharacterId,
     events::{
@@ -21,7 +25,25 @@ use crate::{
 use super::ExecutionContext;
 
 pub(super) fn create_bgm_change_event(context: &mut ExecutionContext, filename: String) -> usize {
-    let format = if filename.ends_with(".flac") {
+    let format = get_bgm_format(&filename);
+    let event = BgmChangeEvent::new(filename, format);
+
+    context.store(event)
+}
+
+pub(super) fn preload_bgm(context: &mut ExecutionContext, filename: String) {
+    let filename = format!("bgm/{}", filename);
+    let format = get_bgm_format(&filename);
+    let loader = context.world.read_resource::<Loader>();
+    let storage = context.world.read_resource::<AssetStorage<Source>>();
+
+    context.world
+        .write_resource::<Music>()
+        .preload_bgm(filename, format, &loader, &storage);
+}
+
+fn get_bgm_format(filename: &str) -> AudioFileFormat {
+    if filename.ends_with(".flac") {
         AudioFileFormat::Flac
     } else if filename.ends_with(".mp3") {
         AudioFileFormat::Mp3
@@ -31,11 +53,7 @@ pub(super) fn create_bgm_change_event(context: &mut ExecutionContext, filename: 
         AudioFileFormat::Wav
     } else {
         panic!("Invalid filename");
-    };
-
-    let event = BgmChangeEvent::new(filename, format);
-
-    context.store(event)
+    }
 }
 
 pub(super) fn create_chained_event(context: &mut ExecutionContext) -> usize {

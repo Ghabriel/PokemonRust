@@ -44,19 +44,30 @@ impl Music {
         loader: &Loader,
         storage: &AssetStorage<Source>,
     ) {
+        self.preload_bgm(bgm.clone(), format, loader, storage);
+
+        let handle = self.storage.get(&bgm).unwrap().clone();
+        self.changed_bgm = true;
+        self.active_bgm = Some(vec![handle].into_iter().cycle());
+    }
+
+    pub fn preload_bgm(
+        &mut self,
+        bgm: String,
+        format: AudioFileFormat,
+        loader: &Loader,
+        storage: &AssetStorage<Source>,
+    ) {
         if !self.storage.contains_key(&bgm) {
+            println!("Preloading {}", bgm);
             let handle = match format {
                 AudioFileFormat::Flac => loader.load(bgm.clone(), FlacFormat, (), &storage),
                 AudioFileFormat::Mp3 => loader.load(bgm.clone(), Mp3Format, (), &storage),
                 AudioFileFormat::Ogg => loader.load(bgm.clone(), OggFormat, (), &storage),
                 AudioFileFormat::Wav => loader.load(bgm.clone(), WavFormat, (), &storage),
             };
-            self.storage.insert(bgm.clone(), handle);
+            self.storage.insert(bgm, handle);
         }
-
-        let handle = self.storage.get(&bgm).unwrap().clone();
-        self.changed_bgm = true;
-        self.active_bgm = Some(vec![handle].into_iter().cycle());
     }
 
     pub fn changed_bgm(&self) -> bool {

@@ -20,6 +20,8 @@ function interact_with_tree()
 end
 
 function on_map_load()
+    BgmChangeEvent.preload("littleroot-town.wav")
+
     local square_movement = function(id)
         return CyclicEvent:new(
             ChainedEvents:new({

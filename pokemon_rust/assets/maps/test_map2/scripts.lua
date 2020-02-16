@@ -1,5 +1,9 @@
 require("pokemon_rust.lua.events");
 
+function on_map_load()
+    BgmChangeEvent.preload("route228.mp3")
+end
+
 function on_map_enter()
     BgmChangeEvent:new("route228.mp3"):dispatch()
     print("Welcome to Test Map 2!")
