@@ -1,3 +1,5 @@
+//! Rotates a character towards a direction.
+
 use amethyst::{
     core::Transform,
     ecs::{World, WorldExt},
@@ -54,6 +56,8 @@ impl DirectionType {
 }
 
 impl CharacterRotateEvent {
+    /// Instantiates a CharacterRotateEvent that rotates a character towards
+    /// a given direction.
     pub fn new(character_id: CharacterId, direction: Direction) -> CharacterRotateEvent {
         CharacterRotateEvent {
             character_id,
@@ -61,6 +65,8 @@ impl CharacterRotateEvent {
         }
     }
 
+    /// Instantiates a CharacterRotateEvent that rotates a character towards
+    /// the human player.
     pub fn towards_player(character_id: CharacterId) -> CharacterRotateEvent {
         CharacterRotateEvent {
             character_id,

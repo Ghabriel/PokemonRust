@@ -1,3 +1,7 @@
+//! Moves a character forward for a given number of tiles. See the
+//! [CharacterMovementSystem](../systems/character_movement_system/struct.CharacterMovementSystem.html)
+//! for details on which situations this event can "hang".
+
 use amethyst::ecs::World;
 
 use crate::entities::character::CharacterId;
@@ -10,6 +14,8 @@ pub struct CharacterMoveEvent {
 }
 
 impl CharacterMoveEvent {
+    /// Instantiates a CharacterMoveEvent from a given Character ID and a
+    /// number of tiles.
     pub fn new(character_id: CharacterId, num_tiles: usize) -> CharacterMoveEvent {
         CharacterMoveEvent {
             executor: RepeatedEvent::from_prototype(

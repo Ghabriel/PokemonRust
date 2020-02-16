@@ -1,3 +1,7 @@
+//! Moves a character one tile forward. See the
+//! [CharacterMovementSystem](../systems/character_movement_system/struct.CharacterMovementSystem.html)
+//! for details on which situations this event can "hang".
+
 use amethyst::ecs::{World, WorldExt};
 
 use crate::{

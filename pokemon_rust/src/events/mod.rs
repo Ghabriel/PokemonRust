@@ -43,8 +43,12 @@ pub use self::{
     warp_event::WarpEvent,
 };
 
+/// Represents the conditions that a `GameEvent` must fulfill in order to be
+/// executed.
 #[derive(Default)]
 pub struct ExecutionConditions {
+    /// Determines whether the event needs the inputs to be disabled in order
+    /// to execute.
     pub requires_disabled_input: bool,
 }
 
@@ -56,12 +60,21 @@ impl ExecutionConditions {
     }
 }
 
+/// A box containing a generic `GameEvent` that is guaranteed to be `Sync` and
+/// `Send`.
 pub type BoxedGameEvent = Box<dyn GameEvent + Sync + Send>;
 
+/// A trait representing a game event.
 pub trait GameEvent {
+    /// Returns an arbitrary `GameEvent` inside a `Box`. This is basically a
+    /// trait object-safe version of `Clone` used specifically for game events.
     fn boxed_clone(&self) -> BoxedGameEvent;
+    /// Returns the execution conditions of this event.
     fn get_execution_conditions(&self) -> ExecutionConditions;
+    /// Starts this event, assuming that its execution conditions hold.
     fn start(&mut self, world: &mut World);
+    /// Ticks this event, making it potentially get closer to completion.
     fn tick(&mut self, world: &mut World, disabled_inputs: bool);
+    /// Checks if this event has been completed.
     fn is_complete(&self, world: &mut World) -> bool;
 }

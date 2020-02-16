@@ -1,3 +1,5 @@
+//! Generic event. Repeats an event for a given number of times sequentially.
+
 use amethyst::ecs::World;
 
 use super::{BoxedGameEvent, ChainedEvents, ExecutionConditions, GameEvent};

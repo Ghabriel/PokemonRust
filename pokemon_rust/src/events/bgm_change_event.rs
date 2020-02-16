@@ -1,3 +1,5 @@
+//! Changes the current background music.
+
 use amethyst::{
     assets::{AssetStorage, Loader},
     audio::Source,
