@@ -1,3 +1,5 @@
+//! A system responsible for executing character movements.
+
 use amethyst::{
     core::{math::Vector3, Time, Transform},
     ecs::{
@@ -32,6 +34,34 @@ use crate::{
     map::{change_player_tile, CoordinateSystem, MapHandler},
 };
 
+/// A system responsible for executing character movements. It finds characters
+/// that contain a
+/// [`CharacterMovement`](../../entities/character/struct.CharacterMovement.html)
+/// component (typically added by a
+/// [`CharacterSingleMoveEvent`](../../events/character_single_move_event/struct.CharacterSingleMoveEvent.html)
+/// or by a
+/// [`CharacterMoveEvent`](../../events/character_move_event/struct.CharacterMoveEvent.html)
+/// ) and performs the movement described by it.
+///
+/// This system is not perfectly equivalent for human players and NPCs.
+/// The following effects only apply to human players:
+///   * If the destination tile is blocked, the movement is canceled;
+///   * After the movement is completed, the following map events happen, in
+///     this order:
+///     * If the movement includes a map change, `OnMapEnter` is triggered on
+///       the new map;
+///     * `OnTileChange` map events are triggered;
+///     * `OnStep` tile events are triggered.
+///
+/// As for NPCs, the following effects are exclusive:
+///   * If the destination tile is blocked, the movement is suspended until the
+///     tile becomes available again. In particular, this makes
+///     `CharacterSingleMoveEvent` and `CharacterMoveEvent` "hang" until that
+///     happens.
+///   * During the movement, the interaction tile (i.e the tile that triggers
+///     interaction with this NPC) moves along with the NPC at the start of the
+///     movement.
+///
 pub struct CharacterMovementSystem;
 
 impl<'a> System<'a> for CharacterMovementSystem {

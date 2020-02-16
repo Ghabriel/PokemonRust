@@ -1,3 +1,8 @@
+//! A system for background music playback. Reads the next BGM from
+//! [`Music`](../../audio/struct.Music.html) and plays it whenever it changes
+//! or ends. Affected by
+//! [`GameConfig::play_bgm`](../../config/struct.GameConfig.html#structfield.play_bgm).
+
 use amethyst::{
     assets::AssetStorage,
     audio::{AudioSink, output::Output, Source},
@@ -9,6 +14,10 @@ use crate::{
     config::GameConfig,
 };
 
+/// A system for background music playback. Reads the next BGM from
+/// [`Music`](../../audio/struct.Music.html) and plays it whenever it changes
+/// or ends. Affected by
+/// [`GameConfig::play_bgm`](../../config/struct.GameConfig.html#structfield.play_bgm).
 #[derive(Default)]
 pub struct AudioSystem;
 

@@ -1,3 +1,6 @@
+//! A system for animating anything that has an
+//! [`AnimationTable`](../../entities/struct.AnimationTable.html).
+
 use amethyst::{
     core::Time,
     ecs::{Join, Read, System, WriteStorage},
@@ -11,6 +14,8 @@ use std::{
     marker::PhantomData,
 };
 
+/// A system for animating anything that has an
+/// [`AnimationTable`](../../entities/struct.AnimationTable.html).
 pub struct AnimationSystem<T: 'static + Eq + Hash + Sync + Send> {
     phantom_data: PhantomData<T>,
 }
