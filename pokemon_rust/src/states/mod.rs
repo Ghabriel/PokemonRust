@@ -1,3 +1,5 @@
+//! The possible states of the game.
+
 mod loading_state;
 mod overworld_animation_state;
 mod overworld_state;

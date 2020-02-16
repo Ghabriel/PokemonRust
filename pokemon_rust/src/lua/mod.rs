@@ -1,3 +1,7 @@
+//! Integration with Lua through FFI. Contains Rust functions that can be
+//! called from Lua code and the required plumbing to make this communication
+//! work.
+
 mod events;
 mod npc;
 mod polymorphic_container;

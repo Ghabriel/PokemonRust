@@ -1,3 +1,5 @@
+//! Contains the "actors" of the game.
+
 use amethyst::ecs::{Component, DenseVecStorage};
 
 use std::{

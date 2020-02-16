@@ -1,3 +1,7 @@
+//! Controls pretty much everything related to maps in the overworld: which
+//! maps are loaded, where are all the characters and items, when are connected
+//! maps loaded and much more.
+
 mod conversions;
 mod coordinates;
 mod load_map;

@@ -1,3 +1,7 @@
+//! The systems present in the game that operate on its entities and resources.
+//! Although a big part of the logic is actually encoded in events, there are
+//! some important systems that help them do their job.
+
 pub mod animation_system;
 pub mod audio_system;
 pub mod character_movement_system;

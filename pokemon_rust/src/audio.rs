@@ -1,3 +1,5 @@
+//! Types related to BGM/SFX playback.
+
 use amethyst::{
     assets::{AssetStorage, Loader},
     audio::{
