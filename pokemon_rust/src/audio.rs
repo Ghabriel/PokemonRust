@@ -29,8 +29,10 @@ use std::{
     vec::IntoIter,
 };
 
-const SELECT_OPTION_SOUND: &str = "sfx/select_option.wav";
-
+/// A type responsible for controlling the current background music (BGM).
+/// BGMs are played in a loop as long as they aren't changed.
+/// Internally, it contains a storage with every loaded BGM file. Files can
+/// also be preloaded to be played later.
 #[derive(Default)]
 pub struct Music {
     storage: HashMap<String, SourceHandle>,
@@ -39,6 +41,7 @@ pub struct Music {
 }
 
 impl Music {
+    /// Sets a BGM file as the active BGM.
     pub fn play_bgm(
         &mut self,
         bgm: String,
@@ -53,6 +56,7 @@ impl Music {
         self.active_bgm = Some(vec![handle].into_iter().cycle());
     }
 
+    /// Preloads a BGM for future playback.
     pub fn preload_bgm(
         &mut self,
         bgm: String,
@@ -72,16 +76,19 @@ impl Music {
         }
     }
 
+    /// Checks if the active BGM has been changed since the last call to `next()`.
     pub fn changed_bgm(&self) -> bool {
         self.changed_bgm
     }
 
+    /// Returns the active BGM, if any.
     pub fn next(&mut self) -> Option<SourceHandle> {
         self.changed_bgm = false;
         self.active_bgm.as_mut().and_then(|bgm| bgm.next())
     }
 }
 
+/// An enumeration with all supported audio file formats.
 #[derive(Clone)]
 pub enum AudioFileFormat {
     Flac,
@@ -90,11 +97,23 @@ pub enum AudioFileFormat {
     Wav,
 }
 
+/// An enumeration with the possible sound effects of the game.
 #[derive(Eq, Hash, PartialEq)]
 pub enum Sound {
     SelectOption,
 }
 
+impl Sound {
+    fn get_filename(&self) -> &str {
+        match self {
+            Sound::SelectOption => "sfx/select_option.wav",
+        }
+    }
+}
+
+/// A type which implements `SystemData` that can be used to play sound effects
+/// (SFX) easily. This can be retrieved either via the `SystemData` of a System
+/// or directly from the world through `SoundKit::fetch(world)`.
 pub struct SoundKit<'a> {
     asset_storage: Read<'a, AssetStorage<Source>>,
     sound_storage: ReadExpect<'a, SoundStorage>,
@@ -154,10 +173,14 @@ impl<'a> SystemData<'a> for SoundKit<'a> {
     }
 }
 
-pub struct SoundStorage {
+/// A private storage for loaded sounds (SFX). This is an implementation detail
+/// of `SoundKit`.
+struct SoundStorage {
     sounds: HashMap<Sound, SourceHandle>,
 }
 
+/// Initialisation function for the audio module. Inserts a `SoundStorage` and
+/// a `Music` into the world as resources.
 pub fn initialise_audio(world: &mut World) {
     let sound_storage = {
         let loader = world.read_resource::<Loader>();
@@ -165,7 +188,7 @@ pub fn initialise_audio(world: &mut World) {
         let mut sound_storage = SoundStorage { sounds: HashMap::new() };
         sound_storage.sounds.insert(
             Sound::SelectOption,
-            loader.load(SELECT_OPTION_SOUND, WavFormat, (), &world.read_resource()),
+            loader.load(Sound::SelectOption.get_filename(), WavFormat, (), &world.read_resource()),
         );
 
         sound_storage
