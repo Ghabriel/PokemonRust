@@ -19,10 +19,10 @@ pub struct GameConfig {
     pub player_starting_map: String,
     /// The starting position of the player, in Map Coordinates.
     pub player_starting_position: (u32, u32),
-    /// Decides whether background music should be played
+    /// Decides whether background music should be played.
     pub play_bgm: bool,
-    /// Decides whether sound effects should be played
+    /// Decides whether sound effects should be played.
     pub play_sfx: bool,
-    /// Decides whether the FPS should be printed
+    /// Decides whether the FPS should be printed.
     pub show_fps: bool,
 }

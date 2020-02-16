@@ -1,4 +1,4 @@
-//! Contains common constants used throughout the entire game.
+//! Common constants used throughout the entire game.
 
 /// The size of a tile, in pixels.
 pub const TILE_SIZE: u8 = 32;

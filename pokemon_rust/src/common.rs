@@ -46,11 +46,14 @@ pub enum Direction {
     Right,
 }
 
-/// A group of diverse resources that are used extensively by different parts
+/// A cache of diverse resources that are used extensively by different parts
 /// of the game.
 pub struct CommonResources {
+    /// The font used by every block of text in the game.
     pub font: FontHandle,
+    /// A text box used to wrap text and map change announcements.
     pub text_box: Handle<SpriteSheet>,
+    /// A solid black sprite used for screen fading.
     pub black: Handle<SpriteSheet>,
 }
 
