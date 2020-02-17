@@ -6,7 +6,13 @@ use amethyst::ecs::World;
 
 use crate::entities::character::CharacterId;
 
-use super::{BoxedGameEvent, CharacterSingleMoveEvent, ExecutionConditions, GameEvent, RepeatedEvent};
+use super::{
+    BoxedGameEvent,
+    CharacterSingleMoveEvent,
+    ExecutionConditions,
+    GameEvent,
+    RepeatedEvent,
+};
 
 #[derive(Clone)]
 pub struct CharacterMoveEvent {

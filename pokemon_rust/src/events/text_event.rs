@@ -4,11 +4,11 @@
 
 use amethyst::{
     ecs::{
+        world::Builder,
         Entities,
         Entity,
         ReadExpect,
         SystemData,
-        world::Builder,
         World,
         WorldExt,
         WriteStorage,
@@ -17,10 +17,7 @@ use amethyst::{
     ui::{Anchor, LineMode, UiImage, UiText, UiTransform},
 };
 
-use crate::{
-    common::CommonResources,
-    entities::text_box::TextBox,
-};
+use crate::{common::CommonResources, entities::text_box::TextBox};
 
 use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
@@ -31,9 +28,7 @@ pub struct TextEvent {
 
 impl TextEvent {
     pub fn new(text: impl Into<String>) -> TextEvent {
-        TextEvent {
-            text: text.into(),
-        }
+        TextEvent { text: text.into() }
     }
 }
 
@@ -50,19 +45,14 @@ impl GameEvent for TextEvent {
 
     fn start(&mut self, world: &mut World) {
         let text_box = {
-            let (
-                mut ui_images,
-                mut ui_texts,
-                mut ui_transforms,
-                entities,
-                resources,
-            ) = <(
-                WriteStorage<UiImage>,
-                WriteStorage<UiText>,
-                WriteStorage<UiTransform>,
-                Entities,
-                ReadExpect<CommonResources>,
-            )>::fetch(world);
+            let (mut ui_images, mut ui_texts, mut ui_transforms, entities, resources) =
+                <(
+                    WriteStorage<UiImage>,
+                    WriteStorage<UiText>,
+                    WriteStorage<UiTransform>,
+                    Entities,
+                    ReadExpect<CommonResources>,
+                )>::fetch(world);
 
             TextBox {
                 full_text: self.text.clone(),
@@ -85,13 +75,10 @@ impl GameEvent for TextEvent {
             }
         };
 
-        world
-            .create_entity()
-            .with(text_box)
-            .build();
+        world.create_entity().with(text_box).build();
     }
 
-    fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) { }
+    fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) {}
 
     fn is_complete(&self, world: &mut World) -> bool {
         world.read_storage::<TextBox>().is_empty()
@@ -110,8 +97,14 @@ fn initialise_box_entity(
     };
 
     let ui_transform = UiTransform::new(
-        "Text Box".to_string(), Anchor::BottomMiddle, Anchor::BottomMiddle,
-        0., 20., 2., 800., 100.
+        "Text Box".to_string(),
+        Anchor::BottomMiddle,
+        Anchor::BottomMiddle,
+        0.,
+        20.,
+        2.,
+        800.,
+        100.,
     );
 
     entities
@@ -137,8 +130,14 @@ fn initialise_text_entity(
     ui_text.align = Anchor::TopLeft;
 
     let ui_transform = UiTransform::new(
-        "Text".to_string(), Anchor::BottomMiddle, Anchor::BottomLeft,
-        -320., 17., 3., 640., 100.
+        "Text".to_string(),
+        Anchor::BottomMiddle,
+        Anchor::BottomLeft,
+        -320.,
+        17.,
+        3.,
+        640.,
+        100.,
     );
 
     entities

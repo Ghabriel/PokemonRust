@@ -1,7 +1,7 @@
 use amethyst::core::{math::Vector3, Transform};
 
 use crate::{
-    common::{Direction, get_direction_offset},
+    common::{get_direction_offset, Direction},
     constants::{TILE_SIZE, UNIVERSAL_PLAYER_OFFSET_Y},
 };
 
@@ -61,10 +61,7 @@ impl WorldCoordinates {
     }
 
     pub fn with_offset(&self, offset: &WorldOffset) -> WorldCoordinates {
-        WorldCoordinates::new(
-            self.x() + offset.0,
-            self.y() + offset.1,
-        )
+        WorldCoordinates::new(self.x() + offset.0, self.y() + offset.1)
     }
 
     pub fn to_world_offset(&self) -> WorldOffset {
@@ -75,10 +72,7 @@ impl WorldCoordinates {
     pub fn corner(&self) -> WorldCoordinates {
         let half_tile: i32 = (TILE_SIZE / 2).into();
 
-        WorldCoordinates::new(
-            self.x() - half_tile,
-            self.y() - half_tile,
-        )
+        WorldCoordinates::new(self.x() - half_tile, self.y() - half_tile)
     }
 }
 
@@ -156,10 +150,7 @@ impl PlayerCoordinates {
     }
 
     pub fn from_transform(transform: &Transform) -> PlayerCoordinates {
-        PlayerCoordinates::new(
-            transform.translation().x,
-            transform.translation().y,
-        )
+        PlayerCoordinates::new(transform.translation().x, transform.translation().y)
     }
 
     pub fn to_transform(&self) -> Transform {

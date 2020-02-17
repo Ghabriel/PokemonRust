@@ -8,8 +8,8 @@ use amethyst::{
 use crate::{
     common::Direction,
     entities::{
-        AnimationTable,
         character::{Character, CharacterAnimation, CharacterId, PlayerEntity},
+        AnimationTable,
     },
     map::{MapHandler, PlayerCoordinates},
 };
@@ -37,20 +37,22 @@ impl DirectionType {
                     .read_resource::<MapHandler>()
                     .get_character_by_id(character_id);
 
-                let npc_position = world.read_storage::<Transform>()
+                let npc_position = world
+                    .read_storage::<Transform>()
                     .get(npc_entity)
                     .map(PlayerCoordinates::from_transform)
                     .unwrap();
 
                 let player_entity = world.read_resource::<PlayerEntity>();
 
-                let player_position = world.read_storage::<Transform>()
-                        .get(player_entity.0)
-                        .map(PlayerCoordinates::from_transform)
-                        .unwrap();
+                let player_position = world
+                    .read_storage::<Transform>()
+                    .get(player_entity.0)
+                    .map(PlayerCoordinates::from_transform)
+                    .unwrap();
 
                 npc_position.get_direction_to(&player_position)
-            }
+            },
         }
     }
 }
@@ -86,7 +88,7 @@ impl GameEvent for CharacterRotateEvent {
         }
     }
 
-    fn start(&mut self, _world: &mut World) { }
+    fn start(&mut self, _world: &mut World) {}
 
     fn tick(&mut self, world: &mut World, _disabled_inputs: bool) {
         let entity = world
@@ -94,14 +96,14 @@ impl GameEvent for CharacterRotateEvent {
             .get_character_by_id(self.character_id);
 
         if let Some(direction) = self.direction_type.get_direction(world, self.character_id) {
-            world.write_storage::<AnimationTable<CharacterAnimation>>()
+            world
+                .write_storage::<AnimationTable<CharacterAnimation>>()
                 .get_mut(entity)
                 .unwrap()
-                .change_animation(CharacterAnimation::Idle(
-                    direction.clone(),
-                ));
+                .change_animation(CharacterAnimation::Idle(direction.clone()));
 
-            world.write_storage::<Character>()
+            world
+                .write_storage::<Character>()
                 .get_mut(entity)
                 .unwrap()
                 .facing_direction = direction;

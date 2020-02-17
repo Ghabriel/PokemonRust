@@ -6,10 +6,7 @@ mod events;
 mod npc;
 mod polymorphic_container;
 
-use amethyst::{
-    ecs::World,
-    utils::application_root_dir,
-};
+use amethyst::{ecs::World, utils::application_root_dir};
 
 use crate::{
     common::{AssetTracker, Direction},
@@ -33,12 +30,7 @@ use self::{
         dispatch_event,
         preload_bgm,
     },
-    npc::{
-        add_npc,
-        change_npc_direction,
-        create_npc,
-        rotate_npc_towards_player,
-    },
+    npc::{add_npc, change_npc_direction, create_npc, rotate_npc_towards_player},
     polymorphic_container::PolymorphicContainer,
 };
 
@@ -64,11 +56,13 @@ impl<'lua> FromLua<'lua> for Direction {
             Some(1) => Direction::Down,
             Some(2) => Direction::Left,
             Some(3) => Direction::Right,
-            _ => return Err(LuaError::FromLuaConversionError {
-                from: lua_type_name,
-                to: "Direction",
-                message: Some("expected a value in the range 1..=4".to_string()),
-            }),
+            _ => {
+                return Err(LuaError::FromLuaConversionError {
+                    from: lua_type_name,
+                    to: "Direction",
+                    message: Some("expected a value in the range 1..=4".to_string()),
+                })
+            },
         };
 
         Ok(direction)
@@ -149,9 +143,7 @@ pub fn run_lua_script(
     function: &str,
     parameters: &Option<GameScriptParameters>,
 ) -> Result<(), LuaScriptError> {
-    LUA.with(|lua| {
-        run_script(world, &lua, &file, &function, &parameters)
-    })
+    LUA.with(|lua| run_script(world, &lua, &file, &function, &parameters))
 }
 
 fn run_script(
@@ -162,9 +154,7 @@ fn run_script(
     parameters: &Option<GameScriptParameters>,
 ) -> Result<(), LuaScriptError> {
     run_with_native_functions(world, lua, |context| {
-        let path = application_root_dir()
-            .unwrap()
-            .join(&file);
+        let path = application_root_dir().unwrap().join(&file);
 
         let content = read_to_string(&path)?;
 
@@ -174,12 +164,13 @@ fn run_script(
 
         match parameters {
             None => function.call(())?,
-            Some(GameScriptParameters::SourceTile(coordinates)) =>
-                function.call((coordinates.x(), coordinates.y()))?,
-            Some(GameScriptParameters::TargetCharacter(character_id)) =>
-                function.call(character_id.0)?,
-            Some(GameScriptParameters::SourceMap(map_name)) =>
-                function.call(map_name.clone())?,
+            Some(GameScriptParameters::SourceTile(coordinates)) => {
+                function.call((coordinates.x(), coordinates.y()))?
+            },
+            Some(GameScriptParameters::TargetCharacter(character_id)) => {
+                function.call(character_id.0)?
+            },
+            Some(GameScriptParameters::SourceMap(map_name)) => function.call(map_name.clone())?,
         }
 
         Ok(())
@@ -206,7 +197,11 @@ macro_rules! native_functions {
     }
 }
 
-fn run_with_native_functions<F, R>(world: &mut World, lua: &Lua, callback: F) -> Result<R, LuaScriptError>
+fn run_with_native_functions<F, R>(
+    world: &mut World,
+    lua: &Lua,
+    callback: F,
+) -> Result<R, LuaScriptError>
 where
     F: FnOnce(&Context) -> Result<R, LuaScriptError>,
 {

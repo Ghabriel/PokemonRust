@@ -31,12 +31,7 @@ impl<'a> System<'a> for MapChangeAnnouncementSystem {
         Read<'a, Time>,
     );
 
-    fn run(&mut self, (
-        mut announcements,
-        mut ui_transforms,
-        entities,
-        time,
-    ): Self::SystemData) {
+    fn run(&mut self, (mut announcements, mut ui_transforms, entities, time): Self::SystemData) {
         if announcements.is_empty() {
             return;
         }
@@ -75,7 +70,7 @@ impl<'a> System<'a> for MapChangeAnnouncementSystem {
                     announcement.elapsed_time = 0.;
                     announcement.state = MapChangeAnnouncementState::Closing;
                 },
-                MapChangeAnnouncementState::Closing => { },
+                MapChangeAnnouncementState::Closing => {},
             }
         }
 
@@ -121,8 +116,12 @@ impl<'a> System<'a> for MapChangeAnnouncementSystem {
             },
             MapChangeAnnouncementState::Closing => {
                 if announcement.elapsed_time >= closing_time {
-                    entities.delete(announcement.box_entity).expect("Failed to delete announcement box");
-                    entities.delete(announcement.text_entity).expect("Failed to delete announcement text");
+                    entities
+                        .delete(announcement.box_entity)
+                        .expect("Failed to delete announcement box");
+                    entities
+                        .delete(announcement.text_entity)
+                        .expect("Failed to delete announcement text");
                     announcements.pop_front();
                     return;
                 }

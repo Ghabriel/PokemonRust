@@ -2,10 +2,7 @@
 
 use amethyst::ecs::{Component, DenseVecStorage};
 
-use std::{
-    collections::HashMap,
-    hash::Hash,
-};
+use std::{collections::HashMap, hash::Hash};
 
 pub mod character;
 pub mod map_change_announcement;
@@ -13,7 +10,7 @@ pub mod text_box;
 
 pub struct AnimationTable<T>
 where
-    T: 'static + Eq + Hash + Sync + Send
+    T: 'static + Eq + Hash + Sync + Send,
 {
     table: HashMap<T, AnimationData>,
     pub active_animation: Option<T>,
@@ -22,7 +19,7 @@ where
 
 impl<T> AnimationTable<T>
 where
-    T: 'static + Eq + Hash + Sync + Send
+    T: 'static + Eq + Hash + Sync + Send,
 {
     pub fn new() -> AnimationTable<T> {
         AnimationTable {
@@ -49,7 +46,8 @@ where
         if index == 0 {
             self.timing = 0.;
         } else {
-            self.timing = self.table
+            self.timing = self
+                .table
                 .get(self.active_animation.as_ref().unwrap())
                 .unwrap()
                 .timings[index - 1];
@@ -59,7 +57,7 @@ where
 
 impl<T> Component for AnimationTable<T>
 where
-    T: 'static + Eq + Hash + Sync + Send
+    T: 'static + Eq + Hash + Sync + Send,
 {
     type Storage = DenseVecStorage<Self>;
 }

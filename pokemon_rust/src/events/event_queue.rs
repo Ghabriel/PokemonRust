@@ -13,7 +13,7 @@ pub struct EventQueue {
 impl EventQueue {
     pub fn push<T>(&mut self, event: T)
     where
-        T: GameEvent + Sync + Send + 'static
+        T: GameEvent + Sync + Send + 'static,
     {
         self.push_boxed(Box::new(event));
     }

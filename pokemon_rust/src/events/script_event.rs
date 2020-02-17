@@ -19,20 +19,14 @@ pub struct ScriptEvent {
 
 #[derive(Clone)]
 enum Script {
-    Reference {
-        map: MapId,
-        script_index: usize,
-    },
+    Reference { map: MapId, script_index: usize },
     Instance(GameScript),
 }
 
 impl ScriptEvent {
     pub fn new(map: MapId, script_index: usize) -> ScriptEvent {
         ScriptEvent {
-            script: Script::Reference {
-                map,
-                script_index,
-            }
+            script: Script::Reference { map, script_index },
         }
     }
 
@@ -55,7 +49,7 @@ impl GameEvent for ScriptEvent {
         }
     }
 
-    fn start(&mut self, _world: &mut World) { }
+    fn start(&mut self, _world: &mut World) {}
 
     fn tick<'a>(&mut self, world: &'a mut World, _disabled_inputs: bool) {
         let game_script = match &self.script {
@@ -68,7 +62,11 @@ impl GameEvent for ScriptEvent {
 
         match game_script {
             GameScript::Native { script, parameters } => script(world, &parameters),
-            GameScript::Lua { file, function, parameters } => {
+            GameScript::Lua {
+                file,
+                function,
+                parameters,
+            } => {
                 let result = run_lua_script(world, &file, &function, &parameters);
 
                 if let Err(err) = result {

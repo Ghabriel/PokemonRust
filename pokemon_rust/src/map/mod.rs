@@ -19,14 +19,11 @@ use crate::{
 
 use self::map::Map;
 
-use std::{
-    collections::HashMap,
-    convert::TryFrom,
-};
+use std::{collections::HashMap, convert::TryFrom};
 
 pub use self::{
-    coordinates::{CoordinateSystem, MapCoordinates, PlayerCoordinates, WorldCoordinates},
     conversions::map_to_world_coordinates,
+    coordinates::{CoordinateSystem, MapCoordinates, PlayerCoordinates, WorldCoordinates},
     load_map::{change_player_tile, initialise_map, interact_with_npc, prepare_warp},
     map::{
         GameAction,
@@ -49,11 +46,7 @@ pub struct MapHandler {
 }
 
 impl MapHandler {
-    pub fn get_forward_tile(
-        &self,
-        facing_direction: &Direction,
-        tile_data: &TileData,
-    ) -> TileData {
+    pub fn get_forward_tile(&self, facing_direction: &Direction, tile_data: &TileData) -> TileData {
         let TileData { map_id, position } = tile_data;
         let map = &self.loaded_maps[&map_id.0];
         let current_tile = map.player_to_map_coordinates(&position);
@@ -75,8 +68,7 @@ impl MapHandler {
     }
 
     pub fn is_tile_blocked(&self, tile_data: &TileData) -> bool {
-        self.loaded_maps[&tile_data.map_id.0]
-            .is_tile_blocked(&tile_data.position)
+        self.loaded_maps[&tile_data.map_id.0].is_tile_blocked(&tile_data.position)
     }
 
     pub fn get_action_at(&self, tile_data: &TileData) -> Option<ValidatedGameAction> {
@@ -85,14 +77,9 @@ impl MapHandler {
 
         map.actions
             .get(&tile_coordinates)
-            .map(|game_action| {
-                ValidatedGameAction {
-                    when: game_action.when.clone(),
-                    script_event: ScriptEvent::new(
-                        tile_data.map_id.clone(),
-                        game_action.script_index,
-                    ),
-                }
+            .map(|game_action| ValidatedGameAction {
+                when: game_action.when.clone(),
+                script_event: ScriptEvent::new(tile_data.map_id.clone(), game_action.script_index),
             })
     }
 
@@ -107,8 +94,7 @@ impl MapHandler {
         map_id: &'a MapId,
         kind: MapScriptKind,
     ) -> impl Iterator<Item = ScriptEvent> + 'a {
-        self.loaded_maps[&map_id.0]
-            .get_map_scripts(kind)
+        self.loaded_maps[&map_id.0].get_map_scripts(kind)
     }
 
     pub fn get_nearby_connections(
@@ -118,27 +104,27 @@ impl MapHandler {
         let map = &self.loaded_maps[&tile_data.map_id.0];
         let position = map.player_to_map_coordinates(&tile_data.position);
 
-        map.connections
-            .iter()
-            .filter(move |(tile, connection)| {
-                let visible_tiles_x = 22;
-                let visible_tiles_y = 16;
-                let distance_x = i32::try_from(tile.x()).unwrap() - i32::try_from(position.x()).unwrap();
-                let distance_y = i32::try_from(tile.y()).unwrap() - i32::try_from(position.y()).unwrap();
-                let leniency = 12;
+        map.connections.iter().filter(move |(tile, connection)| {
+            let visible_tiles_x = 22;
+            let visible_tiles_y = 16;
+            let distance_x =
+                i32::try_from(tile.x()).unwrap() - i32::try_from(position.x()).unwrap();
+            let distance_y =
+                i32::try_from(tile.y()).unwrap() - i32::try_from(position.y()).unwrap();
+            let leniency = 12;
 
-                connection
-                    .directions
-                    .iter()
-                    .all(|(direction, _)| match direction {
-                        Direction::Up | Direction::Down => {
-                            distance_y.abs() <= visible_tiles_y / 2 + leniency
-                        },
-                        Direction::Left | Direction::Right => {
-                            distance_x.abs() <= visible_tiles_x / 2 + leniency
-                        },
-                    })
-            })
+            connection
+                .directions
+                .iter()
+                .all(|(direction, _)| match direction {
+                    Direction::Up | Direction::Down => {
+                        distance_y.abs() <= visible_tiles_y / 2 + leniency
+                    },
+                    Direction::Left | Direction::Right => {
+                        distance_x.abs() <= visible_tiles_x / 2 + leniency
+                    },
+                })
+        })
     }
 
     pub fn make_map_id(&self, map_id: String) -> MapId {
@@ -167,29 +153,38 @@ impl MapHandler {
                     _ => unreachable!(),
                 };
 
-                world.insert(PendingInteraction { character_id: *character_id });
+                world.insert(PendingInteraction {
+                    character_id: *character_id,
+                });
             },
             parameters: Some(GameScriptParameters::TargetCharacter(character_id)),
         });
 
-        map.actions.insert(position.clone(), GameAction {
-            when: GameActionKind::OnInteraction,
-            script_index: map.script_repository.len() - 1,
-        });
+        map.actions.insert(
+            position.clone(),
+            GameAction {
+                when: GameActionKind::OnInteraction,
+                script_index: map.script_repository.len() - 1,
+            },
+        );
 
         map.solids.insert(position, Tile);
 
-        self.characters.insert(character_id, CharacterData {
-            entity,
-            current_map: map_id.clone(),
-            natural_map: map_id.clone(),
-        });
+        self.characters.insert(
+            character_id,
+            CharacterData {
+                entity,
+                current_map: map_id.clone(),
+                natural_map: map_id.clone(),
+            },
+        );
 
         character_id
     }
 
     pub fn get_character_id_by_entity(&self, entity: Entity) -> CharacterId {
-        *self.characters
+        *self
+            .characters
             .iter()
             .find(|(_, c)| c.entity == entity)
             .map(|(id, _)| id)
@@ -205,7 +200,11 @@ impl MapHandler {
             .entity
     }
 
-    pub fn map_to_world_coordinates(&self, map_id: &MapId, tile: &MapCoordinates) -> WorldCoordinates {
+    pub fn map_to_world_coordinates(
+        &self,
+        map_id: &MapId,
+        tile: &MapCoordinates,
+    ) -> WorldCoordinates {
         self.loaded_maps
             .get(&map_id.0)
             .unwrap()
@@ -225,17 +224,11 @@ impl MapHandler {
     }
 
     pub fn get_character_current_map(&self, character_id: CharacterId) -> &MapId {
-        &self.characters
-            .get(&character_id)
-            .unwrap()
-            .current_map
+        &self.characters.get(&character_id).unwrap().current_map
     }
 
     pub fn get_character_natural_map(&self, character_id: CharacterId) -> &MapId {
-        &self.characters
-            .get(&character_id)
-            .unwrap()
-            .natural_map
+        &self.characters.get(&character_id).unwrap().natural_map
     }
 
     pub fn change_npc_tile(&mut self, from: &TileData, to: &TileData) {

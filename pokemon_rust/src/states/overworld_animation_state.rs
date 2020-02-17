@@ -1,9 +1,6 @@
 use amethyst::{
     core::ArcThreadPool,
-    ecs::{
-        Dispatcher,
-        DispatcherBuilder,
-    },
+    ecs::{Dispatcher, DispatcherBuilder},
     prelude::*,
 };
 
@@ -20,11 +17,7 @@ use crate::{
     },
 };
 
-use std::{
-    cell::RefCell,
-    ops::Deref,
-    rc::Rc,
-};
+use std::{cell::RefCell, ops::Deref, rc::Rc};
 
 #[derive(Default)]
 pub struct OverworldAnimationState<'a, 'b> {
@@ -48,7 +41,11 @@ impl SimpleState for OverworldAnimationState<'_, '_> {
         let world = data.world;
 
         let mut dispatcher = DispatcherBuilder::new()
-            .with(AnimationSystem::<CharacterAnimation>::new(), "animation_system", &[])
+            .with(
+                AnimationSystem::<CharacterAnimation>::new(),
+                "animation_system",
+                &[],
+            )
             .with(CharacterMovementSystem, "character_movement_system", &[])
             .with(NpcInteractionSystem, "npc_interaction_system", &[])
             .with(MapChangeAnnouncementSystem, "announcement_system", &[])

@@ -5,14 +5,11 @@
 
 use amethyst::{
     assets::AssetStorage,
-    audio::{AudioSink, output::Output, Source},
+    audio::{output::Output, AudioSink, Source},
     ecs::{Read, ReadExpect, System, Write, WriteExpect},
 };
 
-use crate::{
-    audio::Music,
-    config::GameConfig,
-};
+use crate::{audio::Music, config::GameConfig};
 
 /// A system for background music playback. Reads the next BGM from
 /// [`Music`](../../audio/struct.Music.html) and plays it whenever it changes
@@ -47,10 +44,9 @@ impl<'a> System<'a> for AudioSystem {
                             sink.append(source).unwrap();
                         }
                     },
-                    (false, false) => { },
+                    (false, false) => {},
                 }
             }
         }
     }
 }
-

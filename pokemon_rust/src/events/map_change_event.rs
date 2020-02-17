@@ -1,15 +1,7 @@
 //! Announces a map change, displaying the name of the reached map.
 
 use amethyst::{
-    ecs::{
-        Entities,
-        Entity,
-        ReadExpect,
-        SystemData,
-        World,
-        WorldExt,
-        WriteStorage,
-    },
+    ecs::{Entities, Entity, ReadExpect, SystemData, World, WorldExt, WriteStorage},
     renderer::SpriteRender,
     ui::{Anchor, LineMode, UiImage, UiText, UiTransform},
 };
@@ -51,19 +43,14 @@ impl GameEvent for MapChangeEvent {
 
     fn start(&mut self, world: &mut World) {
         let announcement = {
-            let (
-                mut ui_images,
-                mut ui_texts,
-                mut ui_transforms,
-                entities,
-                resources,
-            ) = <(
-                WriteStorage<UiImage>,
-                WriteStorage<UiText>,
-                WriteStorage<UiTransform>,
-                Entities,
-                ReadExpect<CommonResources>,
-            )>::fetch(world);
+            let (mut ui_images, mut ui_texts, mut ui_transforms, entities, resources) =
+                <(
+                    WriteStorage<UiImage>,
+                    WriteStorage<UiText>,
+                    WriteStorage<UiTransform>,
+                    Entities,
+                    ReadExpect<CommonResources>,
+                )>::fetch(world);
 
             MapChangeAnnouncement {
                 elapsed_time: 0.,
@@ -89,10 +76,12 @@ impl GameEvent for MapChangeEvent {
             .push(announcement);
     }
 
-    fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) { }
+    fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) {}
 
     fn is_complete(&self, world: &mut World) -> bool {
-        world.read_resource::<MapChangeAnnouncementQueue>().is_empty()
+        world
+            .read_resource::<MapChangeAnnouncementQueue>()
+            .is_empty()
     }
 }
 
@@ -108,8 +97,14 @@ fn initialise_box_entity(
     };
 
     let ui_transform = UiTransform::new(
-        "Text Box".to_string(), Anchor::TopRight, Anchor::BottomRight,
-        0., 0., 2., 400., 40.
+        "Text Box".to_string(),
+        Anchor::TopRight,
+        Anchor::BottomRight,
+        0.,
+        0.,
+        2.,
+        400.,
+        40.,
     );
 
     entities
@@ -126,18 +121,19 @@ fn initialise_text_entity(
     ui_transforms: &mut WriteStorage<UiTransform>,
     resources: &CommonResources,
 ) -> Entity {
-    let mut ui_text = UiText::new(
-        resources.font.clone(),
-        text,
-        [1., 1., 1., 1.],
-        30.,
-    );
+    let mut ui_text = UiText::new(resources.font.clone(), text, [1., 1., 1., 1.], 30.);
     ui_text.line_mode = LineMode::Wrap;
     ui_text.align = Anchor::Middle;
 
     let ui_transform = UiTransform::new(
-        "Announcement Text".to_string(), Anchor::TopRight, Anchor::BottomMiddle,
-        -200., 0., 3., 400., 40.
+        "Announcement Text".to_string(),
+        Anchor::TopRight,
+        Anchor::BottomMiddle,
+        -200.,
+        0.,
+        3.,
+        400.,
+        40.,
     );
 
     entities

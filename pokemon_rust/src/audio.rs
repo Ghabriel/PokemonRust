@@ -2,32 +2,14 @@
 
 use amethyst::{
     assets::{AssetStorage, Loader},
-    audio::{
-        FlacFormat,
-        Mp3Format,
-        OggFormat,
-        Source,
-        SourceHandle,
-        output::Output,
-        WavFormat,
-    },
-    ecs::{
-        Read,
-        ReadExpect,
-        SystemData,
-        World,
-        WorldExt,
-    },
+    audio::{output::Output, FlacFormat, Mp3Format, OggFormat, Source, SourceHandle, WavFormat},
+    ecs::{Read, ReadExpect, SystemData, World, WorldExt},
     shred::ResourceId,
 };
 
 use crate::config::GameConfig;
 
-use std::{
-    collections::HashMap,
-    iter::Cycle,
-    vec::IntoIter,
-};
+use std::{collections::HashMap, iter::Cycle, vec::IntoIter};
 
 /// A type responsible for controlling the current background music (BGM).
 /// BGMs are played in a loop as long as they aren't changed.
@@ -185,10 +167,17 @@ pub fn initialise_audio(world: &mut World) {
     let sound_storage = {
         let loader = world.read_resource::<Loader>();
 
-        let mut sound_storage = SoundStorage { sounds: HashMap::new() };
+        let mut sound_storage = SoundStorage {
+            sounds: HashMap::new(),
+        };
         sound_storage.sounds.insert(
             Sound::SelectOption,
-            loader.load(Sound::SelectOption.get_filename(), WavFormat, (), &world.read_resource()),
+            loader.load(
+                Sound::SelectOption.get_filename(),
+                WavFormat,
+                (),
+                &world.read_resource(),
+            ),
         );
 
         sound_storage

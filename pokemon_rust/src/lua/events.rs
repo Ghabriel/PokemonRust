@@ -37,7 +37,8 @@ pub(super) fn preload_bgm(context: &mut ExecutionContext, filename: String) {
     let loader = context.world.read_resource::<Loader>();
     let storage = context.world.read_resource::<AssetStorage<Source>>();
 
-    context.world
+    context
+        .world
         .write_resource::<Music>()
         .preload_bgm(filename, format, &loader, &storage);
 }
@@ -103,7 +104,12 @@ pub(super) fn create_text_event(context: &mut ExecutionContext, text: String) ->
     context.store(event)
 }
 
-pub(super) fn create_warp_event(context: &mut ExecutionContext, map: String, x: u32, y: u32) -> usize {
+pub(super) fn create_warp_event(
+    context: &mut ExecutionContext,
+    map: String,
+    x: u32,
+    y: u32,
+) -> usize {
     let event = WarpEvent::new(map, MapCoordinates::new(x, y));
 
     context.store(event)
@@ -120,13 +126,13 @@ pub(super) fn add_event(context: &mut ExecutionContext, chain_key: usize, new_ev
 pub(super) fn dispatch_event(context: &mut ExecutionContext, key: usize) {
     let event = remove_event(context, key);
 
-    context.world.write_resource::<EventQueue>().push_boxed(event);
+    context
+        .world
+        .write_resource::<EventQueue>()
+        .push_boxed(event);
 }
 
-fn remove_event(
-    context: &mut ExecutionContext,
-    key: usize,
-) -> Box<dyn GameEvent + Send + Sync> {
+fn remove_event(context: &mut ExecutionContext, key: usize) -> Box<dyn GameEvent + Send + Sync> {
     let event = context.remove_boxed(key);
 
     if event.is::<BgmChangeEvent>() {

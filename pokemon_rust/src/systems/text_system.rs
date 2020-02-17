@@ -2,7 +2,7 @@
 
 use amethyst::{
     core::Time,
-    ecs::{Entities, Join, Read, ReaderId, ReadExpect, System, World, WorldExt, WriteStorage},
+    ecs::{Entities, Join, Read, ReadExpect, ReaderId, System, World, WorldExt, WriteStorage},
     input::{InputEvent, StringBindings},
     shrev::EventChannel,
     ui::UiText,
@@ -29,7 +29,8 @@ pub struct TextSystem {
 impl TextSystem {
     pub fn new(world: &mut World) -> TextSystem {
         TextSystem {
-            event_reader: world.write_resource::<EventChannel<InputEvent<StringBindings>>>()
+            event_reader: world
+                .write_resource::<EventChannel<InputEvent<StringBindings>>>()
                 .register_reader(),
         }
     }
@@ -56,33 +57,34 @@ impl TextSystem {
                 }
             },
             (true, false) => {
-                text_box.displayed_text_end = full_text_length.min(
-                    text_box.displayed_text_start + maximum_display_length
-                );
+                text_box.displayed_text_end =
+                    full_text_length.min(text_box.displayed_text_start + maximum_display_length);
             },
             (false, false) => {
                 text_box.cooldown += time.delta_seconds();
                 while text_box.cooldown >= game_config.text_delay {
                     text_box.cooldown -= game_config.text_delay;
 
-                    let displayed_length = text_box.displayed_text_end - text_box.displayed_text_start;
+                    let displayed_length =
+                        text_box.displayed_text_end - text_box.displayed_text_start;
 
-                    if text_box.displayed_text_end == full_text_length || displayed_length == maximum_display_length {
+                    if text_box.displayed_text_end == full_text_length
+                        || displayed_length == maximum_display_length
+                    {
                         text_box.awaiting_keypress = true;
                     } else {
                         text_box.displayed_text_end += 1;
                     }
                 }
-            }
+            },
             _ => {},
         }
 
         ui_texts
             .get_mut(text_box.text_entity)
             .expect("Failed to retrieve UiText")
-            .text = text_box.full_text[
-                text_box.displayed_text_start..text_box.displayed_text_end
-            ].to_string();
+            .text = text_box.full_text[text_box.displayed_text_start..text_box.displayed_text_end]
+            .to_string();
 
         TextState::Running
     }
@@ -99,7 +101,9 @@ impl<'a> System<'a> for TextSystem {
         SoundKit<'a>,
     );
 
-    fn run(&mut self, (
+    fn run(
+        &mut self,
+        (
         mut text_boxes,
         mut ui_texts,
         entities,
@@ -107,7 +111,8 @@ impl<'a> System<'a> for TextSystem {
         time,
         input_event_channel,
         sound_kit,
-    ): Self::SystemData) {
+    ): Self::SystemData,
+    ) {
         for (entity, text_box) in (&entities, &mut text_boxes).join() {
             let mut pressed_action_key = false;
             for event in input_event_channel.read(&mut self.event_reader) {
@@ -129,8 +134,12 @@ impl<'a> System<'a> for TextSystem {
             );
 
             if state == TextState::Closed {
-                entities.delete(text_box.box_entity).expect("Failed to delete box");
-                entities.delete(text_box.text_entity).expect("Failed to delete text");
+                entities
+                    .delete(text_box.box_entity)
+                    .expect("Failed to delete box");
+                entities
+                    .delete(text_box.text_entity)
+                    .expect("Failed to delete text");
                 entities.delete(entity).expect("Failed to delete text box");
             }
         }

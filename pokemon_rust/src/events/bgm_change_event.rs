@@ -36,7 +36,7 @@ impl GameEvent for BgmChangeEvent {
         }
     }
 
-    fn start(&mut self, _world: &mut World) { }
+    fn start(&mut self, _world: &mut World) {}
 
     fn tick(&mut self, world: &mut World, _disabled_inputs: bool) {
         let mut music = world.write_resource::<Music>();

@@ -12,7 +12,7 @@ pub struct ParallelEvents {
 impl ParallelEvents {
     /// Adds the given list of events to this event. It is assumed that the
     /// events' `start()` were already called.
-    pub fn add_events(&mut self, events: impl Iterator<Item=Box<dyn GameEvent + Sync + Send>>) {
+    pub fn add_events(&mut self, events: impl Iterator<Item = Box<dyn GameEvent + Sync + Send>>) {
         self.events.extend(events);
     }
 }
@@ -20,7 +20,11 @@ impl ParallelEvents {
 impl GameEvent for ParallelEvents {
     fn boxed_clone(&self) -> BoxedGameEvent {
         Box::new(ParallelEvents {
-            events: self.events.iter().map(|event| event.boxed_clone()).collect(),
+            events: self
+                .events
+                .iter()
+                .map(|event| event.boxed_clone())
+                .collect(),
         })
     }
 
@@ -38,7 +42,8 @@ impl GameEvent for ParallelEvents {
     }
 
     fn tick(&mut self, world: &mut World, disabled_inputs: bool) {
-        self.events = self.events
+        self.events = self
+            .events
             .drain(..)
             .filter_map(|mut event| {
                 event.tick(world, disabled_inputs);

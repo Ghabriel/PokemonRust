@@ -1,19 +1,15 @@
 use amethyst::ecs::{Component, DenseVecStorage, Entity, World};
 
-use crate::{
-    common::Direction,
-    entities::character::CharacterId,
-    events::ScriptEvent,
-};
+use crate::{common::Direction, entities::character::CharacterId, events::ScriptEvent};
 
 use serde::{Deserialize, Serialize};
 
 use super::{
     conversions::{map_to_world_coordinates, player_to_map_coordinates},
+    serializable_map::InitializedMap,
     MapCoordinates,
     MapId,
     PlayerCoordinates,
-    serializable_map::InitializedMap,
     WorldCoordinates,
 };
 
@@ -50,28 +46,29 @@ impl Map {
             map_name: map.map_name,
             reference_point: map.reference_point,
             terrain_entity: map.terrain_entity,
-            solids: map.solids
+            solids: map
+                .solids
                 .into_iter()
                 .map(|tile_position| (MapCoordinates::from_tuple(&tile_position), Tile))
                 .collect(),
             decoration_entity: map.decoration_entity,
-            script_repository: map.script_repository
-                .into_iter()
-                .map(Into::into)
-                .collect(),
-            actions: map.actions
+            script_repository: map.script_repository.into_iter().map(Into::into).collect(),
+            actions: map
+                .actions
                 .into_iter()
                 .map(|(tile_position, action)| (MapCoordinates::from_tuple(&tile_position), action))
                 .collect(),
             map_scripts: map.map_scripts,
-            connections: map.connections
+            connections: map
+                .connections
                 .into_iter()
                 .map(|(tile_position, connection)| {
                     (
                         MapCoordinates::from_tuple(&tile_position),
                         MapConnection {
                             map: connection.map,
-                            directions: connection.directions
+                            directions: connection
+                                .directions
                                 .into_iter()
                                 .map(|(direction, coordinates)| {
                                     (direction, MapCoordinates::from_tuple(&coordinates))
@@ -139,9 +136,15 @@ impl Debug for GameScript {
     fn fmt(&self, formatter: &mut Formatter) -> Result<(), Error> {
         match self {
             GameScript::Native { .. } => write!(formatter, "Native Script"),
-            GameScript::Lua { file, function, parameters } => {
-                write!(formatter, "Lua Script({}, {}, {:?})", file, function, parameters)
-            },
+            GameScript::Lua {
+                file,
+                function,
+                parameters,
+            } => write!(
+                formatter,
+                "Lua Script({}, {}, {:?})",
+                file, function, parameters
+            ),
         }
     }
 }

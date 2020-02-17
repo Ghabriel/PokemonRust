@@ -4,8 +4,8 @@ use amethyst::{
     assets::{Handle, Loader, ProgressCounter},
     ecs::{World, WorldExt},
     renderer::{
-        ImageFormat,
         sprite::{Sprite, TextureCoordinates},
+        ImageFormat,
         SpriteSheet,
         SpriteSheetFormat,
     },
@@ -23,9 +23,7 @@ pub struct AssetTracker {
 
 impl AssetTracker {
     pub fn new(progress_counter: ProgressCounter) -> AssetTracker {
-        AssetTracker {
-            progress_counter,
-        }
+        AssetTracker { progress_counter }
     }
 
     pub fn get_progress_counter(&self) -> &ProgressCounter {
@@ -76,7 +74,7 @@ pub fn load_sprite_sheet(
         ron_name,
         SpriteSheetFormat(texture_handle),
         &mut *progress_counter,
-        &world.read_resource()
+        &world.read_resource(),
     )
 }
 
@@ -98,26 +96,20 @@ pub fn load_full_texture_sprite_sheet(
 
     let sprite_sheet = SpriteSheet {
         texture,
-        sprites: vec![
-            Sprite {
-                width: image_size.0 as f32,
-                height: image_size.1 as f32,
-                offsets: [0., 0.],
-                tex_coords: TextureCoordinates {
-                    left: 0.,
-                    right: 1.,
-                    bottom: 1.,
-                    top: 0.,
-                }
-            }
-        ]
+        sprites: vec![Sprite {
+            width: image_size.0 as f32,
+            height: image_size.1 as f32,
+            offsets: [0., 0.],
+            tex_coords: TextureCoordinates {
+                left: 0.,
+                right: 1.,
+                bottom: 1.,
+                top: 0.,
+            },
+        }],
     };
 
-    loader.load_from_data(
-        sprite_sheet,
-        &mut *progress_counter,
-        &world.read_resource()
-    )
+    loader.load_from_data(sprite_sheet, &mut *progress_counter, &world.read_resource())
 }
 
 /// Returns a pair of coordinates (x, y) representing a given direction,
@@ -135,7 +127,7 @@ pub fn load_full_texture_sprite_sheet(
 /// ```
 pub fn get_direction_offset<T>(direction: &Direction) -> (T, T)
 where
-    T: From<i8>
+    T: From<i8>,
 {
     let (x, y) = match direction {
         Direction::Up => (0, 1),

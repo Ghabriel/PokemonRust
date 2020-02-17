@@ -29,7 +29,10 @@ impl TileDataBuilder {
     }
 
     #[allow(unused)]
-    pub fn with_player_coordinates(mut self, player_coordinates: PlayerCoordinates) -> TileDataBuilder {
+    pub fn with_player_coordinates(
+        mut self,
+        player_coordinates: PlayerCoordinates,
+    ) -> TileDataBuilder {
         self.0.player_coordinates = Some(player_coordinates);
         self
     }
@@ -49,7 +52,10 @@ impl PreparedTileDataBuilder {
         PreparedTileDataBuilder(self.0)
     }
 
-    pub fn with_player_coordinates(mut self, player_coordinates: PlayerCoordinates) -> PreparedTileDataBuilder {
+    pub fn with_player_coordinates(
+        mut self,
+        player_coordinates: PlayerCoordinates,
+    ) -> PreparedTileDataBuilder {
         self.0.player_coordinates = Some(player_coordinates);
         PreparedTileDataBuilder(self.0)
     }

@@ -14,10 +14,10 @@ use crate::{
     events::EventQueue,
     map::{
         change_player_tile,
+        prepare_warp,
         MapCoordinates,
         MapHandler,
         PlayerCoordinates,
-        prepare_warp,
         TileDataBuilder,
     },
 };
@@ -33,7 +33,7 @@ pub struct SwitchMapEvent {
 impl SwitchMapEvent {
     pub fn new<T>(map: T, tile: MapCoordinates) -> SwitchMapEvent
     where
-        T: Into<String>
+        T: Into<String>,
     {
         SwitchMapEvent {
             map: map.into(),
@@ -82,12 +82,8 @@ impl GameEvent for SwitchMapEvent {
             .with_player_coordinates(player_coordinates)
             .build(world);
 
-        let target_tile_data = prepare_warp(
-            world,
-            &self.map,
-            &self.tile,
-            &mut self.progress_counter,
-        );
+        let target_tile_data =
+            prepare_warp(world, &self.map, &self.tile, &mut self.progress_counter);
 
         let target_transform = target_tile_data.position.to_transform();
 
@@ -106,7 +102,7 @@ impl GameEvent for SwitchMapEvent {
         );
     }
 
-    fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) { }
+    fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) {}
 
     fn is_complete(&self, _world: &mut World) -> bool {
         self.progress_counter.is_complete()

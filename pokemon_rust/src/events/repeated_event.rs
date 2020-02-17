@@ -8,7 +8,7 @@ use std::marker::PhantomData;
 
 pub struct RepeatedEvent<T>
 where
-    T: 'static + GameEvent + Sync + Send
+    T: 'static + GameEvent + Sync + Send,
 {
     chain: ChainedEvents,
     phantom_data: PhantomData<T>,
@@ -16,7 +16,7 @@ where
 
 impl<T> RepeatedEvent<T>
 where
-    T: 'static + GameEvent + Sync + Send + Clone
+    T: 'static + GameEvent + Sync + Send + Clone,
 {
     pub fn from_prototype(prototype: &T, repetitions: usize) -> RepeatedEvent<T> {
         let mut chain = ChainedEvents::default();
@@ -33,7 +33,7 @@ where
 
 impl<T> Clone for RepeatedEvent<T>
 where
-    T: 'static + GameEvent + Sync + Send
+    T: 'static + GameEvent + Sync + Send,
 {
     fn clone(&self) -> RepeatedEvent<T> {
         RepeatedEvent::<T> {
@@ -45,7 +45,7 @@ where
 
 impl<T> GameEvent for RepeatedEvent<T>
 where
-    T: 'static + GameEvent + Sync + Send
+    T: 'static + GameEvent + Sync + Send,
 {
     fn boxed_clone(&self) -> BoxedGameEvent {
         Box::new(RepeatedEvent::<T> {

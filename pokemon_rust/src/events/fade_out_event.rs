@@ -4,13 +4,13 @@
 use amethyst::{
     core::Time,
     ecs::{
+        world::Builder,
         Component,
         Entity,
         HashMapStorage,
         Read,
         ReadExpect,
         SystemData,
-        world::Builder,
         World,
         WorldExt,
         WriteStorage,
@@ -19,10 +19,7 @@ use amethyst::{
     ui::{Anchor, UiImage, UiTransform},
 };
 
-use crate::{
-    common::CommonResources,
-    config::GameConfig,
-};
+use crate::{common::CommonResources, config::GameConfig};
 
 use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
@@ -55,13 +52,19 @@ impl GameEvent for FadeOutEvent {
     }
 
     fn start(&mut self, world: &mut World) {
-        self.top_fade = Some(
-            initialise_fade_entity(world, Anchor::TopMiddle, Anchor::TopMiddle, 0)
-        );
+        self.top_fade = Some(initialise_fade_entity(
+            world,
+            Anchor::TopMiddle,
+            Anchor::TopMiddle,
+            0,
+        ));
 
-        self.bottom_fade = Some(
-            initialise_fade_entity(world, Anchor::BottomMiddle, Anchor::BottomMiddle, 1)
-        );
+        self.bottom_fade = Some(initialise_fade_entity(
+            world,
+            Anchor::BottomMiddle,
+            Anchor::BottomMiddle,
+            1,
+        ));
     }
 
     fn tick(&mut self, world: &mut World, _disabled_inputs: bool) {
@@ -99,10 +102,7 @@ fn initialise_fade_entity(world: &mut World, anchor: Anchor, pivot: Anchor, id: 
         sprite_number: 0,
     };
 
-    let ui_transform = UiTransform::new(
-        "Fade".to_string(), anchor, pivot,
-        0., 0., 2., 800., 0.
-    );
+    let ui_transform = UiTransform::new("Fade".to_string(), anchor, pivot, 0., 0., 2., 800., 0.);
 
     world.register::<Fade>();
 

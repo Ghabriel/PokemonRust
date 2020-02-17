@@ -1,7 +1,4 @@
-use std::{
-    any::Any,
-    collections::HashMap,
-};
+use std::{any::Any, collections::HashMap};
 
 #[derive(Default)]
 pub struct PolymorphicContainer {
@@ -28,10 +25,7 @@ impl PolymorphicContainer {
     }
 
     pub fn try_remove<T: 'static>(&mut self, key: usize) -> Option<Box<T>> {
-        self.data
-            .remove(&key)?
-            .downcast()
-            .ok()
+        self.data.remove(&key)?.downcast().ok()
     }
 
     pub fn remove<T: 'static>(&mut self, key: usize) -> Box<T> {

@@ -37,10 +37,7 @@ pub fn player_to_map_coordinates(
     player_position: &PlayerCoordinates,
     reference_point: &WorldCoordinates,
 ) -> MapCoordinates {
-    world_to_map_coordinates(
-        &player_position.to_world_coordinates(),
-        &reference_point
-    )
+    world_to_map_coordinates(&player_position.to_world_coordinates(), &reference_point)
 }
 
 /// Given the position of a tile in both Map Coordinates and World Coordinates,
@@ -49,9 +46,7 @@ pub fn get_reference_point_from_tile(
     tile_map_coordinates: &MapCoordinates,
     tile_world_coordinates: &WorldCoordinates,
 ) -> WorldCoordinates {
-    let offset = tile_map_coordinates
-        .to_world_offset()
-        .invert();
+    let offset = tile_map_coordinates.to_world_offset().invert();
 
     tile_world_coordinates.with_offset(&offset)
 }

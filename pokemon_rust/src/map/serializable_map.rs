@@ -45,7 +45,11 @@ impl From<SerializableGameScript> for GameScript {
                 file,
                 function,
                 parameters,
-            } => GameScript::Lua { file, function, parameters },
+            } => GameScript::Lua {
+                file,
+                function,
+                parameters,
+            },
         }
     }
 }

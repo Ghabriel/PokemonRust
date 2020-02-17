@@ -1,12 +1,12 @@
 use amethyst::{
     assets::ProgressCounter,
-    ecs::{Entity, world::Builder, World, WorldExt},
+    ecs::{world::Builder, Entity, World, WorldExt},
     renderer::SpriteRender,
     utils::application_root_dir,
 };
 
 use crate::{
-    common::{AssetTracker, load_full_texture_sprite_sheet},
+    common::{load_full_texture_sprite_sheet, AssetTracker},
     constants::{MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
     entities::character::{CharacterId, PendingInteraction, PlayerEntity},
     events::{EventQueue, MapChangeEvent, ScriptEvent},
@@ -14,17 +14,10 @@ use crate::{
 
 use ron::de::from_reader;
 
-use std::{
-    collections::HashMap,
-    convert::TryFrom,
-    fs::File,
-};
+use std::{collections::HashMap, convert::TryFrom, fs::File};
 
 use super::{
-    conversions::{
-        get_reference_point_from_tile,
-        map_to_world_coordinates,
-    },
+    conversions::{get_reference_point_from_tile, map_to_world_coordinates},
     coordinates::{
         CoordinateSystem,
         MapCoordinates,
@@ -41,31 +34,27 @@ use super::{
         MapScript,
         MapScriptKind,
     },
-    MapHandler,
-    MapId,
     serializable_map::{InitializedMap, SerializableMap},
     tile_data_builder::TileDataBuilder,
+    MapHandler,
+    MapId,
     TileData,
     ValidatedGameAction,
 };
 
 pub fn interact_with_npc(character_id: CharacterId, map_id: &MapId, event_queue: &mut EventQueue) {
-    event_queue.push(ScriptEvent::from_script(
-        GameScript::Lua {
-            file: format!("assets/maps/{}/scripts.lua", map_id.0),
-            function: "interact_with_npc".to_string(),
-            parameters: Some(GameScriptParameters::TargetCharacter(character_id)),
-        }
-    ));
+    event_queue.push(ScriptEvent::from_script(GameScript::Lua {
+        file: format!("assets/maps/{}/scripts.lua", map_id.0),
+        function: "interact_with_npc".to_string(),
+        parameters: Some(GameScriptParameters::TargetCharacter(character_id)),
+    }));
 
-    event_queue.push(ScriptEvent::from_script(
-        GameScript::Native {
-            script: |world, _| {
-                world.remove::<PendingInteraction>();
-            },
-            parameters: None,
-        }
-    ))
+    event_queue.push(ScriptEvent::from_script(GameScript::Native {
+        script: |world, _| {
+            world.remove::<PendingInteraction>();
+        },
+        parameters: None,
+    }))
 }
 
 pub fn change_player_tile(
@@ -77,14 +66,16 @@ pub fn change_player_tile(
 ) {
     if initial_tile_data.map_id != final_tile_data.map_id {
         println!("Changing to map {}", final_tile_data.map_id.0);
-        let current_map = map.characters
+        let current_map = map
+            .characters
             .iter_mut()
             .find(|(_, c)| c.entity == player_entity.0)
             .map(|(_, c)| &mut c.current_map)
             .unwrap();
         *current_map = final_tile_data.map_id.clone();
 
-        let natural_map = map.characters
+        let natural_map = map
+            .characters
             .iter_mut()
             .find(|(_, c)| c.entity == player_entity.0)
             .map(|(_, c)| &mut c.natural_map)
@@ -103,9 +94,7 @@ pub fn change_player_tile(
         });
 
     match map.get_action_at(&final_tile_data) {
-        Some(
-            ValidatedGameAction { when, script_event }
-        ) if when == GameActionKind::OnStep => {
+        Some(ValidatedGameAction { when, script_event }) if when == GameActionKind::OnStep => {
             event_queue.push(script_event);
         },
         _ => {},
@@ -138,7 +127,8 @@ pub fn prepare_warp(
 }
 
 pub fn is_map_loaded(world: &World, map_name: &str) -> bool {
-    world.read_resource::<MapHandler>()
+    world
+        .read_resource::<MapHandler>()
         .loaded_maps
         .contains_key(map_name)
 }
@@ -161,8 +151,17 @@ pub fn load_detached_map(
     load_map(world, &map_name, reference_point, progress_counter)
 }
 
-pub fn initialise_map(world: &mut World, starting_map: &str, progress_counter: &mut ProgressCounter) {
-    let map = load_map(world, starting_map, WorldCoordinates::origin(), progress_counter);
+pub fn initialise_map(
+    world: &mut World,
+    starting_map: &str,
+    progress_counter: &mut ProgressCounter,
+) {
+    let map = load_map(
+        world,
+        starting_map,
+        WorldCoordinates::origin(),
+        progress_counter,
+    );
 
     let map_handler = MapHandler {
         loaded_maps: {
@@ -178,7 +177,8 @@ pub fn initialise_map(world: &mut World, starting_map: &str, progress_counter: &
         let starting_map_id = MapId(starting_map.to_string());
         let mut event_queue = world.write_resource::<EventQueue>();
 
-        map_handler.get_map_scripts(&starting_map_id, MapScriptKind::OnMapEnter)
+        map_handler
+            .get_map_scripts(&starting_map_id, MapScriptKind::OnMapEnter)
             .for_each(|event| {
                 event_queue.push(event);
             });
@@ -214,8 +214,7 @@ fn load_nearby_connections(world: &mut World, progress_counter: &mut ProgressCou
             lhs_connection.map == rhs_connection.map
         });
 
-        let reference_point = map
-            .loaded_maps[&map.get_character_current_map(character_id).0]
+        let reference_point = map.loaded_maps[&map.get_character_current_map(character_id).0]
             .reference_point
             .clone();
 
@@ -225,11 +224,7 @@ fn load_nearby_connections(world: &mut World, progress_counter: &mut ProgressCou
     let loaded_maps: Vec<_> = nearby_connections
         .into_iter()
         .map(|(tile, connection)| {
-            let reference_point = get_new_map_reference_point(
-                &tile,
-                &connection,
-                &reference_point,
-            );
+            let reference_point = get_new_map_reference_point(&tile, &connection, &reference_point);
             let map = load_map(world, &connection.map, reference_point, progress_counter);
 
             (connection.map, map)
@@ -252,13 +247,10 @@ fn get_new_map_reference_point(
     // TODO: handle multi-connections (non-rectangular maps)
     let (first_direction, external_tile) = connection.directions.iter().next().unwrap();
 
-    let external_tile_world_coordinates = tile_world_coordinates
-        .offset_by_direction(&first_direction);
+    let external_tile_world_coordinates =
+        tile_world_coordinates.offset_by_direction(&first_direction);
 
-    get_reference_point_from_tile(
-        &external_tile,
-        &external_tile_world_coordinates,
-    )
+    get_reference_point_from_tile(&external_tile, &external_tile_world_coordinates)
 }
 
 fn load_map(

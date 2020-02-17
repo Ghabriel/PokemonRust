@@ -28,9 +28,7 @@ pub struct CharacterSingleMoveEvent {
 
 impl CharacterSingleMoveEvent {
     pub fn new(character_id: CharacterId) -> CharacterSingleMoveEvent {
-        CharacterSingleMoveEvent {
-            character_id,
-        }
+        CharacterSingleMoveEvent { character_id }
     }
 }
 
@@ -56,7 +54,8 @@ impl GameEvent for CharacterSingleMoveEvent {
             .unwrap()
             .clone();
 
-        let velocity = world.read_storage::<AllowedMovements>()
+        let velocity = world
+            .read_storage::<AllowedMovements>()
             .get(entity)
             .unwrap()
             .get_movement_data(&character.action)
@@ -82,12 +81,13 @@ impl GameEvent for CharacterSingleMoveEvent {
             to: final_tile_data,
         };
 
-        world.write_storage::<CharacterMovement>()
+        world
+            .write_storage::<CharacterMovement>()
             .insert(entity, movement)
             .expect("Failed to attach CharacterMovement");
     }
 
-    fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) { }
+    fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) {}
 
     fn is_complete(&self, world: &mut World) -> bool {
         let entity = world
@@ -96,9 +96,7 @@ impl GameEvent for CharacterSingleMoveEvent {
 
         let has_pending_interaction = world.has_value::<PendingInteraction>();
 
-        let has_text_box = !world
-            .read_storage::<TextBox>()
-            .is_empty();
+        let has_text_box = !world.read_storage::<TextBox>().is_empty();
 
         let is_moving = world.read_storage::<CharacterMovement>().contains(entity);
 

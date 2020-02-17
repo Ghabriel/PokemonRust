@@ -41,7 +41,7 @@ impl GameEvent for ChainedEvents {
             event.get_execution_conditions()
         } else {
             ExecutionConditions {
-                requires_disabled_input: false
+                requires_disabled_input: false,
             }
         }
     }

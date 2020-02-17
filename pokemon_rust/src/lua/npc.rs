@@ -1,24 +1,16 @@
-use amethyst::{
-    core::Transform,
-    ecs::WorldExt,
-    renderer::SpriteRender,
-};
+use amethyst::{core::Transform, ecs::WorldExt, renderer::SpriteRender};
 
 use crate::{
-    common::{Direction, get_character_sprite_index_from_direction},
+    common::{get_character_sprite_index_from_direction, Direction},
     entities::character::{
+        initialise_npc,
         Character,
         CharacterId,
-        initialise_npc,
         MovementType,
         NpcBuilder,
         PlayerEntity,
     },
-    map::{
-        MapCoordinates,
-        MapHandler,
-        PlayerCoordinates,
-    },
+    map::{MapCoordinates, MapHandler, PlayerCoordinates},
 };
 
 use super::ExecutionContext;
@@ -56,11 +48,14 @@ pub(super) fn change_npc_direction(
 }
 
 pub(super) fn rotate_npc_towards_player(context: &mut ExecutionContext, character_id: CharacterId) {
-    let npc_entity = context.world
+    let npc_entity = context
+        .world
         .write_resource::<MapHandler>()
         .get_character_by_id(character_id);
 
-    let npc_position = context.world.read_storage::<Transform>()
+    let npc_position = context
+        .world
+        .read_storage::<Transform>()
         .get(npc_entity)
         .map(PlayerCoordinates::from_transform)
         .unwrap();
@@ -68,7 +63,9 @@ pub(super) fn rotate_npc_towards_player(context: &mut ExecutionContext, characte
     let player_position = {
         let player_entity = context.world.read_resource::<PlayerEntity>();
 
-        context.world.read_storage::<Transform>()
+        context
+            .world
+            .read_storage::<Transform>()
             .get(player_entity.0)
             .map(PlayerCoordinates::from_transform)
             .unwrap()
@@ -76,12 +73,16 @@ pub(super) fn rotate_npc_towards_player(context: &mut ExecutionContext, characte
 
     let direction = npc_position.get_direction_to(&player_position).unwrap();
 
-    context.world.write_storage::<SpriteRender>()
+    context
+        .world
+        .write_storage::<SpriteRender>()
         .get_mut(npc_entity)
         .unwrap()
         .sprite_number = get_character_sprite_index_from_direction(&direction);
 
-    context.world.write_storage::<Character>()
+    context
+        .world
+        .write_storage::<Character>()
         .get_mut(npc_entity)
         .unwrap()
         .facing_direction = direction;

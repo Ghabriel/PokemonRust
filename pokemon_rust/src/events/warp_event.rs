@@ -24,16 +24,14 @@ pub struct WarpEvent {
 impl WarpEvent {
     pub fn new<T>(map: T, tile: MapCoordinates) -> WarpEvent
     where
-        T: Into<String>
+        T: Into<String>,
     {
         let mut executor = ChainedEvents::default();
         executor.add_event(Box::new(FadeOutEvent::default()));
         executor.add_event(Box::new(SwitchMapEvent::new(map, tile)));
         executor.add_event(Box::new(FadeInEvent::default()));
 
-        WarpEvent {
-            executor,
-        }
+        WarpEvent { executor }
     }
 }
 

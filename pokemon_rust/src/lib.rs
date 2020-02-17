@@ -1,8 +1,4 @@
-#![warn(
-    clippy::all,
-    clippy::pedantic,
-)]
-
+#![warn(clippy::all, clippy::pedantic)]
 #![allow(
     clippy::cast_precision_loss,
     clippy::cast_possible_truncation,
@@ -15,7 +11,7 @@
     clippy::pub_enum_variant_names,
     clippy::single_match_else,
     clippy::trivially_copy_pass_by_ref,
-    clippy::type_complexity,
+    clippy::type_complexity
 )]
 
 pub mod audio;
@@ -33,22 +29,19 @@ use amethyst::{
     audio::AudioBundle,
     core::transform::TransformBundle,
     input::{InputBundle, StringBindings},
-    LoggerConfig,
     prelude::*,
     renderer::{
         plugins::{RenderFlat2D, RenderToWindow},
         types::DefaultBackend,
         RenderingBundle,
     },
-    Result as AmethystResult,
     start_logger as amethyst_start_logger,
     ui::{RenderUi, UiBundle},
+    LoggerConfig,
+    Result as AmethystResult,
 };
 
-use crate::{
-    config::GameConfig,
-    states::LoadingState,
-};
+use crate::{config::GameConfig, states::LoadingState};
 
 use std::path::PathBuf;
 
@@ -79,12 +72,12 @@ pub fn start_game(params: PokemonRustParameters) -> AmethystResult<()> {
                         .with_clear([0.0, 0.0, 0.0, 1.0]),
                 )
                 .with_plugin(RenderFlat2D::default())
-                .with_plugin(RenderUi::default())
+                .with_plugin(RenderUi::default()),
         )?
         .with_bundle(TransformBundle::new())?
         .with_bundle(
             InputBundle::<StringBindings>::new()
-                .with_bindings_from_file(keybindings_config_path)?
+                .with_bindings_from_file(keybindings_config_path)?,
         )?
         .with_bundle(UiBundle::<StringBindings>::new())?
         .with_bundle(AudioBundle::default())?;

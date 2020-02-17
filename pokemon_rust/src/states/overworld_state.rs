@@ -22,11 +22,7 @@ use crate::{
     },
 };
 
-use std::{
-    cell::RefCell,
-    rc::Rc,
-    ops::Deref,
-};
+use std::{cell::RefCell, ops::Deref, rc::Rc};
 
 #[derive(Default)]
 pub struct OverworldState<'a, 'b> {
@@ -50,11 +46,23 @@ impl SimpleState for OverworldState<'_, '_> {
         let world = data.world;
 
         let mut dispatcher = DispatcherBuilder::new()
-            .with(AnimationSystem::<CharacterAnimation>::new(), "animation_system", &[])
+            .with(
+                AnimationSystem::<CharacterAnimation>::new(),
+                "animation_system",
+                &[],
+            )
             .with(AudioSystem::default(), "audio_system", &[])
             .with(PlayerInputSystem::new(world), "player_input_system", &[])
-            .with(CharacterMovementSystem, "character_movement_system", &["player_input_system"])
-            .with(NpcInteractionSystem, "npc_interaction_system", &["player_input_system"])
+            .with(
+                CharacterMovementSystem,
+                "character_movement_system",
+                &["player_input_system"],
+            )
+            .with(
+                NpcInteractionSystem,
+                "npc_interaction_system",
+                &["player_input_system"],
+            )
             .with(MapChangeAnnouncementSystem, "announcement_system", &[])
             .with(TextSystem::new(world), "text_system", &[])
             .with(FpsCounterSystem, "fps_counter_system", &[])
@@ -90,7 +98,9 @@ impl SimpleState for OverworldState<'_, '_> {
             self.event_executor.borrow_mut().start_new_events(world);
 
             if self.event_executor.borrow().requires_disabled_input() {
-                return Trans::Switch(Box::new(OverworldAnimationState::new(self.event_executor.clone())));
+                return Trans::Switch(Box::new(OverworldAnimationState::new(
+                    self.event_executor.clone(),
+                )));
             }
         }
 

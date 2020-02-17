@@ -2,44 +2,22 @@
 
 use amethyst::{
     assets::{Handle, ProgressCounter},
-    ecs::{
-        Component,
-        DenseVecStorage,
-        Entity,
-        world::Builder,
-        World,
-        WorldExt,
-    },
+    ecs::{world::Builder, Component, DenseVecStorage, Entity, World, WorldExt},
     renderer::{SpriteRender, SpriteSheet},
     utils::application_root_dir,
 };
 
 use crate::{
-    common::{
-        Direction,
-        get_character_sprite_index_from_direction,
-        load_sprite_sheet,
-    },
-    entities::{
-        AnimationData,
-        AnimationTable,
-    },
-    map::{
-        MapCoordinates,
-        MapHandler,
-        PlayerCoordinates,
-        TileData,
-    },
+    common::{get_character_sprite_index_from_direction, load_sprite_sheet, Direction},
+    entities::{AnimationData, AnimationTable},
+    map::{MapCoordinates, MapHandler, PlayerCoordinates, TileData},
 };
 
 use ron::de::from_reader;
 
 use serde::{Deserialize, Serialize};
 
-use std::{
-    collections::HashMap,
-    fs::File,
-};
+use std::{collections::HashMap, fs::File};
 
 /// Represents the serializable version of a character, loaded from its
 /// corresponding `character.ron` file.
@@ -204,7 +182,7 @@ pub fn initialise_npc(
 
         // TODO: use the appropriate coordinate system for NPC positions
         let transform = PlayerCoordinates::from_world_coordinates(
-            &map_handler.map_to_world_coordinates(&map_id, &npc_builder.position)
+            &map_handler.map_to_world_coordinates(&map_id, &npc_builder.position),
         )
         .to_transform();
 
@@ -233,14 +211,12 @@ pub fn initialise_npc(
 
             let texture_file_name = format!(
                 "characters/{}/{}",
-                npc_builder.kind,
-                character_data.texture_file_name,
+                npc_builder.kind, character_data.texture_file_name,
             );
 
             let sprite_sheet_file_name = format!(
                 "characters/{}/{}",
-                npc_builder.kind,
-                movement_data.sprite_sheet,
+                npc_builder.kind, movement_data.sprite_sheet,
             );
 
             let sprite_sheet = load_sprite_sheet(
@@ -254,24 +230,29 @@ pub fn initialise_npc(
                 default_sprite_sheet = Some(sprite_sheet.clone());
             }
 
-            allowed_movements.add_movement_type(movement_type, MovementData {
-                sprite_sheet,
-                velocity: movement_data.velocity,
-            });
+            allowed_movements.add_movement_type(
+                movement_type,
+                MovementData {
+                    sprite_sheet,
+                    velocity: movement_data.velocity,
+                },
+            );
         }
 
         (animation_table, allowed_movements)
     };
 
     if default_sprite_sheet.is_none() {
-        panic!("Invalid initial action for NPC of kind {}", npc_builder.kind);
+        panic!(
+            "Invalid initial action for NPC of kind {}",
+            npc_builder.kind
+        );
     }
 
     let sprite_render = SpriteRender {
         sprite_sheet: default_sprite_sheet.unwrap(),
         sprite_number: get_character_sprite_index_from_direction(&character.facing_direction),
     };
-
 
     world.register::<AnimationTable<CharacterAnimation>>();
     world.register::<AllowedMovements>();
@@ -286,7 +267,8 @@ pub fn initialise_npc(
         .with(animation_table)
         .build();
 
-    world.write_resource::<MapHandler>()
+    world
+        .write_resource::<MapHandler>()
         .register_npc(&map_id, npc_builder.position, entity)
 }
 
@@ -320,10 +302,12 @@ pub fn initialise_player(
             facing_direction: Direction::Down,
             initial_action: MovementType::Walk,
         },
-        progress_counter
+        progress_counter,
     );
 
-    world.read_resource::<MapHandler>().get_character_by_id(player_id)
+    world
+        .read_resource::<MapHandler>()
+        .get_character_by_id(player_id)
 }
 
 /// Internal function for adding idle animations to the animation table of a
@@ -331,25 +315,37 @@ pub fn initialise_player(
 fn add_idle_animations(animation_table: &mut AnimationTable<CharacterAnimation>) {
     let idle_animation_timing = vec![1.0];
 
-    animation_table.insert(CharacterAnimation::Idle(Direction::Down), AnimationData {
-        timings: idle_animation_timing.clone(),
-        frames: vec![3],
-    });
+    animation_table.insert(
+        CharacterAnimation::Idle(Direction::Down),
+        AnimationData {
+            timings: idle_animation_timing.clone(),
+            frames: vec![3],
+        },
+    );
 
-    animation_table.insert(CharacterAnimation::Idle(Direction::Left), AnimationData {
-        timings: idle_animation_timing.clone(),
-        frames: vec![6],
-    });
+    animation_table.insert(
+        CharacterAnimation::Idle(Direction::Left),
+        AnimationData {
+            timings: idle_animation_timing.clone(),
+            frames: vec![6],
+        },
+    );
 
-    animation_table.insert(CharacterAnimation::Idle(Direction::Right), AnimationData {
-        timings: idle_animation_timing.clone(),
-        frames: vec![9],
-    });
+    animation_table.insert(
+        CharacterAnimation::Idle(Direction::Right),
+        AnimationData {
+            timings: idle_animation_timing.clone(),
+            frames: vec![9],
+        },
+    );
 
-    animation_table.insert(CharacterAnimation::Idle(Direction::Up), AnimationData {
-        timings: idle_animation_timing,
-        frames: vec![0],
-    });
+    animation_table.insert(
+        CharacterAnimation::Idle(Direction::Up),
+        AnimationData {
+            timings: idle_animation_timing,
+            frames: vec![0],
+        },
+    );
 }
 
 /// Internal function for adding walking animations to the animation table of a
@@ -357,25 +353,37 @@ fn add_idle_animations(animation_table: &mut AnimationTable<CharacterAnimation>)
 fn add_walk_animations(animation_table: &mut AnimationTable<CharacterAnimation>) {
     let walk_animation_timing = vec![0.1, 0.2, 0.3, 0.4];
 
-    animation_table.insert(CharacterAnimation::Moving(MovementType::Walk, Direction::Down), AnimationData {
-        timings: walk_animation_timing.clone(),
-        frames: vec![3, 4, 3, 5],
-    });
+    animation_table.insert(
+        CharacterAnimation::Moving(MovementType::Walk, Direction::Down),
+        AnimationData {
+            timings: walk_animation_timing.clone(),
+            frames: vec![3, 4, 3, 5],
+        },
+    );
 
-    animation_table.insert(CharacterAnimation::Moving(MovementType::Walk, Direction::Left), AnimationData {
-        timings: walk_animation_timing.clone(),
-        frames: vec![6, 7, 6, 8],
-    });
+    animation_table.insert(
+        CharacterAnimation::Moving(MovementType::Walk, Direction::Left),
+        AnimationData {
+            timings: walk_animation_timing.clone(),
+            frames: vec![6, 7, 6, 8],
+        },
+    );
 
-    animation_table.insert(CharacterAnimation::Moving(MovementType::Walk, Direction::Right), AnimationData {
-        timings: walk_animation_timing.clone(),
-        frames: vec![9, 10, 9, 11],
-    });
+    animation_table.insert(
+        CharacterAnimation::Moving(MovementType::Walk, Direction::Right),
+        AnimationData {
+            timings: walk_animation_timing.clone(),
+            frames: vec![9, 10, 9, 11],
+        },
+    );
 
-    animation_table.insert(CharacterAnimation::Moving(MovementType::Walk, Direction::Up), AnimationData {
-        timings: walk_animation_timing,
-        frames: vec![0, 1, 0, 2],
-    });
+    animation_table.insert(
+        CharacterAnimation::Moving(MovementType::Walk, Direction::Up),
+        AnimationData {
+            timings: walk_animation_timing,
+            frames: vec![0, 1, 0, 2],
+        },
+    );
 }
 
 /// Internal function for adding running animations to the animation table of a
@@ -383,23 +391,35 @@ fn add_walk_animations(animation_table: &mut AnimationTable<CharacterAnimation>)
 fn add_run_animations(animation_table: &mut AnimationTable<CharacterAnimation>) {
     let run_animation_timing = vec![0.0625, 0.125, 0.1875, 0.25];
 
-    animation_table.insert(CharacterAnimation::Moving(MovementType::Run, Direction::Down), AnimationData {
-        timings: run_animation_timing.clone(),
-        frames: vec![3, 4, 3, 5],
-    });
+    animation_table.insert(
+        CharacterAnimation::Moving(MovementType::Run, Direction::Down),
+        AnimationData {
+            timings: run_animation_timing.clone(),
+            frames: vec![3, 4, 3, 5],
+        },
+    );
 
-    animation_table.insert(CharacterAnimation::Moving(MovementType::Run, Direction::Left), AnimationData {
-        timings: run_animation_timing.clone(),
-        frames: vec![6, 7, 6, 8],
-    });
+    animation_table.insert(
+        CharacterAnimation::Moving(MovementType::Run, Direction::Left),
+        AnimationData {
+            timings: run_animation_timing.clone(),
+            frames: vec![6, 7, 6, 8],
+        },
+    );
 
-    animation_table.insert(CharacterAnimation::Moving(MovementType::Run, Direction::Right), AnimationData {
-        timings: run_animation_timing.clone(),
-        frames: vec![9, 10, 9, 11],
-    });
+    animation_table.insert(
+        CharacterAnimation::Moving(MovementType::Run, Direction::Right),
+        AnimationData {
+            timings: run_animation_timing.clone(),
+            frames: vec![9, 10, 9, 11],
+        },
+    );
 
-    animation_table.insert(CharacterAnimation::Moving(MovementType::Run, Direction::Up), AnimationData {
-        timings: run_animation_timing,
-        frames: vec![0, 1, 0, 2],
-    });
+    animation_table.insert(
+        CharacterAnimation::Moving(MovementType::Run, Direction::Up),
+        AnimationData {
+            timings: run_animation_timing,
+            frames: vec![0, 1, 0, 2],
+        },
+    );
 }

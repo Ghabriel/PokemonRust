@@ -19,7 +19,6 @@ use amethyst::{
 use crate::{
     common::get_direction_offset,
     entities::{
-        AnimationTable,
         character::{
             AllowedMovements,
             Character,
@@ -29,6 +28,7 @@ use crate::{
             PlayerEntity,
             StepKind,
         },
+        AnimationTable,
     },
     events::EventQueue,
     map::{change_player_tile, CoordinateSystem, MapHandler},
@@ -79,19 +79,22 @@ impl<'a> System<'a> for CharacterMovementSystem {
         Read<'a, Time>,
     );
 
-    fn run(&mut self, (
-        mut characters,
-        mut movements,
-        allowed_movements_storage,
-        mut transforms,
-        mut animation_tables,
-        mut sprite_renders,
-        entities,
-        player_entity,
-        mut map,
-        mut event_queue,
-        time,
-    ): Self::SystemData) {
+    fn run(
+        &mut self,
+        (
+            mut characters,
+            mut movements,
+            allowed_movements_storage,
+            mut transforms,
+            mut animation_tables,
+            mut sprite_renders,
+            entities,
+            player_entity,
+            mut map,
+            mut event_queue,
+            time,
+        ): Self::SystemData,
+    ) {
         let mut static_characters = Vec::new();
 
         for (
@@ -101,7 +104,7 @@ impl<'a> System<'a> for CharacterMovementSystem {
             allowed_movements,
             transform,
             animation_table,
-            sprite_render
+            sprite_render,
         ) in (
             &entities,
             &mut characters,
@@ -110,7 +113,9 @@ impl<'a> System<'a> for CharacterMovementSystem {
             &mut transforms,
             &mut animation_tables,
             &mut sprite_renders,
-        ).join() {
+        )
+            .join()
+        {
             let delta_seconds = time.delta_seconds();
             let is_player = entity == player_entity.0;
 
@@ -147,7 +152,11 @@ impl<'a> System<'a> for CharacterMovementSystem {
                     transform,
                     animation_table,
                     sprite_render,
-                    if is_player { Some(&player_entity) } else { None },
+                    if is_player {
+                        Some(&player_entity)
+                    } else {
+                        None
+                    },
                     &mut map,
                     &mut event_queue,
                 );
@@ -227,9 +236,7 @@ fn on_movement_finish(
         sprite_render.sprite_sheet = data.sprite_sheet.clone();
     }
 
-    animation_table.change_animation(CharacterAnimation::Idle(
-        character.facing_direction.clone(),
-    ));
+    animation_table.change_animation(CharacterAnimation::Idle(character.facing_direction.clone()));
 
     character.next_step.invert();
 

@@ -28,7 +28,7 @@ impl GameEvent for MapInteractionEvent {
         }
     }
 
-    fn start(&mut self, _world: &mut World) { }
+    fn start(&mut self, _world: &mut World) {}
 
     fn tick(&mut self, world: &mut World, _disabled_inputs: bool) {
         let player_entity = world.read_resource::<PlayerEntity>().0;
@@ -44,20 +44,16 @@ impl GameEvent for MapInteractionEvent {
             .get(player_entity)
             .expect("Failed to retrieve Character");
 
-        let interacted_position = map.get_forward_tile(
-            &character.facing_direction,
-            &tile_data,
-        );
+        let interacted_position = map.get_forward_tile(&character.facing_direction, &tile_data);
 
         match map.get_action_at(&interacted_position) {
-            Some(
-                ValidatedGameAction { when, script_event }
-            ) if when == GameActionKind::OnInteraction => {
+            Some(ValidatedGameAction { when, script_event })
+                if when == GameActionKind::OnInteraction =>
+            {
                 SoundKit::fetch(world).play_sound(Sound::SelectOption);
 
-                world.write_resource::<EventQueue>()
-                    .push(script_event);
-            },
+                world.write_resource::<EventQueue>().push(script_event);
+            }
             _ => {},
         }
     }

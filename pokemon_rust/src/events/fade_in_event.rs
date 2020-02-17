@@ -4,13 +4,13 @@
 use amethyst::{
     core::Time,
     ecs::{
-        Entity,
+        world::EntitiesRes,
         Entities,
+        Entity,
         Join,
         Read,
         ReadExpect,
         SystemData,
-        world::EntitiesRes,
         World,
         WorldExt,
         WriteStorage,
@@ -18,10 +18,7 @@ use amethyst::{
     ui::UiTransform,
 };
 
-use crate::{
-    config::GameConfig,
-    events::fade_out_event::Fade,
-};
+use crate::{config::GameConfig, events::fade_out_event::Fade};
 
 use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
@@ -82,8 +79,12 @@ impl GameEvent for FadeInEvent {
             .height = 300. * (1. - self.elapsed_time / fade_duration);
 
         if self.elapsed_time >= fade_duration {
-            entities.delete(*top_fade).expect("Failed to delete top fade");
-            entities.delete(*bottom_fade).expect("Failed to delete bottom fade");
+            entities
+                .delete(*top_fade)
+                .expect("Failed to delete top fade");
+            entities
+                .delete(*bottom_fade)
+                .expect("Failed to delete bottom fade");
 
             self.completed = true;
         }

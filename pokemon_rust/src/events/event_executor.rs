@@ -23,9 +23,7 @@ impl EventExecutor {
     }
 
     pub fn requires_disabled_input(&self) -> bool {
-        self.root
-            .get_execution_conditions()
-            .requires_disabled_input
+        self.root.get_execution_conditions().requires_disabled_input
     }
 
     pub fn start_new_events(&mut self, world: &mut World) {

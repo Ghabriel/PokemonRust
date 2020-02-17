@@ -9,10 +9,7 @@ use amethyst::{
 
 use crate::entities::AnimationTable;
 
-use std::{
-    hash::Hash,
-    marker::PhantomData,
-};
+use std::{hash::Hash, marker::PhantomData};
 
 /// A system for animating anything that has an
 /// [`AnimationTable`](../../entities/struct.AnimationTable.html).
@@ -22,7 +19,7 @@ pub struct AnimationSystem<T: 'static + Eq + Hash + Sync + Send> {
 
 impl<T> AnimationSystem<T>
 where
-    T: 'static + Eq + Hash + Sync + Send
+    T: 'static + Eq + Hash + Sync + Send,
 {
     pub fn new() -> AnimationSystem<T> {
         AnimationSystem {
@@ -33,7 +30,7 @@ where
 
 impl<'a, T> System<'a> for AnimationSystem<T>
 where
-    T: 'static + Eq + Hash + Sync + Send
+    T: 'static + Eq + Hash + Sync + Send,
 {
     type SystemData = (
         WriteStorage<'a, AnimationTable<T>>,
@@ -42,11 +39,13 @@ where
     );
 
     fn run(&mut self, (mut animation_tables, mut sprite_renders, time): Self::SystemData) {
-        for (animation_table, sprite_render) in (&mut animation_tables, &mut sprite_renders).join() {
+        for (animation_table, sprite_render) in (&mut animation_tables, &mut sprite_renders).join()
+        {
             if let Some(animation) = &animation_table.active_animation {
                 let animation_data = animation_table.get(&animation).unwrap();
                 let mut timing = animation_table.timing;
-                let frame_index = animation_data.timings
+                let frame_index = animation_data
+                    .timings
                     .binary_search_by(|value| value.partial_cmp(&timing).unwrap());
                 let mut frame_index = match frame_index {
                     Ok(index) => index + 1,
@@ -65,4 +64,3 @@ where
         }
     }
 }
-

@@ -1,15 +1,8 @@
 use amethyst::{
     assets::{Loader, ProgressCounter},
     audio::output::init_output,
-    core::{ArcThreadPool, math::Vector3, Parent, Transform},
-    ecs::{
-        Dispatcher,
-        DispatcherBuilder,
-        Entity,
-        world::Builder,
-        World,
-        WorldExt,
-    },
+    core::{math::Vector3, ArcThreadPool, Parent, Transform},
+    ecs::{world::Builder, Dispatcher, DispatcherBuilder, Entity, World, WorldExt},
     prelude::*,
     renderer::Camera,
     ui::TtfFormat,
@@ -17,7 +10,7 @@ use amethyst::{
 
 use crate::{
     audio::initialise_audio,
-    common::{AssetTracker, CommonResources, load_full_texture_sprite_sheet},
+    common::{load_full_texture_sprite_sheet, AssetTracker, CommonResources},
     config::GameConfig,
     entities::character::{initialise_player, PlayerEntity},
     events::EventQueue,
@@ -63,7 +56,11 @@ pub fn initialise_resources(world: &mut World, progress_counter: &mut ProgressCo
         &mut *progress_counter,
     );
 
-    world.insert(CommonResources { font, text_box, black });
+    world.insert(CommonResources {
+        font,
+        text_box,
+        black,
+    });
 }
 
 #[derive(Default)]
