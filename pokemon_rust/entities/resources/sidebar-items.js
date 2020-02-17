@@ -1,1 +1,0 @@
-initSidebarItems({"fn":[["initialise_resources",""]],"struct":[["Resources",""]]});

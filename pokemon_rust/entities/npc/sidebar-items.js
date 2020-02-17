@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["_IMPL_DESERIALIZE_FOR_NpcAction",""],["_IMPL_DESERIALIZE_FOR_NpcAnimation",""],["_IMPL_SERIALIZE_FOR_NpcAction",""],["_IMPL_SERIALIZE_FOR_NpcAnimation",""]],"enum":[["NpcAction",""],["NpcAnimation",""]],"struct":[["Npc",""]]});
