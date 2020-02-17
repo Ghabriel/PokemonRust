@@ -1,3 +1,6 @@
+//! A system for processing interactions with NPCs once they're no longer
+//! moving.
+
 use amethyst::ecs::{ReadExpect, ReadStorage, System, WriteExpect};
 
 use crate::{
@@ -6,6 +9,9 @@ use crate::{
     map::{interact_with_npc, MapHandler},
 };
 
+/// A system for processing interactions with NPCs. Note that if an interaction
+/// happens while the target NPC is moving, then this system waits until
+/// they're static to actually process the interaction.
 pub struct NpcInteractionSystem;
 
 impl<'a> System<'a> for NpcInteractionSystem {

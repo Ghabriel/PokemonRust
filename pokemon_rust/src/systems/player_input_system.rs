@@ -1,3 +1,6 @@
+//! A system responsible for reading the player's inputs and processing them
+//! appropriately.
+
 use amethyst::{
     ecs::{
         Read,
@@ -27,6 +30,8 @@ use crate::{
     map::MapHandler,
 };
 
+/// A system responsible for reading the player's inputs and processing them
+/// appropriately.
 pub struct PlayerInputSystem {
     event_reader: ReaderId<InputEvent<StringBindings>>,
 }

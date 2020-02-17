@@ -1,3 +1,5 @@
+//! A system responsible for animating a text box on the screen.
+
 use amethyst::{
     core::Time,
     ecs::{Entities, Join, Read, ReaderId, ReadExpect, System, World, WorldExt, WriteStorage},
@@ -12,12 +14,14 @@ use crate::{
     entities::text_box::TextBox,
 };
 
+/// Represents the possible states that a text box can be in.
 #[derive(Debug, Eq, PartialEq)]
 enum TextState {
     Running,
     Closed,
 }
 
+/// A system responsible for animating a text box on the screen.
 pub struct TextSystem {
     event_reader: ReaderId<InputEvent<StringBindings>>,
 }

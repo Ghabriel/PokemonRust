@@ -1,3 +1,5 @@
+//! A system for animating map change announcements.
+
 use amethyst::{
     core::Time,
     ecs::{Entities, Read, System, Write, WriteStorage},
@@ -9,6 +11,16 @@ use crate::entities::map_change_announcement::{
     MapChangeAnnouncementState,
 };
 
+/// A system for animating map change announcements. Each announcement goes
+/// through three states:
+///  * Opening: the announcement is fading into the screen;
+///  * Waiting: the announcement is completely visible and is just waiting
+///    until its waiting time has passed;
+///  * Closing: the announcement is fading out of the screen.
+///
+/// When an announcement A happens while there's already an announcement B in
+/// progress, B immediately transitions to the Closing state, allowing A to
+/// quickly start appearing after B fades out completely.
 pub struct MapChangeAnnouncementSystem;
 
 impl<'a> System<'a> for MapChangeAnnouncementSystem {
