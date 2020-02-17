@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["NpcInteractionSystem","A system for processing interactions with NPCs. Note that if an interaction happens while the target NPC is moving, then this system waits until they're static to actually process the interaction."]]});

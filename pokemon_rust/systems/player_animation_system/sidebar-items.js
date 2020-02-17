@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["change_player_animation",""],["get_new_animation",""],["player_run",""],["player_walk",""]],"struct":[["PlayerAnimationSystem",""]]});

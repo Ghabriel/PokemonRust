@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["character","Types related to character entities."],["map_change_announcement","Types related to map change announcements."],["text_box","A TextBox component used for rendering text."]],"struct":[["AnimationData",""],["AnimationTable",""]]});

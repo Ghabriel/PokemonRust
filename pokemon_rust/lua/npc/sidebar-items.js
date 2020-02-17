@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["add_npc",""],["change_npc_direction",""],["create_npc",""],["rotate_npc_towards_player",""]]});

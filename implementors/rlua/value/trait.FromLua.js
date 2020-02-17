@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["pokemon_rust"] = [{"text":"impl&lt;'lua&gt; FromLua&lt;'lua&gt; for <a class=\"struct\" href=\"pokemon_rust/entities/character/struct.CharacterId.html\" title=\"struct pokemon_rust::entities::character::CharacterId\">CharacterId</a>","synthetic":false,"types":["pokemon_rust::entities::character::CharacterId"]},{"text":"impl&lt;'lua&gt; FromLua&lt;'lua&gt; for <a class=\"enum\" href=\"pokemon_rust/common/enum.Direction.html\" title=\"enum pokemon_rust::common::Direction\">Direction</a>","synthetic":false,"types":["pokemon_rust::common::Direction"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["PlayerInputSystem","A system responsible for reading the player's inputs and processing them appropriately."]]});

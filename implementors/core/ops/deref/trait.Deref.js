@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["pokemon_rust"] = [{"text":"impl&lt;'_&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/ops/deref/trait.Deref.html\" title=\"trait core::ops::deref::Deref\">Deref</a> for <a class=\"struct\" href=\"pokemon_rust/lua/struct.ExecutionContext.html\" title=\"struct pokemon_rust::lua::ExecutionContext\">ExecutionContext</a>&lt;'_&gt;","synthetic":false,"types":["pokemon_rust::lua::ExecutionContext"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

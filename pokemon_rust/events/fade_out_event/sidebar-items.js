@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["initialise_fade_entity",""]],"struct":[["Fade","A marker component to allow easy retrieval of the fade-related entities."],["FadeOutEvent",""]]});

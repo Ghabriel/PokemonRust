@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["TextState","Represents the possible states that a text box can be in."]],"struct":[["TextSystem","A system responsible for animating a text box on the screen."]]});

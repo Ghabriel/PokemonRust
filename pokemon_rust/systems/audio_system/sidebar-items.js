@@ -1,0 +1,1 @@
+initSidebarItems({"struct":[["AudioSystem","A system for background music playback. Reads the next BGM from `Music` and plays it whenever it changes or ends. Affected by `GameConfig::play_bgm`."]]});

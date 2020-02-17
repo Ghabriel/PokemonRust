@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["pokemon_rust"] = [{"text":"impl&lt;'a&gt; SystemData&lt;'a&gt; for <a class=\"struct\" href=\"pokemon_rust/audio/struct.SoundKit.html\" title=\"struct pokemon_rust::audio::SoundKit\">SoundKit</a>&lt;'a&gt;","synthetic":false,"types":["pokemon_rust::audio::SoundKit"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

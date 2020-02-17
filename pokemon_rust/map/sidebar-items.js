@@ -1,0 +1,1 @@
+initSidebarItems({"mod":[["conversions",""],["coordinates",""],["load_map",""],["map",""],["serializable_map",""],["tile_data_builder",""]],"struct":[["CharacterData",""],["MapHandler",""],["MapId",""],["TileData","A global way to refer to a tile."],["ValidatedGameAction",""]]});

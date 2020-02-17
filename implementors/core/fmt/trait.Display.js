@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["pokemon_rust"] = [{"text":"impl <a class=\"trait\" href=\"https://doc.rust-lang.org/nightly/core/fmt/trait.Display.html\" title=\"trait core::fmt::Display\">Display</a> for <a class=\"enum\" href=\"pokemon_rust/lua/enum.LuaScriptError.html\" title=\"enum pokemon_rust::lua::LuaScriptError\">LuaScriptError</a>","synthetic":false,"types":["pokemon_rust::lua::LuaScriptError"]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()

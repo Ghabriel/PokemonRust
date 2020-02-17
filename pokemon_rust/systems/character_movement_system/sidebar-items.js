@@ -1,0 +1,1 @@
+initSidebarItems({"fn":[["on_movement_finish",""],["on_movement_start",""]],"struct":[["CharacterMovementSystem","A system responsible for executing character movements. It finds characters that contain a `CharacterMovement` component (typically added by a `CharacterSingleMoveEvent` or by a `CharacterMoveEvent` ) and performs the movement described by it."]]});
