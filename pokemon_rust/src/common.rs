@@ -126,12 +126,12 @@ pub fn load_full_texture_sprite_sheet(
 /// # Examples
 ///
 /// ```
-/// use pokemon_rust::common::get_direction_offset;
+/// use pokemon_rust::common::{Direction, get_direction_offset};
 ///
-/// assert_eq!((0, 1), get_direction_offset::<i8>(Direction::Up));
-/// assert_eq!((0, -1), get_direction_offset::<i8>(Direction::Down));
-/// assert_eq!((-1, 0), get_direction_offset::<i8>(Direction::Left));
-/// assert_eq!((1, 0), get_direction_offset::<i8>(Direction::Right));
+/// assert_eq!((0, 1), get_direction_offset::<i8>(&Direction::Up));
+/// assert_eq!((0, -1), get_direction_offset::<i8>(&Direction::Down));
+/// assert_eq!((-1, 0), get_direction_offset::<i8>(&Direction::Left));
+/// assert_eq!((1, 0), get_direction_offset::<i8>(&Direction::Right));
 /// ```
 pub fn get_direction_offset<T>(direction: &Direction) -> (T, T)
 where
@@ -149,6 +149,17 @@ where
 
 /// Returns the appropriate sprite index to use for a standing character that
 /// is facing a given direction.
+///
+/// # Examples
+///
+/// ```
+/// use pokemon_rust::common::{Direction, get_character_sprite_index_from_direction};
+///
+/// assert_eq!(0, get_character_sprite_index_from_direction(&Direction::Up));
+/// assert_eq!(3, get_character_sprite_index_from_direction(&Direction::Down));
+/// assert_eq!(6, get_character_sprite_index_from_direction(&Direction::Left));
+/// assert_eq!(9, get_character_sprite_index_from_direction(&Direction::Right));
+/// ```
 pub fn get_character_sprite_index_from_direction(direction: &Direction) -> usize {
     match direction {
         Direction::Up => 0,

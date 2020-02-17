@@ -18,16 +18,16 @@
     clippy::type_complexity,
 )]
 
-mod audio;
-mod common;
-mod config;
-mod constants;
-mod entities;
-mod events;
-mod lua;
-mod map;
-mod states;
-mod systems;
+pub mod audio;
+pub mod common;
+pub mod config;
+pub mod constants;
+pub mod entities;
+pub mod events;
+pub mod lua;
+pub mod map;
+pub mod states;
+pub mod systems;
 
 use amethyst::{
     audio::AudioBundle,
