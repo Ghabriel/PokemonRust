@@ -2,6 +2,8 @@ mod generator;
 
 use amethyst::ecs::World;
 
+use crate::constants::MOVE_LIMIT;
+
 use std::time::SystemTime;
 
 pub struct Pokemon {
@@ -9,16 +11,15 @@ pub struct Pokemon {
     nature: Nature,
     held_item: Option<String>,
     experience_points: usize,
-    ability: Option<String>,
+    ability: String,
     evs: [usize; 6],
     natural_ivs: [usize; 6],
     obtained_ivs: [usize; 6],
-    moves: [Option<String>; 4],
-    pp: [usize; 4],
-    pp_ups: [usize; 4],
+    moves: [Option<String>; MOVE_LIMIT],
+    pp: [usize; MOVE_LIMIT],
+    pp_ups: [usize; MOVE_LIMIT],
     egg_steps_to_hatch: Option<usize>,
     gender: Gender,
-    form: usize,
     nickname: Option<String>,
     met_at_date: SystemTime,
     met_at_location: String,

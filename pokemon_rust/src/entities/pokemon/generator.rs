@@ -1,7 +1,11 @@
-use crate::entities::pokemon::{Gender, Nature, Pokemon, PokemonSpeciesData, PokerusData};
+use crate::{
+    constants::MOVE_LIMIT,
+    entities::pokemon::{Gender, Nature, Pokemon, PokemonSpeciesData, PokerusData},
+};
 
 use rand::{
     distributions::{Distribution, Uniform},
+    seq::SliceRandom,
     thread_rng,
 };
 
@@ -11,7 +15,7 @@ pub fn generate_pokemon(species_data: &PokemonSpeciesData, level: usize) -> Poke
     let nature = pick_nature();
     let evs = [0, 0, 0, 0, 0, 0];
     let ivs = pick_ivs();
-    let moves = pick_moves(&species_data, level);
+    let moves = pick_moves(&species_data.move_table, level);
     let pp = pick_pps(&moves);
     let stats = pick_stats(&species_data.base_stats, &evs, &ivs, nature, level);
 
@@ -20,7 +24,7 @@ pub fn generate_pokemon(species_data: &PokemonSpeciesData, level: usize) -> Poke
         nature,
         held_item: None,
         experience_points: 0,
-        ability: None, // TODO
+        ability: pick_ability(&species_data.abilities),
         evs,
         natural_ivs: ivs,
         obtained_ivs: [0, 0, 0, 0, 0, 0],
@@ -29,7 +33,6 @@ pub fn generate_pokemon(species_data: &PokemonSpeciesData, level: usize) -> Poke
         pp_ups: [0, 0, 0, 0],
         egg_steps_to_hatch: None,
         gender: pick_gender(&species_data.male_ratio),
-        form: 0, // TODO
         nickname: None,
         met_at_date: SystemTime::now(),
         met_at_location: String::default(),
@@ -66,9 +69,19 @@ pub fn pick_ivs() -> [usize; 6] {
     ]
 }
 
-pub fn pick_moves(species_data: &PokemonSpeciesData, level: usize) -> [Option<String>; 4] {
-    // TODO
-    [None, None, None, None]
+pub fn pick_moves(move_table: &Vec<(usize, String)>, level: usize) -> [Option<String>; MOVE_LIMIT] {
+    let mut result: [Option<String>; MOVE_LIMIT] = Default::default();
+
+    move_table
+        .iter()
+        .rev()
+        .filter(|(required_level, _)| *required_level <= level)
+        .map(|(_, move_id)| move_id)
+        .enumerate()
+        .take(MOVE_LIMIT)
+        .for_each(|(i, move_id)| result[i] = Some(move_id.clone()));
+
+    result
 }
 
 pub fn pick_stats(
@@ -98,9 +111,13 @@ pub fn pick_stats(
     result
 }
 
-pub fn pick_pps(moves: &[Option<String>; 4]) -> [usize; 4] {
+pub fn pick_pps(moves: &[Option<String>; MOVE_LIMIT]) -> [usize; MOVE_LIMIT] {
     // TODO
     [0, 0, 0, 0]
+}
+
+pub fn pick_ability(abilities: &Vec<String>) -> String {
+    abilities.choose(&mut thread_rng()).unwrap().clone()
 }
 
 pub fn pick_gender(male_ratio: &Option<f32>) -> Gender {
