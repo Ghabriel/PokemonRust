@@ -1,3 +1,4 @@
+mod data;
 mod generator;
 mod movement;
 
