@@ -1,4 +1,5 @@
 mod generator;
+mod movement;
 
 use amethyst::ecs::World;
 
