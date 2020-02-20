@@ -1,6 +1,13 @@
 use crate::{
     constants::MOVE_LIMIT,
-    entities::pokemon::{Gender, Nature, Pokemon, PokemonSpeciesData, PokerusData},
+    entities::pokemon::{
+        Gender,
+        LearningCondition,
+        Nature,
+        Pokemon,
+        PokemonSpeciesData,
+        PokerusData,
+    },
 };
 
 use rand::{
@@ -69,13 +76,19 @@ pub fn pick_ivs() -> [usize; 6] {
     ]
 }
 
-pub fn pick_moves(move_table: &Vec<(usize, String)>, level: usize) -> [Option<String>; MOVE_LIMIT] {
+pub fn pick_moves(
+    move_table: &Vec<(LearningCondition, String)>,
+    level: usize,
+) -> [Option<String>; MOVE_LIMIT] {
     let mut result: [Option<String>; MOVE_LIMIT] = Default::default();
 
     move_table
         .iter()
         .rev()
-        .filter(|(required_level, _)| *required_level <= level)
+        .filter(|(condition, _)| match condition {
+            LearningCondition::Level(required_level) => *required_level <= level,
+            _ => false,
+        })
         .map(|(_, move_id)| move_id)
         .enumerate()
         .take(MOVE_LIMIT)

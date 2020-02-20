@@ -49,7 +49,7 @@ pub struct PokemonSpeciesData {
     // base_friendship: usize,
     abilities: Vec<String>,
     hidden_abilities: Vec<String>,
-    move_table: Vec<(usize, String)>,
+    move_table: Vec<(LearningCondition, String)>,
     egg_moves: Vec<String>,
     egg_groups: Vec<String>,
     egg_steps: usize,
@@ -180,24 +180,43 @@ pub enum GrowthRate {
     Fluctuating,
 }
 
+pub enum LearningCondition {
+    Level(usize),
+    Evolution,
+}
+
+/// Contains data about a possible Pokémon evolution.
 pub struct EvolutionData {
+    /// The target of this evolution, i.e to which Pokémon this one evolves to.
     pokemon: EvolutionTarget,
+    /// The event that triggers the evolution, as soon as the right conditions
+    /// are fulfilled.
     triggering_event: EvolutionEvent,
+    /// The conditions that must hold for the evolution to occur.
     conditions: Vec<EvolutionCondition>,
 }
 
+/// Represents a Pokémon that another Pokémon can evolve to.
 pub enum EvolutionTarget {
     /// Evolution to the same Pokémon regardless of the circumstances.
     /// Applies to almost all Pokémon. If the Pokémon has multiple forms,
     /// its evolution maintains the same form.
     Static(String),
     /// Evolution that depends on the circumstances. Examples of this include
-    /// Burmy -> Wormadam and Toxel -> Toxtricity.
+    /// Tyrogue -> {Hitmonlee, Hitmonchan, Hitmontop}, Burmy -> Wormadam and
+    /// Toxel -> Toxtricity.
     Dynamic(fn(&Pokemon, &World) -> Pokemon),
 }
 
 /// The event that triggers an evolution. In the official games, Pokémon can
-/// also evolve by being traded, but we won't have that option.
+/// also evolve by being traded, but we won't have that option. There are a few
+/// other possibilities that have been changed:
+///  * Galarian Farfetch'd evolves into Sirfetch'd by leveling up while holding
+///    a Leek;
+///  * Galarian Yamask evolves into Runerigus by leveling up in a certain
+///    location;
+///  * Milcery evolves into Alcremie by leveling up while holding a certain
+///    item (the item determines the Alcremie's flavor).
 pub enum EvolutionEvent {
     LevelUp(usize),
     EvolutionStone(String),
@@ -207,12 +226,21 @@ pub enum EvolutionCondition {
     // HighFriendship(usize),
     /// Evolution by holding an item, e.g Clamperl
     HoldingItem(String),
-    /// Evolution by time of day, e.g Umbreon
+    /// Evolution by time of day, e.g Eevee -> Umbreon
     TimeOfDay(TimeOfDay),
-    // KnowingMove(String),
-    /// Evolution at a certain location, e.g Magneton
+    // Evolution by knowing a move, e.g Steenee -> Tsareena
+    KnowingMove(String),
+    /// Evolution at a certain location, e.g Magneton -> Magnezone
     Location(String),
-    // HavingPokemonInParty(String),
+    /// Evolution by having a certain gender, e.g Kirlia -> Gallade
+    Gender(Gender),
+    /// Evolution by having a certain Pokémon in the party, e.g Mantyke -> Mantine
+    HavingPokemonInParty(String),
+    /// Evolution by having a Pokémon of a certain type in the party, e.g
+    /// Pancham -> Pangoro
+    HavingTypeInParty(PokemonType),
+    /// Evolution by the weather of the overworld, e.g Sliggoo -> Goodra
+    Weather(String),
 }
 
 pub enum TimeOfDay {
