@@ -1,7 +1,6 @@
 use crate::entities::pokemon::{
     GrowthRate,
     LearningCondition,
-    Pokemon,
     PokemonSpeciesData,
     PokemonType,
 };
@@ -37,11 +36,11 @@ macro_rules! species {
             base_exp_yield: $base_exp_yield,
             ev_yield: $ev_yield,
             capture_rate: $capture_rate,
-            abilities: list(vec![$( $abilities ),*]),
-            hidden_abilities: list(vec![$( $hidden_abilities ),*]),
-            move_table: tuple_list(vec![
-                $((LearningCondition::Level($level), $movement)),*
-            ]),
+            abilities: vec![$( $abilities.into() ),*],
+            hidden_abilities: vec![$( $hidden_abilities.into() ),*],
+            move_table: vec![
+                $((LearningCondition::Level($level), $movement.into())),*
+            ],
             egg_moves: Vec::new(), // TODO
             egg_groups: Vec::new(), // TODO
             egg_steps: 0, // TODO
@@ -55,27 +54,6 @@ macro_rules! species {
             evolution_data: Vec::new(), // TODO
         }
     }
-}
-
-pub fn list<T, U>(source: Vec<T>) -> Vec<U>
-where
-    T: Into<U>,
-{
-    source
-        .into_iter()
-        .map(Into::into)
-        .collect()
-}
-
-pub fn tuple_list<T, U, V, W>(source: Vec<(T, U)>) -> Vec<(V, W)>
-where
-    T: Into<V>,
-    U: Into<W>,
-{
-    source
-        .into_iter()
-        .map(|(t, u)| (t.into(), u.into()))
-        .collect()
 }
 
 pub fn get_pokemon_species_data() -> HashMap<String, PokemonSpeciesData> {
