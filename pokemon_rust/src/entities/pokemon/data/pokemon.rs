@@ -1,6 +1,7 @@
 use crate::entities::pokemon::{
     GrowthRate,
     LearningCondition,
+    PokeDex,
     PokemonSpeciesData,
     PokemonType,
 };
@@ -56,7 +57,7 @@ macro_rules! species {
     }
 }
 
-pub fn get_all_pokemon_species() -> HashMap<String, PokemonSpeciesData> {
+pub fn get_all_pokemon_species() -> PokeDex {
     let mut result = Vec::new();
 
     result.push(species! {
@@ -120,8 +121,10 @@ pub fn get_all_pokemon_species() -> HashMap<String, PokemonSpeciesData> {
         ],
     });
 
-    result
-        .into_iter()
-        .map(|data| (data.id.clone(), data))
-        .collect()
+    PokeDex::new(
+        result
+            .into_iter()
+            .map(|data| (data.id.clone(), data))
+            .collect::<HashMap<_, _>>()
+    )
 }

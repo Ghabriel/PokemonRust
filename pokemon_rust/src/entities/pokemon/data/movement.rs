@@ -2,6 +2,7 @@ use crate::entities::pokemon::{
     movement::{
         Move,
         MoveCategory,
+        MoveDex,
         MovePower,
         TargetType,
     },
@@ -10,7 +11,7 @@ use crate::entities::pokemon::{
 
 use std::collections::HashMap;
 
-pub fn get_all_moves() -> HashMap<String, Move> {
+pub fn get_all_moves() -> MoveDex {
     let mut result = Vec::new();
 
     result.push(Move {
@@ -29,8 +30,10 @@ pub fn get_all_moves() -> HashMap<String, Move> {
         secondary_effect: None,
     });
 
-    result
-        .into_iter()
-        .map(|data| (data.id.clone(), data))
-        .collect()
+    MoveDex::new(
+        result
+            .into_iter()
+            .map(|data| (data.id.clone(), data))
+            .collect::<HashMap<_, _>>()
+    )
 }

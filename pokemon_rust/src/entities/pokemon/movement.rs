@@ -1,4 +1,20 @@
+use std::collections::HashMap;
+
 use super::{Pokemon, PokemonType, Stat, StatusCondition};
+
+pub struct MoveDex {
+    data: HashMap<String, Move>,
+}
+
+impl MoveDex {
+    pub fn new(data: HashMap<String, Move>) -> MoveDex {
+        MoveDex { data }
+    }
+
+    pub fn get_move(&self, id: &str) -> Option<&Move> {
+        self.data.get(id)
+    }
+}
 
 pub struct Move {
     pub id: String,

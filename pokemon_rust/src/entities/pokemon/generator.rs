@@ -1,6 +1,7 @@
 use crate::{
     constants::MOVE_LIMIT,
     entities::pokemon::{
+        movement::MoveDex,
         Gender,
         LearningCondition,
         Nature,
@@ -18,12 +19,16 @@ use rand::{
 
 use std::time::SystemTime;
 
-pub fn generate_pokemon(species_data: &PokemonSpeciesData, level: usize) -> Pokemon {
+pub fn generate_pokemon(
+    species_data: &PokemonSpeciesData,
+    move_dex: &MoveDex,
+    level: usize,
+) -> Pokemon {
     let nature = pick_nature();
     let evs = [0, 0, 0, 0, 0, 0];
     let ivs = pick_ivs();
     let moves = pick_moves(&species_data.move_table, level);
-    let pp = pick_pps(&moves);
+    let pp = pick_pps(&move_dex, &moves);
     let stats = pick_stats(&species_data.base_stats, &evs, &ivs, nature, level);
 
     Pokemon {
@@ -124,9 +129,19 @@ pub fn pick_stats(
     result
 }
 
-pub fn pick_pps(moves: &[Option<String>; MOVE_LIMIT]) -> [usize; MOVE_LIMIT] {
-    // TODO
-    [0, 0, 0, 0]
+pub fn pick_pps(dex: &MoveDex, moves: &[Option<String>; MOVE_LIMIT]) -> [usize; MOVE_LIMIT] {
+    let mut result: [usize; MOVE_LIMIT] = Default::default();
+
+    moves
+        .iter()
+        .map(|mov| match mov {
+            Some(mov) => dex.get_move(mov).unwrap().pp,
+            None => 0,
+        })
+        .enumerate()
+        .for_each(|(i, pp)| result[i] = pp);
+
+    result
 }
 
 pub fn pick_ability(abilities: &Vec<String>) -> String {

@@ -6,7 +6,21 @@ use amethyst::ecs::World;
 
 use crate::constants::MOVE_LIMIT;
 
-use std::time::SystemTime;
+use std::{collections::HashMap, time::SystemTime};
+
+pub struct PokeDex {
+    data: HashMap<String, PokemonSpeciesData>,
+}
+
+impl PokeDex {
+    pub fn new(data: HashMap<String, PokemonSpeciesData>) -> PokeDex {
+        PokeDex { data }
+    }
+
+    pub fn get_species(&self, id: &str) -> Option<&PokemonSpeciesData> {
+        self.data.get(id)
+    }
+}
 
 pub struct Pokemon {
     species_id: String,
