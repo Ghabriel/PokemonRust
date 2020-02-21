@@ -56,7 +56,7 @@ macro_rules! species {
     }
 }
 
-pub fn get_pokemon_species_data() -> HashMap<String, PokemonSpeciesData> {
+pub fn get_all_pokemon_species() -> HashMap<String, PokemonSpeciesData> {
     let mut result = Vec::new();
 
     result.push(species! {

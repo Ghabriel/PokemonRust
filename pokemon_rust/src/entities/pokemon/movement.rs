@@ -1,22 +1,22 @@
 use super::{Pokemon, PokemonType, Stat, StatusCondition};
 
 pub struct Move {
-    id: String,
-    display_name: String,
-    description: String,
-    move_type: PokemonType,
-    category: MoveCategory,
-    base_power: MovePower,
-    power_modifier: Option<MoveCallback<usize>>,
+    pub id: String,
+    pub display_name: String,
+    pub description: String,
+    pub move_type: PokemonType,
+    pub category: MoveCategory,
+    pub base_power: MovePower,
+    pub power_modifier: Option<MoveCallback<usize>>,
     /// The accuracy of this move. This is None for moves that never miss,
     /// e.g Swift.
-    accuracy: Option<usize>,
-    pp: usize,
-    priority: i8,
-    target_type: TargetType,
-    multi_hit: Option<MultiHit>,
+    pub accuracy: Option<usize>,
+    pub pp: usize,
+    pub priority: i8,
+    pub target_type: TargetType,
+    pub multi_hit: Option<MultiHit>,
     /// A "shortcut" for moves with a simple secondary effect
-    secondary_effect: SecondaryEffect,
+    pub secondary_effect: Option<SecondaryEffect>,
 }
 
 pub enum MoveCategory {
@@ -68,13 +68,13 @@ pub enum TargetType {
 }
 
 pub struct MultiHit {
-    min_hits: usize,
-    max_hits: usize,
+    pub min_hits: usize,
+    pub max_hits: usize,
 }
 
 pub struct SecondaryEffect {
-    chance: usize,
-    effect: SimpleEffect,
+    pub chance: usize,
+    pub effect: SimpleEffect,
 }
 
 pub enum SimpleEffect {
