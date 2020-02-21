@@ -1,12 +1,21 @@
 mod data;
-mod generator;
-mod movement;
+pub mod generator;
+pub mod movement;
 
 use amethyst::ecs::World;
 
 use crate::constants::MOVE_LIMIT;
 
-use std::{collections::HashMap, time::SystemTime};
+use std::{
+    collections::HashMap,
+    fmt::{Debug, Error, Formatter},
+    time::SystemTime,
+};
+
+pub use self::data::{
+    movement::get_all_moves,
+    pokemon::get_all_pokemon_species,
+};
 
 pub struct PokeDex {
     data: HashMap<String, PokemonSpeciesData>,
@@ -22,6 +31,7 @@ impl PokeDex {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct Pokemon {
     species_id: String,
     nature: Nature,
@@ -79,7 +89,7 @@ pub struct PokemonSpeciesData {
     evolution_data: Vec<EvolutionData>,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Nature {
     Hardy,
     Lonely,
@@ -145,12 +155,14 @@ impl Nature {
     }
 }
 
+#[derive(Clone, Debug)]
 pub enum Gender {
     Male,
     Female,
     Genderless,
 }
 
+#[derive(Clone, Debug)]
 pub enum StatusCondition {
     Burn,
     Freeze,
@@ -160,12 +172,14 @@ pub enum StatusCondition {
     Sleep { remaining_turns: usize },
 }
 
+#[derive(Clone, Debug)]
 pub enum PokerusData {
     Unaffected,
     Cured,
     HasPokerus { duration: usize, remaining_days: usize },
 }
 
+#[derive(Clone, Debug)]
 pub enum PokemonType {
     Normal,
     Fight,
@@ -187,6 +201,7 @@ pub enum PokemonType {
     Fairy,
 }
 
+#[derive(Clone, Debug)]
 pub enum GrowthRate {
     Erratic,
     Fast,
@@ -196,12 +211,14 @@ pub enum GrowthRate {
     Fluctuating,
 }
 
+#[derive(Clone, Debug)]
 pub enum LearningCondition {
     Level(usize),
     Evolution,
 }
 
 /// Contains data about a possible Pokémon evolution.
+#[derive(Clone, Debug)]
 pub struct EvolutionData {
     /// The target of this evolution, i.e to which Pokémon this one evolves to.
     pokemon: EvolutionTarget,
@@ -213,6 +230,7 @@ pub struct EvolutionData {
 }
 
 /// Represents a Pokémon that another Pokémon can evolve to.
+#[derive(Clone)]
 pub enum EvolutionTarget {
     /// Evolution to the same Pokémon regardless of the circumstances.
     /// Applies to almost all Pokémon. If the Pokémon has multiple forms,
@@ -224,6 +242,15 @@ pub enum EvolutionTarget {
     Dynamic(fn(&Pokemon, &World) -> Pokemon),
 }
 
+impl Debug for EvolutionTarget {
+    fn fmt(&self, formatter: &mut Formatter) -> Result<(), Error> {
+        match self {
+            Self::Static(target) => write!(formatter, "Static({})", target),
+            Self::Dynamic(_) => write!(formatter, "Dynamic"),
+        }
+    }
+}
+
 /// The event that triggers an evolution. In the official games, Pokémon can
 /// also evolve by being traded, but we won't have that option. There are a few
 /// other possibilities that have been changed:
@@ -233,11 +260,13 @@ pub enum EvolutionTarget {
 ///    location;
 ///  * Milcery evolves into Alcremie by leveling up while holding a certain
 ///    item (the item determines the Alcremie's flavor).
+#[derive(Clone, Debug)]
 pub enum EvolutionEvent {
     LevelUp(usize),
     EvolutionStone(String),
 }
 
+#[derive(Clone, Debug)]
 pub enum EvolutionCondition {
     // HighFriendship(usize),
     /// Evolution by holding an item, e.g Clamperl
@@ -259,6 +288,7 @@ pub enum EvolutionCondition {
     Weather(String),
 }
 
+#[derive(Clone, Debug)]
 pub enum TimeOfDay {
     /// 04:00 - 09:59
     Morning,
@@ -268,6 +298,7 @@ pub enum TimeOfDay {
     Night,
 }
 
+#[derive(Clone, Debug)]
 pub enum Stat {
     HP,
     Attack,

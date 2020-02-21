@@ -46,6 +46,7 @@ impl GameEvent for ScriptEvent {
         // TODO: is this always correct?
         ExecutionConditions {
             requires_disabled_input: false,
+            requires_battle_state: false,
         }
     }
 

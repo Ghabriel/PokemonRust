@@ -4,12 +4,14 @@ use crate::entities::{
 };
 
 /// Represents the type of battle that is happening.
-enum BattleType {
+#[derive(Clone)]
+pub enum BattleType {
     Single,
 }
 
 /// Represents the kind of opponent(s) that the player is facing.
-enum OpponentKind {
+#[derive(Clone)]
+pub enum OpponentKind {
     Trainer {
         character_id: CharacterId,
     },

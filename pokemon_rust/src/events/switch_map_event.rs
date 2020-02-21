@@ -61,6 +61,7 @@ impl GameEvent for SwitchMapEvent {
     fn get_execution_conditions(&self) -> ExecutionConditions {
         ExecutionConditions {
             requires_disabled_input: true,
+            ..ExecutionConditions::default()
         }
     }
 

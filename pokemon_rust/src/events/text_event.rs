@@ -40,6 +40,7 @@ impl GameEvent for TextEvent {
     fn get_execution_conditions(&self) -> ExecutionConditions {
         ExecutionConditions {
             requires_disabled_input: true,
+            ..ExecutionConditions::default()
         }
     }
 

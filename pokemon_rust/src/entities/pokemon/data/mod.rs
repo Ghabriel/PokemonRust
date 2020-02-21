@@ -1,2 +1,2 @@
-mod movement;
-mod pokemon;
+pub mod movement;
+pub mod pokemon;

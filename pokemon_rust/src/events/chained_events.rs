@@ -40,9 +40,7 @@ impl GameEvent for ChainedEvents {
         if let Some(event) = self.chain.front() {
             event.get_execution_conditions()
         } else {
-            ExecutionConditions {
-                requires_disabled_input: false,
-            }
+            ExecutionConditions::default()
         }
     }
 

@@ -1,6 +1,7 @@
 //! Contains every possible game event. Events can trigger animations,
 //! textboxes, warps and much more.
 
+pub mod battle_start_event;
 pub mod bgm_change_event;
 pub mod chained_events;
 pub mod character_move_event;
@@ -23,6 +24,7 @@ pub mod warp_event;
 use amethyst::ecs::World;
 
 pub use self::{
+    battle_start_event::BattleStartEvent,
     bgm_change_event::BgmChangeEvent,
     chained_events::ChainedEvents,
     character_move_event::CharacterMoveEvent,
@@ -47,15 +49,19 @@ pub use self::{
 /// executed.
 #[derive(Default)]
 pub struct ExecutionConditions {
+    // TODO: unify these boolean values in something like an enum
     /// Determines whether the event needs the inputs to be disabled in order
     /// to execute.
     pub requires_disabled_input: bool,
+    /// Determines whether the event requires a transition to BattleState.
+    pub requires_battle_state: bool,
 }
 
 impl ExecutionConditions {
     fn merge_with(&self, other: &ExecutionConditions) -> ExecutionConditions {
         ExecutionConditions {
             requires_disabled_input: self.requires_disabled_input || other.requires_disabled_input,
+            requires_battle_state: self.requires_battle_state || other.requires_battle_state,
         }
     }
 }

@@ -38,6 +38,7 @@ impl GameEvent for MapChangeEvent {
     fn get_execution_conditions(&self) -> ExecutionConditions {
         ExecutionConditions {
             requires_disabled_input: false,
+            ..ExecutionConditions::default()
         }
     }
 

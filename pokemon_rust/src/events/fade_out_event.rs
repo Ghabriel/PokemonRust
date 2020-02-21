@@ -48,6 +48,7 @@ impl GameEvent for FadeOutEvent {
     fn get_execution_conditions(&self) -> ExecutionConditions {
         ExecutionConditions {
             requires_disabled_input: true,
+            ..ExecutionConditions::default()
         }
     }
 
