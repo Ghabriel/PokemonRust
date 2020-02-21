@@ -112,6 +112,36 @@ pub fn get_pokemon_species_data() -> HashMap<String, PokemonSpeciesData> {
         ],
     });
 
+    result.push(species! {
+        id: "Rattata",
+        display_name: "Rattata",
+        national_number: 19,
+        types: [PokemonType::Normal],
+        base_stats: [30, 56, 35, 25, 35, 72],
+        male_ratio: Some(50.),
+        growth_rate: GrowthRate::MediumFast,
+        base_exp_yield: 51,
+        ev_yield: [0, 0, 0, 0, 0, 1],
+        capture_rate: 255,
+        abilities: ["RunAway", "Guts"],
+        hidden_abilities: ["Hustle"],
+        move_table: [
+            1: "Tackle",
+            1: "TailWhip",
+            4: "QuickAttack",
+            7: "FocusEnergy",
+            10: "Bite",
+            13: "Pursuit",
+            16: "HyperFang",
+            19: "SuckerPunch",
+            22: "Crunch",
+            25: "Assurance",
+            28: "SuperFang",
+            31: "DoubleEdge",
+            34: "Endeavor",
+        ],
+    });
+
     result
         .into_iter()
         .map(|data| (data.id.clone(), data))
