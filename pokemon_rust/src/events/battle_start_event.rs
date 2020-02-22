@@ -1,19 +1,18 @@
 //! Initiates a Pokémon battle.
 
-use amethyst::ecs::{World, WorldExt};
+use amethyst::ecs::{world::Builder, World, WorldExt};
 
 use crate::{
     entities::{
-        battle::BattleType,
-        character::CharacterId,
+        battle::{Battle, BattleCharacterTeam, BattleType},
+        character::{CharacterId, PlayerEntity},
         pokemon::{
             generator::generate_pokemon,
             get_all_moves,
             get_all_pokemon_species,
-            movement::MoveDex,
-            PokeDex,
         },
     },
+    map::MapHandler,
 };
 
 use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
@@ -64,13 +63,35 @@ impl GameEvent for BattleStartEvent {
     fn start(&mut self, world: &mut World) {
         let pokedex = get_all_pokemon_species();
         let movedex = get_all_moves();
-        let pidgey = generate_pokemon(
-            &pokedex.get_species("Pidgey").unwrap(),
-            &movedex,
-            3,
-        );
 
-        println!("{:#?}", pidgey);
+        let battle_type = self.battle_type.clone();
+
+        let p1 = BattleCharacterTeam::Trainer {
+            character_id: get_player_character_id(world),
+        };
+
+        let p2 = match self.opponent {
+            BattleOpponent::Trainer(character_id) => {
+                BattleCharacterTeam::Trainer { character_id }
+            },
+            BattleOpponent::WildPokemon => {
+                let pokemon = generate_pokemon(
+                    &pokedex.get_species("Pidgey").unwrap(),
+                    &movedex,
+                    3,
+                );
+
+                BattleCharacterTeam::WildPokemon { pokemon }
+            },
+        };
+
+        world.insert(pokedex);
+        world.insert(movedex);
+
+        world
+            .create_entity()
+            .with(Battle { battle_type, p1, p2 })
+            .build();
     }
 
     fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) {}
@@ -78,4 +99,12 @@ impl GameEvent for BattleStartEvent {
     fn is_complete(&self, _world: &mut World) -> bool {
         true
     }
+}
+
+fn get_player_character_id(world: &World) -> CharacterId {
+    let player_entity = world.read_resource::<PlayerEntity>().0;
+
+    world
+        .read_resource::<MapHandler>()
+        .get_character_id_by_entity(player_entity)
 }

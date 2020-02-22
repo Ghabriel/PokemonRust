@@ -61,6 +61,7 @@ pub struct Pokemon {
     current_hp: usize,
 }
 
+#[allow(unused)]
 pub struct PokemonSpeciesData {
     id: String,
     display_name: String,
