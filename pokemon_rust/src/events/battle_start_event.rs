@@ -4,7 +4,7 @@ use amethyst::ecs::{World, WorldExt};
 
 use crate::{
     entities::{
-        battle::{Battle, BattleCharacterTeam, BattleType},
+        battle::{Battle, BattleCharacterTeam, BattleType, Party},
         character::{CharacterId, PlayerEntity},
         pokemon::{
             generator::generate_pokemon,
@@ -61,13 +61,18 @@ impl GameEvent for BattleStartEvent {
     }
 
     fn start(&mut self, world: &mut World) {
+        let player_entity = world.read_resource::<PlayerEntity>().0;
+        let player_id = world
+            .read_resource::<MapHandler>()
+            .get_character_id_by_entity(player_entity);
+
         let pokedex = get_all_pokemon_species();
         let movedex = get_all_moves();
 
         let battle_type = self.battle_type.clone();
 
         let p1 = BattleCharacterTeam::Trainer {
-            character_id: get_player_character_id(world),
+            character_id: player_id,
         };
 
         let p2 = match self.opponent {
@@ -85,6 +90,23 @@ impl GameEvent for BattleStartEvent {
             },
         };
 
+        let party = {
+            let rattata = generate_pokemon(
+                &pokedex.get_species("Rattata").unwrap(),
+                &movedex,
+                3,
+            );
+
+            Party {
+                pokemon: vec![rattata],
+            }
+        };
+
+        world
+            .write_storage::<Party>()
+            .insert(player_entity, party)
+            .expect("Failed to attach Party");
+
         world.insert(pokedex);
         world.insert(movedex);
 
@@ -96,12 +118,4 @@ impl GameEvent for BattleStartEvent {
     fn is_complete(&self, world: &mut World) -> bool {
         !world.has_value::<Battle>()
     }
-}
-
-fn get_player_character_id(world: &World) -> CharacterId {
-    let player_entity = world.read_resource::<PlayerEntity>().0;
-
-    world
-        .read_resource::<MapHandler>()
-        .get_character_id_by_entity(player_entity)
 }

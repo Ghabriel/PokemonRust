@@ -1,3 +1,5 @@
+use amethyst::ecs::{Component, DenseVecStorage};
+
 use crate::entities::{
     character::CharacterId,
     pokemon::Pokemon,
@@ -29,4 +31,12 @@ pub enum BattleCharacterTeam {
     WildPokemon {
         pokemon: Pokemon,
     },
+}
+
+pub struct Party {
+    pub pokemon: Vec<Pokemon>,
+}
+
+impl Component for Party {
+    type Storage = DenseVecStorage<Self>;
 }
