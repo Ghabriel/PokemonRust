@@ -1,5 +1,3 @@
-use amethyst::ecs::{Component, DenseVecStorage};
-
 use crate::entities::{
     character::CharacterId,
     pokemon::Pokemon,
@@ -14,10 +12,6 @@ pub struct Battle {
     pub p1: BattleCharacterTeam,
     /// The characters or wild Pokémon that make up the second team.
     pub p2: BattleCharacterTeam,
-}
-
-impl Component for Battle {
-    type Storage = DenseVecStorage<Self>;
 }
 
 /// Represents the type of battle that is happening.

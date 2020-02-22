@@ -1,6 +1,6 @@
 //! Initiates a Pokémon battle.
 
-use amethyst::ecs::{world::Builder, World, WorldExt};
+use amethyst::ecs::{World, WorldExt};
 
 use crate::{
     entities::{
@@ -88,16 +88,13 @@ impl GameEvent for BattleStartEvent {
         world.insert(pokedex);
         world.insert(movedex);
 
-        world
-            .create_entity()
-            .with(Battle { battle_type, p1, p2 })
-            .build();
+        world.insert(Battle { battle_type, p1, p2 });
     }
 
     fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) {}
 
-    fn is_complete(&self, _world: &mut World) -> bool {
-        true
+    fn is_complete(&self, world: &mut World) -> bool {
+        !world.has_value::<Battle>()
     }
 }
 
