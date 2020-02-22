@@ -26,6 +26,10 @@ impl EventExecutor {
         self.root.get_execution_conditions().requires_disabled_input
     }
 
+    pub fn requires_battle_state(&self) -> bool {
+        self.root.get_execution_conditions().requires_battle_state
+    }
+
     pub fn start_new_events(&mut self, world: &mut World) {
         for event in &mut self.incoming_events {
             event.start(world);

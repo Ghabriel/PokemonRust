@@ -10,7 +10,7 @@ use crate::{
     config::GameConfig,
     entities::character::CharacterAnimation,
     events::{EventExecutor, EventQueue},
-    states::OverworldAnimationState,
+    states::{BattleState, OverworldAnimationState},
     systems::{
         AnimationSystem,
         AudioSystem,
@@ -97,10 +97,14 @@ impl SimpleState for OverworldState<'_, '_> {
         if self.event_executor.borrow().has_new_events() {
             self.event_executor.borrow_mut().start_new_events(world);
 
-            if self.event_executor.borrow().requires_disabled_input() {
+            let event_executor = self.event_executor.borrow();
+
+            if event_executor.requires_disabled_input() {
                 return Trans::Switch(Box::new(OverworldAnimationState::new(
                     self.event_executor.clone(),
                 )));
+            } else if event_executor.requires_battle_state() {
+                return Trans::Push(Box::new(BattleState::default()));
             }
         }
 

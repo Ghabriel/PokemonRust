@@ -1,5 +1,4 @@
 use amethyst::{
-    audio::output::init_output,
     core::ArcThreadPool,
     ecs::{Dispatcher, DispatcherBuilder},
     prelude::*,
@@ -23,6 +22,8 @@ pub struct BattleState<'a, 'b> {
 
 impl SimpleState for BattleState<'_, '_> {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
+        println!("Entering Battle State");
+
         let world = data.world;
 
         let mut dispatcher = DispatcherBuilder::new()
@@ -32,8 +33,6 @@ impl SimpleState for BattleState<'_, '_> {
 
         dispatcher.setup(world);
         self.dispatcher = Some(dispatcher);
-
-        init_output(world);
     }
 
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {
