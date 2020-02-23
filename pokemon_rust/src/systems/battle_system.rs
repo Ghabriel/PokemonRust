@@ -1,7 +1,10 @@
 //! A system responsible for processing Pokémon battles.
-use amethyst::ecs::System;
+use amethyst::ecs::{System, WriteExpect};
 
-use crate::battle::backend::{BattleBackend, BattleEvent};
+use crate::battle::{
+    backend::{BattleBackend, BattleEvent},
+    types::Battle,
+};
 
 use std::collections::VecDeque;
 
@@ -22,13 +25,20 @@ pub struct BattleSystem {
 }
 
 impl BattleSystem {
-    fn init_backend(&mut self, (): <Self as System>::SystemData) {
-        self.backend = Some(BattleBackend { });
+    fn init_backend(
+        &mut self,
+        (battle,): <Self as System>::SystemData,
+    ) {
+        self.backend = Some(BattleBackend::new(
+            (*battle).clone(),
+        ));
     }
 }
 
 impl<'a> System<'a> for BattleSystem {
-    type SystemData = ();
+    type SystemData = (
+        WriteExpect<'a, Battle>,
+    );
 
     fn run(&mut self, system_data: Self::SystemData) {
         let backend = match self.backend.as_mut() {

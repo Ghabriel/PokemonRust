@@ -6,13 +6,14 @@ use crate::entities::{
 };
 
 /// Represents a Pokémon Battle.
+#[derive(Clone)]
 pub struct Battle {
     /// The type of battle that is happening.
     pub battle_type: BattleType,
-    /// The characters or wild Pokémon that make up the first team.
-    /// If the local player is participating, this is always his team.
+    /// The Pokémon that make up the first team. If the local player is
+    /// participating, this is always his team.
     pub p1: BattleCharacterTeam,
-    /// The characters or wild Pokémon that make up the second team.
+    /// The Pokémon that make up the second team.
     pub p2: BattleCharacterTeam,
 }
 
@@ -22,17 +23,19 @@ pub enum BattleType {
     Single,
 }
 
-/// Represents which characters or wild Pokémon make up a team.
+/// Represents which Pokémon make up a team.
 #[derive(Clone)]
-pub enum BattleCharacterTeam {
-    Trainer {
-        character_id: CharacterId,
-    },
-    WildPokemon {
-        pokemon: Pokemon,
-    },
+pub struct BattleCharacterTeam {
+    // TODO: change this to a Vec to implement doubles/triples
+    /// The active Pokémon of this team.
+    pub active_pokemon: Option<Pokemon>,
+    /// The Pokémon party of this team.
+    pub party: Party,
+    /// If this team is owned by a trainer, contains its character ID.
+    pub character_id: Option<CharacterId>,
 }
 
+#[derive(Clone)]
 pub struct Party {
     pub pokemon: Vec<Pokemon>,
 }

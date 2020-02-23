@@ -71,25 +71,6 @@ impl GameEvent for BattleStartEvent {
 
         let battle_type = self.battle_type.clone();
 
-        let p1 = BattleCharacterTeam::Trainer {
-            character_id: player_id,
-        };
-
-        let p2 = match self.opponent {
-            BattleOpponent::Trainer(character_id) => {
-                BattleCharacterTeam::Trainer { character_id }
-            },
-            BattleOpponent::WildPokemon => {
-                let pokemon = generate_pokemon(
-                    &pokedex.get_species("Pidgey").unwrap(),
-                    &movedex,
-                    3,
-                );
-
-                BattleCharacterTeam::WildPokemon { pokemon }
-            },
-        };
-
         let party = {
             let rattata = generate_pokemon(
                 &pokedex.get_species("Rattata").unwrap(),
@@ -102,13 +83,34 @@ impl GameEvent for BattleStartEvent {
             }
         };
 
-        world
-            .write_storage::<Party>()
-            .insert(player_entity, party)
-            .expect("Failed to attach Party");
+        // TODO: do this somewhere to persist the player's Party
+        // world
+        //     .write_storage::<Party>()
+        //     .insert(player_entity, party)
+        //     .expect("Failed to attach Party");
 
-        world.insert(pokedex);
-        world.insert(movedex);
+        let p1 = BattleCharacterTeam {
+            active_pokemon: None,
+            party,
+            character_id: Some(player_id),
+        };
+
+        let p2 = {
+            let pidgey = generate_pokemon(
+                &pokedex.get_species("Pidgey").unwrap(),
+                &movedex,
+                3,
+            );
+
+            BattleCharacterTeam {
+                active_pokemon: None,
+                party: Party { pokemon: vec![pidgey] },
+                character_id: match self.opponent {
+                    BattleOpponent::Trainer(character_id) => Some(character_id),
+                    BattleOpponent::WildPokemon => None,
+                }
+            }
+        };
 
         world.insert(Battle { battle_type, p1, p2 });
     }

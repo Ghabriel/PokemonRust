@@ -6,6 +6,8 @@ use crate::entities::pokemon::{
     PokemonType,
 };
 
+use lazy_static::lazy_static;
+
 use std::collections::HashMap;
 
 macro_rules! species {
@@ -57,74 +59,80 @@ macro_rules! species {
     }
 }
 
-pub fn get_all_pokemon_species() -> PokeDex {
-    let mut result = Vec::new();
+lazy_static! {
+    static ref POKEDEX: PokeDex = {
+        let mut result = Vec::new();
 
-    result.push(species! {
-        id: "Pidgey",
-        display_name: "Pidgey",
-        national_number: 16,
-        types: [PokemonType::Normal, PokemonType::Flying],
-        base_stats: [40, 45, 40, 35, 35, 56],
-        male_ratio: Some(50.),
-        growth_rate: GrowthRate::MediumSlow,
-        base_exp_yield: 50,
-        ev_yield: [0, 0, 0, 0, 0, 1],
-        capture_rate: 255,
-        abilities: ["KeenEye", "TangledFeet"],
-        hidden_abilities: ["BigPecks"],
-        move_table: [
-            1: "Tackle",
-            5: "SandAttack",
-            9: "Gust",
-            13: "QuickAttack",
-            17: "Whirlwind",
-            21: "Twister",
-            25: "FeatherDance",
-            29: "Agility",
-            33: "WingAttack",
-            37: "Roost",
-            41: "TailWind",
-            45: "MirrorMove",
-            49: "AirSlash",
-            53: "Hurricane",
-        ],
-    });
+        result.push(species! {
+            id: "Pidgey",
+            display_name: "Pidgey",
+            national_number: 16,
+            types: [PokemonType::Normal, PokemonType::Flying],
+            base_stats: [40, 45, 40, 35, 35, 56],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumSlow,
+            base_exp_yield: 50,
+            ev_yield: [0, 0, 0, 0, 0, 1],
+            capture_rate: 255,
+            abilities: ["KeenEye", "TangledFeet"],
+            hidden_abilities: ["BigPecks"],
+            move_table: [
+                1: "Tackle",
+                5: "SandAttack",
+                9: "Gust",
+                13: "QuickAttack",
+                17: "Whirlwind",
+                21: "Twister",
+                25: "FeatherDance",
+                29: "Agility",
+                33: "WingAttack",
+                37: "Roost",
+                41: "TailWind",
+                45: "MirrorMove",
+                49: "AirSlash",
+                53: "Hurricane",
+            ],
+        });
 
-    result.push(species! {
-        id: "Rattata",
-        display_name: "Rattata",
-        national_number: 19,
-        types: [PokemonType::Normal],
-        base_stats: [30, 56, 35, 25, 35, 72],
-        male_ratio: Some(50.),
-        growth_rate: GrowthRate::MediumFast,
-        base_exp_yield: 51,
-        ev_yield: [0, 0, 0, 0, 0, 1],
-        capture_rate: 255,
-        abilities: ["RunAway", "Guts"],
-        hidden_abilities: ["Hustle"],
-        move_table: [
-            1: "Tackle",
-            1: "TailWhip",
-            4: "QuickAttack",
-            7: "FocusEnergy",
-            10: "Bite",
-            13: "Pursuit",
-            16: "HyperFang",
-            19: "SuckerPunch",
-            22: "Crunch",
-            25: "Assurance",
-            28: "SuperFang",
-            31: "DoubleEdge",
-            34: "Endeavor",
-        ],
-    });
+        result.push(species! {
+            id: "Rattata",
+            display_name: "Rattata",
+            national_number: 19,
+            types: [PokemonType::Normal],
+            base_stats: [30, 56, 35, 25, 35, 72],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 51,
+            ev_yield: [0, 0, 0, 0, 0, 1],
+            capture_rate: 255,
+            abilities: ["RunAway", "Guts"],
+            hidden_abilities: ["Hustle"],
+            move_table: [
+                1: "Tackle",
+                1: "TailWhip",
+                4: "QuickAttack",
+                7: "FocusEnergy",
+                10: "Bite",
+                13: "Pursuit",
+                16: "HyperFang",
+                19: "SuckerPunch",
+                22: "Crunch",
+                25: "Assurance",
+                28: "SuperFang",
+                31: "DoubleEdge",
+                34: "Endeavor",
+            ],
+        });
 
-    PokeDex::new(
-        result
-            .into_iter()
-            .map(|data| (data.id.clone(), data))
-            .collect::<HashMap<_, _>>()
-    )
+        PokeDex::new(
+            result
+                .into_iter()
+                .map(|data| (data.id.clone(), data))
+                .collect::<HashMap<_, _>>()
+        )
+    };
+}
+
+pub fn get_all_pokemon_species() -> &'static PokeDex {
+    &POKEDEX
 }

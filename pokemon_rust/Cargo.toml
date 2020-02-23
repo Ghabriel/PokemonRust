@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 amethyst = { version = "0.13", features = ["nightly", "sdl_controller", "vulkan"] }
+lazy_static = "1.4"
 rand = "0.7"
 rlua = "0.17"
 ron = "0.5"
