@@ -1,6 +1,10 @@
 //! A system responsible for processing Pokémon battles.
 use amethyst::ecs::System;
 
+use crate::battle::backend::{BattleBackend, BattleEvent};
+
+use std::collections::VecDeque;
+
 /// A system responsible for processing Pokémon battles. Architecturally,
 /// battles are split into two layers: one acts like a "frontend" and the other
 /// acts like a "backend". This separation allows the battle mechanics
@@ -12,12 +16,35 @@ use amethyst::ecs::System;
 /// to the screen in an intuitive way. It also handles the player's input,
 /// sending signals to the backend whenever an action is taken.
 #[derive(Default)]
-pub struct BattleSystem;
+pub struct BattleSystem {
+    backend: Option<BattleBackend>,
+    event_queue: VecDeque<BattleEvent>,
+}
+
+impl BattleSystem {
+    fn init_backend(&mut self, (): <Self as System>::SystemData) {
+        self.backend = Some(BattleBackend { });
+    }
+}
 
 impl<'a> System<'a> for BattleSystem {
     type SystemData = ();
 
-    fn run(&mut self, (): Self::SystemData) {
-        // TODO
+    fn run(&mut self, system_data: Self::SystemData) {
+        let backend = match self.backend.as_mut() {
+            Some(backend) => backend,
+            None => {
+                self.init_backend(system_data);
+                self.backend.as_mut().unwrap()
+            },
+        };
+
+        while self.event_queue.is_empty() {
+            self.event_queue.extend(backend.tick());
+        }
+
+        while let Some(event) = self.event_queue.pop_front() {
+            println!("{:?}", event);
+        }
     }
 }
