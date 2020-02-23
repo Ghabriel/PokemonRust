@@ -4,13 +4,13 @@ use amethyst::{
     prelude::*,
 };
 
-use crate::systems::AudioSystem;
+use crate::systems::{AudioSystem, BattleSystem};
 
 use std::ops::Deref;
 
 /// The state that the game reaches when the player enters a battle.
 /// This state makes some assumptions about the state of the World:
-///   * An entity representing the battle exists with a `Battle` component;
+///   * A resource representing the battle exists (`Battle`);
 ///   * The player must have an associated `Party` component with at least one
 ///     Pokémon able to fight;
 ///   * If this is a trainer battle, then every participating trainer must also
@@ -28,6 +28,7 @@ impl SimpleState for BattleState<'_, '_> {
 
         let mut dispatcher = DispatcherBuilder::new()
             .with(AudioSystem::default(), "audio_system", &[])
+            .with(BattleSystem::default(), "battle_system", &[])
             .with_pool(world.read_resource::<ArcThreadPool>().deref().clone())
             .build();
 

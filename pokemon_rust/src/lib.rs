@@ -15,6 +15,7 @@
 )]
 
 pub mod audio;
+pub mod battle;
 pub mod common;
 pub mod config;
 pub mod constants;

@@ -4,6 +4,7 @@
 
 pub mod animation_system;
 pub mod audio_system;
+pub mod battle_system;
 pub mod character_movement_system;
 pub mod map_change_announcement_system;
 pub mod npc_interaction_system;
@@ -12,6 +13,7 @@ pub mod text_system;
 
 pub use animation_system::AnimationSystem;
 pub use audio_system::AudioSystem;
+pub use battle_system::BattleSystem;
 pub use character_movement_system::CharacterMovementSystem;
 pub use map_change_announcement_system::MapChangeAnnouncementSystem;
 pub use npc_interaction_system::NpcInteractionSystem;

@@ -3,8 +3,8 @@
 use amethyst::ecs::{World, WorldExt};
 
 use crate::{
+    battle::types::{Battle, BattleCharacterTeam, BattleType, Party},
     entities::{
-        battle::{Battle, BattleCharacterTeam, BattleType, Party},
         character::{CharacterId, PlayerEntity},
         pokemon::{
             generator::generate_pokemon,

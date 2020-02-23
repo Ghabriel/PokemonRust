@@ -4,7 +4,6 @@ use amethyst::ecs::{Component, DenseVecStorage};
 
 use std::{collections::HashMap, hash::Hash};
 
-pub mod battle;
 pub mod character;
 pub mod map_change_announcement;
 pub mod pokemon;
