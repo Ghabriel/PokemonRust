@@ -79,7 +79,7 @@ impl GameEvent for BattleStartEvent {
             );
 
             Party {
-                pokemon: vec![rattata],
+                pokemon: vec![rattata].into(),
             }
         };
 
@@ -104,7 +104,7 @@ impl GameEvent for BattleStartEvent {
 
             BattleCharacterTeam {
                 active_pokemon: None,
-                party: Party { pokemon: vec![pidgey] },
+                party: Party { pokemon: vec![pidgey].into() },
                 character_id: match self.opponent {
                     BattleOpponent::Trainer(character_id) => Some(character_id),
                     BattleOpponent::WildPokemon => None,
@@ -112,7 +112,7 @@ impl GameEvent for BattleStartEvent {
             }
         };
 
-        world.insert(Battle { battle_type, p1, p2 });
+        world.insert(Battle::new(battle_type, p1, p2));
     }
 
     fn tick(&mut self, _world: &mut World, _disabled_inputs: bool) {}

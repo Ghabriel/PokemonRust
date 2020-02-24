@@ -5,16 +5,35 @@ use crate::entities::{
     pokemon::Pokemon,
 };
 
+use std::collections::VecDeque;
+
 /// Represents a Pokémon Battle.
 #[derive(Clone)]
 pub struct Battle {
     /// The type of battle that is happening.
     pub battle_type: BattleType,
+    /// The current turn.
+    pub turn: usize,
     /// The Pokémon that make up the first team. If the local player is
     /// participating, this is always his team.
     pub p1: BattleCharacterTeam,
     /// The Pokémon that make up the second team.
     pub p2: BattleCharacterTeam,
+}
+
+impl Battle {
+    pub fn new(
+        battle_type: BattleType,
+        p1: BattleCharacterTeam,
+        p2: BattleCharacterTeam,
+    ) -> Battle {
+        Battle {
+            battle_type,
+            turn: 0,
+            p1,
+            p2,
+        }
+    }
 }
 
 /// Represents the type of battle that is happening.
@@ -37,7 +56,7 @@ pub struct BattleCharacterTeam {
 
 #[derive(Clone)]
 pub struct Party {
-    pub pokemon: Vec<Pokemon>,
+    pub pokemon: VecDeque<Pokemon>,
 }
 
 impl Component for Party {

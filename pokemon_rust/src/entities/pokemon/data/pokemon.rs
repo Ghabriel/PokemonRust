@@ -109,7 +109,7 @@ lazy_static! {
             hidden_abilities: ["Hustle"],
             move_table: [
                 1: "Tackle",
-                1: "TailWhip",
+                // 1: "TailWhip",
                 4: "QuickAttack",
                 7: "FocusEnergy",
                 10: "Bite",
