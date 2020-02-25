@@ -32,7 +32,7 @@ pub enum FrontendEventKind {
 }
 
 /// The kind of events that the backend can send to the frontend.
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum BattleEvent {
     InitialSwitchIn(Team, usize),
     ChangeTurn(usize),

@@ -11,64 +11,62 @@ use crate::{
     },
 };
 
-#[test]
-fn switches_in_all_participants_in_first_turn() {
-    let battle_type = BattleType::Single;
-    let p1 = simple_team("Rattata", 3);
-    let p2 = simple_team("Pidgey", 3);
-    let mut backend = BattleBackend::new(Battle::new(battle_type, p1, p2));
+struct BattleBuilder {
+    battle_type: BattleType,
+    p1: Option<BattleCharacterTeam>,
+    p2: Option<BattleCharacterTeam>,
+}
 
-    let mut events = backend.tick();
-
-    match events.next().unwrap() {
-        BattleEvent::InitialSwitchIn(team, pokemon) => {
-            assert_eq!(team, Team::P1);
-            assert_eq!(pokemon, 0);
-        },
-        _ => panic!("Wrong event kind"),
+impl BattleBuilder {
+    fn new() -> BattleBuilder {
+        BattleBuilder {
+            battle_type: BattleType::Single,
+            p1: None,
+            p2: None,
+        }
     }
 
-    match events.next().unwrap() {
-        BattleEvent::InitialSwitchIn(team, pokemon) => {
-            assert_eq!(team, Team::P2);
-            assert_eq!(pokemon, 1);
-        },
-        _ => panic!("Wrong event kind"),
+    fn p1(mut self, species_id: &str, level: usize) -> Self {
+        self.p1 = Some(simple_team(species_id, level));
+        self
+    }
+
+    fn p2(mut self, species_id: &str, level: usize) -> Self {
+        self.p2 = Some(simple_team(species_id, level));
+        self
+    }
+
+    fn build(self) -> BattleBackend {
+        BattleBackend::new(Battle::new(
+            self.battle_type,
+            self.p1.unwrap(),
+            self.p2.unwrap(),
+        ))
     }
 }
 
-#[test]
-fn tackle_deals_damage() {
-    let battle_type = BattleType::Single;
-    let p1 = simple_team("Rattata", 3);
-    let p2 = simple_team("Pidgey", 3);
-    let mut backend = BattleBackend::new(Battle::new(battle_type, p1, p2));
+fn battle() -> BattleBuilder {
+    BattleBuilder::new()
+}
 
-    backend.tick();
+trait TestMethods {
+    fn move_p1(&mut self, index: usize);
+    fn move_p2(&mut self, index: usize);
+}
 
-    backend.push_frontend_event(FrontendEvent {
-        team: Team::P1,
-        event: FrontendEventKind::UseMove(0),
-    });
-    backend.push_frontend_event(FrontendEvent {
-        team: Team::P2,
-        event: FrontendEventKind::UseMove(0),
-    });
-    let mut events = backend.tick();
+impl TestMethods for BattleBackend {
+    fn move_p1(&mut self, index: usize) {
+        self.push_frontend_event(FrontendEvent {
+            team: Team::P1,
+            event: FrontendEventKind::UseMove(index),
+        });
+    }
 
-    let first = events.next().unwrap();
-    let second = events.next().unwrap();
-
-    match (first, second) {
-        (
-            BattleEvent::Damage { target: t1, amount: a1 },
-            BattleEvent::Damage { target: t2, amount: a2 },
-        ) => {
-            assert_ne!(t1, t2);
-            assert!(a1 >= 3 && a1 <= 5);
-            assert!(a2 >= 3 && a2 <= 5);
-        },
-        _ => panic!("Wrong event kind"),
+    fn move_p2(&mut self, index: usize) {
+        self.push_frontend_event(FrontendEvent {
+            team: Team::P2,
+            event: FrontendEventKind::UseMove(index),
+        });
     }
 }
 
@@ -91,4 +89,38 @@ fn get_pokemon(species_id: &str, level: usize) -> Pokemon {
         &movedex,
         level,
     )
+}
+
+#[test]
+fn switches_in_all_participants_in_first_turn() {
+    let mut backend = battle().p1("Rattata", 3).p2("Pidgey", 3).build();
+    let mut events = backend.tick();
+
+    assert_eq!(events.next().unwrap(), BattleEvent::InitialSwitchIn(Team::P1, 0));
+    assert_eq!(events.next().unwrap(), BattleEvent::InitialSwitchIn(Team::P2, 1));
+}
+
+#[test]
+fn tackle_deals_damage() {
+    let mut backend = battle().p1("Rattata", 3).p2("Pidgey", 3).build();
+
+    backend.tick();
+    backend.move_p1(0);
+    backend.move_p2(0);
+
+    let mut events = backend.tick();
+    let first = events.next().unwrap();
+    let second = events.next().unwrap();
+
+    match (first, second) {
+        (
+            BattleEvent::Damage { target: t1, amount: a1 },
+            BattleEvent::Damage { target: t2, amount: a2 },
+        ) => {
+            assert_ne!(t1, t2);
+            assert!(a1 >= 3 && a1 <= 5);
+            assert!(a2 >= 3 && a2 <= 5);
+        },
+        _ => panic!("Wrong event kind"),
+    }
 }
