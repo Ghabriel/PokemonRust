@@ -4,9 +4,11 @@ use rand::{
     thread_rng,
 };
 
+use std::fmt::Debug;
+
 use super::backend::UsedMove;
 
-pub trait BattleRng {
+pub trait BattleRng: Debug {
     /// Returns a value in the range [0.85, 1].
     fn get_damage_modifier(&mut self) -> f32;
 
@@ -15,7 +17,7 @@ pub trait BattleRng {
     fn shuffle_moves<'a>(&mut self, moves: &mut Vec<UsedMove<'a>>);
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct StandardBattleRng;
 
 impl BattleRng for StandardBattleRng {

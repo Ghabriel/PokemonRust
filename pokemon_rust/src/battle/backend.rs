@@ -48,6 +48,7 @@ pub struct UsedMove<'a> {
     movement: &'a Move,
 }
 
+#[derive(Debug)]
 pub struct BattleBackend<Rng: BattleRng> {
     /// The type of battle that is happening.
     battle_type: BattleType,
@@ -65,6 +66,7 @@ pub struct BattleBackend<Rng: BattleRng> {
     rng: Rng,
 }
 
+#[derive(Debug)]
 struct TeamData {
     active_pokemon: Option<usize>,
     party: VecDeque<usize>,

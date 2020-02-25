@@ -37,7 +37,7 @@ impl Battle {
 }
 
 /// Represents the type of battle that is happening.
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum BattleType {
     Single,
 }
