@@ -1,3 +1,12 @@
+macro_rules! assert_pattern {
+    ($value:expr, $pattern:pat) => {
+        match $value {
+            $pattern => {},
+            _ => panic!("Pattern mismatch"),
+        }
+    }
+}
+
 macro_rules! battle {
     ($($args:tt)*) => {
         {
@@ -48,7 +57,7 @@ macro_rules! battle_setup {
                         character_id: None,
                     },
                 ),
-                TestRng,
+                TestRng::default(),
             )
         }
     }

@@ -34,6 +34,7 @@ pub enum BattleEvent {
     InitialSwitchIn(Team, usize),
     ChangeTurn(usize),
     Damage { target: usize, amount: usize },
+    Miss(usize),
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -63,7 +64,7 @@ pub struct BattleBackend<Rng: BattleRng> {
     event_queue: Vec<BattleEvent>,
     pub(super) pokemon_repository: HashMap<usize, Pokemon>,
     /// The RNG that this battle is using.
-    rng: Rng,
+    pub(super) rng: Rng,
 }
 
 #[derive(Debug)]
@@ -216,6 +217,11 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
     }
 
     fn process_move(&mut self, used_move: UsedMove) {
+        if self.check_miss(&used_move) {
+            self.event_queue.push(BattleEvent::Miss(used_move.user));
+            return;
+        }
+
         match used_move.movement.category {
             MoveCategory::Physical => {
                 let attack = self.get_stat(used_move.user, Stat::Attack);
@@ -277,6 +283,21 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         self.pokemon_repository[&pokemon].stats[stat as usize]
     }
 
+    fn get_stat_stage(&self, pokemon: usize, stat: Stat) -> i8 {
+        // TODO: store stat stages somewhere and retrieve them here
+        0
+    }
+
+    fn get_accuracy_multiplier(&self, stage: i8) -> f32 {
+        let stage = stage.max(-6).min(6) as f32;
+
+        if stage >= 0. {
+            (3. + stage) / 3.
+        } else {
+            3. / (3. + stage)
+        }
+    }
+
     fn get_move_power(&self, used_move: &UsedMove) -> usize {
         let mov = used_move.movement;
 
@@ -322,6 +343,25 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
             1
         } else {
             damage
+        }
+    }
+
+    fn check_miss(&mut self, used_move: &UsedMove) -> bool {
+        if let Some(accuracy) = used_move.movement.accuracy {
+            let accuracy = accuracy as f32;
+
+            let adjusted_stages = {
+                let user_accuracy = self.get_stat_stage(used_move.user, Stat::Accuracy);
+                let target_evasion = self.get_stat_stage(used_move.target, Stat::Evasion);
+
+                self.get_accuracy_multiplier(user_accuracy - target_evasion)
+            };
+
+            let chance = accuracy * adjusted_stages;
+
+            self.rng.check_miss(chance as usize)
+        } else {
+            false
         }
     }
 }

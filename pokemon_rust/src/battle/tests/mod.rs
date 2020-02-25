@@ -67,8 +67,21 @@ impl<Rng: BattleRng> TestMethods for BattleBackend<Rng> {
     }
 }
 
-#[derive(Debug)]
-struct TestRng;
+#[derive(Debug, Default)]
+struct TestRng {
+    miss_counter: usize,
+    last_miss_check_chance: Option<usize>,
+}
+
+impl TestRng {
+    pub fn force_miss(&mut self, times: usize) {
+        self.miss_counter = times;
+    }
+
+    pub fn get_last_miss_check_chance(&self) -> Option<usize> {
+        self.last_miss_check_chance
+    }
+}
 
 impl BattleRng for TestRng {
     fn get_damage_modifier(&mut self) -> f32 {
@@ -76,4 +89,15 @@ impl BattleRng for TestRng {
     }
 
     fn shuffle_moves<'a>(&mut self, _moves: &mut Vec<UsedMove<'a>>) {}
+
+    fn check_miss(&mut self, chance: usize) -> bool {
+        self.last_miss_check_chance = Some(chance);
+
+        if self.miss_counter > 0 {
+            self.miss_counter -= 1;
+            true
+        } else {
+            false
+        }
+    }
 }
