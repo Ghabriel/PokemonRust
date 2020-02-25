@@ -56,19 +56,19 @@ pub struct BattleBackend<Rng: BattleRng> {
     turn: usize,
     /// The Pokémon that make up the first team. If the local player is
     /// participating, this is always his team.
-    p1: TeamData,
+    pub(super) p1: TeamData,
     /// The Pokémon that make up the second team.
-    p2: TeamData,
+    pub(super) p2: TeamData,
     input_events: VecDeque<FrontendEvent>,
     event_queue: Vec<BattleEvent>,
-    pokemon_repository: HashMap<usize, Pokemon>,
+    pub(super) pokemon_repository: HashMap<usize, Pokemon>,
     /// The RNG that this battle is using.
     rng: Rng,
 }
 
 #[derive(Debug)]
-struct TeamData {
-    active_pokemon: Option<usize>,
+pub(super) struct TeamData {
+    pub(super) active_pokemon: Option<usize>,
     party: VecDeque<usize>,
     character_id: Option<CharacterId>,
 }

@@ -103,6 +103,45 @@ fn get_pokemon(species_id: &str, level: usize) -> Pokemon {
     )
 }
 
+fn process_turn<'a, Rng: BattleRng>(
+    backend: &'a mut BattleBackend<Rng>,
+    p1_move: &str,
+    p2_move: &str,
+) -> impl Iterator<Item = BattleEvent> + 'a {
+    let p1_index = backend.p1.active_pokemon.unwrap();
+    let p2_index = backend.p2.active_pokemon.unwrap();
+
+    let p1_move_index = backend
+        .pokemon_repository[&p1_index]
+        .moves
+        .iter()
+        .enumerate()
+        .filter_map(|(i, mov)| match mov {
+            Some(mov) => Some((i, mov)),
+            None => None,
+        })
+        .find(|(i, mov)| mov.as_str() == p1_move)
+        .map(|(i, _)| i)
+        .unwrap();
+
+    let p2_move_index = backend
+        .pokemon_repository[&p2_index]
+        .moves
+        .iter()
+        .enumerate()
+        .filter_map(|(i, mov)| match mov {
+            Some(mov) => Some((i, mov)),
+            None => None,
+        })
+        .find(|(i, mov)| mov.as_str() == p2_move)
+        .map(|(i, _)| i)
+        .unwrap();
+
+    backend.move_p1(p1_move_index);
+    backend.move_p2(p2_move_index);
+    backend.tick()
+}
+
 macro_rules! battle {
     (
         $p1_species:literal $p1_level:literal $(($($p1_data:tt)*))?
@@ -272,12 +311,9 @@ fn tackle_deals_damage() {
     let mut backend = battle! {
         "Rattata" 50 (max ivs, Adamant) vs "Pidgey" 50 (max ivs, Adamant)
     };
-
     backend.tick();
-    backend.move_p1(0);
-    backend.move_p2(0);
 
-    let mut events = backend.tick();
+    let mut events = process_turn(&mut backend, "Tackle", "Tackle");
     let first = events.next().unwrap();
     let second = events.next().unwrap();
 
