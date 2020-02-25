@@ -8,15 +8,12 @@ use crate::entities::{
     },
 };
 
-use rand::{
-    distributions::{Distribution, Uniform},
-    seq::SliceRandom,
-    thread_rng,
-};
-
 use std::collections::{HashMap, VecDeque};
 
-use super::types::{Battle, BattleType};
+use super::{
+    rng::BattleRng,
+    types::{Battle, BattleType},
+};
 
 /// Represents an event that can be sent from the frontend to the backend.
 #[derive(Debug)]
@@ -45,13 +42,13 @@ pub enum Team {
     P2,
 }
 
-struct UsedMove<'a> {
+pub struct UsedMove<'a> {
     user: usize,
     target: usize,
     movement: &'a Move,
 }
 
-pub struct BattleBackend {
+pub struct BattleBackend<Rng: BattleRng> {
     /// The type of battle that is happening.
     battle_type: BattleType,
     /// The current turn.
@@ -64,6 +61,8 @@ pub struct BattleBackend {
     input_events: VecDeque<FrontendEvent>,
     event_queue: Vec<BattleEvent>,
     pokemon_repository: HashMap<usize, Pokemon>,
+    /// The RNG that this battle is using.
+    rng: Rng,
 }
 
 struct TeamData {
@@ -72,8 +71,8 @@ struct TeamData {
     character_id: Option<CharacterId>,
 }
 
-impl BattleBackend {
-    pub fn new(data: Battle) -> BattleBackend {
+impl<Rng: BattleRng> BattleBackend<Rng> {
+    pub fn new(data: Battle, rng: Rng) -> BattleBackend<Rng> {
         let mut pokemon_repository = HashMap::new();
         let mut p1 = TeamData {
             active_pokemon: None,
@@ -106,6 +105,7 @@ impl BattleBackend {
             input_events: VecDeque::new(),
             event_queue: Vec::new(),
             pokemon_repository,
+            rng,
         }
     }
 
@@ -197,7 +197,7 @@ impl BattleBackend {
         let mut result: Vec<_> = moves.collect();
 
         // Ensures random move order if both the priority and speed are equal
-        result.shuffle(&mut thread_rng());
+        self.rng.shuffle_moves(&mut result);
 
         result.sort_by(|a, b| {
             b.movement.priority
@@ -253,7 +253,7 @@ impl BattleBackend {
     }
 }
 
-impl BattleBackend {
+impl<Rng: BattleRng> BattleBackend<Rng> {
     fn inflict_damage(&mut self, used_move: &UsedMove, attack: usize, defense: usize) {
         let damage = self.get_move_damage(&used_move, attack, defense);
 
@@ -269,7 +269,7 @@ impl BattleBackend {
     }
 }
 
-impl BattleBackend {
+impl<Rng: BattleRng> BattleBackend<Rng> {
     fn get_stat(&self, pokemon: usize, stat: Stat) -> usize {
         // TODO: take stat stages and other factors into account
         self.pokemon_repository[&pokemon].stats[stat as usize]
@@ -301,7 +301,7 @@ impl BattleBackend {
             let targets = 1.; // TODO: handle multi-target moves
             let weather = 1.; // TODO
             let critical = 1.; // TODO
-            let random = Uniform::new(85., 100.).sample(&mut thread_rng()) / 100.;
+            let random = self.rng.get_damage_modifier();
             let stab = 1.; // TODO
             let effectiveness = 1.; // TODO
             let burn = 1.; // TODO
@@ -310,7 +310,10 @@ impl BattleBackend {
             targets * weather * critical * random * stab * effectiveness * burn * other
         };
 
-        let damage = ((level_modifier * power * stat_ratio) / 50. + 2.) * modifier;
+        let power_stat_ratio = (power * stat_ratio).floor();
+        let level_power_stat_ratio = ((level_modifier * power_stat_ratio) / 50.).floor();
+
+        let damage = (level_power_stat_ratio + 2.) * modifier;
         let damage = damage as usize;
 
         if damage == 0 {

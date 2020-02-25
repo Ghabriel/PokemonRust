@@ -3,6 +3,7 @@ use amethyst::ecs::{System, WriteExpect};
 
 use crate::battle::{
     backend::{BattleBackend, BattleEvent},
+    rng::StandardBattleRng,
     types::Battle,
 };
 
@@ -20,7 +21,7 @@ use std::collections::VecDeque;
 /// sending signals to the backend whenever an action is taken.
 #[derive(Default)]
 pub struct BattleSystem {
-    backend: Option<BattleBackend>,
+    backend: Option<BattleBackend<StandardBattleRng>>,
     event_queue: VecDeque<BattleEvent>,
 }
 
@@ -31,6 +32,7 @@ impl BattleSystem {
     ) {
         self.backend = Some(BattleBackend::new(
             (*battle).clone(),
+            StandardBattleRng::default(),
         ));
     }
 }
