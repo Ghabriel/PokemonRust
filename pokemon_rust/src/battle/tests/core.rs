@@ -13,7 +13,7 @@ use crate::{
     },
 };
 
-use super::{process_turn, TestRng};
+use super::{TestMethods, TestRng};
 
 #[test]
 fn switches_in_all_participants_in_first_turn() {
@@ -30,8 +30,8 @@ fn tackle_deals_damage() {
         "Rattata" 50 (max ivs, Adamant) vs "Pidgey" 50 (max ivs, Adamant)
     };
 
-    let mut events = process_turn(&mut backend, "Tackle", "Tackle");
+    let events = backend.process_turn("Tackle", "Tackle");
 
-    assert_eq!(events.next().unwrap(), BattleEvent::Damage { target: 1, amount: 28 });
-    assert_eq!(events.next().unwrap(), BattleEvent::Damage { target: 0, amount: 22 });
+    assert_eq!(events[0], BattleEvent::Damage { target: 1, amount: 28 });
+    assert_eq!(events[1], BattleEvent::Damage { target: 0, amount: 22 });
 }
