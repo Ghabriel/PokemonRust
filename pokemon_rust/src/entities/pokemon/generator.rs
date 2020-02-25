@@ -31,7 +31,6 @@ pub struct PokemonBuilder {
     moves: Option<[Option<String>; MOVE_LIMIT]>,
     pp: Option<[usize; MOVE_LIMIT]>,
     gender: Option<Gender>,
-    met_at_date: Option<SystemTime>,
     // shiny: bool,
 
     // Battle stats
