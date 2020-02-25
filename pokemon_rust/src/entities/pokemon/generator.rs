@@ -19,45 +19,126 @@ use rand::{
 
 use std::time::SystemTime;
 
+/// Allows creation of a Pokémon while fixing some parameters and automatically
+/// calculating others.
+#[derive(Default)]
+pub struct PokemonBuilder {
+    nature: Option<Nature>,
+    held_item: Option<String>,
+    ability: Option<String>,
+    evs: Option<[usize; 6]>,
+    natural_ivs: Option<[usize; 6]>,
+    moves: Option<[Option<String>; MOVE_LIMIT]>,
+    pp: Option<[usize; MOVE_LIMIT]>,
+    gender: Option<Gender>,
+    met_at_date: Option<SystemTime>,
+    // shiny: bool,
+
+    // Battle stats
+    stats: Option<[usize; 6]>,
+}
+
+impl PokemonBuilder {
+    pub fn with_nature(mut self, nature: Nature) -> Self {
+        self.nature = Some(nature);
+        self
+    }
+
+    pub fn with_held_item(mut self, item: String) -> Self {
+        self.held_item = Some(item);
+        self
+    }
+
+    pub fn with_ability(mut self, ability: String) -> Self {
+        self.ability = Some(ability);
+        self
+    }
+
+    pub fn with_evs(mut self, evs: [usize; 6]) -> Self {
+        self.evs = Some(evs);
+        self
+    }
+
+    pub fn with_ivs(mut self, ivs: [usize; 6]) -> Self {
+        self.natural_ivs = Some(ivs);
+        self
+    }
+
+    pub fn with_moves(mut self, moves: [Option<String>; MOVE_LIMIT]) -> Self {
+        self.moves = Some(moves);
+        self
+    }
+
+    pub fn with_pp(mut self, pp: [usize; MOVE_LIMIT]) -> Self {
+        self.pp = Some(pp);
+        self
+    }
+
+    pub fn with_gender(mut self, gender: Gender) -> Self {
+        self.gender = Some(gender);
+        self
+    }
+
+    pub fn with_stats(mut self, stats: [usize; 6]) -> Self {
+        self.stats = Some(stats);
+        self
+    }
+
+    pub fn build(
+        self,
+        species_data: &PokemonSpeciesData,
+        move_dex: &MoveDex,
+        level: usize,
+    ) -> Pokemon {
+        let nature = self.nature.unwrap_or_else(pick_nature);
+        let evs = self.evs.unwrap_or([0, 0, 0, 0, 0, 0]);
+        let ivs = self.natural_ivs.unwrap_or_else(pick_ivs);
+        let moves = self.moves.unwrap_or_else(|| {
+            pick_moves(&species_data.move_table, level)
+        });
+        let pp = self.pp.unwrap_or_else(|| pick_pps(&move_dex, &moves));
+        let stats = self.stats.unwrap_or_else(|| {
+            pick_stats(&species_data.base_stats, &evs, &ivs, nature, level)
+        });
+
+        Pokemon {
+            species_id: species_data.id.clone(),
+            nature,
+            held_item: self.held_item,
+            experience_points: 0,
+            ability: self.ability.unwrap_or_else(|| pick_ability(&species_data.abilities)),
+            evs,
+            natural_ivs: ivs,
+            obtained_ivs: [0, 0, 0, 0, 0, 0],
+            moves,
+            pp,
+            pp_ups: [0, 0, 0, 0],
+            egg_steps_to_hatch: None,
+            gender: self.gender.unwrap_or_else(|| pick_gender(&species_data.male_ratio)),
+            nickname: None,
+            met_at_date: SystemTime::now(),
+            met_at_location: String::default(),
+            met_at_level: level,
+            pokerus: PokerusData::Unaffected,
+            pokeball: None,
+
+            // Battle stats
+            status_condition: None,
+            level,
+            stats,
+            current_hp: stats[0],
+        }
+    }
+}
+
+/// Generates a fully randomized Pokémon, according to the constraints of its
+/// species.
 pub fn generate_pokemon(
     species_data: &PokemonSpeciesData,
     move_dex: &MoveDex,
     level: usize,
 ) -> Pokemon {
-    let nature = pick_nature();
-    let evs = [0, 0, 0, 0, 0, 0];
-    let ivs = pick_ivs();
-    let moves = pick_moves(&species_data.move_table, level);
-    let pp = pick_pps(&move_dex, &moves);
-    let stats = pick_stats(&species_data.base_stats, &evs, &ivs, nature, level);
-
-    Pokemon {
-        species_id: species_data.id.clone(),
-        nature,
-        held_item: None,
-        experience_points: 0,
-        ability: pick_ability(&species_data.abilities),
-        evs,
-        natural_ivs: ivs,
-        obtained_ivs: [0, 0, 0, 0, 0, 0],
-        moves,
-        pp,
-        pp_ups: [0, 0, 0, 0],
-        egg_steps_to_hatch: None,
-        gender: pick_gender(&species_data.male_ratio),
-        nickname: None,
-        met_at_date: SystemTime::now(),
-        met_at_location: String::default(),
-        met_at_level: level,
-        pokerus: PokerusData::Unaffected,
-        pokeball: None,
-
-        // Battle stats
-        status_condition: None,
-        level,
-        stats,
-        current_hp: stats[0],
-    }
+    PokemonBuilder::default().build(&species_data, &move_dex, level)
 }
 
 pub fn pick_nature() -> Nature {
