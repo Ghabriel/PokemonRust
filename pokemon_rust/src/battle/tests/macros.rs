@@ -1,4 +1,14 @@
 macro_rules! battle {
+    ($($args:tt)*) => {
+        {
+            let mut backend = battle_setup!($($args)*);
+            let _ = backend.tick();
+            backend
+        }
+    }
+}
+
+macro_rules! battle_setup {
     (
         $p1_species:literal $p1_level:literal $(($($p1_data:tt)*))?
         vs
