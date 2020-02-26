@@ -3,7 +3,13 @@ use crate::entities::{
     pokemon::{
         get_all_moves,
         get_all_pokemon_species,
-        movement::{Move, MoveCategory, MovePower},
+        movement::{
+            Move,
+            MoveCategory,
+            MovePower,
+            SimpleEffect,
+            SimpleEffectTarget,
+        },
         Pokemon,
         PokemonType,
         Stat,
@@ -42,6 +48,7 @@ pub enum BattleEvent {
         is_critical_hit: bool,
     },
     Miss(usize),
+    StatChange { target: usize, kind: StatChangeKind },
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -71,6 +78,18 @@ impl TypeEffectiveness {
 }
 
 #[derive(Debug, Eq, PartialEq)]
+pub enum StatChangeKind {
+    WontGoAnyLower,
+    SeverelyFell,
+    HarshlyFell,
+    Fell,
+    Rose,
+    SharplyRose,
+    DrasticallyRose,
+    WontGoAnyHigher,
+}
+
+#[derive(Debug, Eq, PartialEq)]
 pub enum Team {
     P1,
     P2,
@@ -93,6 +112,7 @@ pub struct BattleBackend<Rng: BattleRng> {
     pub(super) p1: TeamData,
     /// The Pokémon that make up the second team.
     pub(super) p2: TeamData,
+    pokemon_flags: HashMap<usize, FlagContainer>,
     input_events: VecDeque<FrontendEvent>,
     event_queue: Vec<BattleEvent>,
     pub(super) pokemon_repository: HashMap<usize, Pokemon>,
@@ -105,6 +125,16 @@ pub(super) struct TeamData {
     pub(super) active_pokemon: Option<usize>,
     party: VecDeque<usize>,
     character_id: Option<CharacterId>,
+}
+
+#[derive(Debug, Default)]
+struct FlagContainer {
+    flags: HashMap<&'static str, Flag>,
+}
+
+#[derive(Debug)]
+enum Flag {
+    StatStages(HashMap<Stat, i8>),
 }
 
 impl<Rng: BattleRng> BattleBackend<Rng> {
@@ -120,17 +150,20 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
             party: VecDeque::new(),
             character_id: data.p2.character_id,
         };
+        let mut pokemon_flags = HashMap::new();
 
         for pokemon in data.p1.party.pokemon {
             let index = pokemon_repository.len();
             pokemon_repository.insert(index, pokemon);
             p1.party.push_back(index);
+            pokemon_flags.insert(index, FlagContainer::default());
         }
 
         for pokemon in data.p2.party.pokemon {
             let index = pokemon_repository.len();
             pokemon_repository.insert(index, pokemon);
             p2.party.push_back(index);
+            pokemon_flags.insert(index, FlagContainer::default());
         }
 
         BattleBackend {
@@ -142,6 +175,7 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
             event_queue: Vec::new(),
             pokemon_repository,
             rng,
+            pokemon_flags,
         }
     }
 
@@ -263,6 +297,8 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
                 // TODO
             },
         }
+
+        self.process_secondary_effect(&used_move);
     }
 
     fn process_damage_effect(&mut self, used_move: &UsedMove) {
@@ -289,6 +325,28 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         };
 
         self.inflict_damage(&used_move, attack, defense, is_critical_hit);
+    }
+
+    fn process_secondary_effect(&mut self, used_move: &UsedMove) {
+        if let Some(effect) = used_move.movement.secondary_effect.as_ref() {
+            if !self.rng.check_secondary_effect(effect.chance) {
+                return;
+            }
+
+            match &effect.effect {
+                SimpleEffect::StatChange { changes, target } => {
+                    let target = match target {
+                        SimpleEffectTarget::MoveTarget => used_move.target,
+                        SimpleEffectTarget::MoveUser => used_move.user,
+                    };
+
+                    for (stat, delta) in changes {
+                        self.change_stat_stage(target, *stat, *delta);
+                    }
+                },
+                _ => todo!(),
+            }
+        }
     }
 
     fn next_turn(&mut self) {
@@ -341,6 +399,45 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         });
 
         // TODO: trigger effects like Static
+    }
+
+    fn change_stat_stage(&mut self, target: usize, stat: Stat, delta: i8) {
+        let stat_stages = self
+            .pokemon_flags
+            .get_mut(&target)
+            .unwrap()
+            .flags
+            .entry("stat_stages")
+            .or_insert(Flag::StatStages(HashMap::default()));
+
+        let mut stat_change_kind = match delta {
+            -3 => StatChangeKind::SeverelyFell,
+            -2 => StatChangeKind::HarshlyFell,
+            -1 => StatChangeKind::Fell,
+            1 => StatChangeKind::Rose,
+            2 => StatChangeKind::SharplyRose,
+            3 => StatChangeKind::DrasticallyRose,
+            _ => unreachable!(),
+        };
+
+        match stat_stages {
+            Flag::StatStages(stages) => {
+                let value = stages.entry(stat).or_insert(0);
+
+                if delta < 0 && *value == -6 {
+                    stat_change_kind = StatChangeKind::WontGoAnyLower;
+                } else if delta > 0 && *value == 6 {
+                    stat_change_kind = StatChangeKind::WontGoAnyHigher;
+                } else {
+                    *value = (*value + delta).max(-6).min(6);
+                }
+            },
+        }
+
+        self.event_queue.push(BattleEvent::StatChange {
+            target,
+            kind: stat_change_kind,
+        });
     }
 }
 

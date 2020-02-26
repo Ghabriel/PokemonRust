@@ -332,7 +332,7 @@ pub enum TimeOfDay {
     Night,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug, Hash, Eq, PartialEq)]
 pub enum Stat {
     HP,
     Attack,

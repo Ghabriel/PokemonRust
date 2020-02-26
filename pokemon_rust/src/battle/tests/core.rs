@@ -1,6 +1,6 @@
 use crate::{
     battle::{
-        backend::{BattleBackend, BattleEvent, Team, TypeEffectiveness},
+        backend::{BattleBackend, BattleEvent, StatChangeKind, Team, TypeEffectiveness},
         types::{Battle, BattleCharacterTeam, BattleType, Party},
     },
     entities::pokemon::{
@@ -116,4 +116,15 @@ fn applies_critical_hit() {
     assert_pattern!(turn1[1], BattleEvent::Damage { is_critical_hit: false, .. });
     assert_pattern!(turn2[0], BattleEvent::Damage { is_critical_hit: false, .. });
     assert_pattern!(turn2[1], BattleEvent::Damage { is_critical_hit: false, .. });
+}
+
+#[test]
+fn tailwhip_reduces_defense() {
+    let mut backend = battle! {
+        "Rattata" 3 (max ivs, Serious) vs "Pidgey" 3 (max ivs, Serious)
+    };
+
+    let events = backend.process_turn("TailWhip", "Tackle");
+
+    assert_eq!(events[0], BattleEvent::StatChange { target: 1, kind: StatChangeKind::Fell });
 }

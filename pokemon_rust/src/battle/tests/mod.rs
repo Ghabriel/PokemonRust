@@ -71,6 +71,7 @@ impl<Rng: BattleRng> TestMethods for BattleBackend<Rng> {
 struct TestRng {
     miss_counter: usize,
     last_miss_check_chance: Option<usize>,
+    last_secondary_effect_check_chance: Option<usize>,
 }
 
 impl TestRng {
@@ -99,5 +100,11 @@ impl BattleRng for TestRng {
         } else {
             false
         }
+    }
+
+    fn check_secondary_effect(&mut self, chance: usize) -> bool {
+        self.last_secondary_effect_check_chance = Some(chance);
+
+        chance == 100
     }
 }

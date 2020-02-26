@@ -18,6 +18,9 @@ pub trait BattleRng: Debug {
 
     /// Picks a number r in the range [1, 100] and returns r <= chance.
     fn check_miss(&mut self, chance: usize) -> bool;
+
+    /// Picks a number r in the range [1, 100] and returns r <= chance.
+    fn check_secondary_effect(&mut self, chance: usize) -> bool;
 }
 
 #[derive(Debug, Default)]
@@ -27,6 +30,10 @@ impl StandardBattleRng {
     fn rand(&mut self, lowest: isize, highest: isize) -> isize {
         Uniform::new(lowest, highest + 1)
             .sample(&mut thread_rng())
+    }
+
+    fn roll(&mut self, chance: usize) -> bool {
+        self.rand(1, 100) <= chance as isize
     }
 }
 
@@ -40,6 +47,10 @@ impl BattleRng for StandardBattleRng {
     }
 
     fn check_miss(&mut self, chance: usize) -> bool {
-        self.rand(1, 100) <= chance as isize
+        self.roll(chance)
+    }
+
+    fn check_secondary_effect(&mut self, chance: usize) -> bool {
+        self.roll(chance)
     }
 }

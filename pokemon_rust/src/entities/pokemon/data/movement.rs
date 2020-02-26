@@ -4,9 +4,13 @@ use crate::entities::pokemon::{
         MoveCategory,
         MoveDex,
         MovePower,
+        SecondaryEffect,
+        SimpleEffect,
+        SimpleEffectTarget,
         TargetType,
     },
     PokemonType,
+    Stat,
 };
 
 use lazy_static::lazy_static;
@@ -118,6 +122,29 @@ lazy_static! {
             multi_hit: None,
             secondary_effect: None,
             critical_hit: true,
+        });
+
+        result.push(Move {
+            id: "TailWhip".to_string(),
+            display_name: "Tail Whip".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Normal,
+            category: MoveCategory::Status,
+            base_power: MovePower::Special,
+            power_modifier: None,
+            accuracy: Some(100),
+            pp: 30,
+            priority: 0,
+            target_type: TargetType::AllAdjacentFoes,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 100,
+                effect: SimpleEffect::StatChange {
+                    changes: vec![(Stat::Defense, -1)],
+                    target: SimpleEffectTarget::MoveTarget,
+                }
+            }),
+            critical_hit: false,
         });
 
         MoveDex::new(
