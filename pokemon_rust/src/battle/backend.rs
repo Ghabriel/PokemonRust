@@ -35,7 +35,12 @@ pub enum FrontendEventKind {
 pub enum BattleEvent {
     InitialSwitchIn(Team, usize),
     ChangeTurn(usize),
-    Damage { target: usize, amount: usize, effectiveness: TypeEffectiveness },
+    Damage {
+        target: usize,
+        amount: usize,
+        effectiveness: TypeEffectiveness,
+        is_critical_hit: bool,
+    },
     Miss(usize),
 }
 
@@ -251,20 +256,39 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         }
 
         match used_move.movement.category {
-            MoveCategory::Physical => {
-                let attack = self.get_stat(used_move.user, Stat::Attack);
-                let defense = self.get_stat(used_move.user, Stat::Defense);
-                self.inflict_damage(&used_move, attack, defense);
-            },
-            MoveCategory::Special => {
-                let attack = self.get_stat(used_move.user, Stat::SpecialAttack);
-                let defense = self.get_stat(used_move.user, Stat::SpecialDefense);
-                self.inflict_damage(&used_move, attack, defense);
+            MoveCategory::Physical | MoveCategory::Special => {
+                self.process_damage_effect(&used_move);
             },
             MoveCategory::Status => {
                 // TODO
             },
         }
+    }
+
+    fn process_damage_effect(&mut self, used_move: &UsedMove) {
+        let is_critical_hit = used_move.movement.critical_hit;
+
+        let (attack, defense) = match (is_critical_hit, used_move.movement.category) {
+            (false, MoveCategory::Physical) => (
+                self.get_stat(used_move.user, Stat::Attack),
+                self.get_stat(used_move.target, Stat::Defense),
+            ),
+            (true, MoveCategory::Physical) => (
+                self.get_attack_critical_hit(used_move.user),
+                self.get_defense_critical_hit(used_move.target),
+            ),
+            (false, MoveCategory::Special) => (
+                self.get_stat(used_move.user, Stat::SpecialAttack),
+                self.get_stat(used_move.target, Stat::SpecialDefense),
+            ),
+            (true, MoveCategory::Special) => (
+                self.get_special_attack_critical_hit(used_move.user),
+                self.get_special_defense_critical_hit(used_move.target),
+            ),
+            _ => unreachable!(),
+        };
+
+        self.inflict_damage(&used_move, attack, defense, is_critical_hit);
     }
 
     fn next_turn(&mut self) {
@@ -290,9 +314,21 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
 }
 
 impl<Rng: BattleRng> BattleBackend<Rng> {
-    fn inflict_damage(&mut self, used_move: &UsedMove, attack: usize, defense: usize) {
+    fn inflict_damage(
+        &mut self,
+        used_move: &UsedMove,
+        attack: usize,
+        defense: usize,
+        is_critical_hit: bool,
+    ) {
         let effectiveness = self.get_type_effectiveness(&used_move.movement, used_move.target);
-        let damage = self.get_move_damage(&used_move, attack, defense, effectiveness);
+        let damage = self.get_move_damage(
+            &used_move,
+            attack,
+            defense,
+            effectiveness,
+            is_critical_hit,
+        );
 
         let target = self.pokemon_repository.get_mut(&used_move.target).unwrap();
         target.current_hp = target.current_hp.saturating_sub(damage);
@@ -301,6 +337,7 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
             target: used_move.target,
             amount: damage,
             effectiveness: TypeEffectiveness::from(effectiveness),
+            is_critical_hit,
         });
 
         // TODO: trigger effects like Static
@@ -308,8 +345,34 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
 }
 
 impl<Rng: BattleRng> BattleBackend<Rng> {
+    fn get_attack_critical_hit(&self, pokemon: usize) -> usize {
+        // TODO: take *positive* stat stages and other factors into account
+        self.get_pure_stat(pokemon, Stat::Attack)
+    }
+
+    fn get_defense_critical_hit(&self, pokemon: usize) -> usize {
+        // TODO: take *negative* stat stages and other factors into account
+        self.get_pure_stat(pokemon, Stat::Defense)
+    }
+
+    fn get_special_attack_critical_hit(&self, pokemon: usize) -> usize {
+        // TODO: take *positive* stat stages and other factors into account
+        self.get_pure_stat(pokemon, Stat::SpecialAttack)
+    }
+
+    fn get_special_defense_critical_hit(&self, pokemon: usize) -> usize {
+        // TODO: take *negative* stat stages and other factors into account
+        self.get_pure_stat(pokemon, Stat::SpecialDefense)
+    }
+
     fn get_stat(&self, pokemon: usize, stat: Stat) -> usize {
         // TODO: take stat stages and other factors into account
+        self.get_pure_stat(pokemon, stat)
+    }
+
+    /// Returns the value of a stat of a Pokémon without considering
+    /// stat stages and other factors.
+    fn get_pure_stat(&self, pokemon: usize, stat: Stat) -> usize {
         self.pokemon_repository[&pokemon].stats[stat as usize]
     }
 
@@ -350,6 +413,7 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         attack: usize,
         defense: usize,
         effectiveness: f32,
+        is_critical_hit: bool,
     ) -> usize {
         let level = self.pokemon_repository[&used_move.user].level as f32;
         let level_modifier = (2. * level) / 5. + 2.;
@@ -359,7 +423,11 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         let modifier = {
             let targets = 1.; // TODO: handle multi-target moves
             let weather = 1.; // TODO
-            let critical = 1.; // TODO
+            let critical = if is_critical_hit {
+                1.25
+            } else {
+                1.
+            };
             let random = self.rng.get_damage_modifier();
             let stab = if self.check_stab(&used_move.movement, used_move.user) {
                 1.5

@@ -33,8 +33,15 @@ pub struct Move {
     pub multi_hit: Option<MultiHit>,
     /// A "shortcut" for moves with a simple secondary effect
     pub secondary_effect: Option<SecondaryEffect>,
+    /// In this game, there's no RNG in critical hits: a move either always
+    /// crits or never crits. Moves that originally mention "high critical
+    /// chance" in their description or possess some other kind of critical hit
+    /// buff always crit, dealing 125% damage and ignoring both offensive stat
+    /// debuffs and defensive stat buffs. Every other move never crits.
+    pub critical_hit: bool,
 }
 
+#[derive(Clone, Copy)]
 pub enum MoveCategory {
     Physical,
     Special,

@@ -32,20 +32,22 @@ fn tackle_deals_damage() {
 
     assert_eq!(events[0], BattleEvent::Damage {
         target: 1,
-        amount: 42,
+        amount: 39,
         effectiveness: TypeEffectiveness::Normal,
+        is_critical_hit: false,
     });
     assert_eq!(events[1], BattleEvent::Damage {
         target: 0,
-        amount: 33,
+        amount: 36,
         effectiveness: TypeEffectiveness::Normal,
+        is_critical_hit: false,
     });
 }
 
 #[test]
 fn tackle_does_accuracy_checks() {
     let mut backend = battle! {
-        "Rattata" 3 vs "Pidgey" 3
+        "Rattata" 3 (max ivs, Serious) vs "Pidgey" 3 (max ivs, Serious)
     };
 
     backend.rng.force_miss(3);
@@ -69,13 +71,15 @@ fn applies_type_effectiveness() {
 
     assert_eq!(events[0], BattleEvent::Damage {
         target: 0,
-        amount: 8,
+        amount: 10,
         effectiveness: TypeEffectiveness::Normal,
+        is_critical_hit: false,
     });
     assert_eq!(events[1], BattleEvent::Damage {
         target: 1,
-        amount: 18,
+        amount: 12,
         effectiveness: TypeEffectiveness::SuperEffective,
+        is_critical_hit: false,
     });
 }
 
@@ -97,4 +101,19 @@ fn applies_stab() {
         },
         _ => panic!("Pattern mismatch"),
     }
+}
+
+#[test]
+fn applies_critical_hit() {
+    let mut backend = battle! {
+        "Charmander" 20 (max ivs, Serious) vs "Pidgey" 20 (max ivs, Serious)
+    };
+
+    let turn1 = backend.process_turn("Slash", "Tackle");
+    let turn2 = backend.process_turn("Scratch", "Tackle");
+
+    assert_pattern!(turn1[0], BattleEvent::Damage { is_critical_hit: true, .. });
+    assert_pattern!(turn1[1], BattleEvent::Damage { is_critical_hit: false, .. });
+    assert_pattern!(turn2[0], BattleEvent::Damage { is_critical_hit: false, .. });
+    assert_pattern!(turn2[1], BattleEvent::Damage { is_critical_hit: false, .. });
 }

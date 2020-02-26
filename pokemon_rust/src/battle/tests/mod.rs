@@ -45,7 +45,7 @@ impl<Rng: BattleRng> TestMethods for BattleBackend<Rng> {
             })
             .find(|(_, mov)| mov.as_str() == p1_move)
             .map(|(i, _)| i)
-            .unwrap();
+            .unwrap_or_else(|| panic!("Move \"{}\" not found for player 1", p1_move));
 
         let p2_move_index = self
             .pokemon_repository[&p2_index]
@@ -58,7 +58,7 @@ impl<Rng: BattleRng> TestMethods for BattleBackend<Rng> {
             })
             .find(|(_, mov)| mov.as_str() == p2_move)
             .map(|(i, _)| i)
-            .unwrap();
+            .unwrap_or_else(|| panic!("Move \"{}\" not found for player 2", p2_move));
 
         self.move_p1(p1_move_index);
         self.move_p2(p2_move_index);

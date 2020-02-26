@@ -161,6 +161,35 @@ lazy_static! {
             ],
         });
 
+        result.push(species! {
+            id: "Charmander",
+            display_name: "Charmander",
+            national_number: 4,
+            types: [PokemonType::Fire],
+            base_stats: [39, 52, 43, 60, 50, 65],
+            male_ratio: Some(87.5),
+            growth_rate: GrowthRate::MediumSlow,
+            base_exp_yield: 62,
+            ev_yield: [0, 0, 0, 0, 0, 1],
+            capture_rate: 45,
+            abilities: ["Blaze"],
+            hidden_abilities: ["SolarPower"],
+            move_table: [
+                1: "Scratch",
+                // 1: "Growl",
+                // 4: "Ember",
+                // 8: "Smokescreen",
+                // 12: "DragonBreath",
+                // 17: "FireFang",
+                20: "Slash",
+                // 24: "Flamethrower",
+                // 28: "ScaryFace",
+                // 32: "FireSpin",
+                // 36: "Inferno",
+                // 40: "FlareBlitz",
+            ],
+        });
+
         PokeDex::new(
             result
                 .into_iter()
