@@ -1,17 +1,6 @@
-use crate::{
-    battle::{
-        backend::{BattleBackend, BattleEvent, StatChangeKind, Team, TypeEffectiveness},
-        types::{Battle, BattleCharacterTeam, BattleType, Party},
-    },
-    entities::pokemon::{
-        generator::PokemonBuilder,
-        get_all_moves,
-        get_all_pokemon_species,
-        Nature,
-    },
-};
+use crate::battle::backend::{BattleEvent, Team, TypeEffectiveness};
 
-use super::{TestMethods, TestRng};
+use super::{prelude::*, TestMethods, TestRng};
 
 #[test]
 fn switches_in_all_participants_in_first_turn() {
@@ -20,45 +9,6 @@ fn switches_in_all_participants_in_first_turn() {
 
     assert_eq!(events.next().unwrap(), BattleEvent::InitialSwitchIn(Team::P1, 0));
     assert_eq!(events.next().unwrap(), BattleEvent::InitialSwitchIn(Team::P2, 1));
-}
-
-#[test]
-fn tackle_deals_damage() {
-    let mut backend = battle! {
-        "Rattata" 50 (max ivs, Adamant) vs "Pidgey" 50 (max ivs, Adamant)
-    };
-
-    let events = backend.process_turn("Tackle", "Tackle");
-
-    assert_eq!(events[0], BattleEvent::Damage {
-        target: 1,
-        amount: 39,
-        effectiveness: TypeEffectiveness::Normal,
-        is_critical_hit: false,
-    });
-    assert_eq!(events[1], BattleEvent::Damage {
-        target: 0,
-        amount: 36,
-        effectiveness: TypeEffectiveness::Normal,
-        is_critical_hit: false,
-    });
-}
-
-#[test]
-fn tackle_does_accuracy_checks() {
-    let mut backend = battle! {
-        "Rattata" 3 (max ivs, Serious) vs "Pidgey" 3 (max ivs, Serious)
-    };
-
-    backend.rng.force_miss(3);
-    let turn1 = backend.process_turn("Tackle", "Tackle");
-    let turn2 = backend.process_turn("Tackle", "Tackle");
-
-    assert_eq!(turn1[0], BattleEvent::Miss(0));
-    assert_eq!(turn1[1], BattleEvent::Miss(1));
-    assert_eq!(turn2[0], BattleEvent::Miss(0));
-    assert_pattern!(turn2[1], BattleEvent::Damage { target: 0, .. });
-    assert_eq!(backend.rng.get_last_miss_check_chance(), Some(100));
 }
 
 #[test]
@@ -116,15 +66,4 @@ fn applies_critical_hit() {
     assert_pattern!(turn1[1], BattleEvent::Damage { is_critical_hit: false, .. });
     assert_pattern!(turn2[0], BattleEvent::Damage { is_critical_hit: false, .. });
     assert_pattern!(turn2[1], BattleEvent::Damage { is_critical_hit: false, .. });
-}
-
-#[test]
-fn tailwhip_reduces_defense() {
-    let mut backend = battle! {
-        "Rattata" 3 (max ivs, Serious) vs "Pidgey" 3 (max ivs, Serious)
-    };
-
-    let events = backend.process_turn("TailWhip", "Tackle");
-
-    assert_eq!(events[0], BattleEvent::StatChange { target: 1, kind: StatChangeKind::Fell });
 }

@@ -9,6 +9,25 @@ mod macros;
 
 mod core;
 
+pub mod prelude {
+    // Modules required by the test macros
+    pub use crate::{
+        battle::{
+            backend::BattleBackend,
+            types::{Battle, BattleCharacterTeam, BattleType, Party},
+        },
+        entities::pokemon::{
+            generator::PokemonBuilder,
+            get_all_moves,
+            get_all_pokemon_species,
+            Nature,
+        },
+    };
+}
+
+mod tackle;
+mod tailwhip;
+
 trait TestMethods {
     fn move_p1(&mut self, index: usize);
     fn move_p2(&mut self, index: usize);
