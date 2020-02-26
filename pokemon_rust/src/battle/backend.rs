@@ -2,8 +2,10 @@ use crate::entities::{
     character::CharacterId,
     pokemon::{
         get_all_moves,
+        get_all_pokemon_species,
         movement::{Move, MoveCategory, MovePower},
         Pokemon,
+        PokemonType,
         Stat,
     },
 };
@@ -33,8 +35,34 @@ pub enum FrontendEventKind {
 pub enum BattleEvent {
     InitialSwitchIn(Team, usize),
     ChangeTurn(usize),
-    Damage { target: usize, amount: usize },
+    Damage { target: usize, amount: usize, effectiveness: TypeEffectiveness },
     Miss(usize),
+}
+
+#[derive(Debug, Eq, PartialEq)]
+pub enum TypeEffectiveness {
+    Immune,
+    ReallyNotVeryEffective,
+    NotVeryEffective,
+    Normal,
+    SuperEffective,
+    ExtremelyEffective,
+}
+
+impl TypeEffectiveness {
+    fn from(effectiveness: f32) -> TypeEffectiveness {
+        let scaled_effectiveness = (4. * effectiveness).round() as u8;
+
+        match scaled_effectiveness {
+            0 => Self::Immune,
+            1 => Self::ReallyNotVeryEffective,
+            2 => Self::NotVeryEffective,
+            4 => Self::Normal,
+            8 => Self::SuperEffective,
+            16 => Self::ExtremelyEffective,
+            _ => panic!("Invalid type effectiveness: {}", effectiveness),
+        }
+    }
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -263,7 +291,8 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
 
 impl<Rng: BattleRng> BattleBackend<Rng> {
     fn inflict_damage(&mut self, used_move: &UsedMove, attack: usize, defense: usize) {
-        let damage = self.get_move_damage(&used_move, attack, defense);
+        let effectiveness = self.get_type_effectiveness(&used_move.movement, used_move.target);
+        let damage = self.get_move_damage(&used_move, attack, defense, effectiveness);
 
         let target = self.pokemon_repository.get_mut(&used_move.target).unwrap();
         target.current_hp = target.current_hp.saturating_sub(damage);
@@ -271,6 +300,7 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         self.event_queue.push(BattleEvent::Damage {
             target: used_move.target,
             amount: damage,
+            effectiveness: TypeEffectiveness::from(effectiveness),
         });
 
         // TODO: trigger effects like Static
@@ -314,7 +344,13 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         }
     }
 
-    fn get_move_damage(&mut self, used_move: &UsedMove, attack: usize, defense: usize) -> usize {
+    fn get_move_damage(
+        &mut self,
+        used_move: &UsedMove,
+        attack: usize,
+        defense: usize,
+        effectiveness: f32,
+    ) -> usize {
         let level = self.pokemon_repository[&used_move.user].level as f32;
         let level_modifier = (2. * level) / 5. + 2.;
         let power = self.get_move_power(&used_move) as f32;
@@ -326,7 +362,6 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
             let critical = 1.; // TODO
             let random = self.rng.get_damage_modifier();
             let stab = 1.; // TODO
-            let effectiveness = 1.; // TODO
             let burn = 1.; // TODO
             let other = 1.; // TODO
 
@@ -344,6 +379,23 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         } else {
             damage
         }
+    }
+
+    fn get_type_effectiveness(&self, mov: &Move, target: usize) -> f32 {
+        // TODO: handle Pokémon that currently have a different type than their
+        // original ones (e.g after Soak or Roost)
+        // TODO: handle moves without types (e.g Struggle)
+
+        let pokedex = get_all_pokemon_species();
+        let species_id = &self.pokemon_repository[&target].species_id;
+
+        pokedex
+            .get_species(species_id)
+            .unwrap()
+            .types
+            .iter()
+            .map(|t| PokemonType::get_effectiveness(mov.move_type, *t))
+            .product()
     }
 
     fn check_miss(&mut self, used_move: &UsedMove) -> bool {

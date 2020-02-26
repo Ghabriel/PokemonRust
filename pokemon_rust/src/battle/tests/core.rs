@@ -1,8 +1,6 @@
-// use crate::battle::backend::{BattleEvent, Team};
-
 use crate::{
     battle::{
-        backend::{BattleBackend, BattleEvent, Team},
+        backend::{BattleBackend, BattleEvent, Team, TypeEffectiveness},
         types::{Battle, BattleCharacterTeam, BattleType, Party},
     },
     entities::pokemon::{
@@ -32,8 +30,16 @@ fn tackle_deals_damage() {
 
     let events = backend.process_turn("Tackle", "Tackle");
 
-    assert_eq!(events[0], BattleEvent::Damage { target: 1, amount: 28 });
-    assert_eq!(events[1], BattleEvent::Damage { target: 0, amount: 22 });
+    assert_eq!(events[0], BattleEvent::Damage {
+        target: 1,
+        amount: 28,
+        effectiveness: TypeEffectiveness::Normal,
+    });
+    assert_eq!(events[1], BattleEvent::Damage {
+        target: 0,
+        amount: 22,
+        effectiveness: TypeEffectiveness::Normal,
+    });
 }
 
 #[test]
@@ -51,4 +57,24 @@ fn tackle_does_accuracy_checks() {
     assert_eq!(turn2[0], BattleEvent::Miss(0));
     assert_pattern!(turn2[1], BattleEvent::Damage { target: 0, .. });
     assert_eq!(backend.rng.get_last_miss_check_chance(), Some(100));
+}
+
+#[test]
+fn applies_type_effectiveness() {
+    let mut backend = battle! {
+        "Pidgey" 10 (max ivs, Adamant) vs "Hitmonchan" 10 (max ivs, Serious)
+    };
+
+    let events = backend.process_turn("Gust", "Tackle");
+
+    assert_eq!(events[0], BattleEvent::Damage {
+        target: 0,
+        amount: 8,
+        effectiveness: TypeEffectiveness::Normal,
+    });
+    assert_eq!(events[1], BattleEvent::Damage {
+        target: 1,
+        amount: 12,
+        effectiveness: TypeEffectiveness::SuperEffective,
+    });
 }

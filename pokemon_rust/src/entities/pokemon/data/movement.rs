@@ -33,6 +33,22 @@ lazy_static! {
             secondary_effect: None,
         });
 
+        result.push(Move {
+            id: "Gust".to_string(),
+            display_name: "Gust".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Flying,
+            category: MoveCategory::Special,
+            base_power: MovePower::Constant(40),
+            power_modifier: None,
+            accuracy: Some(100),
+            pp: 35,
+            priority: 0,
+            target_type: TargetType::SingleTarget,
+            multi_hit: None,
+            secondary_effect: None,
+        });
+
         MoveDex::new(
             result
                 .into_iter()

@@ -17,6 +17,29 @@ pub use self::data::{
     pokemon::get_all_pokemon_species,
 };
 
+/// Type effectiveness table. Every number is doubled (e.g 0.5x effectiveness
+/// is stored as 1) so that we don't need to store floats.
+const TYPE_TABLE: [[u8; 18]; 18] = [
+    [2, 2, 2, 2, 2, 1, 2, 0, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2],
+    [4, 2, 1, 1, 2, 4, 1, 0, 4, 2, 2, 2, 2, 1, 4, 2, 4, 1],
+    [2, 4, 2, 2, 2, 1, 4, 2, 1, 2, 2, 4, 1, 2, 2, 2, 2, 2],
+    [2, 2, 2, 1, 1, 1, 2, 1, 0, 2, 2, 4, 2, 2, 2, 2, 2, 4],
+    [2, 2, 0, 4, 2, 4, 1, 2, 4, 4, 2, 1, 4, 2, 2, 2, 2, 2],
+    [2, 1, 4, 2, 1, 2, 4, 2, 1, 4, 2, 2, 2, 2, 4, 2, 2, 2],
+    [2, 1, 1, 1, 2, 2, 2, 1, 1, 1, 2, 4, 2, 4, 2, 2, 4, 1],
+    [0, 2, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 4, 2, 2, 1, 2],
+    [2, 2, 2, 2, 2, 4, 2, 2, 1, 1, 1, 2, 1, 2, 4, 2, 2, 4],
+    [2, 2, 2, 2, 2, 1, 4, 2, 4, 1, 1, 4, 2, 2, 4, 1, 2, 2],
+    [2, 2, 2, 2, 4, 4, 2, 2, 2, 4, 1, 1, 2, 2, 2, 1, 2, 2],
+    [2, 2, 1, 1, 4, 4, 1, 2, 1, 1, 4, 1, 2, 2, 2, 1, 2, 2],
+    [2, 2, 4, 2, 0, 2, 2, 2, 2, 2, 4, 1, 1, 2, 2, 1, 2, 2],
+    [2, 4, 2, 4, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 2, 0, 2],
+    [2, 2, 4, 2, 4, 2, 2, 2, 1, 1, 1, 4, 2, 2, 1, 4, 2, 2],
+    [2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 4, 2, 0],
+    [2, 1, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2, 2, 4, 2, 2, 1, 1],
+    [2, 4, 2, 1, 2, 2, 2, 2, 1, 1, 2, 2, 2, 2, 2, 4, 4, 2],
+];
+
 pub struct PokeDex {
     data: HashMap<String, PokemonSpeciesData>,
 }
@@ -63,31 +86,31 @@ pub struct Pokemon {
 
 #[allow(unused)]
 pub struct PokemonSpeciesData {
-    id: String,
-    display_name: String,
-    national_number: usize,
-    types: Vec<PokemonType>,
-    base_stats: [usize; 6],
-    male_ratio: Option<f32>,
-    growth_rate: GrowthRate,
-    base_exp_yield: usize,
-    ev_yield: [usize; 6],
-    capture_rate: usize,
-    // base_friendship: usize,
-    abilities: Vec<String>,
-    hidden_abilities: Vec<String>,
-    move_table: Vec<(LearningCondition, String)>,
-    egg_moves: Vec<String>,
-    egg_groups: Vec<String>,
-    egg_steps: usize,
-    height: f32,
-    weight: f32,
-    color: String,
-    shape: usize,
-    habitat: String,
-    kind: String,
-    pokedex_description: String,
-    evolution_data: Vec<EvolutionData>,
+    pub id: String,
+    pub display_name: String,
+    pub national_number: usize,
+    pub types: Vec<PokemonType>,
+    pub base_stats: [usize; 6],
+    pub male_ratio: Option<f32>,
+    pub growth_rate: GrowthRate,
+    pub base_exp_yield: usize,
+    pub ev_yield: [usize; 6],
+    pub capture_rate: usize,
+    // pub base_friendship: usize,
+    pub abilities: Vec<String>,
+    pub hidden_abilities: Vec<String>,
+    pub move_table: Vec<(LearningCondition, String)>,
+    pub egg_moves: Vec<String>,
+    pub egg_groups: Vec<String>,
+    pub egg_steps: usize,
+    pub height: f32,
+    pub weight: f32,
+    pub color: String,
+    pub shape: usize,
+    pub habitat: String,
+    pub kind: String,
+    pub pokedex_description: String,
+    pub evolution_data: Vec<EvolutionData>,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -180,7 +203,7 @@ pub enum PokerusData {
     HasPokerus { duration: usize, remaining_days: usize },
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug)]
 pub enum PokemonType {
     Normal,
     Fight,
@@ -200,6 +223,16 @@ pub enum PokemonType {
     Dragon,
     Dark,
     Fairy,
+}
+
+impl PokemonType {
+    /// Returns the type effectiveness between two types.
+    pub fn get_effectiveness(attacking_type: PokemonType, defending_type: PokemonType) -> f32 {
+        let attacking_type = attacking_type as usize;
+        let defending_type = defending_type as usize;
+
+        (TYPE_TABLE[attacking_type][defending_type] as f32) / 2.
+    }
 }
 
 #[derive(Clone, Debug)]
