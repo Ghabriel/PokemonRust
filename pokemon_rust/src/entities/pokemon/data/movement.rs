@@ -49,6 +49,39 @@ lazy_static! {
             secondary_effect: None,
         });
 
+        result.push(Move {
+            id: "Bite".to_string(),
+            display_name: "Bite".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Dark,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(60),
+            power_modifier: None,
+            accuracy: Some(100),
+            pp: 25,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            // TODO: 30% flinch
+            secondary_effect: None,
+        });
+
+        result.push(Move {
+            id: "MachPunch".to_string(),
+            display_name: "Mach Punch".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Fight,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(40),
+            power_modifier: None,
+            accuracy: Some(100),
+            pp: 30,
+            priority: 1,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: None,
+        });
+
         MoveDex::new(
             result
                 .into_iter()

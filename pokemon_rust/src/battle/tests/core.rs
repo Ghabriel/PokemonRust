@@ -32,12 +32,12 @@ fn tackle_deals_damage() {
 
     assert_eq!(events[0], BattleEvent::Damage {
         target: 1,
-        amount: 28,
+        amount: 42,
         effectiveness: TypeEffectiveness::Normal,
     });
     assert_eq!(events[1], BattleEvent::Damage {
         target: 0,
-        amount: 22,
+        amount: 33,
         effectiveness: TypeEffectiveness::Normal,
     });
 }
@@ -74,7 +74,27 @@ fn applies_type_effectiveness() {
     });
     assert_eq!(events[1], BattleEvent::Damage {
         target: 1,
-        amount: 12,
+        amount: 18,
         effectiveness: TypeEffectiveness::SuperEffective,
     });
+}
+
+#[test]
+fn applies_stab() {
+    let mut backend = battle! {
+        "Hitmonchan" 10 (max ivs, Adamant) vs "Pidgey" 10 (max ivs, Adamant)
+    };
+
+    let turn1 = backend.process_turn("MachPunch", "Tackle");
+    let turn2 = backend.process_turn("Tackle", "Tackle");
+
+    match (&turn1[0], &turn2[0]) {
+        (
+            BattleEvent::Damage { amount: a1, .. },
+            BattleEvent::Damage { amount: a2, .. },
+        ) => {
+            assert_eq!(*a1, (1.5 * *a2 as f32) as usize);
+        },
+        _ => panic!("Pattern mismatch"),
+    }
 }

@@ -203,7 +203,7 @@ pub enum PokerusData {
     HasPokerus { duration: usize, remaining_days: usize },
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum PokemonType {
     Normal,
     Fight,

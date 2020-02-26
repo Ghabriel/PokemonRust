@@ -361,7 +361,11 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
             let weather = 1.; // TODO
             let critical = 1.; // TODO
             let random = self.rng.get_damage_modifier();
-            let stab = 1.; // TODO
+            let stab = if self.check_stab(&used_move.movement, used_move.user) {
+                1.5
+            } else {
+                1.
+            };
             let burn = 1.; // TODO
             let other = 1.; // TODO
 
@@ -387,15 +391,32 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         // TODO: handle moves without types (e.g Struggle)
 
         let pokedex = get_all_pokemon_species();
-        let species_id = &self.pokemon_repository[&target].species_id;
+        let target_species_id = &self.pokemon_repository[&target].species_id;
 
         pokedex
-            .get_species(species_id)
+            .get_species(target_species_id)
             .unwrap()
             .types
             .iter()
             .map(|t| PokemonType::get_effectiveness(mov.move_type, *t))
             .product()
+    }
+
+    fn check_stab(&self, mov: &Move, user: usize) -> bool {
+        // TODO: handle Pokémon that currently have a different type than their
+        // original ones (e.g after Soak or Roost)
+        // TODO: handle moves without types (e.g Struggle)
+
+        let pokedex = get_all_pokemon_species();
+        let user_species_id = &self.pokemon_repository[&user].species_id;
+
+        pokedex
+            .get_species(user_species_id)
+            .unwrap()
+            .types
+            .iter()
+            .find(|t| **t == mov.move_type)
+            .is_some()
     }
 
     fn check_miss(&mut self, used_move: &UsedMove) -> bool {
