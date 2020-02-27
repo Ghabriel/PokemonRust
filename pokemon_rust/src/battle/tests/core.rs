@@ -67,3 +67,24 @@ fn applies_critical_hit() {
     assert_pattern!(turn2[0], BattleEvent::Damage { is_critical_hit: false, .. });
     assert_pattern!(turn2[1], BattleEvent::Damage { is_critical_hit: false, .. });
 }
+
+#[test]
+fn considers_stat_stages_on_damage_calculation() {
+    let mut backend = battle! {
+        "Rattata" 3 (max ivs, Serious) vs "Pidgey" 3 (max ivs, Serious)
+    };
+
+    let turn1 = backend.process_turn("Tackle", "Tackle");
+    backend.process_turn("TailWhip", "Tackle");
+    let turn3 = backend.process_turn("Tackle", "Tackle");
+
+    match (&turn1[0], &turn3[0]) {
+        (
+            BattleEvent::Damage { amount: a1, .. },
+            BattleEvent::Damage { amount: a2, .. },
+        ) => {
+            assert_eq!(*a2, ((*a1 as f32) * 2. / 3.) as usize);
+        },
+        _ => panic!("Pattern mismatch"),
+    }
+}

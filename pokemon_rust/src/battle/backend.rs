@@ -463,8 +463,12 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
     }
 
     fn get_stat(&self, pokemon: usize, stat: Stat) -> usize {
-        // TODO: take stat stages and other factors into account
-        self.get_pure_stat(pokemon, stat)
+        // TODO: take other factors into account
+        let stat_stage = self.get_stat_stage(pokemon, stat);
+        let multiplier = self.get_stat_stage_multiplier(stat_stage);
+        let pure_stat = self.get_pure_stat(pokemon, stat);
+
+        (multiplier * pure_stat as f32) as usize
     }
 
     /// Returns the value of a stat of a Pokémon without considering
@@ -474,8 +478,30 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
     }
 
     fn get_stat_stage(&self, pokemon: usize, stat: Stat) -> i8 {
-        // TODO: store stat stages somewhere and retrieve them here
-        0
+        let hash_map = self
+            .pokemon_flags[&pokemon]
+            .flags
+            .get("stat_stages");
+
+        if let Some(hash_map) = hash_map {
+            if let Flag::StatStages(stages) = hash_map {
+                *stages.get(&stat).unwrap_or(&0)
+            } else {
+                unreachable!()
+            }
+        } else {
+            0
+        }
+    }
+
+    fn get_stat_stage_multiplier(&self, stage: i8) -> f32 {
+        let stage = stage.max(-6).min(6) as f32;
+
+        if stage >= 0. {
+            (2. + stage) / 2.
+        } else {
+            2. / (2. + stage)
+        }
     }
 
     fn get_accuracy_multiplier(&self, stage: i8) -> f32 {
