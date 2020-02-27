@@ -147,6 +147,52 @@ lazy_static! {
             critical_hit: false,
         });
 
+        result.push(Move {
+            id: "Harden".to_string(),
+            display_name: "Harden".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Normal,
+            category: MoveCategory::Status,
+            base_power: MovePower::Special,
+            power_modifier: None,
+            accuracy: None,
+            pp: 30,
+            priority: 0,
+            target_type: TargetType::User,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 100,
+                effect: SimpleEffect::StatChange {
+                    changes: vec![(Stat::Defense, 1)],
+                    target: SimpleEffectTarget::MoveUser,
+                }
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
+            id: "Growl".to_string(),
+            display_name: "Growl".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Normal,
+            category: MoveCategory::Status,
+            base_power: MovePower::Special,
+            power_modifier: None,
+            accuracy: Some(100),
+            pp: 40,
+            priority: 0,
+            target_type: TargetType::AllAdjacentFoes,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 100,
+                effect: SimpleEffect::StatChange {
+                    changes: vec![(Stat::Attack, -1)],
+                    target: SimpleEffectTarget::MoveTarget,
+                }
+            }),
+            critical_hit: false,
+        });
+
         MoveDex::new(
             result
                 .into_iter()

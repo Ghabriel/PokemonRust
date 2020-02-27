@@ -176,7 +176,7 @@ lazy_static! {
             hidden_abilities: ["SolarPower"],
             move_table: [
                 1: "Scratch",
-                // 1: "Growl",
+                1: "Growl",
                 // 4: "Ember",
                 // 8: "Smokescreen",
                 // 12: "DragonBreath",
@@ -187,6 +187,46 @@ lazy_static! {
                 // 32: "FireSpin",
                 // 36: "Inferno",
                 // 40: "FlareBlitz",
+            ],
+        });
+
+        result.push(species! {
+            id: "Caterpie",
+            display_name: "Caterpie",
+            national_number: 10,
+            types: [PokemonType::Bug],
+            base_stats: [45, 30, 35, 20, 20, 45],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 39,
+            ev_yield: [1, 0, 0, 0, 0, 0],
+            capture_rate: 255,
+            abilities: ["ShieldDust"],
+            hidden_abilities: ["RunAway"],
+            move_table: [
+                1: "Tackle",
+                1: "StringShot",
+                9: "BugBite",
+            ],
+        });
+
+        result.push(species! {
+            id: "Metapod",
+            display_name: "Metapod",
+            national_number: 11,
+            types: [PokemonType::Bug],
+            base_stats: [50, 20, 55, 25, 25, 30],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 72,
+            ev_yield: [0, 0, 2, 0, 0, 0],
+            capture_rate: 120,
+            abilities: ["ShedSkin"],
+            hidden_abilities: [],
+            move_table: [
+                1: "Harden",
+                // TODO: learns when evolving
+                // 1: "Harden",
             ],
         });
 

@@ -443,25 +443,42 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
 
 impl<Rng: BattleRng> BattleBackend<Rng> {
     fn get_attack_critical_hit(&self, pokemon: usize) -> usize {
-        // TODO: take *positive* stat stages and other factors into account
-        self.get_pure_stat(pokemon, Stat::Attack)
+        self.get_positive_critical_hit_stat(pokemon, Stat::Attack)
     }
 
     fn get_defense_critical_hit(&self, pokemon: usize) -> usize {
-        // TODO: take *negative* stat stages and other factors into account
-        self.get_pure_stat(pokemon, Stat::Defense)
+        self.get_negative_critical_hit_stat(pokemon, Stat::Defense)
     }
 
     fn get_special_attack_critical_hit(&self, pokemon: usize) -> usize {
-        // TODO: take *positive* stat stages and other factors into account
-        self.get_pure_stat(pokemon, Stat::SpecialAttack)
+        self.get_positive_critical_hit_stat(pokemon, Stat::SpecialAttack)
     }
 
     fn get_special_defense_critical_hit(&self, pokemon: usize) -> usize {
-        // TODO: take *negative* stat stages and other factors into account
-        self.get_pure_stat(pokemon, Stat::SpecialDefense)
+        self.get_negative_critical_hit_stat(pokemon, Stat::SpecialDefense)
     }
 
+    /// Returns the value of a stat, ignoring negative stat changes.
+    fn get_positive_critical_hit_stat(&self, pokemon: usize, stat: Stat) -> usize {
+        // TODO: take other factors into account
+        let stat_stage = self.get_stat_stage(pokemon, stat).max(0);
+        let multiplier = self.get_stat_stage_multiplier(stat_stage);
+        let pure_stat = self.get_pure_stat(pokemon, stat);
+
+        (multiplier * pure_stat as f32) as usize
+    }
+
+    /// Returns the value of a stat, ignoring positive stat changes.
+    fn get_negative_critical_hit_stat(&self, pokemon: usize, stat: Stat) -> usize {
+        // TODO: take other factors into account
+        let stat_stage = self.get_stat_stage(pokemon, stat).min(0);
+        let multiplier = self.get_stat_stage_multiplier(stat_stage);
+        let pure_stat = self.get_pure_stat(pokemon, stat);
+
+        (multiplier * pure_stat as f32) as usize
+    }
+
+    /// Returns the effective value of a stat.
     fn get_stat(&self, pokemon: usize, stat: Stat) -> usize {
         // TODO: take other factors into account
         let stat_stage = self.get_stat_stage(pokemon, stat);
@@ -471,8 +488,8 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         (multiplier * pure_stat as f32) as usize
     }
 
-    /// Returns the value of a stat of a Pokémon without considering
-    /// stat stages and other factors.
+    /// Returns the value of a stat without considering stat stages and other
+    /// factors.
     fn get_pure_stat(&self, pokemon: usize, stat: Stat) -> usize {
         self.pokemon_repository[&pokemon].stats[stat as usize]
     }

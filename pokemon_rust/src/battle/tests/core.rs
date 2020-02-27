@@ -69,6 +69,46 @@ fn applies_critical_hit() {
 }
 
 #[test]
+fn ignores_attack_debuffs_on_critical_hit() {
+    let mut backend = battle! {
+        "Charmander" 20 (max ivs, Naive) vs "Charmander" 20 (max ivs, Serious)
+    };
+
+    let turn1 = backend.process_turn("Slash", "Growl");
+    let turn2 = backend.process_turn("Slash", "Growl");
+
+    match (&turn1[0], &turn2[0]) {
+        (
+            BattleEvent::Damage { amount: a1, .. },
+            BattleEvent::Damage { amount: a2, .. },
+        ) => {
+            assert_eq!(*a1, *a2);
+        },
+        _ => panic!("Pattern mismatch"),
+    }
+}
+
+#[test]
+fn ignores_defense_buffs_on_critical_hit() {
+    let mut backend = battle! {
+        "Charmander" 20 (max ivs, Serious) vs "Metapod" 20 (max ivs, Serious)
+    };
+
+    let turn1 = backend.process_turn("Slash", "Harden");
+    let turn2 = backend.process_turn("Slash", "Harden");
+
+    match (&turn1[0], &turn2[0]) {
+        (
+            BattleEvent::Damage { amount: a1, .. },
+            BattleEvent::Damage { amount: a2, .. },
+        ) => {
+            assert_eq!(*a1, *a2);
+        },
+        _ => panic!("Pattern mismatch"),
+    }
+}
+
+#[test]
 fn considers_stat_stages_on_damage_calculation() {
     let mut backend = battle! {
         "Rattata" 3 (max ivs, Serious) vs "Pidgey" 3 (max ivs, Serious)
