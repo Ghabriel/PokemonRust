@@ -230,6 +230,25 @@ lazy_static! {
             ],
         });
 
+        result.push(species! {
+            id: "Clefairy",
+            display_name: "Clefairy",
+            national_number: 35,
+            types: [PokemonType::Fairy],
+            base_stats: [70, 45, 48, 60, 65, 35],
+            male_ratio: Some(25.),
+            growth_rate: GrowthRate::Fast,
+            base_exp_yield: 113,
+            ev_yield: [2, 0, 0, 0, 0, 0],
+            capture_rate: 150,
+            abilities: ["CuteCharm", "MagicGuard"],
+            hidden_abilities: ["FriendGuard"],
+            move_table: [
+                1: "Pound",
+                // TODO: fill remaining moves
+            ],
+        });
+
         PokeDex::new(
             result
                 .into_iter()

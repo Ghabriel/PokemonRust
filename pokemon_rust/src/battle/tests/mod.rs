@@ -27,6 +27,7 @@ pub mod prelude {
 
 mod tackle;
 mod tailwhip;
+mod pound;
 
 trait TestMethods {
     fn move_p1(&mut self, index: usize);
