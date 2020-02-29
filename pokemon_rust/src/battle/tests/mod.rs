@@ -26,6 +26,7 @@ pub mod prelude {
 }
 
 mod karate_chop;
+mod mega_punch;
 mod pound;
 mod tackle;
 mod tailwhip;
