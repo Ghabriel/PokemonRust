@@ -249,6 +249,40 @@ lazy_static! {
             ],
         });
 
+        result.push(species! {
+            id: "Machop",
+            display_name: "Machop",
+            national_number: 66,
+            types: [PokemonType::Fight],
+            base_stats: [70, 45, 48, 60, 65, 35],
+            male_ratio: Some(75.),
+            growth_rate: GrowthRate::MediumSlow,
+            base_exp_yield: 61,
+            ev_yield: [0, 1, 0, 0, 0, 0],
+            capture_rate: 180,
+            abilities: ["Guts", "NoGuard"],
+            hidden_abilities: ["Steadfast"],
+            move_table: [
+                // 1: "LowKick",
+                // 1: "Leer",
+                // 3: "FocusEnergy",
+                7: "KarateChop",
+                // 9: "Foresight",
+                // 13: "LowSweep",
+                // 15: "SeismicToss",
+                // 19: "Revenge",
+                // 21: "KnockOff",
+                // 25: "VitalThrow",
+                // 27: "Wake-UpSlap",
+                // 31: "DualChop",
+                // 33: "Submission",
+                // 37: "BulkUp",
+                // 39: "CrossChop",
+                // 43: "ScaryFace",
+                // 45: "DynamicPunch",
+            ],
+        });
+
         PokeDex::new(
             result
                 .into_iter()

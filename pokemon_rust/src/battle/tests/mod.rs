@@ -25,9 +25,10 @@ pub mod prelude {
     };
 }
 
+mod karate_chop;
+mod pound;
 mod tackle;
 mod tailwhip;
-mod pound;
 
 trait TestMethods {
     fn move_p1(&mut self, index: usize);
