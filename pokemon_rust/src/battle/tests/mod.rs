@@ -30,6 +30,7 @@ mod mega_punch;
 mod pound;
 mod tackle;
 mod tailwhip;
+mod vise_grip;
 
 trait TestMethods {
     fn move_p1(&mut self, index: usize);

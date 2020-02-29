@@ -244,6 +244,38 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Krabby",
+            display_name: "Krabby",
+            national_number: 98,
+            types: [PokemonType::Water],
+            base_stats: [30, 105, 90, 25, 25, 50],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 65,
+            ev_yield: [0, 1, 0, 0, 0, 0],
+            capture_rate: 225,
+            abilities: ["HyperCutter", "ShellArmor"],
+            hidden_abilities: ["SheerForce"],
+            move_table: [
+                1: "ViseGrip",
+                // 1: "WaterGun",
+                // 1: "Leer",
+                4: "Harden",
+                // 8: "MetalClaw",
+                12: "MudShot",
+                16: "Protect",
+                20: "BubbleBeam",
+                24: "Stomp",
+                29: "Flail",
+                32: "RazorShell",
+                36: "Slam",
+                40: "SwordsDance",
+                44: "Crabhammer",
+                48: "Guillotine",
+            ],
+        });
+
+        result.push(species! {
             id: "Hitmonchan",
             display_name: "Hitmonchan",
             national_number: 107,
