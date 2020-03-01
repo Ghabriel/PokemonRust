@@ -1,12 +1,25 @@
 use amethyst::{
-    core::ArcThreadPool,
-    ecs::{Dispatcher, DispatcherBuilder},
+    core::{ArcThreadPool, Transform},
+    ecs::{Dispatcher, DispatcherBuilder, Entity},
     prelude::*,
+    renderer::{ActiveCamera, Camera},
 };
 
 use crate::systems::{AudioSystem, BattleSystem};
 
 use std::ops::Deref;
+
+pub fn initialise_camera(world: &mut World) -> Entity {
+    let mut transform = Transform::default();
+    // TODO: remove magic numbers
+    transform.set_translation_xyz(-1000., -1000., 1.0);
+
+    world
+        .create_entity()
+        .with(Camera::standard_2d(800., 600.))
+        .with(transform)
+        .build()
+}
 
 /// The state that the game reaches when the player enters a battle.
 /// This state makes some assumptions about the state of the World:
@@ -34,6 +47,9 @@ impl SimpleState for BattleState<'_, '_> {
 
         dispatcher.setup(world);
         self.dispatcher = Some(dispatcher);
+
+        let camera = initialise_camera(world);
+        world.write_resource::<ActiveCamera>().entity = Some(camera);
     }
 
     fn update(&mut self, data: &mut StateData<'_, GameData<'_, '_>>) -> SimpleTrans {

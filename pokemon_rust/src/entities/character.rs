@@ -8,7 +8,7 @@ use amethyst::{
 };
 
 use crate::{
-    common::{get_character_sprite_index_from_direction, load_sprite_sheet, Direction},
+    common::{get_character_sprite_index_from_direction, load_sprite_sheet_from_world, Direction},
     entities::{AnimationData, AnimationTable},
     map::{MapCoordinates, MapHandler, PlayerCoordinates, TileData},
 };
@@ -219,7 +219,7 @@ pub fn initialise_npc(
                 npc_builder.kind, movement_data.sprite_sheet,
             );
 
-            let sprite_sheet = load_sprite_sheet(
+            let sprite_sheet = load_sprite_sheet_from_world(
                 world,
                 &texture_file_name,
                 &sprite_sheet_file_name,

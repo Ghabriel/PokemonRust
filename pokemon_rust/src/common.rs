@@ -1,13 +1,14 @@
 //! Contains common types and functions used throughout the entire game.
 
 use amethyst::{
-    assets::{Handle, Loader, ProgressCounter},
+    assets::{AssetStorage, Handle, Loader, ProgressCounter},
     ecs::{World, WorldExt},
     renderer::{
         sprite::{Sprite, TextureCoordinates},
         ImageFormat,
         SpriteSheet,
         SpriteSheetFormat,
+        Texture,
     },
     ui::FontHandle,
 };
@@ -55,26 +56,49 @@ pub struct CommonResources {
     pub black: Handle<SpriteSheet>,
 }
 
-/// Loads a texture + spritesheet from given image/ron filenames.
-pub fn load_sprite_sheet(
+/// Loads a texture + spritesheet from given image/ron filenames, extracting
+/// the loader and needed asset storages directly from the world.
+pub fn load_sprite_sheet_from_world(
     world: &World,
     image_name: &str,
     ron_name: &str,
     progress_counter: &mut ProgressCounter,
 ) -> Handle<SpriteSheet> {
     let loader = world.read_resource::<Loader>();
+    let texture_storage = world.read_resource::<AssetStorage<Texture>>();
+    let sprite_sheet_storage = world.read_resource::<AssetStorage<SpriteSheet>>();
+
+    load_sprite_sheet(
+        &loader,
+        &texture_storage,
+        &sprite_sheet_storage,
+        image_name,
+        ron_name,
+        progress_counter,
+    )
+}
+
+/// Loads a texture + spritesheet from given image/ron filenames.
+pub fn load_sprite_sheet(
+    loader: &Loader,
+    texture_storage: &AssetStorage<Texture>,
+    sprite_sheet_storage: &AssetStorage<SpriteSheet>,
+    image_name: &str,
+    ron_name: &str,
+    progress_counter: &mut ProgressCounter,
+) -> Handle<SpriteSheet> {
     let texture_handle = loader.load(
         image_name,
         ImageFormat::default(),
         &mut *progress_counter,
-        &world.read_resource(),
+        texture_storage,
     );
 
     loader.load(
         ron_name,
         SpriteSheetFormat(texture_handle),
         &mut *progress_counter,
-        &world.read_resource(),
+        sprite_sheet_storage,
     )
 }
 

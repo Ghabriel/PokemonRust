@@ -4,7 +4,7 @@ use amethyst::{
     core::{math::Vector3, ArcThreadPool, Parent, Transform},
     ecs::{world::Builder, Dispatcher, DispatcherBuilder, Entity, World, WorldExt},
     prelude::*,
-    renderer::Camera,
+    renderer::{ActiveCamera, Camera},
     ui::TtfFormat,
 };
 
@@ -21,7 +21,7 @@ use crate::{
 
 use std::ops::Deref;
 
-pub fn initialise_camera(world: &mut World, player: Entity) {
+pub fn initialise_camera(world: &mut World, player: Entity) -> Entity {
     let mut transform = Transform::default();
     transform.set_translation_xyz(0., 0., 1.0);
     transform.set_scale(Vector3::new(0.5, 0.5, 0.5));
@@ -31,7 +31,7 @@ pub fn initialise_camera(world: &mut World, player: Entity) {
         .with(Camera::standard_2d(800., 600.))
         .with(Parent { entity: player })
         .with(transform)
-        .build();
+        .build()
 }
 
 pub fn initialise_resources(world: &mut World, progress_counter: &mut ProgressCounter) {
@@ -108,8 +108,9 @@ impl SimpleState for LoadingState<'_, '_> {
             starting_position,
             &mut progress_counter,
         );
-        initialise_camera(world, player);
+        let camera = initialise_camera(world, player);
 
+        world.insert(ActiveCamera { entity: Some(camera) });
         world.insert(AssetTracker::new(progress_counter));
         world.insert(PlayerEntity(player));
     }
