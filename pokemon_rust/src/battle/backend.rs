@@ -39,16 +39,45 @@ pub enum FrontendEventKind {
 /// The kind of events that the backend can send to the frontend.
 #[derive(Debug, Eq, PartialEq)]
 pub enum BattleEvent {
-    InitialSwitchIn(Team, usize),
-    ChangeTurn(usize),
-    Damage {
-        target: usize,
-        amount: usize,
-        effectiveness: TypeEffectiveness,
-        is_critical_hit: bool,
-    },
-    Miss(usize),
-    StatChange { target: usize, kind: StatChangeKind },
+    InitialSwitchIn(event::InitialSwitchIn),
+    ChangeTurn(event::ChangeTurn),
+    Damage(event::Damage),
+    Miss(event::Miss),
+    StatChange(event::StatChange),
+}
+
+pub mod event {
+    use super::{StatChangeKind, Team, TypeEffectiveness};
+
+    #[derive(Debug, Eq, PartialEq)]
+    pub struct InitialSwitchIn {
+        pub team: Team,
+        pub pokemon: usize,
+    }
+
+    #[derive(Debug, Eq, PartialEq)]
+    pub struct ChangeTurn {
+        pub new_turn: usize,
+    }
+
+    #[derive(Debug, Eq, PartialEq)]
+    pub struct Damage {
+        pub target: usize,
+        pub amount: usize,
+        pub effectiveness: TypeEffectiveness,
+        pub is_critical_hit: bool,
+    }
+
+    #[derive(Debug, Eq, PartialEq)]
+    pub struct Miss {
+        pub move_user: usize,
+    }
+
+    #[derive(Debug, Eq, PartialEq)]
+    pub struct StatChange {
+        pub target: usize,
+        pub kind: StatChangeKind,
+    }
 }
 
 #[derive(Debug, Eq, PartialEq)]
@@ -197,17 +226,17 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
     fn first_tick(&mut self) {
         self.p1.active_pokemon = self.p1.party.pop_front();
         assert!(self.p1.active_pokemon.is_some());
-        self.event_queue.push(BattleEvent::InitialSwitchIn(
-            Team::P1,
-            self.p1.active_pokemon.as_ref().unwrap().clone(),
-        ));
+        self.event_queue.push(BattleEvent::InitialSwitchIn(event::InitialSwitchIn {
+            team: Team::P1,
+            pokemon: self.p1.active_pokemon.as_ref().unwrap().clone(),
+        }));
 
         self.p2.active_pokemon = self.p2.party.pop_front();
         assert!(self.p2.active_pokemon.is_some());
-        self.event_queue.push(BattleEvent::InitialSwitchIn(
-            Team::P2,
-            self.p2.active_pokemon.as_ref().unwrap().clone(),
-        ));
+        self.event_queue.push(BattleEvent::InitialSwitchIn(event::InitialSwitchIn {
+            team: Team::P2,
+            pokemon: self.p2.active_pokemon.as_ref().unwrap().clone(),
+        }));
 
         // TODO: trigger things like Intimidate, entry hazards, Drought, etc
         // TODO: in which order?
@@ -285,7 +314,9 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
 
     fn process_move(&mut self, used_move: UsedMove) {
         if self.check_miss(&used_move) {
-            self.event_queue.push(BattleEvent::Miss(used_move.user));
+            self.event_queue.push(BattleEvent::Miss(event::Miss {
+                move_user: used_move.user
+            }));
             return;
         }
 
@@ -351,7 +382,9 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
 
     fn next_turn(&mut self) {
         self.turn += 1;
-        self.event_queue.push(BattleEvent::ChangeTurn(self.turn));
+        self.event_queue.push(BattleEvent::ChangeTurn(event::ChangeTurn {
+            new_turn: self.turn
+        }));
     }
 
     fn decompose_input_events(&mut self) -> (FrontendEventKind, FrontendEventKind) {
@@ -391,12 +424,12 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         let target = self.pokemon_repository.get_mut(&used_move.target).unwrap();
         target.current_hp = target.current_hp.saturating_sub(damage);
 
-        self.event_queue.push(BattleEvent::Damage {
+        self.event_queue.push(BattleEvent::Damage(event::Damage {
             target: used_move.target,
             amount: damage,
             effectiveness: TypeEffectiveness::from(effectiveness),
             is_critical_hit,
-        });
+        }));
 
         // TODO: trigger effects like Static
     }
@@ -434,10 +467,10 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
             },
         }
 
-        self.event_queue.push(BattleEvent::StatChange {
+        self.event_queue.push(BattleEvent::StatChange(event::StatChange {
             target,
             kind: stat_change_kind,
-        });
+        }));
     }
 }
 
