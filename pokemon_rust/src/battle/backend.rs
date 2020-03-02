@@ -11,6 +11,7 @@ use crate::entities::{
             SimpleEffectTarget,
         },
         Pokemon,
+        PokemonSpeciesData,
         PokemonType,
         Stat,
     },
@@ -475,6 +476,13 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
 }
 
 impl<Rng: BattleRng> BattleBackend<Rng> {
+    pub fn get_species(&self, pokemon: usize) -> &PokemonSpeciesData {
+        let pokedex = get_all_pokemon_species();
+        let species_id = &self.pokemon_repository[&pokemon].species_id;
+
+        pokedex.get_species(species_id).unwrap()
+    }
+
     fn get_attack_critical_hit(&self, pokemon: usize) -> usize {
         self.get_positive_critical_hit_stat(pokemon, Stat::Attack)
     }
@@ -631,12 +639,7 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         // original ones (e.g after Soak or Roost)
         // TODO: handle moves without types (e.g Struggle)
 
-        let pokedex = get_all_pokemon_species();
-        let target_species_id = &self.pokemon_repository[&target].species_id;
-
-        pokedex
-            .get_species(target_species_id)
-            .unwrap()
+        self.get_species(target)
             .types
             .iter()
             .map(|t| PokemonType::get_effectiveness(mov.move_type, *t))
