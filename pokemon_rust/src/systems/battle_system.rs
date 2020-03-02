@@ -2,7 +2,7 @@
 
 use amethyst::{
     assets::{AssetStorage, Loader},
-    core::Transform,
+    core::{math::Vector3, Transform},
     ecs::{Entities, Read, ReadExpect, System, WriteExpect, WriteStorage},
     renderer::{SpriteRender, SpriteSheet, Texture},
 };
@@ -123,31 +123,37 @@ impl BattleSystem {
         let animation = self.active_animation.as_mut().unwrap();
 
         if let Animation::InitialSwitchIn { event_data, time } = animation {
-            if event_data.team == Team::P2 {
-                // TODO
-                self.finish_animation();
-                return;
-            }
+            let (image_name, transform) = if event_data.team == Team::P1 {
+                let mut transform = Transform::default();
+                // TODO: remove magic numbers
+                transform.set_translation_xyz(-1200., -1200., 0.);
+                transform.set_scale(Vector3::new(2., 2., 2.));
+
+                ("pokemon/gen1_back.png", transform)
+            } else {
+                let mut transform = Transform::default();
+                // TODO: remove magic numbers
+                transform.set_translation_xyz(-800., -800., 0.);
+                transform.set_scale(Vector3::new(2., 2., 2.));
+
+                ("pokemon/gen1_front.png", transform)
+            };
 
             let sprite_sheet = load_sprite_sheet(
                 &loader,
                 &texture_storage,
                 &sprite_sheet_storage,
-                "pokemon/gen1_front.png",
-                "pokemon/gen1_front.ron",
+                image_name,
+                "pokemon/gen1_sprites.ron",
                 asset_tracker.get_progress_counter_mut(),
             );
 
+            let pokemon_species = self.backend.as_ref().unwrap().get_species(event_data.pokemon);
+
             let sprite_render = SpriteRender {
                 sprite_sheet,
-                sprite_number: 0,
+                sprite_number: pokemon_species.national_number - 1,
             };
-
-            let mut transform = Transform::default();
-            // TODO: remove magic numbers
-            transform.set_translation_xyz(-1000., -1000., 0.);
-
-            println!("Creating entity for the player's Pokémon...");
 
             entities
                 .build_entity()
@@ -173,7 +179,7 @@ impl<'a> System<'a> for BattleSystem {
     );
 
     fn run(&mut self, system_data: Self::SystemData) {
-        if self.temp >= 1 {
+        if self.temp >= 2 {
             return;
         }
 
