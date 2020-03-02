@@ -5,14 +5,16 @@ use amethyst::{
     renderer::{ActiveCamera, Camera},
 };
 
-use crate::systems::{AudioSystem, BattleSystem};
+use crate::{
+    constants::BATTLE_CAMERA_POSITION,
+    systems::{AudioSystem, BattleSystem},
+};
 
 use std::ops::Deref;
 
 pub fn initialise_camera(world: &mut World) -> Entity {
     let mut transform = Transform::default();
-    // TODO: remove magic numbers
-    transform.set_translation_xyz(-1000., -1000., 1.0);
+    transform.set_translation_xyz(BATTLE_CAMERA_POSITION.0, BATTLE_CAMERA_POSITION.1, 1.0);
 
     world
         .create_entity()

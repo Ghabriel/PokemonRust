@@ -25,9 +25,36 @@ use crate::{
         types::Battle,
     },
     common::{AssetTracker, load_sprite_sheet},
+    constants::BATTLE_CAMERA_POSITION,
 };
 
 use std::collections::VecDeque;
+
+// TODO: move these constants somewhere else
+const WINDOW_WIDTH: f32 = 800.;
+const WINDOW_HEIGHT: f32 = 600.;
+
+fn get_p1_sprite_transform() -> Transform {
+    let x = BATTLE_CAMERA_POSITION.0 - WINDOW_WIDTH / 3.;
+    let y = BATTLE_CAMERA_POSITION.0 - WINDOW_HEIGHT / 4.;
+
+    let mut transform = Transform::default();
+    transform.set_translation_xyz(x, y, 0.);
+    transform.set_scale(Vector3::new(2., 2., 2.));
+
+    transform
+}
+
+fn get_p2_sprite_transform() -> Transform {
+    let x = BATTLE_CAMERA_POSITION.0 + WINDOW_WIDTH / 3.;
+    let y = BATTLE_CAMERA_POSITION.0 + WINDOW_HEIGHT / 4.;
+
+    let mut transform = Transform::default();
+    transform.set_translation_xyz(x, y, 0.);
+    transform.set_scale(Vector3::new(1.8, 1.8, 1.8));
+
+    transform
+}
 
 /// A system responsible for processing Pokémon battles. Architecturally,
 /// battles are split into two layers: one acts like a "frontend" and the other
@@ -124,19 +151,9 @@ impl BattleSystem {
 
         if let Animation::InitialSwitchIn { event_data, time } = animation {
             let (image_name, transform) = if event_data.team == Team::P1 {
-                let mut transform = Transform::default();
-                // TODO: remove magic numbers
-                transform.set_translation_xyz(-1200., -1200., 0.);
-                transform.set_scale(Vector3::new(2., 2., 2.));
-
-                ("pokemon/gen1_back.png", transform)
+                ("pokemon/gen1_back.png", get_p1_sprite_transform())
             } else {
-                let mut transform = Transform::default();
-                // TODO: remove magic numbers
-                transform.set_translation_xyz(-800., -800., 0.);
-                transform.set_scale(Vector3::new(2., 2., 2.));
-
-                ("pokemon/gen1_front.png", transform)
+                ("pokemon/gen1_front.png", get_p2_sprite_transform())
             };
 
             let sprite_sheet = load_sprite_sheet(

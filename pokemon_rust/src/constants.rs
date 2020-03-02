@@ -16,3 +16,6 @@ pub const MAP_DECORATION_LAYER_Z: f32 = 0.5;
 
 /// The maximum number of moves that a Pokémon can have.
 pub const MOVE_LIMIT: usize = 4;
+
+/// The coordinates of the battle camera.
+pub const BATTLE_CAMERA_POSITION: (f32, f32) = (-1000., -1000.);
