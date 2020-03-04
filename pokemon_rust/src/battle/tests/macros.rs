@@ -20,7 +20,11 @@ macro_rules! assert_pattern {
     ($value:expr, $pattern:pat) => {
         match $value {
             $pattern => {},
-            _ => panic!("Pattern mismatch"),
+            _ => panic!(
+                "\nPattern mismatch.\n\tValue: {:?}\n\tPattern: {}\n",
+                $value,
+                stringify!($pattern),
+            ),
         }
     }
 }
@@ -42,40 +46,27 @@ macro_rules! battle_setup {
         $p2_species:literal $p2_level:literal $(($($p2_data:tt)*))?
     ) => {
         {
+            let p1 = pokemon_setup!($p1_species $p1_level $(($($p1_data)*))?);
+            let p2 = pokemon_setup!($p2_species $p2_level $(($($p2_data)*))?);
+
+            create_simple_test_battle(p1, p2)
+        }
+    }
+}
+
+macro_rules! pokemon_setup {
+    ($p1_species:literal $p1_level:literal $(($($p1_data:tt)*))?) => {
+        {
+            let p1_builder = PokemonBuilder::default();
+            $(let p1_builder = constrain_pokemon!(p1_builder, $($p1_data)*);)?
+
             let pokedex = get_all_pokemon_species();
             let movedex = get_all_moves();
 
-            let p1_builder = PokemonBuilder::default();
-            $(let p1_builder = constrain_pokemon!(p1_builder, $($p1_data)*);)?
-            let p1 = p1_builder.build(
+            p1_builder.build(
                 &pokedex.get_species($p1_species).unwrap(),
                 &movedex,
                 $p1_level,
-            );
-
-            let p2_builder = PokemonBuilder::default();
-            $(let p2_builder = constrain_pokemon!(p2_builder, $($p2_data)*);)?
-            let p2 = p2_builder.build(
-                &pokedex.get_species($p2_species).unwrap(),
-                &movedex,
-                $p2_level,
-            );
-
-            BattleBackend::new(
-                Battle::new(
-                    BattleType::Single,
-                    BattleCharacterTeam {
-                        active_pokemon: None,
-                        party: Party { pokemon: vec![p1].into() },
-                        character_id: None,
-                    },
-                    BattleCharacterTeam {
-                        active_pokemon: None,
-                        party: Party { pokemon: vec![p2].into() },
-                        character_id: None,
-                    },
-                ),
-                TestRng::default(),
             )
         }
     }

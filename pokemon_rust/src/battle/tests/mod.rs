@@ -32,6 +32,30 @@ pub mod prelude {
             Nature,
         },
     };
+
+    use crate::{
+        battle::tests::TestRng,
+        entities::pokemon::Pokemon,
+    };
+
+    pub fn create_simple_test_battle(p1: Pokemon, p2: Pokemon) -> BattleBackend<TestRng> {
+        BattleBackend::new(
+            Battle::new(
+                BattleType::Single,
+                BattleCharacterTeam {
+                    active_pokemon: None,
+                    party: Party { pokemon: vec![p1].into() },
+                    character_id: None,
+                },
+                BattleCharacterTeam {
+                    active_pokemon: None,
+                    party: Party { pokemon: vec![p2].into() },
+                    character_id: None,
+                },
+            ),
+            TestRng::default(),
+        )
+    }
 }
 
 mod karate_chop;
@@ -100,7 +124,7 @@ impl<Rng: BattleRng> TestMethods for BattleBackend<Rng> {
 }
 
 #[derive(Debug, Default)]
-struct TestRng {
+pub struct TestRng {
     miss_counter: usize,
     last_miss_check_chance: Option<usize>,
     last_secondary_effect_check_chance: Option<usize>,
