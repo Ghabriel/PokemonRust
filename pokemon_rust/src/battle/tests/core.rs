@@ -7,8 +7,34 @@ fn switches_in_all_participants_in_first_turn() {
     let mut backend = battle_setup!("Rattata" 3 vs "Pidgey" 3);
     let mut events: Vec<_> = backend.tick().collect();
 
-    assert_event!(events[0], InitialSwitchIn { team: Team::P1, pokemon: 0 });
-    assert_event!(events[1], InitialSwitchIn { team: Team::P2, pokemon: 1 });
+    assert_event!(events[0], InitialSwitchIn { team: Team::P2, pokemon: 1, .. });
+    assert_event!(events[1], InitialSwitchIn { team: Team::P1, pokemon: 0, .. });
+}
+
+#[test]
+fn treats_wild_pokemon_as_already_sent_out() {
+    let mut backend = battle_setup!("Rattata" 3 vs "Pidgey" 3);
+    let mut events: Vec<_> = backend.tick().collect();
+
+    assert_event!(events[0], InitialSwitchIn { is_already_sent_out: true, .. });
+}
+
+#[test]
+fn treats_owned_pokemon_as_not_already_sent_out() {
+    let p1 = pokemon_setup!("Rattata" 3);
+    let p2 = pokemon_setup!("Pidgey" 3);
+    let mut backend = create_simple_trainer_battle(p1, p2);
+    let mut events: Vec<_> = backend.tick().collect();
+
+    assert_event!(events[0], InitialSwitchIn { is_already_sent_out: false, .. });
+}
+
+#[test]
+fn treats_the_player_pokemon_as_not_already_sent_out() {
+    let mut backend = battle_setup!("Rattata" 3 vs "Pidgey" 3);
+    let mut events: Vec<_> = backend.tick().collect();
+
+    assert_event!(events[1], InitialSwitchIn { is_already_sent_out: false, .. });
 }
 
 #[test]

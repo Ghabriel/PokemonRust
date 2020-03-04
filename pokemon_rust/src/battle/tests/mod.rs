@@ -35,22 +35,44 @@ pub mod prelude {
 
     use crate::{
         battle::tests::TestRng,
-        entities::pokemon::Pokemon,
+        entities::{
+            character::CharacterId,
+            pokemon::Pokemon,
+        },
     };
 
-    pub fn create_simple_test_battle(p1: Pokemon, p2: Pokemon) -> BattleBackend<TestRng> {
+    pub fn create_simple_wild_battle(p1: Pokemon, p2: Pokemon) -> BattleBackend<TestRng> {
         BattleBackend::new(
             Battle::new(
                 BattleType::Single,
                 BattleCharacterTeam {
                     active_pokemon: None,
                     party: Party { pokemon: vec![p1].into() },
-                    character_id: None,
+                    character_id: Some(CharacterId(1)),
                 },
                 BattleCharacterTeam {
                     active_pokemon: None,
                     party: Party { pokemon: vec![p2].into() },
                     character_id: None,
+                },
+            ),
+            TestRng::default(),
+        )
+    }
+
+    pub fn create_simple_trainer_battle(p1: Pokemon, p2: Pokemon) -> BattleBackend<TestRng> {
+        BattleBackend::new(
+            Battle::new(
+                BattleType::Single,
+                BattleCharacterTeam {
+                    active_pokemon: None,
+                    party: Party { pokemon: vec![p1].into() },
+                    character_id: Some(CharacterId(1)),
+                },
+                BattleCharacterTeam {
+                    active_pokemon: None,
+                    party: Party { pokemon: vec![p2].into() },
+                    character_id: Some(CharacterId(2)),
                 },
             ),
             TestRng::default(),

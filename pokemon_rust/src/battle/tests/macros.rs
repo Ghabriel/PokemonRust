@@ -49,7 +49,7 @@ macro_rules! battle_setup {
             let p1 = pokemon_setup!($p1_species $p1_level $(($($p1_data)*))?);
             let p2 = pokemon_setup!($p2_species $p2_level $(($($p2_data)*))?);
 
-            create_simple_test_battle(p1, p2)
+            create_simple_wild_battle(p1, p2)
         }
     }
 }

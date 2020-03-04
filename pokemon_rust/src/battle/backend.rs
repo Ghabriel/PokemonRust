@@ -50,10 +50,17 @@ pub enum BattleEvent {
 pub mod event {
     use super::{StatChangeKind, Team, TypeEffectiveness};
 
+    /// Corresponds to the very first switch-in of a battle participant in a
+    /// battle.
     #[derive(Debug, Eq, PartialEq)]
     pub struct InitialSwitchIn {
         pub team: Team,
         pub pokemon: usize,
+        /// Indicates if the Pokémon is already sent out when the battle
+        /// started. The frontend uses this to decide whether a pokéball
+        /// throwing animation should be played. This is `true` for wild
+        /// Pokémon and `false` otherwise.
+        pub is_already_sent_out: bool,
     }
 
     #[derive(Debug, Eq, PartialEq)]
@@ -227,20 +234,24 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
     fn first_tick(&mut self) {
         self.p1.active_pokemon = self.p1.party.pop_front();
         assert!(self.p1.active_pokemon.is_some());
-        self.event_queue.push(BattleEvent::InitialSwitchIn(event::InitialSwitchIn {
-            team: Team::P1,
-            pokemon: self.p1.active_pokemon.as_ref().unwrap().clone(),
-        }));
 
         self.p2.active_pokemon = self.p2.party.pop_front();
         assert!(self.p2.active_pokemon.is_some());
+
         self.event_queue.push(BattleEvent::InitialSwitchIn(event::InitialSwitchIn {
             team: Team::P2,
             pokemon: self.p2.active_pokemon.as_ref().unwrap().clone(),
+            is_already_sent_out: self.p2.character_id.is_none(),
         }));
 
-        // TODO: trigger things like Intimidate, entry hazards, Drought, etc
-        // TODO: in which order?
+        self.event_queue.push(BattleEvent::InitialSwitchIn(event::InitialSwitchIn {
+            team: Team::P1,
+            pokemon: self.p1.active_pokemon.as_ref().unwrap().clone(),
+            is_already_sent_out: false,
+        }));
+
+        // TODO: trigger things like Intimidate, entry hazards, Drought, etc.
+        // The order is determined by speed.
     }
 
     fn process_turn(&mut self) {
