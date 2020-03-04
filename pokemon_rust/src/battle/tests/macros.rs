@@ -1,3 +1,21 @@
+macro_rules! assert_event {
+    ($value:expr, InitialSwitchIn { $($args:tt)* }) => {
+        assert_pattern!($value, BattleEvent::InitialSwitchIn(InitialSwitchIn { $($args)* }));
+    };
+    ($value:expr, ChangeTurn { $($args:tt)* }) => {
+        assert_pattern!($value, BattleEvent::ChangeTurn(ChangeTurn { $($args)* }));
+    };
+    ($value:expr, Damage { $($args:tt)* }) => {
+        assert_pattern!($value, BattleEvent::Damage(Damage { $($args)* }));
+    };
+    ($value:expr, Miss { $($args:tt)* }) => {
+        assert_pattern!($value, BattleEvent::Miss(Miss { $($args)* }));
+    };
+    ($value:expr, StatChange { $($args:tt)* }) => {
+        assert_pattern!($value, BattleEvent::StatChange(StatChange { $($args)* }));
+    };
+}
+
 macro_rules! assert_pattern {
     ($value:expr, $pattern:pat) => {
         match $value {

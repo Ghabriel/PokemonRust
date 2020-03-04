@@ -13,7 +13,16 @@ pub mod prelude {
     // Modules required by the test macros
     pub use crate::{
         battle::{
-            backend::BattleBackend,
+            backend::{
+                BattleBackend,
+                event::{
+                    InitialSwitchIn,
+                    ChangeTurn,
+                    Damage,
+                    Miss,
+                    StatChange,
+                },
+            },
             types::{Battle, BattleCharacterTeam, BattleType, Party},
         },
         entities::pokemon::{

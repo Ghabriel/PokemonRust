@@ -10,5 +10,5 @@ fn pound_deals_damage() {
 
     let events = backend.process_turn("Pound", "Harden");
 
-    assert_pattern!(events[0], BattleEvent::Damage { target: 1, is_critical_hit: false, .. });
+    assert_event!(events[0], Damage { target: 1, is_critical_hit: false, .. });
 }

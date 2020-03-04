@@ -5,10 +5,10 @@ use super::{prelude::*, TestMethods, TestRng};
 #[test]
 fn switches_in_all_participants_in_first_turn() {
     let mut backend = battle_setup!("Rattata" 3 vs "Pidgey" 3);
-    let mut events = backend.tick();
+    let mut events: Vec<_> = backend.tick().collect();
 
-    assert_eq!(events.next().unwrap(), BattleEvent::InitialSwitchIn(Team::P1, 0));
-    assert_eq!(events.next().unwrap(), BattleEvent::InitialSwitchIn(Team::P2, 1));
+    assert_event!(events[0], InitialSwitchIn { team: Team::P1, pokemon: 0 });
+    assert_event!(events[1], InitialSwitchIn { team: Team::P2, pokemon: 1 });
 }
 
 #[test]
@@ -19,13 +19,13 @@ fn applies_type_effectiveness() {
 
     let events = backend.process_turn("Gust", "Tackle");
 
-    assert_eq!(events[0], BattleEvent::Damage {
+    assert_event!(events[0], Damage {
         target: 0,
         amount: 10,
         effectiveness: TypeEffectiveness::Normal,
         is_critical_hit: false,
     });
-    assert_eq!(events[1], BattleEvent::Damage {
+    assert_event!(events[1], Damage {
         target: 1,
         amount: 12,
         effectiveness: TypeEffectiveness::SuperEffective,
@@ -44,8 +44,8 @@ fn applies_stab() {
 
     match (&turn1[0], &turn2[0]) {
         (
-            BattleEvent::Damage { amount: a1, .. },
-            BattleEvent::Damage { amount: a2, .. },
+            BattleEvent::Damage(Damage { amount: a1, .. }),
+            BattleEvent::Damage(Damage { amount: a2, .. }),
         ) => {
             assert_eq!(*a1, (1.5 * *a2 as f32) as usize);
         },
@@ -62,10 +62,10 @@ fn applies_critical_hit() {
     let turn1 = backend.process_turn("Slash", "Tackle");
     let turn2 = backend.process_turn("Scratch", "Tackle");
 
-    assert_pattern!(turn1[0], BattleEvent::Damage { is_critical_hit: true, .. });
-    assert_pattern!(turn1[1], BattleEvent::Damage { is_critical_hit: false, .. });
-    assert_pattern!(turn2[0], BattleEvent::Damage { is_critical_hit: false, .. });
-    assert_pattern!(turn2[1], BattleEvent::Damage { is_critical_hit: false, .. });
+    assert_event!(turn1[0], Damage { is_critical_hit: true, .. });
+    assert_event!(turn1[1], Damage { is_critical_hit: false, .. });
+    assert_event!(turn2[0], Damage { is_critical_hit: false, .. });
+    assert_event!(turn2[1], Damage { is_critical_hit: false, .. });
 }
 
 #[test]
@@ -79,8 +79,8 @@ fn ignores_attack_debuffs_on_critical_hit() {
 
     match (&turn1[0], &turn2[0]) {
         (
-            BattleEvent::Damage { amount: a1, .. },
-            BattleEvent::Damage { amount: a2, .. },
+            BattleEvent::Damage(Damage { amount: a1, .. }),
+            BattleEvent::Damage(Damage { amount: a2, .. }),
         ) => {
             assert_eq!(*a1, *a2);
         },
@@ -99,8 +99,8 @@ fn ignores_defense_buffs_on_critical_hit() {
 
     match (&turn1[0], &turn2[0]) {
         (
-            BattleEvent::Damage { amount: a1, .. },
-            BattleEvent::Damage { amount: a2, .. },
+            BattleEvent::Damage(Damage { amount: a1, .. }),
+            BattleEvent::Damage(Damage { amount: a2, .. }),
         ) => {
             assert_eq!(*a1, *a2);
         },
@@ -120,8 +120,8 @@ fn considers_stat_stages_on_damage_calculation() {
 
     match (&turn1[0], &turn3[0]) {
         (
-            BattleEvent::Damage { amount: a1, .. },
-            BattleEvent::Damage { amount: a2, .. },
+            BattleEvent::Damage(Damage { amount: a1, .. }),
+            BattleEvent::Damage(Damage { amount: a2, .. }),
         ) => {
             assert_eq!(*a2, ((*a1 as f32) * 2. / 3.) as usize);
         },
