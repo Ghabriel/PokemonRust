@@ -10,7 +10,12 @@ use amethyst::{
 
 use crate::{
     audio::initialise_audio,
-    common::{load_full_texture_sprite_sheet, AssetTracker, CommonResources},
+    common::{
+        load_full_texture_sprite_sheet,
+        load_sprite_sheet_from_world,
+        AssetTracker,
+        CommonResources,
+    },
     config::GameConfig,
     entities::character::{initialise_player, PlayerEntity},
     events::EventQueue,
@@ -56,10 +61,26 @@ pub fn initialise_resources(world: &mut World, progress_counter: &mut ProgressCo
         &mut *progress_counter,
     );
 
+    let gen1_front = load_sprite_sheet_from_world(
+        world,
+        "pokemon/gen1_front.png",
+        "pokemon/gen1_sprites.ron",
+        &mut *progress_counter,
+    );
+
+    let gen1_back = load_sprite_sheet_from_world(
+        world,
+        "pokemon/gen1_back.png",
+        "pokemon/gen1_sprites.ron",
+        &mut *progress_counter,
+    );
+
     world.insert(CommonResources {
         font,
         text_box,
         black,
+        gen1_front,
+        gen1_back,
     });
 }
 

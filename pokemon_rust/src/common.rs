@@ -54,6 +54,10 @@ pub struct CommonResources {
     pub text_box: Handle<SpriteSheet>,
     /// A solid black sprite used for screen fading.
     pub black: Handle<SpriteSheet>,
+    /// A sprite sheet containing the front side of all gen I Pokémon.
+    pub gen1_front: Handle<SpriteSheet>,
+    /// A sprite sheet containing the back side of all gen I Pokémon.
+    pub gen1_back: Handle<SpriteSheet>,
 }
 
 /// Loads a texture + spritesheet from given image/ron filenames, extracting

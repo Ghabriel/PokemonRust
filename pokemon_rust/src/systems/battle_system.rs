@@ -24,7 +24,7 @@ use crate::{
         rng::StandardBattleRng,
         types::Battle,
     },
-    common::{AssetTracker, load_sprite_sheet},
+    common::{AssetTracker, CommonResources, load_sprite_sheet},
     constants::BATTLE_CAMERA_POSITION,
 };
 
@@ -153,26 +153,18 @@ impl BattleSystem {
             tints,
             entities,
             asset_tracker,
+            resources,
             loader,
             sprite_sheet_storage,
             texture_storage,
             time,
         ) = system_data;
 
-        let (image_name, transform) = if event_data.team == Team::P1 {
-            ("pokemon/gen1_back.png", get_p1_sprite_transform())
+        let (sprite_sheet, transform) = if event_data.team == Team::P1 {
+            (resources.gen1_back.clone(), get_p1_sprite_transform())
         } else {
-            ("pokemon/gen1_front.png", get_p2_sprite_transform())
+            (resources.gen1_front.clone(), get_p2_sprite_transform())
         };
-
-        let sprite_sheet = load_sprite_sheet(
-            &loader,
-            &texture_storage,
-            &sprite_sheet_storage,
-            image_name,
-            "pokemon/gen1_sprites.ron",
-            asset_tracker.get_progress_counter_mut(),
-        );
 
         let pokemon_species = self.backend.as_ref().unwrap().get_species(event_data.pokemon);
 
@@ -204,6 +196,7 @@ impl BattleSystem {
             mut tints,
             entities,
             mut asset_tracker,
+            resources,
             loader,
             sprite_sheet_storage,
             texture_storage,
@@ -249,6 +242,7 @@ impl<'a> System<'a> for BattleSystem {
         WriteStorage<'a, Tint>,
         Entities<'a>,
         WriteExpect<'a, AssetTracker>,
+        ReadExpect<'a, CommonResources>,
         ReadExpect<'a, Loader>,
         Read<'a, AssetStorage<SpriteSheet>>,
         Read<'a, AssetStorage<Texture>>,
