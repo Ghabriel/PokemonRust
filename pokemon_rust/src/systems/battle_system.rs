@@ -4,7 +4,7 @@ use amethyst::{
     assets::{AssetStorage, Loader},
     core::{math::Vector3, Time, Transform},
     ecs::{Entities, Entity, Read, ReadExpect, System, WriteExpect, WriteStorage},
-    renderer::{SpriteRender, SpriteSheet, Texture},
+    renderer::{palette::Srgba, resources::Tint, SpriteRender, SpriteSheet, Texture},
 };
 
 use crate::{
@@ -34,12 +34,12 @@ use std::collections::VecDeque;
 const WINDOW_WIDTH: f32 = 800.;
 const WINDOW_HEIGHT: f32 = 600.;
 
-const P1_SPRITE_Y: f32 = BATTLE_CAMERA_POSITION.0 - WINDOW_HEIGHT / 4.;
-const P2_SPRITE_Y: f32 = BATTLE_CAMERA_POSITION.0 + WINDOW_HEIGHT / 4.;
+const P1_SPRITE_Y: f32 = BATTLE_CAMERA_POSITION.1 - WINDOW_HEIGHT / 4.;
+const P2_SPRITE_Y: f32 = BATTLE_CAMERA_POSITION.1 + WINDOW_HEIGHT / 4.;
 
 // Both initial positions should be off-screen to improve the animation
-const P1_SPRITE_INITIAL_X: f32 = BATTLE_CAMERA_POSITION.0 - WINDOW_WIDTH - 100.;
-const P2_SPRITE_INITIAL_X: f32 = BATTLE_CAMERA_POSITION.0 + WINDOW_WIDTH + 100.;
+const P1_SPRITE_INITIAL_X: f32 = BATTLE_CAMERA_POSITION.0 - WINDOW_WIDTH / 2. - 128.;
+const P2_SPRITE_INITIAL_X: f32 = BATTLE_CAMERA_POSITION.0 + WINDOW_WIDTH / 2. + 128.;
 
 const P1_SPRITE_FINAL_X: f32 = BATTLE_CAMERA_POSITION.0 - WINDOW_WIDTH / 3.;
 const P2_SPRITE_FINAL_X: f32 = BATTLE_CAMERA_POSITION.0 + WINDOW_WIDTH / 3.;
@@ -150,6 +150,7 @@ impl BattleSystem {
             battle,
             sprite_renders,
             transforms,
+            tints,
             entities,
             asset_tracker,
             loader,
@@ -184,6 +185,7 @@ impl BattleSystem {
             .build_entity()
             .with(sprite_render, sprite_renders)
             .with(transform, transforms)
+            .with(Tint(Srgba::new(1.0, 1.0, 1.0, 0.1)), tints)
             .build();
 
         self.active_animation = Some(Animation::InitialSwitchIn {
@@ -199,6 +201,7 @@ impl BattleSystem {
             battle,
             mut sprite_renders,
             mut transforms,
+            mut tints,
             entities,
             mut asset_tracker,
             loader,
@@ -243,6 +246,7 @@ impl<'a> System<'a> for BattleSystem {
         WriteExpect<'a, Battle>,
         WriteStorage<'a, SpriteRender>,
         WriteStorage<'a, Transform>,
+        WriteStorage<'a, Tint>,
         Entities<'a>,
         WriteExpect<'a, AssetTracker>,
         ReadExpect<'a, Loader>,
