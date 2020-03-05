@@ -11,15 +11,8 @@ use amethyst::{
 use crate::{
     audio::{Sound, SoundKit},
     config::GameConfig,
-    entities::text_box::TextBox,
+    entities::text_box::{advance_text, delete_text_box, TextBox, TextState},
 };
-
-/// Represents the possible states that a text box can be in.
-#[derive(Debug, Eq, PartialEq)]
-enum TextState {
-    Running,
-    Closed,
-}
 
 /// A system responsible for animating a text box on the screen.
 pub struct TextSystem {
@@ -33,60 +26,6 @@ impl TextSystem {
                 .write_resource::<EventChannel<InputEvent<StringBindings>>>()
                 .register_reader(),
         }
-    }
-
-    fn advance_text(
-        &mut self,
-        pressed_action_key: bool,
-        text_box: &mut TextBox,
-        game_config: &GameConfig,
-        time: &Time,
-        ui_texts: &mut WriteStorage<UiText>,
-    ) -> TextState {
-        let full_text_length = text_box.full_text.len();
-        // TODO: extract to constant or make this more flexible
-        let maximum_display_length = 150;
-
-        match (pressed_action_key, text_box.awaiting_keypress) {
-            (true, true) => {
-                if text_box.displayed_text_end == full_text_length {
-                    return TextState::Closed;
-                } else {
-                    text_box.displayed_text_start = text_box.displayed_text_end;
-                    text_box.awaiting_keypress = false;
-                }
-            },
-            (true, false) => {
-                text_box.displayed_text_end =
-                    full_text_length.min(text_box.displayed_text_start + maximum_display_length);
-            },
-            (false, false) => {
-                text_box.cooldown += time.delta_seconds();
-                while text_box.cooldown >= game_config.text_delay {
-                    text_box.cooldown -= game_config.text_delay;
-
-                    let displayed_length =
-                        text_box.displayed_text_end - text_box.displayed_text_start;
-
-                    if text_box.displayed_text_end == full_text_length
-                        || displayed_length == maximum_display_length
-                    {
-                        text_box.awaiting_keypress = true;
-                    } else {
-                        text_box.displayed_text_end += 1;
-                    }
-                }
-            },
-            _ => {},
-        }
-
-        ui_texts
-            .get_mut(text_box.text_entity)
-            .expect("Failed to retrieve UiText")
-            .text = text_box.full_text[text_box.displayed_text_start..text_box.displayed_text_end]
-            .to_string();
-
-        TextState::Running
     }
 }
 
@@ -125,7 +64,7 @@ impl<'a> System<'a> for TextSystem {
                 }
             }
 
-            let state = self.advance_text(
+            let state = advance_text(
                 pressed_action_key,
                 text_box,
                 &game_config,
@@ -134,13 +73,7 @@ impl<'a> System<'a> for TextSystem {
             );
 
             if state == TextState::Closed {
-                entities
-                    .delete(text_box.box_entity)
-                    .expect("Failed to delete box");
-                entities
-                    .delete(text_box.text_entity)
-                    .expect("Failed to delete text");
-                entities.delete(entity).expect("Failed to delete text box");
+                delete_text_box(entity, text_box, &entities);
             }
         }
     }
