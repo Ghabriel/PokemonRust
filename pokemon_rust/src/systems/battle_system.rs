@@ -1,10 +1,11 @@
 //! A system responsible for processing Pokémon battles.
 
 use amethyst::{
-    assets::{AssetStorage, Loader},
     core::{math::Vector3, Time, Transform},
-    ecs::{Entities, Entity, Read, ReadExpect, System, WriteExpect, WriteStorage},
-    renderer::{palette::Srgba, resources::Tint, SpriteRender, SpriteSheet, Texture},
+    ecs::{Entities, Entity, Read, ReadExpect, System, SystemData, World, WriteExpect, WriteStorage},
+    renderer::{palette::Srgba, resources::Tint, SpriteRender},
+    shred::ResourceId,
+    ui::{UiImage, UiText, UiTransform},
 };
 
 use crate::{
@@ -24,11 +25,29 @@ use crate::{
         rng::StandardBattleRng,
         types::Battle,
     },
-    common::{AssetTracker, CommonResources, load_sprite_sheet},
+    common::CommonResources,
+    config::GameConfig,
     constants::BATTLE_CAMERA_POSITION,
+    entities::text_box::{advance_text, create_text_box, delete_text_box, TextBox, TextState},
 };
 
 use std::collections::VecDeque;
+
+#[derive(SystemData)]
+pub struct BattleSystemData<'a> {
+    battle: WriteExpect<'a, Battle>,
+    sprite_renders: WriteStorage<'a, SpriteRender>,
+    text_boxes: WriteStorage<'a, TextBox>,
+    transforms: WriteStorage<'a, Transform>,
+    tints: WriteStorage<'a, Tint>,
+    ui_images: WriteStorage<'a, UiImage>,
+    ui_texts: WriteStorage<'a, UiText>,
+    ui_transforms: WriteStorage<'a, UiTransform>,
+    entities: Entities<'a>,
+    resources: ReadExpect<'a, CommonResources>,
+    game_config: ReadExpect<'a, GameConfig>,
+    time: Read<'a, Time>,
+}
 
 // TODO: move these window-related constants somewhere else
 const WINDOW_WIDTH: f32 = 800.;
@@ -96,6 +115,9 @@ enum Animation {
         event_data: StatChange,
         time: usize,
     },
+    Text {
+        text_box_entity: Entity,
+    },
 }
 
 impl BattleSystem {
@@ -131,14 +153,15 @@ impl BattleSystem {
         self.active_animation = None;
     }
 
-    fn tick(&mut self, system_data: <Self as System<'_>>::SystemData) {
+    fn tick(&mut self, mut system_data: <Self as System<'_>>::SystemData) {
         let animation = self.active_animation.as_mut().unwrap();
 
         match animation {
-            Animation::InitialSwitchIn { .. } => self.tick_switch_in(system_data),
+            Animation::InitialSwitchIn { .. } => self.tick_switch_in(&mut system_data),
             Animation::Damage { event_data } => { },
             Animation::Miss => { },
             Animation::StatChange { event_data, time } => { },
+            Animation::Text { .. } => self.tick_text(&mut system_data),
         }
     }
 }
@@ -147,21 +170,16 @@ impl BattleSystem {
     fn init_switch_in(
         &mut self,
         event_data: InitialSwitchIn,
-        system_data: &mut <Self as System<'_>>::SystemData,
+        system_data: &mut BattleSystemData<'_>,
     ) {
-        let (
-            battle,
+        let BattleSystemData {
             sprite_renders,
             transforms,
             tints,
             entities,
-            asset_tracker,
             resources,
-            loader,
-            sprite_sheet_storage,
-            texture_storage,
-            time,
-        ) = system_data;
+            ..
+        } = system_data;
 
         let (sprite_sheet, transform) = if event_data.team == Team::P1 {
             (resources.gen1_back.clone(), get_p1_sprite_transform())
@@ -196,26 +214,17 @@ impl BattleSystem {
         });
     }
 
-    fn tick_switch_in(
-        &mut self,
-        (
-            battle,
-            mut sprite_renders,
-            mut transforms,
-            mut tints,
-            entities,
-            mut asset_tracker,
-            resources,
-            loader,
-            sprite_sheet_storage,
-            texture_storage,
+    fn tick_switch_in(&mut self, system_data: &mut BattleSystemData<'_>) {
+        let BattleSystemData {
+            transforms,
             time,
-        ): <Self as System<'_>>::SystemData,
-    ) {
+            ..
+        } = system_data;
+
         let animation = self.active_animation.as_mut().unwrap();
 
         if let Animation::InitialSwitchIn { event_data, pokemon_entity, elapsed_time } = animation {
-            let mut transform = transforms
+            let transform = transforms
                 .get_mut(*pokemon_entity)
                 .expect("Failed to retrieve Transform");
 
@@ -232,6 +241,7 @@ impl BattleSystem {
 
             if *elapsed_time >= SWITCH_IN_ANIMATION_TIME {
                 self.finish_animation();
+                self.init_introductory_text(system_data);
             } else {
                 *elapsed_time += time.delta_seconds();
             }
@@ -239,20 +249,70 @@ impl BattleSystem {
     }
 }
 
+impl BattleSystem {
+    fn init_introductory_text(&mut self, system_data: &mut BattleSystemData<'_>) {
+        let BattleSystemData {
+            text_boxes,
+            ui_images,
+            ui_texts,
+            ui_transforms,
+            entities,
+            resources,
+            ..
+        } = system_data;
+
+        let text_box = create_text_box(
+            format!("A wild {} appears!", "Pidgey"),
+            ui_images,
+            ui_texts,
+            ui_transforms,
+            &entities,
+            &resources,
+        );
+
+        let text_box_entity = entities
+            .build_entity()
+            .with(text_box, text_boxes)
+            .build();
+
+        self.active_animation = Some(Animation::Text { text_box_entity });
+    }
+
+    fn tick_text(&mut self, system_data: &mut BattleSystemData<'_>) {
+        let BattleSystemData {
+            text_boxes,
+            ui_texts,
+            entities,
+            game_config,
+            time,
+            ..
+        } = system_data;
+
+        let animation = self.active_animation.as_mut().unwrap();
+
+        if let Animation::Text { text_box_entity } = animation {
+            let text_box = text_boxes
+                .get_mut(*text_box_entity)
+                .expect("Failed to retrieve text box");
+
+            let state = advance_text(
+                false,
+                text_box,
+                &game_config,
+                &time,
+                ui_texts,
+            );
+
+            if state == TextState::Closed {
+                delete_text_box(*text_box_entity, text_box, &entities);
+                self.finish_animation();
+            }
+        }
+    }
+}
+
 impl<'a> System<'a> for BattleSystem {
-    type SystemData = (
-        WriteExpect<'a, Battle>,
-        WriteStorage<'a, SpriteRender>,
-        WriteStorage<'a, Transform>,
-        WriteStorage<'a, Tint>,
-        Entities<'a>,
-        WriteExpect<'a, AssetTracker>,
-        ReadExpect<'a, CommonResources>,
-        ReadExpect<'a, Loader>,
-        Read<'a, AssetStorage<SpriteSheet>>,
-        Read<'a, AssetStorage<Texture>>,
-        Read<'a, Time>,
-    );
+    type SystemData = BattleSystemData<'a>;
 
     fn run(&mut self, mut system_data: Self::SystemData) {
         if self.active_animation.is_none() {
@@ -265,7 +325,7 @@ impl<'a> System<'a> for BattleSystem {
             let backend = match self.backend.as_mut() {
                 Some(backend) => backend,
                 None => {
-                    self.init_backend(&system_data.0);
+                    self.init_backend(&system_data.battle);
                     self.backend.as_mut().unwrap()
                 },
             };
