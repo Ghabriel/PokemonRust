@@ -35,7 +35,7 @@ const WINDOW_WIDTH: f32 = 800.;
 const WINDOW_HEIGHT: f32 = 600.;
 
 // TODO: move to a better place
-const SWITCH_IN_ANIMATION_TIME: f32 = 2.;
+const SWITCH_IN_ANIMATION_TIME: f32 = 1.;
 
 const P1_SPRITE_Y: f32 = BATTLE_CAMERA_POSITION.1 - WINDOW_HEIGHT / 4.;
 const P2_SPRITE_Y: f32 = BATTLE_CAMERA_POSITION.1 + WINDOW_HEIGHT / 4.;
@@ -219,16 +219,15 @@ impl BattleSystem {
                 .get_mut(*pokemon_entity)
                 .expect("Failed to retrieve Transform");
 
-            let progress = (*elapsed_time / SWITCH_IN_ANIMATION_TIME).min(1.);
-            let x = match event_data.team {
-                Team::P1 => {
-                    P1_SPRITE_INITIAL_X + (P1_SPRITE_FINAL_X - P1_SPRITE_INITIAL_X) * progress
-                },
-                Team::P2 => {
-                    P2_SPRITE_INITIAL_X + (P2_SPRITE_FINAL_X - P2_SPRITE_INITIAL_X) * progress
-                },
-            };
+            let x = {
+                let (initial_x, final_x) = match event_data.team {
+                    Team::P1 => (P1_SPRITE_INITIAL_X, P1_SPRITE_FINAL_X),
+                    Team::P2 => (P2_SPRITE_INITIAL_X, P2_SPRITE_FINAL_X),
+                };
+                let progress = (*elapsed_time / SWITCH_IN_ANIMATION_TIME).min(1.);
 
+                initial_x + (final_x - initial_x) * progress
+            };
             transform.set_translation_x(x);
 
             if *elapsed_time >= SWITCH_IN_ANIMATION_TIME {
