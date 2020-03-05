@@ -34,6 +34,9 @@ use std::collections::VecDeque;
 const WINDOW_WIDTH: f32 = 800.;
 const WINDOW_HEIGHT: f32 = 600.;
 
+// TODO: move to a better place
+const SWITCH_IN_ANIMATION_TIME: f32 = 2.;
+
 const P1_SPRITE_Y: f32 = BATTLE_CAMERA_POSITION.1 - WINDOW_HEIGHT / 4.;
 const P2_SPRITE_Y: f32 = BATTLE_CAMERA_POSITION.1 + WINDOW_HEIGHT / 4.;
 
@@ -180,10 +183,16 @@ impl BattleSystem {
             .with(Tint(Srgba::new(1.0, 1.0, 1.0, 0.1)), tints)
             .build();
 
+        let elapsed_time = if event_data.is_already_sent_out {
+            SWITCH_IN_ANIMATION_TIME
+        } else {
+            0.
+        };
+
         self.active_animation = Some(Animation::InitialSwitchIn {
             event_data,
             pokemon_entity,
-            elapsed_time: 0.,
+            elapsed_time,
         });
     }
 
@@ -210,10 +219,7 @@ impl BattleSystem {
                 .get_mut(*pokemon_entity)
                 .expect("Failed to retrieve Transform");
 
-            // TODO: extract to constant
-            let total_time = 2.;
-
-            let progress = (*elapsed_time / total_time).min(1.);
+            let progress = (*elapsed_time / SWITCH_IN_ANIMATION_TIME).min(1.);
             let x = match event_data.team {
                 Team::P1 => {
                     P1_SPRITE_INITIAL_X + (P1_SPRITE_FINAL_X - P1_SPRITE_INITIAL_X) * progress
@@ -225,7 +231,7 @@ impl BattleSystem {
 
             transform.set_translation_x(x);
 
-            if *elapsed_time >= total_time {
+            if *elapsed_time >= SWITCH_IN_ANIMATION_TIME {
                 self.finish_animation();
             } else {
                 *elapsed_time += time.delta_seconds();
