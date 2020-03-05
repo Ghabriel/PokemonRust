@@ -52,7 +52,7 @@ pub mod event {
 
     /// Corresponds to the very first switch-in of a battle participant in a
     /// battle.
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct InitialSwitchIn {
         pub team: Team,
         pub pokemon: usize,
@@ -63,12 +63,12 @@ pub mod event {
         pub is_already_sent_out: bool,
     }
 
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct ChangeTurn {
         pub new_turn: usize,
     }
 
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct Damage {
         pub target: usize,
         pub amount: usize,
@@ -76,19 +76,19 @@ pub mod event {
         pub is_critical_hit: bool,
     }
 
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct Miss {
         pub move_user: usize,
     }
 
-    #[derive(Debug, Eq, PartialEq)]
+    #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct StatChange {
         pub target: usize,
         pub kind: StatChangeKind,
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TypeEffectiveness {
     Immune,
     ReallyNotVeryEffective,
@@ -114,7 +114,7 @@ impl TypeEffectiveness {
     }
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum StatChangeKind {
     WontGoAnyLower,
     SeverelyFell,
@@ -126,7 +126,7 @@ pub enum StatChangeKind {
     WontGoAnyHigher,
 }
 
-#[derive(Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Team {
     P1,
     P2,

@@ -113,7 +113,7 @@ pub struct BattleSystem {
     event_reader: ReaderId<InputEvent<StringBindings>>,
     backend: Option<BattleBackend<StandardBattleRng>>,
     event_queue: VecDeque<BattleEvent>,
-    active_animation: Option<Animation>,
+    active_animation_sequence: Option<AnimationSequence>,
     temp: usize,
 }
 
@@ -137,6 +137,10 @@ enum Animation {
     },
 }
 
+struct AnimationSequence {
+    animations: VecDeque<Animation>,
+}
+
 impl BattleSystem {
     pub fn new(world: &mut World) -> BattleSystem {
         BattleSystem {
@@ -145,7 +149,7 @@ impl BattleSystem {
                 .register_reader(),
             backend: None,
             event_queue: VecDeque::new(),
-            active_animation: None,
+            active_animation_sequence: None,
             temp: 0,
         }
     }
@@ -157,33 +161,48 @@ impl BattleSystem {
         ));
     }
 
-    fn init_animation(&mut self, system_data: &mut <Self as System<'_>>::SystemData) {
+    fn start_animation(&mut self, system_data: &mut <Self as System<'_>>::SystemData) {
         let event = self.event_queue.pop_front().unwrap();
         println!("{:?}", event);
 
         match event {
             BattleEvent::InitialSwitchIn(event_data) => {
-                self.init_switch_in(event_data, system_data);
+                self.handle_initial_switch_in(event_data, system_data);
             },
             BattleEvent::ChangeTurn(_) => self.finish_animation(),
             BattleEvent::Damage(event_data) => {
-                self.active_animation = Some(Animation::Damage { event_data });
+                // TODO
+                // self.active_animation = Some(Animation::Damage { event_data });
             },
             BattleEvent::Miss(_) => {
-                self.active_animation = Some(Animation::Miss);
+                // TODO
+                // self.active_animation = Some(Animation::Miss);
             },
             BattleEvent::StatChange(event_data) => {
-                self.active_animation = Some(Animation::StatChange { event_data, time: 0 });
+                // TODO
+                // self.active_animation = Some(Animation::StatChange { event_data, time: 0 });
             },
         }
     }
 
     fn finish_animation(&mut self) {
-        self.active_animation = None;
+        let animation_sequence = self.active_animation_sequence.as_mut().unwrap();
+
+        if animation_sequence.animations.len() > 1 {
+            animation_sequence.animations.pop_front();
+        } else {
+            self.active_animation_sequence = None;
+        }
     }
 
     fn tick(&mut self, mut system_data: <Self as System<'_>>::SystemData) {
-        let animation = self.active_animation.as_mut().unwrap();
+        let animation = self
+            .active_animation_sequence
+            .as_mut()
+            .unwrap()
+            .animations
+            .front_mut()
+            .unwrap();
 
         match animation {
             Animation::InitialSwitchIn { .. } => self.tick_switch_in(&mut system_data),
@@ -196,11 +215,39 @@ impl BattleSystem {
 }
 
 impl BattleSystem {
-    fn init_switch_in(
+    fn handle_initial_switch_in(
         &mut self,
         event_data: InitialSwitchIn,
         system_data: &mut BattleSystemData<'_>,
     ) {
+        let mut animations = vec![
+            self.init_switch_in(event_data.clone(), system_data),
+        ];
+
+        if event_data.team == Team::P2 {
+            let introductory_text = {
+                let species = self
+                    .backend
+                    .as_mut()
+                    .unwrap()
+                    .get_species(event_data.pokemon);
+
+                format!("A wild {} appears!", species.display_name)
+            };
+
+            animations.push(self.init_text(introductory_text, system_data));
+        }
+
+        self.active_animation_sequence = Some(AnimationSequence {
+            animations: animations.into(),
+        });
+    }
+
+    fn init_switch_in(
+        &mut self,
+        event_data: InitialSwitchIn,
+        system_data: &mut BattleSystemData<'_>,
+    ) -> Animation {
         let BattleSystemData {
             sprite_renders,
             transforms,
@@ -236,11 +283,11 @@ impl BattleSystem {
             0.
         };
 
-        self.active_animation = Some(Animation::InitialSwitchIn {
+        Animation::InitialSwitchIn {
             event_data,
             pokemon_entity,
             elapsed_time,
-        });
+        }
     }
 
     fn tick_switch_in(&mut self, system_data: &mut BattleSystemData<'_>) {
@@ -250,7 +297,13 @@ impl BattleSystem {
             ..
         } = system_data;
 
-        let animation = self.active_animation.as_mut().unwrap();
+        let animation = self
+            .active_animation_sequence
+            .as_mut()
+            .unwrap()
+            .animations
+            .front_mut()
+            .unwrap();
 
         if let Animation::InitialSwitchIn { event_data, pokemon_entity, elapsed_time } = animation {
             let transform = transforms
@@ -269,21 +322,7 @@ impl BattleSystem {
             transform.set_translation_x(x);
 
             if *elapsed_time >= SWITCH_IN_ANIMATION_TIME {
-                if event_data.team == Team::P2 {
-                    let text = {
-                        let species = self
-                            .backend
-                            .as_mut()
-                            .unwrap()
-                            .get_species(event_data.pokemon);
-
-                        format!("A wild {} appears!", species.display_name)
-                    };
-
-                    self.init_text(text, system_data);
-                } else {
-                    self.finish_animation();
-                }
+                self.finish_animation();
             } else {
                 *elapsed_time += time.delta_seconds();
             }
@@ -296,7 +335,7 @@ impl BattleSystem {
         &mut self,
         text: String,
         system_data: &mut BattleSystemData<'_>,
-    ) {
+    ) -> Animation {
         let BattleSystemData {
             text_boxes,
             ui_images,
@@ -321,7 +360,7 @@ impl BattleSystem {
             .with(text_box, text_boxes)
             .build();
 
-        self.active_animation = Some(Animation::Text { text_box_entity });
+        Animation::Text { text_box_entity }
     }
 
     fn tick_text(&mut self, system_data: &mut BattleSystemData<'_>) {
@@ -336,7 +375,13 @@ impl BattleSystem {
             ..
         } = system_data;
 
-        let animation = self.active_animation.as_mut().unwrap();
+        let animation = self
+            .active_animation_sequence
+            .as_mut()
+            .unwrap()
+            .animations
+            .front_mut()
+            .unwrap();
 
         if let Animation::Text { text_box_entity } = animation {
             let mut pressed_action_key = false;
@@ -374,7 +419,7 @@ impl<'a> System<'a> for BattleSystem {
     type SystemData = BattleSystemData<'a>;
 
     fn run(&mut self, mut system_data: Self::SystemData) {
-        if self.active_animation.is_none() {
+        if self.active_animation_sequence.is_none() {
             if self.temp >= 2 {
                 println!("Stopped for debugging purposes");
                 return;
@@ -393,7 +438,7 @@ impl<'a> System<'a> for BattleSystem {
                 self.event_queue.extend(backend.tick());
             }
 
-            self.init_animation(&mut system_data);
+            self.start_animation(&mut system_data);
         }
 
         self.tick(system_data);
