@@ -43,7 +43,7 @@ impl SimpleState for BattleState<'_, '_> {
 
         let mut dispatcher = DispatcherBuilder::new()
             .with(AudioSystem::default(), "audio_system", &[])
-            .with(BattleSystem::default(), "battle_system", &[])
+            .with(BattleSystem::new(world), "battle_system", &[])
             .with_pool(world.read_resource::<ArcThreadPool>().deref().clone())
             .build();
 

@@ -2,13 +2,28 @@
 
 use amethyst::{
     core::{math::Vector3, Time, Transform},
-    ecs::{Entities, Entity, Read, ReadExpect, System, SystemData, World, WriteExpect, WriteStorage},
+    ecs::{
+        Entities,
+        Entity,
+        Read,
+        ReaderId,
+        ReadExpect,
+        System,
+        SystemData,
+        World,
+        WorldExt,
+        WriteExpect,
+        WriteStorage,
+    },
+    input::{InputEvent, StringBindings},
     renderer::{palette::Srgba, resources::Tint, SpriteRender},
     shred::ResourceId,
+    shrev::EventChannel,
     ui::{UiImage, UiText, UiTransform},
 };
 
 use crate::{
+    audio::{Sound, SoundKit},
     battle::{
         backend::{
             BattleBackend,
@@ -46,6 +61,8 @@ pub struct BattleSystemData<'a> {
     entities: Entities<'a>,
     resources: ReadExpect<'a, CommonResources>,
     game_config: ReadExpect<'a, GameConfig>,
+    input_event_channel: Read<'a, EventChannel<InputEvent<StringBindings>>>,
+    sound_kit: SoundKit<'a>,
     time: Read<'a, Time>,
 }
 
@@ -92,8 +109,8 @@ fn get_p2_sprite_transform() -> Transform {
 /// is responsible for receiving events from the backend and displaying them
 /// to the screen in an intuitive way. It also handles the player's input,
 /// sending signals to the backend whenever an action is taken.
-#[derive(Default)]
 pub struct BattleSystem {
+    event_reader: ReaderId<InputEvent<StringBindings>>,
     backend: Option<BattleBackend<StandardBattleRng>>,
     event_queue: VecDeque<BattleEvent>,
     active_animation: Option<Animation>,
@@ -121,6 +138,18 @@ enum Animation {
 }
 
 impl BattleSystem {
+    pub fn new(world: &mut World) -> BattleSystem {
+        BattleSystem {
+            event_reader: world
+                .write_resource::<EventChannel<InputEvent<StringBindings>>>()
+                .register_reader(),
+            backend: None,
+            event_queue: VecDeque::new(),
+            active_animation: None,
+            temp: 0,
+        }
+    }
+
     fn init_backend(&mut self, battle: &Battle) {
         self.backend = Some(BattleBackend::new(
             battle.clone(),
@@ -240,8 +269,21 @@ impl BattleSystem {
             transform.set_translation_x(x);
 
             if *elapsed_time >= SWITCH_IN_ANIMATION_TIME {
-                self.finish_animation();
-                self.init_introductory_text(system_data);
+                if event_data.team == Team::P2 {
+                    let text = {
+                        let species = self
+                            .backend
+                            .as_mut()
+                            .unwrap()
+                            .get_species(event_data.pokemon);
+
+                        format!("A wild {} appears!", species.display_name)
+                    };
+
+                    self.init_text(text, system_data);
+                } else {
+                    self.finish_animation();
+                }
             } else {
                 *elapsed_time += time.delta_seconds();
             }
@@ -250,7 +292,11 @@ impl BattleSystem {
 }
 
 impl BattleSystem {
-    fn init_introductory_text(&mut self, system_data: &mut BattleSystemData<'_>) {
+    fn init_text(
+        &mut self,
+        text: String,
+        system_data: &mut BattleSystemData<'_>,
+    ) {
         let BattleSystemData {
             text_boxes,
             ui_images,
@@ -262,7 +308,7 @@ impl BattleSystem {
         } = system_data;
 
         let text_box = create_text_box(
-            format!("A wild {} appears!", "Pidgey"),
+            text,
             ui_images,
             ui_texts,
             ui_transforms,
@@ -284,6 +330,8 @@ impl BattleSystem {
             ui_texts,
             entities,
             game_config,
+            input_event_channel,
+            sound_kit,
             time,
             ..
         } = system_data;
@@ -291,12 +339,23 @@ impl BattleSystem {
         let animation = self.active_animation.as_mut().unwrap();
 
         if let Animation::Text { text_box_entity } = animation {
+            let mut pressed_action_key = false;
+            for event in input_event_channel.read(&mut self.event_reader) {
+                match event {
+                    InputEvent::ActionPressed(action) if action == "action" => {
+                        pressed_action_key = true;
+                        sound_kit.play_sound(Sound::SelectOption);
+                    },
+                    _ => {},
+                }
+            }
+
             let text_box = text_boxes
                 .get_mut(*text_box_entity)
                 .expect("Failed to retrieve text box");
 
             let state = advance_text(
-                false,
+                pressed_action_key,
                 text_box,
                 &game_config,
                 &time,
