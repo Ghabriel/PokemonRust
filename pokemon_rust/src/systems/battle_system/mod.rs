@@ -6,7 +6,6 @@ use amethyst::{
     core::{Time, Transform},
     ecs::{
         Entities,
-        Entity,
         Read,
         ReaderId,
         ReadExpect,
@@ -87,26 +86,6 @@ pub struct BattleSystem {
     temp: usize,
 }
 
-enum Animation {
-    InitialSwitchIn {
-        event_data: InitialSwitchIn,
-        pokemon_entity: Entity,
-        elapsed_time: f32,
-    },
-    Damage {
-        // TODO: keep track of HP bar animation parameters
-        event_data: Damage,
-    },
-    Miss,
-    StatChange {
-        event_data: StatChange,
-        time: usize,
-    },
-    Text {
-        text_box_entity: Entity,
-    },
-}
-
 struct AnimationSequence {
     animations: VecDeque<Box<dyn FrontendEvent + Sync + Send>>,
 }
@@ -120,6 +99,7 @@ trait FrontendEvent {
 
     fn tick(
         &mut self,
+        input_events: Vec<InputEvent<StringBindings>>,
         backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) -> bool;
@@ -151,10 +131,10 @@ impl BattleSystem {
 
         match event {
             BattleEvent::InitialSwitchIn(event_data) => {
-                self.handle_initial_switch_in(event_data, system_data);
+                self.handle_initial_switch_in(event_data);
             },
-            BattleEvent::ChangeTurn(_) => self.finish_animation(),
-            BattleEvent::Damage(event_data) => {
+            BattleEvent::ChangeTurn(_) => { },
+            BattleEvent::Damage(_) => {
                 // TODO
                 // self.active_animation = Some(Animation::Damage { event_data });
             },
@@ -162,50 +142,58 @@ impl BattleSystem {
                 // TODO
                 // self.active_animation = Some(Animation::Miss);
             },
-            BattleEvent::StatChange(event_data) => {
+            BattleEvent::StatChange(_) => {
                 // TODO
                 // self.active_animation = Some(Animation::StatChange { event_data, time: 0 });
             },
         }
-    }
 
-    fn finish_animation(&mut self) {
-        let animation_sequence = self.active_animation_sequence.as_mut().unwrap();
+        let backend = self.backend.as_mut().unwrap();
 
-        if animation_sequence.animations.len() > 1 {
-            animation_sequence.animations.pop_front();
-        } else {
-            self.active_animation_sequence = None;
-        }
+        self.active_animation_sequence
+            .as_mut()
+            .and_then(|sequence| sequence.animations.front_mut())
+            .iter_mut()
+            .for_each(|animation| animation.start(backend, system_data));
     }
 
     fn tick(&mut self, mut system_data: <Self as System<'_>>::SystemData) {
-        // let animation = self
-        //     .active_animation_sequence
-        //     .as_mut()
-        //     .unwrap()
-        //     .animations
-        //     .front_mut()
-        //     .unwrap();
+        if let Some(active_animation_sequence) = self.active_animation_sequence.as_mut() {
+            let animation = active_animation_sequence.animations.front_mut().unwrap();
 
-        // match animation {
-        //     Animation::InitialSwitchIn { .. } => self.tick_switch_in(&mut system_data),
-        //     Animation::Damage { event_data } => { },
-        //     Animation::Miss => { },
-        //     Animation::StatChange { event_data, time } => { },
-        //     Animation::Text { .. } => self.tick_text(&mut system_data),
-        // }
+            let input_events = system_data
+                .input_event_channel
+                .read(&mut self.event_reader)
+                .map(Clone::clone)
+                .collect();
+
+            let backend = self.backend.as_mut().unwrap();
+
+            let completed = animation.tick(
+                input_events,
+                backend,
+                &mut system_data,
+            );
+
+            if completed {
+                active_animation_sequence.animations.pop_front();
+
+                if let Some(animation) = active_animation_sequence.animations.front_mut() {
+                    animation.start(backend, &mut system_data);
+                } else {
+                    self.active_animation_sequence = None;
+                }
+            }
+        }
     }
 }
 
 impl BattleSystem {
-    fn handle_initial_switch_in(
-        &mut self,
-        event_data: InitialSwitchIn,
-        system_data: &mut BattleSystemData<'_>,
-    ) {
+    fn handle_initial_switch_in(&mut self, event_data: InitialSwitchIn) {
         let mut animations: Vec<Box<dyn FrontendEvent + Sync + Send>> = vec![
-            Box::new(InitialSwitchInEvent::PendingStart { event_data }),
+            Box::new(InitialSwitchInEvent::PendingStart {
+                event_data: event_data.clone(),
+            }),
         ];
 
         if event_data.team == Team::P2 {

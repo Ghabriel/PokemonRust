@@ -1,14 +1,8 @@
 use amethyst::{
     core::{math::Vector3, Transform},
-    ecs::{
-        Entity,
-        ReaderId,
-        WorldExt,
-    },
+    ecs::Entity,
     input::{InputEvent, StringBindings},
     renderer::{palette::Srgba, resources::Tint, SpriteRender},
-    shred::ResourceId,
-    shrev::EventChannel,
 };
 
 use crate::{
@@ -26,7 +20,6 @@ use crate::{
             Team,
         },
         rng::StandardBattleRng,
-        types::Battle,
     },
     constants::BATTLE_CAMERA_POSITION,
     entities::text_box::{advance_text, create_text_box, delete_text_box, TextState},
@@ -84,7 +77,8 @@ impl FrontendEvent for InitialSwitchInEvent {
         backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) {
-        if let InitialSwitchInEvent::PendingStart { event_data } = *self {
+        println!("Start InitialSwitchInEvent");
+        if let InitialSwitchInEvent::PendingStart { event_data } = self {
             let BattleSystemData {
                 sprite_renders,
                 transforms,
@@ -121,7 +115,7 @@ impl FrontendEvent for InitialSwitchInEvent {
             };
 
             *self = InitialSwitchInEvent::Started {
-                event_data,
+                event_data: event_data.clone(),
                 pokemon_entity,
                 elapsed_time,
             };
@@ -130,9 +124,11 @@ impl FrontendEvent for InitialSwitchInEvent {
 
     fn tick(
         &mut self,
+        _input_events: Vec<InputEvent<StringBindings>>,
         _backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) -> bool {
+        println!("Tick InitialSwitchInEvent");
         if let InitialSwitchInEvent::Started { event_data, pokemon_entity, elapsed_time } = self {
             let BattleSystemData {
                 transforms,
@@ -179,10 +175,11 @@ pub enum TextEvent {
 impl FrontendEvent for TextEvent {
     fn start(
         &mut self,
-        backend: &BattleBackend<StandardBattleRng>,
+        _backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) {
-        if let TextEvent::PendingStart { full_text } = *self {
+        println!("Start TextEvent");
+        if let TextEvent::PendingStart { full_text } = self {
             let BattleSystemData {
                 text_boxes,
                 ui_images,
@@ -194,7 +191,7 @@ impl FrontendEvent for TextEvent {
             } = system_data;
 
             let text_box = create_text_box(
-                full_text,
+                full_text.clone(),
                 ui_images,
                 ui_texts,
                 ui_transforms,
@@ -213,23 +210,24 @@ impl FrontendEvent for TextEvent {
 
     fn tick(
         &mut self,
+        input_events: Vec<InputEvent<StringBindings>>,
         _backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) -> bool {
+        println!("Tick TextEvent");
         if let TextEvent::Started { text_box_entity } = self {
             let BattleSystemData {
                 text_boxes,
                 ui_texts,
                 entities,
                 game_config,
-                input_event_channel,
                 sound_kit,
                 time,
                 ..
             } = system_data;
 
             let mut pressed_action_key = false;
-            for event in input_event_channel.read(&mut self.event_reader) {
+            for event in input_events {
                 match event {
                     InputEvent::ActionPressed(action) if action == "action" => {
                         pressed_action_key = true;
