@@ -489,9 +489,13 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
 impl<Rng: BattleRng> BattleBackend<Rng> {
     pub fn get_species(&self, pokemon: usize) -> &PokemonSpeciesData {
         let pokedex = get_all_pokemon_species();
-        let species_id = &self.pokemon_repository[&pokemon].species_id;
+        let species_id = &self.get_pokemon(pokemon).species_id;
 
         pokedex.get_species(species_id).unwrap()
+    }
+
+    pub fn get_pokemon(&self, pokemon: usize) -> &Pokemon {
+        &self.pokemon_repository[&pokemon]
     }
 
     fn get_attack_critical_hit(&self, pokemon: usize) -> usize {

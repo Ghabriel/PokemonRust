@@ -32,7 +32,7 @@ const WINDOW_WIDTH: f32 = 800.;
 const WINDOW_HEIGHT: f32 = 600.;
 
 // TODO: move to a better place
-const SWITCH_IN_ANIMATION_TIME: f32 = 1.;
+const SWITCH_IN_ANIMATION_TIME: f32 = 0.5;
 
 const P1_SPRITE_Y: f32 = BATTLE_CAMERA_POSITION.1 - WINDOW_HEIGHT / 4.;
 const P2_SPRITE_Y: f32 = BATTLE_CAMERA_POSITION.1 + WINDOW_HEIGHT / 4.;
@@ -77,7 +77,6 @@ impl FrontendEvent for InitialSwitchInEvent {
         backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) {
-        println!("Start InitialSwitchInEvent");
         if let InitialSwitchInEvent::PendingStart { event_data } = self {
             let BattleSystemData {
                 sprite_renders,
@@ -128,7 +127,6 @@ impl FrontendEvent for InitialSwitchInEvent {
         _backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) -> bool {
-        println!("Tick InitialSwitchInEvent");
         if let InitialSwitchInEvent::Started { event_data, pokemon_entity, elapsed_time } = self {
             let BattleSystemData {
                 transforms,
@@ -178,7 +176,6 @@ impl FrontendEvent for TextEvent {
         _backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) {
-        println!("Start TextEvent");
         if let TextEvent::PendingStart { full_text } = self {
             let BattleSystemData {
                 text_boxes,
@@ -214,7 +211,6 @@ impl FrontendEvent for TextEvent {
         _backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) -> bool {
-        println!("Tick TextEvent");
         if let TextEvent::Started { text_box_entity } = self {
             let BattleSystemData {
                 text_boxes,

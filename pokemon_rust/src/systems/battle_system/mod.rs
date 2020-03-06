@@ -190,26 +190,33 @@ impl BattleSystem {
 
 impl BattleSystem {
     fn handle_initial_switch_in(&mut self, event_data: InitialSwitchIn) {
-        let mut animations: Vec<Box<dyn FrontendEvent + Sync + Send>> = vec![
-            Box::new(InitialSwitchInEvent::PendingStart {
-                event_data: event_data.clone(),
-            }),
-        ];
+        let mut animations: Vec<Box<dyn FrontendEvent + Sync + Send>> = Vec::new();
 
-        if event_data.team == Team::P2 {
-            let introductory_text = {
-                let species = self
-                    .backend
-                    .as_mut()
-                    .unwrap()
-                    .get_species(event_data.pokemon);
+        let backend = self.backend.as_mut().unwrap();
+        let species = backend.get_species(event_data.pokemon);
 
-                format!("A wild {} appears!", species.display_name)
-            };
+        match event_data.team {
+            Team::P1 => {
+                let pokemon = backend.get_pokemon(event_data.pokemon);
+                let display_name = pokemon.nickname.as_ref().unwrap_or(&species.display_name);
 
-            animations.push(Box::new(TextEvent::PendingStart {
-                full_text: introductory_text,
-            }));
+                animations.push(Box::new(TextEvent::PendingStart {
+                    full_text: format!("Go! {}!", display_name),
+                }));
+
+                animations.push(Box::new(InitialSwitchInEvent::PendingStart {
+                    event_data: event_data.clone(),
+                }));
+            },
+            Team::P2 => {
+                animations.push(Box::new(InitialSwitchInEvent::PendingStart {
+                    event_data: event_data.clone(),
+                }));
+
+                animations.push(Box::new(TextEvent::PendingStart {
+                    full_text: format!("A wild {} appears!", species.display_name),
+                }));
+            },
         }
 
         self.active_animation_sequence = Some(AnimationSequence {
