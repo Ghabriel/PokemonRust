@@ -9,6 +9,7 @@ use amethyst::{
 
 use crate::{
     common::Direction,
+    constants::AXIS_SENSITIVITY,
     entities::character::{
         AllowedMovements,
         Character,
@@ -93,20 +94,20 @@ impl<'a> System<'a> for PlayerInputSystem {
 
         let horizontal_value = input_handler.axis_value("horizontal").unwrap_or(0.);
 
-        if horizontal_value < -0.2 {
+        if horizontal_value < -AXIS_SENSITIVITY {
             character.facing_direction = Direction::Left;
             event_queue.push(CharacterSingleMoveEvent::new(character_id));
-        } else if horizontal_value > 0.2 {
+        } else if horizontal_value > AXIS_SENSITIVITY {
             character.facing_direction = Direction::Right;
             event_queue.push(CharacterSingleMoveEvent::new(character_id));
         }
 
         let vertical_value = input_handler.axis_value("vertical").unwrap_or(0.);
 
-        if vertical_value < -0.2 {
+        if vertical_value < -AXIS_SENSITIVITY {
             character.facing_direction = Direction::Down;
             event_queue.push(CharacterSingleMoveEvent::new(character_id));
-        } else if vertical_value > 0.2 {
+        } else if vertical_value > AXIS_SENSITIVITY {
             character.facing_direction = Direction::Up;
             event_queue.push(CharacterSingleMoveEvent::new(character_id));
         }

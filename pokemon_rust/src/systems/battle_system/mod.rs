@@ -237,7 +237,7 @@ impl<'a> System<'a> for BattleSystem {
         if self.active_animation_sequence.is_none() {
             if self.event_queue.is_empty() {
                 match self.backend.as_mut() {
-                    Some(backend) => {
+                    Some(_) => {
                         self.push_move_selection_event(&mut system_data);
                         self.start_animation(&mut system_data);
                     },

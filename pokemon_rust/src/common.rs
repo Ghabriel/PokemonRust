@@ -54,6 +54,12 @@ pub struct CommonResources {
     pub text_box: Handle<SpriteSheet>,
     /// A solid black sprite used for screen fading.
     pub black: Handle<SpriteSheet>,
+    /// A sprite sheet containing the selection arrow displayed in battles.
+    pub selection_arrow: Handle<SpriteSheet>,
+    /// A sprite sheet containing the "Fight" button displayed in battles.
+    pub fight_button: Handle<SpriteSheet>,
+    /// A sprite sheet containing the "Run" button displayed in battles.
+    pub run_button: Handle<SpriteSheet>,
     /// A sprite sheet containing the front side of all gen I Pokémon.
     pub gen1_front: Handle<SpriteSheet>,
     /// A sprite sheet containing the back side of all gen I Pokémon.

@@ -61,6 +61,27 @@ pub fn initialise_resources(world: &mut World, progress_counter: &mut ProgressCo
         &mut *progress_counter,
     );
 
+    let selection_arrow = load_full_texture_sprite_sheet(
+        world,
+        "sprites/selection_arrow.png",
+        &(64, 74),
+        &mut *progress_counter,
+    );
+
+    let fight_button = load_full_texture_sprite_sheet(
+        world,
+        "sprites/fight_button.png",
+        &(324, 96),
+        &mut *progress_counter,
+    );
+
+    let run_button = load_full_texture_sprite_sheet(
+        world,
+        "sprites/run_button.png",
+        &(322, 94),
+        &mut *progress_counter,
+    );
+
     let gen1_front = load_sprite_sheet_from_world(
         world,
         "pokemon/gen1_front.png",
@@ -79,6 +100,9 @@ pub fn initialise_resources(world: &mut World, progress_counter: &mut ProgressCo
         font,
         text_box,
         black,
+        selection_arrow,
+        fight_button,
+        run_button,
         gen1_front,
         gen1_back,
     });

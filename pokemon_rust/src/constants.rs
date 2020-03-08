@@ -19,3 +19,6 @@ pub const MOVE_LIMIT: usize = 4;
 
 /// The coordinates of the battle camera.
 pub const BATTLE_CAMERA_POSITION: (f32, f32) = (-1000., -1000.);
+
+/// The lowest axis value that is considered an intentional input.
+pub const AXIS_SENSITIVITY: f32 = 0.2;
