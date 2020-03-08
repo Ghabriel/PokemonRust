@@ -46,7 +46,7 @@ use crate::{
     entities::text_box::TextBox,
 };
 
-use self::events::{InitialSwitchInEvent, TextEvent};
+use self::events::{InitialSwitchInEvent, MoveSelectionScreenEvent, TextEvent};
 
 use std::collections::VecDeque;
 
@@ -83,7 +83,6 @@ pub struct BattleSystem {
     backend: Option<BattleBackend<StandardBattleRng>>,
     event_queue: VecDeque<BattleEvent>,
     active_animation_sequence: Option<AnimationSequence>,
-    temp: usize,
 }
 
 struct AnimationSequence {
@@ -114,18 +113,10 @@ impl BattleSystem {
             backend: None,
             event_queue: VecDeque::new(),
             active_animation_sequence: None,
-            temp: 0,
         }
     }
 
-    fn init_backend(&mut self, battle: &Battle) {
-        self.backend = Some(BattleBackend::new(
-            battle.clone(),
-            StandardBattleRng::default(),
-        ));
-    }
-
-    fn start_animation(&mut self, system_data: &mut <Self as System<'_>>::SystemData) {
+    fn handle_next_backend_event(&mut self, system_data: &mut BattleSystemData<'_>) {
         let event = self.event_queue.pop_front().unwrap();
         println!("{:?}", event);
 
@@ -148,6 +139,10 @@ impl BattleSystem {
             },
         }
 
+        self.start_animation(system_data);
+    }
+
+    fn start_animation(&mut self, system_data: &mut BattleSystemData<'_>) {
         let backend = self.backend.as_mut().unwrap();
 
         self.active_animation_sequence
@@ -157,7 +152,7 @@ impl BattleSystem {
             .for_each(|animation| animation.start(backend, system_data));
     }
 
-    fn tick(&mut self, mut system_data: <Self as System<'_>>::SystemData) {
+    fn tick(&mut self, system_data: &mut BattleSystemData<'_>) {
         if let Some(active_animation_sequence) = self.active_animation_sequence.as_mut() {
             let animation = active_animation_sequence.animations.front_mut().unwrap();
 
@@ -172,14 +167,14 @@ impl BattleSystem {
             let completed = animation.tick(
                 input_events,
                 backend,
-                &mut system_data,
+                system_data,
             );
 
             if completed {
                 active_animation_sequence.animations.pop_front();
 
                 if let Some(animation) = active_animation_sequence.animations.front_mut() {
-                    animation.start(backend, &mut system_data);
+                    animation.start(backend, system_data);
                 } else {
                     self.active_animation_sequence = None;
                 }
@@ -223,6 +218,16 @@ impl BattleSystem {
             animations: animations.into(),
         });
     }
+
+    fn push_move_selection_event(&mut self, system_data: &mut BattleSystemData<'_>) {
+        let animations: Vec<Box<dyn FrontendEvent + Sync + Send>> = vec![
+            Box::new(MoveSelectionScreenEvent::PendingStart),
+        ];
+
+        self.active_animation_sequence = Some(AnimationSequence {
+            animations: animations.into(),
+        });
+    }
 }
 
 impl<'a> System<'a> for BattleSystem {
@@ -230,27 +235,28 @@ impl<'a> System<'a> for BattleSystem {
 
     fn run(&mut self, mut system_data: Self::SystemData) {
         if self.active_animation_sequence.is_none() {
-            if self.temp >= 2 {
-                println!("Stopped for debugging purposes");
-                return;
-            }
-            self.temp += 1;
-
-            let backend = match self.backend.as_mut() {
-                Some(backend) => backend,
-                None => {
-                    self.init_backend(&system_data.battle);
-                    self.backend.as_mut().unwrap()
-                },
-            };
-
             if self.event_queue.is_empty() {
-                self.event_queue.extend(backend.tick());
-            }
+                match self.backend.as_mut() {
+                    Some(backend) => {
+                        self.push_move_selection_event(&mut system_data);
+                        self.start_animation(&mut system_data);
+                    },
+                    None => {
+                        let mut backend = BattleBackend::new(
+                            system_data.battle.clone(),
+                            StandardBattleRng::default(),
+                        );
 
-            self.start_animation(&mut system_data);
+                        self.event_queue.extend(backend.tick());
+                        self.backend = Some(backend);
+                        self.handle_next_backend_event(&mut system_data);
+                    },
+                };
+            } else {
+                self.handle_next_backend_event(&mut system_data);
+            }
         }
 
-        self.tick(system_data);
+        self.tick(&mut system_data);
     }
 }

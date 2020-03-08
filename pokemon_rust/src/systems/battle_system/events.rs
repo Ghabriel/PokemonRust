@@ -161,6 +161,38 @@ impl FrontendEvent for InitialSwitchInEvent {
     }
 }
 
+
+pub enum MoveSelectionScreenEvent {
+    PendingStart,
+    Started {
+        fight_button_entity: Entity,
+        run_button_entity: Entity,
+    },
+}
+
+impl FrontendEvent for MoveSelectionScreenEvent {
+    fn start(
+        &mut self,
+        _backend: &BattleBackend<StandardBattleRng>,
+        _system_data: &mut BattleSystemData,
+    ) {
+        // TODO
+        println!("MoveSelectionScreenEvent::start");
+    }
+
+    fn tick(
+        &mut self,
+        _input_events: Vec<InputEvent<StringBindings>>,
+        _backend: &BattleBackend<StandardBattleRng>,
+        _system_data: &mut BattleSystemData
+    ) -> bool {
+        // TODO
+        println!("MoveSelectionScreenEvent::tick");
+        false
+    }
+}
+
+
 pub enum TextEvent {
     PendingStart {
         full_text: String,
