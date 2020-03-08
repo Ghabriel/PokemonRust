@@ -46,7 +46,7 @@ use crate::{
     entities::text_box::TextBox,
 };
 
-use self::events::{InitialSwitchInEvent, MoveSelectionScreenEvent, TextEvent};
+use self::events::{ActionSelectionScreenEvent, InitialSwitchInEvent, TextEvent};
 
 use std::collections::VecDeque;
 
@@ -221,7 +221,7 @@ impl BattleSystem {
 
     fn push_move_selection_event(&mut self, system_data: &mut BattleSystemData<'_>) {
         let animations: Vec<Box<dyn FrontendEvent + Sync + Send>> = vec![
-            Box::new(MoveSelectionScreenEvent::PendingStart),
+            Box::new(ActionSelectionScreenEvent::PendingStart),
         ];
 
         self.active_animation_sequence = Some(AnimationSequence {
