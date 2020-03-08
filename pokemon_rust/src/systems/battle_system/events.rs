@@ -176,8 +176,7 @@ pub enum MoveSelectionScreenEvent {
 
 const MOVE_SELECTION_ARROW_HEIGHT: f32 = 37.;
 const MOVE_SELECTION_BUTTON_SCREEN_MARGIN: f32 = 10.;
-const MOVE_SELECTION_BUTTON_FIGHT_HEIGHT: f32 = 48.;
-const MOVE_SELECTION_BUTTON_RUN_HEIGHT: f32 = 47.;
+const MOVE_SELECTION_BUTTON_HEIGHT: f32 = 47.;
 const MOVE_SELECTION_NUM_OPTIONS: i8 = 2;
 
 impl MoveSelectionScreenEvent {
@@ -198,9 +197,9 @@ impl MoveSelectionScreenEvent {
             system_data.resources.fight_button.clone(),
             "Fight Button".to_string(),
             -MOVE_SELECTION_BUTTON_SCREEN_MARGIN,
-            2. * MOVE_SELECTION_BUTTON_SCREEN_MARGIN + MOVE_SELECTION_BUTTON_RUN_HEIGHT,
-            162.,
-            MOVE_SELECTION_BUTTON_FIGHT_HEIGHT,
+            2. * MOVE_SELECTION_BUTTON_SCREEN_MARGIN + MOVE_SELECTION_BUTTON_HEIGHT,
+            160.,
+            MOVE_SELECTION_BUTTON_HEIGHT,
             system_data,
         )
     }
@@ -212,7 +211,7 @@ impl MoveSelectionScreenEvent {
             -MOVE_SELECTION_BUTTON_SCREEN_MARGIN,
             MOVE_SELECTION_BUTTON_SCREEN_MARGIN,
             161.,
-            MOVE_SELECTION_BUTTON_RUN_HEIGHT,
+            MOVE_SELECTION_BUTTON_HEIGHT,
             system_data,
         )
     }
@@ -258,12 +257,7 @@ impl MoveSelectionScreenEvent {
 
     fn update_selection_arrow(&self, system_data: &mut BattleSystemData) {
         if let Self::Started { selection_arrow_entity, focused_option, .. } = self {
-            let BattleSystemData {
-                ui_transforms,
-                ..
-            } = system_data;
-
-            ui_transforms
+            system_data.ui_transforms
                 .get_mut(*selection_arrow_entity)
                 .expect("Failed to retrieve UiTransform")
                 .local_y = Self::get_selection_arrow_y(*focused_option);
@@ -271,24 +265,12 @@ impl MoveSelectionScreenEvent {
     }
 
     fn get_selection_arrow_y(focused_option: i8) -> f32 {
-        // TODO: generalize when all buttons become the same height
-        match focused_option {
-            0 => {
-                let height_difference =
-                    MOVE_SELECTION_BUTTON_FIGHT_HEIGHT - MOVE_SELECTION_ARROW_HEIGHT;
+        let height_difference = MOVE_SELECTION_BUTTON_HEIGHT - MOVE_SELECTION_ARROW_HEIGHT;
+        let inverted_option: f32 = (MOVE_SELECTION_NUM_OPTIONS - 1 - focused_option).into();
 
-                2. * MOVE_SELECTION_BUTTON_SCREEN_MARGIN
-                + MOVE_SELECTION_BUTTON_RUN_HEIGHT
-                + height_difference / 2.
-            },
-            1 => {
-                let height_difference =
-                    MOVE_SELECTION_BUTTON_RUN_HEIGHT - MOVE_SELECTION_ARROW_HEIGHT;
-
-                MOVE_SELECTION_BUTTON_SCREEN_MARGIN + height_difference / 2.
-            },
-            _ => unreachable!(),
-        }
+        (MOVE_SELECTION_BUTTON_SCREEN_MARGIN + MOVE_SELECTION_BUTTON_HEIGHT) * inverted_option
+        + MOVE_SELECTION_BUTTON_SCREEN_MARGIN
+        + height_difference / 2.
     }
 }
 

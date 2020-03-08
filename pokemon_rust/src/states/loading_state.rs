@@ -71,7 +71,7 @@ pub fn initialise_resources(world: &mut World, progress_counter: &mut ProgressCo
     let fight_button = load_full_texture_sprite_sheet(
         world,
         "sprites/fight_button.png",
-        &(324, 96),
+        &(320, 94),
         &mut *progress_counter,
     );
 
