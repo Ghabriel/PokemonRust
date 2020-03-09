@@ -1,6 +1,6 @@
 //! A system responsible for processing Pokémon battles.
 
-mod events;
+mod animations;
 
 use amethyst::{
     core::{Time, Transform},
@@ -46,7 +46,7 @@ use crate::{
     entities::text_box::TextBox,
 };
 
-use self::events::{ActionSelectionScreenEvent, InitialSwitchInEvent, TextEvent};
+use self::animations::{ActionSelectionScreen, InitialSwitchInAnimation, TextAnimation};
 
 use std::collections::VecDeque;
 
@@ -86,13 +86,13 @@ pub struct BattleSystem {
 }
 
 struct AnimationSequence {
-    animations: VecDeque<Box<dyn FrontendEvent + Sync + Send>>,
+    animations: VecDeque<Box<dyn FrontendAnimation + Sync + Send>>,
 }
 
 enum TickResult {
     Incomplete,
     Completed {
-        new_events: Vec<Box<dyn FrontendEvent + Sync + Send>>,
+        new_events: Vec<Box<dyn FrontendAnimation + Sync + Send>>,
     },
 }
 
@@ -104,7 +104,7 @@ impl TickResult {
     }
 }
 
-trait FrontendEvent {
+trait FrontendAnimation {
     fn start(
         &mut self,
         backend: &BattleBackend<StandardBattleRng>,
@@ -205,7 +205,7 @@ impl BattleSystem {
 
 impl BattleSystem {
     fn handle_initial_switch_in(&mut self, event_data: InitialSwitchIn) {
-        let mut animations: Vec<Box<dyn FrontendEvent + Sync + Send>> = Vec::new();
+        let mut animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = Vec::new();
 
         let backend = self.backend.as_mut().unwrap();
         let species = backend.get_species(event_data.pokemon);
@@ -215,20 +215,20 @@ impl BattleSystem {
                 let pokemon = backend.get_pokemon(event_data.pokemon);
                 let display_name = pokemon.nickname.as_ref().unwrap_or(&species.display_name);
 
-                animations.push(Box::new(TextEvent::PendingStart {
+                animations.push(Box::new(TextAnimation::PendingStart {
                     full_text: format!("Go! {}!", display_name),
                 }));
 
-                animations.push(Box::new(InitialSwitchInEvent::PendingStart {
+                animations.push(Box::new(InitialSwitchInAnimation::PendingStart {
                     event_data: event_data.clone(),
                 }));
             },
             Team::P2 => {
-                animations.push(Box::new(InitialSwitchInEvent::PendingStart {
+                animations.push(Box::new(InitialSwitchInAnimation::PendingStart {
                     event_data: event_data.clone(),
                 }));
 
-                animations.push(Box::new(TextEvent::PendingStart {
+                animations.push(Box::new(TextAnimation::PendingStart {
                     full_text: format!("A wild {} appears!", species.display_name),
                 }));
             },
@@ -240,8 +240,8 @@ impl BattleSystem {
     }
 
     fn push_move_selection_event(&mut self, system_data: &mut BattleSystemData<'_>) {
-        let animations: Vec<Box<dyn FrontendEvent + Sync + Send>> = vec![
-            Box::new(ActionSelectionScreenEvent::PendingStart),
+        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = vec![
+            Box::new(ActionSelectionScreen::PendingStart),
         ];
 
         self.active_animation_sequence = Some(AnimationSequence {

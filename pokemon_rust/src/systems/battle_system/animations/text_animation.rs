@@ -12,9 +12,9 @@ use crate::{
     entities::text_box::{advance_text, create_text_box, delete_text_box, TextState},
 };
 
-use super::super::{BattleSystemData, FrontendEvent, TickResult};
+use super::super::{BattleSystemData, FrontendAnimation, TickResult};
 
-pub enum TextEvent {
+pub enum TextAnimation {
     PendingStart {
         full_text: String,
     },
@@ -23,13 +23,13 @@ pub enum TextEvent {
     },
 }
 
-impl FrontendEvent for TextEvent {
+impl FrontendAnimation for TextAnimation {
     fn start(
         &mut self,
         _backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) {
-        if let TextEvent::PendingStart { full_text } = self {
+        if let TextAnimation::PendingStart { full_text } = self {
             let BattleSystemData {
                 text_boxes,
                 ui_images,
@@ -54,7 +54,7 @@ impl FrontendEvent for TextEvent {
                 .with(text_box, text_boxes)
                 .build();
 
-            *self = TextEvent::Started { text_box_entity };
+            *self = TextAnimation::Started { text_box_entity };
         }
     }
 
@@ -64,7 +64,7 @@ impl FrontendEvent for TextEvent {
         _backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) -> TickResult {
-        if let TextEvent::Started { text_box_entity } = self {
+        if let TextAnimation::Started { text_box_entity } = self {
             let BattleSystemData {
                 text_boxes,
                 ui_texts,

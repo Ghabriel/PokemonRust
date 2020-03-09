@@ -9,62 +9,43 @@ use crate::{
     constants::AXIS_SENSITIVITY,
 };
 
-use super::super::{BattleSystemData, FrontendEvent, TickResult};
+use super::super::{BattleSystemData, FrontendAnimation, TickResult};
 
-use super::{MoveSelectionScreenEvent, SelectionScreen};
+use super::SelectionScreen;
 
-pub enum ActionSelectionScreenEvent {
+pub enum MoveSelectionScreen {
     PendingStart,
     Started {
         selection_screen: SelectionScreen,
     },
 }
 
-impl ActionSelectionScreenEvent {
-    fn select_option(&mut self, system_data: &mut BattleSystemData) -> TickResult {
+impl MoveSelectionScreen {
+    fn select_option(&mut self, _system_data: &mut BattleSystemData) -> TickResult {
         if let Self::Started { selection_screen, .. } = self {
-            match selection_screen.get_focused_option() {
-                0 => self.select_fight_option(system_data),
-                1 => self.select_run_option(system_data),
-                _ => unreachable!(),
-            }
-        } else {
-            TickResult::Incomplete
-        }
-    }
+            let focused_option = selection_screen.get_focused_option();
 
-    fn select_fight_option(&mut self, system_data: &mut BattleSystemData) -> TickResult {
-        if let Self::Started { selection_screen, .. } = self {
-            selection_screen.remove(system_data)
+            println!("Selected option {}", focused_option);
         }
-
-        TickResult::Completed {
-            new_events: vec![
-                Box::new(MoveSelectionScreenEvent::PendingStart)
-            ],
-        }
-    }
-
-    fn select_run_option(&mut self, _system_data: &mut BattleSystemData) -> TickResult {
-        // TODO
-        println!("Selected option: run");
 
         TickResult::Incomplete
     }
 }
 
-impl FrontendEvent for ActionSelectionScreenEvent {
+impl FrontendAnimation for MoveSelectionScreen {
     fn start(
         &mut self,
         _backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) {
-        *self = ActionSelectionScreenEvent::Started {
+        *self = MoveSelectionScreen::Started {
             selection_screen: SelectionScreen::new(
                 160.,
                 vec![
                     system_data.resources.fight_button.clone(),
-                    system_data.resources.run_button.clone(),
+                    system_data.resources.fight_button.clone(),
+                    system_data.resources.fight_button.clone(),
+                    system_data.resources.fight_button.clone(),
                 ],
                 system_data,
             )

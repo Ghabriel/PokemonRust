@@ -17,7 +17,7 @@ use crate::{
     constants::BATTLE_CAMERA_POSITION,
 };
 
-use super::super::{BattleSystemData, FrontendEvent, TickResult};
+use super::super::{BattleSystemData, FrontendAnimation, TickResult};
 
 // TODO: move these window-related constants somewhere else
 const WINDOW_WIDTH: f32 = 800.;
@@ -52,7 +52,7 @@ fn get_p2_sprite_transform() -> Transform {
     transform
 }
 
-pub enum InitialSwitchInEvent {
+pub enum InitialSwitchInAnimation {
     PendingStart {
         event_data: InitialSwitchIn,
     },
@@ -63,13 +63,13 @@ pub enum InitialSwitchInEvent {
     },
 }
 
-impl FrontendEvent for InitialSwitchInEvent {
+impl FrontendAnimation for InitialSwitchInAnimation {
     fn start(
         &mut self,
         backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) {
-        if let InitialSwitchInEvent::PendingStart { event_data } = self {
+        if let InitialSwitchInAnimation::PendingStart { event_data } = self {
             let BattleSystemData {
                 sprite_renders,
                 transforms,
@@ -105,7 +105,7 @@ impl FrontendEvent for InitialSwitchInEvent {
                 0.
             };
 
-            *self = InitialSwitchInEvent::Started {
+            *self = InitialSwitchInAnimation::Started {
                 event_data: event_data.clone(),
                 pokemon_entity,
                 elapsed_time,
@@ -119,7 +119,7 @@ impl FrontendEvent for InitialSwitchInEvent {
         _backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) -> TickResult {
-        if let InitialSwitchInEvent::Started { event_data, pokemon_entity, elapsed_time } = self {
+        if let InitialSwitchInAnimation::Started { event_data, pokemon_entity, elapsed_time } = self {
             let BattleSystemData {
                 transforms,
                 time,
