@@ -165,7 +165,7 @@ pub fn pick_moves(
     move_table: &Vec<(LearningCondition, String)>,
     level: usize,
 ) -> [Option<String>; MOVE_LIMIT] {
-    let mut result: [Option<String>; MOVE_LIMIT] = Default::default();
+    let mut move_list = Vec::with_capacity(MOVE_LIMIT);
 
     move_table
         .iter()
@@ -174,10 +174,13 @@ pub fn pick_moves(
             LearningCondition::Level(required_level) => *required_level <= level,
             _ => false,
         })
-        .map(|(_, move_id)| move_id)
-        .enumerate()
         .take(MOVE_LIMIT)
-        .for_each(|(i, move_id)| result[i] = Some(move_id.clone()));
+        .for_each(|(_, move_id)| move_list.push(move_id.clone()));
+
+    let mut result: [Option<String>; MOVE_LIMIT] = Default::default();
+    for (i, move_id) in move_list.into_iter().rev().enumerate() {
+        result[i] = Some(move_id);
+    }
 
     result
 }
