@@ -12,7 +12,7 @@ use crate::{
     entities::text_box::{advance_text, create_text_box, delete_text_box, TextState},
 };
 
-use super::super::{BattleSystemData, FrontendEvent};
+use super::super::{BattleSystemData, FrontendEvent, TickResult};
 
 pub enum TextEvent {
     PendingStart {
@@ -63,7 +63,7 @@ impl FrontendEvent for TextEvent {
         input_events: Vec<InputEvent<StringBindings>>,
         _backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
-    ) -> bool {
+    ) -> TickResult {
         if let TextEvent::Started { text_box_entity } = self {
             let BattleSystemData {
                 text_boxes,
@@ -100,9 +100,9 @@ impl FrontendEvent for TextEvent {
 
             if state == TextState::Closed {
                 delete_text_box(*text_box_entity, text_box, &entities);
-                true
+                TickResult::done()
             } else {
-                false
+                TickResult::Incomplete
             }
         } else {
             panic!("Called tick() before start()");

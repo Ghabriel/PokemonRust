@@ -57,6 +57,15 @@ impl SelectionScreen {
         self.update_selection_arrow(system_data);
     }
 
+    pub fn remove(&mut self, system_data: &mut BattleSystemData) {
+        let entities = &system_data.entities;
+        entities.delete(self.selection_arrow_entity).expect("Failed to delete selection arrow");
+
+        for button in &self.button_entities {
+            entities.delete(*button).expect("Failed to delete button");
+        }
+    }
+
     fn create_selection_arrow(
         num_options: usize,
         button_width: f32,

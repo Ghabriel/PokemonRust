@@ -17,7 +17,7 @@ use crate::{
     constants::BATTLE_CAMERA_POSITION,
 };
 
-use super::super::{BattleSystemData, FrontendEvent};
+use super::super::{BattleSystemData, FrontendEvent, TickResult};
 
 // TODO: move these window-related constants somewhere else
 const WINDOW_WIDTH: f32 = 800.;
@@ -118,7 +118,7 @@ impl FrontendEvent for InitialSwitchInEvent {
         _input_events: Vec<InputEvent<StringBindings>>,
         _backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
-    ) -> bool {
+    ) -> TickResult {
         if let InitialSwitchInEvent::Started { event_data, pokemon_entity, elapsed_time } = self {
             let BattleSystemData {
                 transforms,
@@ -142,10 +142,10 @@ impl FrontendEvent for InitialSwitchInEvent {
             transform.set_translation_x(x);
 
             if *elapsed_time >= SWITCH_IN_ANIMATION_TIME {
-                true
+                TickResult::done()
             } else {
                 *elapsed_time += time.delta_seconds();
-                false
+                TickResult::Incomplete
             }
         } else {
             panic!("Called tick() before start()");

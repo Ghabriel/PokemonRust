@@ -89,6 +89,21 @@ struct AnimationSequence {
     animations: VecDeque<Box<dyn FrontendEvent + Sync + Send>>,
 }
 
+enum TickResult {
+    Incomplete,
+    Completed {
+        new_events: Vec<Box<dyn FrontendEvent + Sync + Send>>,
+    },
+}
+
+impl TickResult {
+    fn done() -> Self {
+        Self::Completed {
+            new_events: Vec::new(),
+        }
+    }
+}
+
 trait FrontendEvent {
     fn start(
         &mut self,
@@ -101,7 +116,7 @@ trait FrontendEvent {
         input_events: Vec<InputEvent<StringBindings>>,
         backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
-    ) -> bool;
+    ) -> TickResult;
 }
 
 impl BattleSystem {
@@ -164,14 +179,19 @@ impl BattleSystem {
 
             let backend = self.backend.as_mut().unwrap();
 
-            let completed = animation.tick(
+            let tick_result = animation.tick(
                 input_events,
                 backend,
                 system_data,
             );
 
-            if completed {
+            if let TickResult::Completed { new_events } = tick_result {
                 active_animation_sequence.animations.pop_front();
+
+                new_events
+                    .into_iter()
+                    .rev()
+                    .for_each(|event| active_animation_sequence.animations.push_front(event));
 
                 if let Some(animation) = active_animation_sequence.animations.front_mut() {
                     animation.start(backend, system_data);
