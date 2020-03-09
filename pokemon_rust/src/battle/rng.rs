@@ -46,8 +46,8 @@ impl BattleRng for StandardBattleRng {
         moves.shuffle(&mut thread_rng());
     }
 
-    fn check_miss(&mut self, chance: usize) -> bool {
-        self.roll(chance)
+    fn check_miss(&mut self, accuracy: usize) -> bool {
+        self.roll(100 - accuracy)
     }
 
     fn check_secondary_effect(&mut self, chance: usize) -> bool {
