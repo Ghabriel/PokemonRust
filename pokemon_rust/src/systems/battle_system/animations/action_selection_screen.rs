@@ -38,11 +38,9 @@ impl ActionSelectionScreen {
             selection_screen.remove(system_data)
         }
 
-        TickResult::Completed {
-            new_events: vec![
-                Box::new(MoveSelectionScreen::PendingStart)
-            ],
-        }
+        TickResult::replace_by(vec![
+            Box::new(MoveSelectionScreen::PendingStart)
+        ])
     }
 
     fn select_run_option(&mut self, _system_data: &mut BattleSystemData) -> TickResult {

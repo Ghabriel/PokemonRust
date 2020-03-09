@@ -36,6 +36,7 @@ use crate::{
                 Miss,
                 StatChange,
             },
+            FrontendEvent,
             Team,
         },
         rng::StandardBattleRng,
@@ -92,14 +93,30 @@ struct AnimationSequence {
 enum TickResult {
     Incomplete,
     Completed {
-        new_events: Vec<Box<dyn FrontendAnimation + Sync + Send>>,
+        new_animations: Vec<Box<dyn FrontendAnimation + Sync + Send>>,
+        emitted_events: Vec<FrontendEvent>,
     },
 }
 
 impl TickResult {
     fn done() -> Self {
         Self::Completed {
-            new_events: Vec::new(),
+            new_animations: Vec::new(),
+            emitted_events: Vec::new(),
+        }
+    }
+
+    fn replace_by(new_animations: Vec<Box<dyn FrontendAnimation + Sync + Send>>) -> Self {
+        Self::Completed {
+            new_animations,
+            emitted_events: Vec::new(),
+        }
+    }
+
+    fn emit(event: FrontendEvent) -> Self {
+        Self::Completed {
+            new_animations: Vec::new(),
+            emitted_events: vec![event],
         }
     }
 }
@@ -185,10 +202,25 @@ impl BattleSystem {
                 system_data,
             );
 
-            if let TickResult::Completed { new_events } = tick_result {
+            if let TickResult::Completed { new_animations, emitted_events } = tick_result {
                 active_animation_sequence.animations.pop_front();
 
-                new_events
+                if !emitted_events.is_empty() {
+                    for event in emitted_events {
+                        backend.push_frontend_event(event);
+                    }
+
+                    // TODO: replace this by an AI call
+                    use crate::battle::backend::FrontendEventKind;
+                    backend.push_frontend_event(FrontendEvent {
+                        team: Team::P2,
+                        event: FrontendEventKind::UseMove(0),
+                    });
+
+                    self.event_queue.extend(backend.tick());
+                }
+
+                new_animations
                     .into_iter()
                     .rev()
                     .for_each(|event| active_animation_sequence.animations.push_front(event));

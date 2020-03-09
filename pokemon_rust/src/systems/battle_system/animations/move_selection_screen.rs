@@ -3,7 +3,7 @@ use amethyst::input::{InputEvent, StringBindings};
 use crate::{
     audio::Sound,
     battle::{
-        backend::BattleBackend,
+        backend::{BattleBackend, FrontendEvent, FrontendEventKind, Team},
         rng::StandardBattleRng,
     },
     constants::AXIS_SENSITIVITY,
@@ -21,14 +21,18 @@ pub enum MoveSelectionScreen {
 }
 
 impl MoveSelectionScreen {
-    fn select_option(&mut self, _system_data: &mut BattleSystemData) -> TickResult {
+    fn select_option(&mut self, system_data: &mut BattleSystemData) -> TickResult {
         if let Self::Started { selection_screen, .. } = self {
-            let focused_option = selection_screen.get_focused_option();
+            let move_index = selection_screen.get_focused_option();
+            selection_screen.remove(system_data);
 
-            println!("Selected option {}", focused_option);
+            TickResult::emit(FrontendEvent {
+                team: Team::P1,
+                event: FrontendEventKind::UseMove(move_index.into()),
+            })
+        } else {
+            TickResult::Incomplete
         }
-
-        TickResult::Incomplete
     }
 }
 
