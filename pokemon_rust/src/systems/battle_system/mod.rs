@@ -271,7 +271,7 @@ impl BattleSystem {
         });
     }
 
-    fn push_move_selection_event(&mut self, system_data: &mut BattleSystemData<'_>) {
+    fn push_action_selection_event(&mut self) {
         let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = vec![
             Box::new(ActionSelectionScreen::PendingStart),
         ];
@@ -290,7 +290,7 @@ impl<'a> System<'a> for BattleSystem {
             if self.event_queue.is_empty() {
                 match self.backend.as_mut() {
                     Some(_) => {
-                        self.push_move_selection_event(&mut system_data);
+                        self.push_action_selection_event();
                         self.start_animation(&mut system_data);
                     },
                     None => {

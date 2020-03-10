@@ -22,3 +22,12 @@ pub const BATTLE_CAMERA_POSITION: (f32, f32) = (-1000., -1000.);
 
 /// The lowest axis value that is considered an intentional input.
 pub const AXIS_SENSITIVITY: f32 = 0.2;
+
+/// The margin between health bars and the edge of the screen.
+pub const HEALTH_BAR_MARGIN: f32 = 30.;
+
+/// The height of the health bar of the player and their allies.
+pub const ALLY_HEALTH_BAR_HEIGHT: f32 = 60.;
+
+/// The height of the health bar of the player's opponents.
+pub const OPPONENT_HEALTH_BAR_HEIGHT: f32 = 50.;

@@ -82,6 +82,20 @@ pub fn initialise_resources(world: &mut World, progress_counter: &mut ProgressCo
         &mut *progress_counter,
     );
 
+    let hp_bar_left = load_full_texture_sprite_sheet(
+        world,
+        "sprites/healthbar_left.png",
+        &(200, 50),
+        &mut *progress_counter,
+    );
+
+    let hp_bar_right = load_full_texture_sprite_sheet(
+        world,
+        "sprites/healthbar_right.png",
+        &(200, 50),
+        &mut *progress_counter,
+    );
+
     let gen1_front = load_sprite_sheet_from_world(
         world,
         "pokemon/gen1_front.png",
@@ -103,6 +117,8 @@ pub fn initialise_resources(world: &mut World, progress_counter: &mut ProgressCo
         selection_arrow,
         fight_button,
         run_button,
+        hp_bar_left,
+        hp_bar_right,
         gen1_front,
         gen1_back,
     });

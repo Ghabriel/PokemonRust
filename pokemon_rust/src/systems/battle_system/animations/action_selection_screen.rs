@@ -3,7 +3,7 @@ use amethyst::input::{InputEvent, StringBindings};
 use crate::{
     audio::Sound,
     battle::{
-        backend::BattleBackend,
+        backend::{BattleBackend, Team},
         rng::StandardBattleRng,
     },
     constants::AXIS_SENSITIVITY,
@@ -11,12 +11,14 @@ use crate::{
 
 use super::super::{BattleSystemData, FrontendAnimation, TickResult};
 
-use super::{MoveSelectionScreen, SelectionScreen};
+use super::{HealthBar, MoveSelectionScreen, SelectionScreen};
 
 pub enum ActionSelectionScreen {
     PendingStart,
     Started {
         selection_screen: SelectionScreen,
+        p1_hp_bar: HealthBar,
+        p2_hp_bar: HealthBar,
     },
 }
 
@@ -34,8 +36,10 @@ impl ActionSelectionScreen {
     }
 
     fn select_fight_option(&mut self, system_data: &mut BattleSystemData) -> TickResult {
-        if let Self::Started { selection_screen, .. } = self {
-            selection_screen.remove(system_data)
+        if let Self::Started { selection_screen, p1_hp_bar, p2_hp_bar } = self {
+            selection_screen.remove(system_data);
+            p1_hp_bar.remove(system_data);
+            p2_hp_bar.remove(system_data);
         }
 
         TickResult::replace_by(vec![
@@ -65,7 +69,9 @@ impl FrontendAnimation for ActionSelectionScreen {
                     system_data.resources.run_button.clone(),
                 ],
                 system_data,
-            )
+            ),
+            p1_hp_bar: HealthBar::new(Team::P1, system_data),
+            p2_hp_bar: HealthBar::new(Team::P2, system_data),
         };
     }
 

@@ -14,7 +14,12 @@ use crate::{
         },
         rng::StandardBattleRng,
     },
-    constants::BATTLE_CAMERA_POSITION,
+    constants::{
+        ALLY_HEALTH_BAR_HEIGHT,
+        BATTLE_CAMERA_POSITION,
+        HEALTH_BAR_MARGIN,
+        OPPONENT_HEALTH_BAR_HEIGHT,
+    },
 };
 
 use super::super::{BattleSystemData, FrontendAnimation, TickResult};
@@ -25,9 +30,21 @@ const WINDOW_HEIGHT: f32 = 600.;
 
 // TODO: move to a better place
 const SWITCH_IN_ANIMATION_TIME: f32 = 0.5;
+const POKEMON_SPRITE_HEIGHT: f32 = 64.;
+const P1_SPRITE_SCALING: f32 = 2.;
+const P2_SPRITE_SCALING: f32 = 1.8;
 
-const P1_SPRITE_Y: f32 = BATTLE_CAMERA_POSITION.1 - WINDOW_HEIGHT / 4.;
-const P2_SPRITE_Y: f32 = BATTLE_CAMERA_POSITION.1 + WINDOW_HEIGHT / 4.;
+const P1_SPRITE_Y: f32
+    = (BATTLE_CAMERA_POSITION.1 - WINDOW_HEIGHT / 2.)
+    + HEALTH_BAR_MARGIN
+    + ALLY_HEALTH_BAR_HEIGHT
+    + (POKEMON_SPRITE_HEIGHT * P1_SPRITE_SCALING) / 2.
+    - 14.; // TODO: investigate why this offset is needed
+const P2_SPRITE_Y: f32
+    = (BATTLE_CAMERA_POSITION.1 + WINDOW_HEIGHT / 2.)
+    - HEALTH_BAR_MARGIN
+    - OPPONENT_HEALTH_BAR_HEIGHT
+    - (POKEMON_SPRITE_HEIGHT * P2_SPRITE_SCALING) / 2.;
 
 // Both initial positions should be off-screen to improve the animation
 const P1_SPRITE_INITIAL_X: f32 = BATTLE_CAMERA_POSITION.0 - WINDOW_WIDTH / 2. - 128.;
@@ -39,7 +56,7 @@ const P2_SPRITE_FINAL_X: f32 = BATTLE_CAMERA_POSITION.0 + WINDOW_WIDTH / 3.;
 fn get_p1_sprite_transform() -> Transform {
     let mut transform = Transform::default();
     transform.set_translation_xyz(P1_SPRITE_INITIAL_X, P1_SPRITE_Y, 0.);
-    transform.set_scale(Vector3::new(2., 2., 2.));
+    transform.set_scale(Vector3::new(P1_SPRITE_SCALING, P1_SPRITE_SCALING, P1_SPRITE_SCALING));
 
     transform
 }
@@ -47,7 +64,7 @@ fn get_p1_sprite_transform() -> Transform {
 fn get_p2_sprite_transform() -> Transform {
     let mut transform = Transform::default();
     transform.set_translation_xyz(P2_SPRITE_INITIAL_X, P2_SPRITE_Y, 0.);
-    transform.set_scale(Vector3::new(1.8, 1.8, 1.8));
+    transform.set_scale(Vector3::new(P2_SPRITE_SCALING, P2_SPRITE_SCALING, P2_SPRITE_SCALING));
 
     transform
 }

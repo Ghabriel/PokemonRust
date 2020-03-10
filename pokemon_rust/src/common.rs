@@ -60,6 +60,10 @@ pub struct CommonResources {
     pub fight_button: Handle<SpriteSheet>,
     /// A sprite sheet containing the "Run" button displayed in battles.
     pub run_button: Handle<SpriteSheet>,
+    /// A sprite sheet containing an HP bar container to be used on the left side.
+    pub hp_bar_left: Handle<SpriteSheet>,
+    /// A sprite sheet containing an HP bar container to be used on the right side.
+    pub hp_bar_right: Handle<SpriteSheet>,
     /// A sprite sheet containing the front side of all gen I Pokémon.
     pub gen1_front: Handle<SpriteSheet>,
     /// A sprite sheet containing the back side of all gen I Pokémon.
