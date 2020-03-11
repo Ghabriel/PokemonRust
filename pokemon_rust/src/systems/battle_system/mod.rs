@@ -44,7 +44,10 @@ use crate::{
     },
     common::CommonResources,
     config::GameConfig,
-    entities::text_box::TextBox,
+    entities::{
+        pokemon::{get_all_pokemon_species, get_pokemon_display_name},
+        text_box::TextBox,
+    },
 };
 
 use self::animations::{ActionSelectionScreen, InitialSwitchInAnimation, TextAnimation};
@@ -239,13 +242,13 @@ impl BattleSystem {
     fn handle_initial_switch_in(&mut self, event_data: InitialSwitchIn) {
         let mut animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = Vec::new();
 
+        let pokedex = get_all_pokemon_species();
         let backend = self.backend.as_mut().unwrap();
-        let species = backend.get_species(event_data.pokemon);
+        let pokemon = backend.get_pokemon(event_data.pokemon);
 
         match event_data.team {
             Team::P1 => {
-                let pokemon = backend.get_pokemon(event_data.pokemon);
-                let display_name = pokemon.nickname.as_ref().unwrap_or(&species.display_name);
+                let display_name = get_pokemon_display_name(&pokemon, &pokedex);
 
                 animations.push(Box::new(TextAnimation::PendingStart {
                     full_text: format!("Go! {}!", display_name),
@@ -256,6 +259,8 @@ impl BattleSystem {
                 }));
             },
             Team::P2 => {
+                let species = pokedex.get_species(&pokemon.species_id).unwrap();
+
                 animations.push(Box::new(InitialSwitchInAnimation::PendingStart {
                     event_data: event_data.clone(),
                 }));

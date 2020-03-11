@@ -84,6 +84,17 @@ pub struct Pokemon {
     pub current_hp: usize,
 }
 
+pub fn get_pokemon_display_name<'a>(pokemon: &'a Pokemon, pokedex: &'a PokeDex) -> &'a str {
+    if let Some(name) = &pokemon.nickname {
+        name
+    } else {
+        let species_id = &pokemon.species_id;
+        let species = pokedex.get_species(species_id).unwrap();
+
+        &species.display_name
+    }
+}
+
 #[allow(unused)]
 pub struct PokemonSpeciesData {
     pub id: String,
