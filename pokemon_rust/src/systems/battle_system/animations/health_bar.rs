@@ -56,7 +56,7 @@ pub struct HealthBar {
     level_entity: Entity,
     // health_bar_entity: Entity,
     // caught_indicator_entity: Option<Entity>,
-    // health_values_entity: Option<Entity>,
+    health_values_entity: Option<Entity>,
     // experience_bar_entity: Option<Entity>,
 }
 
@@ -73,7 +73,12 @@ impl HealthBar {
         // let gender_entity = Self::create_gender_entity(pokemon, system_data);
         let level_entity = Self::create_level_entity(&pokemon, &properties, system_data);
         // let health_bar_entity = Self::create_health_bar_entity(pokemon, system_data);
-        // let health_values_entity = Self::create_health_values_entity(pokemon, team, system_data);
+        let health_values_entity = Self::create_health_values_entity(
+            &pokemon,
+            team,
+            &properties,
+            system_data,
+        );
         // let experience_bar_entity = Self::create_experience_bar_entity(pokemon, team, system_data);
 
         Self {
@@ -82,7 +87,7 @@ impl HealthBar {
             // gender_entity,
             level_entity,
             // health_bar_entity,
-            // health_values_entity,
+            health_values_entity,
             // experience_bar_entity,
         }
     }
@@ -215,6 +220,30 @@ impl HealthBar {
             properties.top_y - font_size,
             system_data,
         )
+    }
+
+    fn create_health_values_entity(
+        pokemon: &Pokemon,
+        team: Team,
+        properties: &HealthBarProperties,
+        system_data: &mut BattleSystemData,
+    ) -> Option<Entity> {
+        if team == Team::P2 {
+            return None;
+        }
+
+        // TODO: extract to constant
+        let font_size = 18.;
+
+        let content = format!("{} / {}", pokemon.current_hp, pokemon.stats[0]);
+
+        Some(Self::create_ui_text(
+            content,
+            font_size,
+            properties.content_x,
+            properties.bottom_y,
+            system_data,
+        ))
     }
 
     fn create_ui_text(
