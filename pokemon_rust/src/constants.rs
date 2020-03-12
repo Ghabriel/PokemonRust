@@ -45,7 +45,7 @@ pub const HEALTH_BAR_HORIZONTAL_PADDING: f32 = 10.;
 pub const HEALTH_BAR_VERTICAL_PADDING: f32 = 10.;
 
 /// The height of the health bar of the player and their allies, in pixels.
-pub const ALLY_HEALTH_BAR_HEIGHT: f32 = 60.;
+pub const ALLY_HEALTH_BAR_HEIGHT: f32 = 47.;
 
 /// The height of the health bar of the player's opponents, in pixels.
-pub const OPPONENT_HEALTH_BAR_HEIGHT: f32 = 50.;
+pub const OPPONENT_HEALTH_BAR_HEIGHT: f32 = 35.;

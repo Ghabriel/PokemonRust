@@ -54,6 +54,8 @@ pub struct CommonResources {
     pub text_box: Handle<SpriteSheet>,
     /// A solid black sprite used for screen fading.
     pub black: Handle<SpriteSheet>,
+    /// A solid white sprite used for health bars, exp bars, etc.
+    pub white: Handle<SpriteSheet>,
     /// A sprite sheet containing the selection arrow displayed in battles.
     pub selection_arrow: Handle<SpriteSheet>,
     /// A sprite sheet containing the "Fight" button displayed in battles.

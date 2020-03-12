@@ -1,7 +1,7 @@
 use amethyst::{
     assets::Handle,
     ecs::Entity,
-    renderer::{SpriteRender, SpriteSheet},
+    renderer::{palette::Srgba, resources::Tint, SpriteRender, SpriteSheet},
     ui::{Anchor, UiImage, UiText, UiTransform},
 };
 
@@ -39,6 +39,10 @@ const P2_BAR_BOTTOM_Y: f32 = WINDOW_HEIGHT - OPPONENT_HEALTH_BAR_HEIGHT - HEALTH
 const P1_BAR_TOP_Y: f32 = P1_BAR_BOTTOM_Y + ALLY_HEALTH_BAR_HEIGHT;
 const P2_BAR_TOP_Y: f32 = P2_BAR_BOTTOM_Y + OPPONENT_HEALTH_BAR_HEIGHT;
 
+const POKEMON_NAME_FONT_SIZE: f32 = 16.;
+const POKEMON_LEVEL_FONT_SIZE: f32 = 18.;
+const POKEMON_HEALTH_TEXT_FONT_SIZE: f32 = 18.;
+
 pub struct HealthBarProperties {
     x: f32,
     content_x: f32,
@@ -54,7 +58,7 @@ pub struct HealthBar {
     name_entity: Entity,
     // gender_entity: Entity,
     level_entity: Entity,
-    // health_bar_entity: Entity,
+    health_bar_entity: Entity,
     // caught_indicator_entity: Option<Entity>,
     health_values_entity: Option<Entity>,
     // experience_bar_entity: Option<Entity>,
@@ -72,7 +76,7 @@ impl HealthBar {
         let name_entity = Self::create_name_entity(&pokemon, &properties, system_data);
         // let gender_entity = Self::create_gender_entity(pokemon, system_data);
         let level_entity = Self::create_level_entity(&pokemon, &properties, system_data);
-        // let health_bar_entity = Self::create_health_bar_entity(pokemon, system_data);
+        let health_bar_entity = Self::create_health_bar_entity(&pokemon, &properties, system_data);
         let health_values_entity = Self::create_health_values_entity(
             &pokemon,
             team,
@@ -86,7 +90,7 @@ impl HealthBar {
             name_entity,
             // gender_entity,
             level_entity,
-            // health_bar_entity,
+            health_bar_entity,
             health_values_entity,
             // experience_bar_entity,
         }
@@ -162,7 +166,7 @@ impl HealthBar {
         };
 
         let ui_transform = UiTransform::new(
-            "Health bar".to_string(),
+            "Health bar container".to_string(),
             Anchor::BottomLeft,
             Anchor::BottomLeft,
             properties.x,
@@ -188,14 +192,11 @@ impl HealthBar {
     ) -> Entity {
         let pokedex = get_all_pokemon_species();
 
-        // TODO: extract to constant
-        let font_size = 16.;
-
         Self::create_ui_text(
             get_pokemon_display_name(&pokemon, pokedex).to_string(),
-            font_size,
+            POKEMON_NAME_FONT_SIZE,
             properties.content_x,
-            properties.top_y - font_size,
+            properties.top_y - POKEMON_NAME_FONT_SIZE,
             system_data,
         )
     }
@@ -205,21 +206,93 @@ impl HealthBar {
         properties: &HealthBarProperties,
         system_data: &mut BattleSystemData,
     ) -> Entity {
-        // TODO: extract to constant
-        let font_size = 18.;
-
         let content = format!("Lv. {}", pokemon.level);
-        let content_width = Self::estimate_text_width(&content, font_size);
+        let content_width = Self::estimate_text_width(&content, POKEMON_LEVEL_FONT_SIZE);
 
         let x = properties.content_end_x - content_width;
 
         Self::create_ui_text(
             content,
-            font_size,
+            POKEMON_LEVEL_FONT_SIZE,
             x,
-            properties.top_y - font_size,
+            properties.top_y - POKEMON_LEVEL_FONT_SIZE,
             system_data,
         )
+    }
+
+    fn create_health_bar_entity(
+        pokemon: &Pokemon,
+        properties: &HealthBarProperties,
+        system_data: &mut BattleSystemData,
+    ) -> Entity {
+        Self::create_generic_health_bar_entity(
+            0.,
+            0.,
+            0.,
+            0.,
+            0.,
+            Tint(Srgba::new(0.2, 0.2, 0.2, 1.0)),
+            properties,
+            system_data,
+        );
+
+        Self::create_generic_health_bar_entity(
+            1.,
+            1.,
+            1.,
+            -2.,
+            -2.,
+            Tint(Srgba::new(0.0, 1.0, 0.0, 1.0)),
+            properties,
+            system_data,
+        )
+    }
+
+    fn create_generic_health_bar_entity(
+        delta_x: f32,
+        delta_y: f32,
+        delta_z: f32,
+        delta_width: f32,
+        delta_height: f32,
+        tint: Tint,
+        properties: &HealthBarProperties,
+        system_data: &mut BattleSystemData,
+    ) -> Entity {
+        let BattleSystemData {
+            tints,
+            ui_images,
+            ui_transforms,
+            entities,
+            resources,
+            ..
+        } = system_data;
+
+        // TODO: extract to constant
+        let bar_height = 10.;
+        let bar_spacing = 2.;
+
+        let sprite_render = SpriteRender {
+            sprite_sheet: resources.white.clone(),
+            sprite_number: 0,
+        };
+
+        let ui_transform = UiTransform::new(
+            "Health bar".to_string(),
+            Anchor::BottomLeft,
+            Anchor::BottomLeft,
+            properties.content_x + delta_x,
+            properties.top_y - POKEMON_LEVEL_FONT_SIZE - bar_height - bar_spacing + delta_y,
+            3. + delta_z,
+            BAR_WIDTH + delta_width,
+            bar_height + delta_height,
+        );
+
+        entities
+            .build_entity()
+            .with(UiImage::Sprite(sprite_render), ui_images)
+            .with(ui_transform, ui_transforms)
+            .with(tint, tints)
+            .build()
     }
 
     fn create_health_values_entity(
@@ -232,14 +305,11 @@ impl HealthBar {
             return None;
         }
 
-        // TODO: extract to constant
-        let font_size = 18.;
-
         let content = format!("{} / {}", pokemon.current_hp, pokemon.stats[0]);
 
         Some(Self::create_ui_text(
             content,
-            font_size,
+            POKEMON_HEALTH_TEXT_FONT_SIZE,
             properties.content_x,
             properties.bottom_y,
             system_data,

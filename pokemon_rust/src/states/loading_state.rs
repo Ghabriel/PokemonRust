@@ -61,6 +61,13 @@ pub fn initialise_resources(world: &mut World, progress_counter: &mut ProgressCo
         &mut *progress_counter,
     );
 
+    let white = load_full_texture_sprite_sheet(
+        world,
+        "sprites/white.png",
+        &(32, 32),
+        &mut *progress_counter,
+    );
+
     let selection_arrow = load_full_texture_sprite_sheet(
         world,
         "sprites/selection_arrow.png",
@@ -114,6 +121,7 @@ pub fn initialise_resources(world: &mut World, progress_counter: &mut ProgressCo
         font,
         text_box,
         black,
+        white,
         selection_arrow,
         fight_button,
         run_button,
