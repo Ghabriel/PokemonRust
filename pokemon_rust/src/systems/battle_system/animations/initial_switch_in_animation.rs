@@ -19,14 +19,12 @@ use crate::{
         BATTLE_CAMERA_POSITION,
         HEALTH_BAR_MARGIN,
         OPPONENT_HEALTH_BAR_HEIGHT,
+        WINDOW_HEIGHT,
+        WINDOW_WIDTH,
     },
 };
 
 use super::super::{BattleSystemData, FrontendAnimation, TickResult};
-
-// TODO: move these window-related constants somewhere else
-const WINDOW_WIDTH: f32 = 800.;
-const WINDOW_HEIGHT: f32 = 600.;
 
 // TODO: move to a better place
 const SWITCH_IN_ANIMATION_TIME: f32 = 0.5;

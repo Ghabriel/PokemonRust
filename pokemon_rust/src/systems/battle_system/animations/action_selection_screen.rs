@@ -58,9 +58,12 @@ impl ActionSelectionScreen {
 impl FrontendAnimation for ActionSelectionScreen {
     fn start(
         &mut self,
-        _backend: &BattleBackend<StandardBattleRng>,
+        backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) {
+        let p1 = backend.get_active_pokemon(Team::P1).next().unwrap();
+        let p2 = backend.get_active_pokemon(Team::P2).next().unwrap();
+
         *self = ActionSelectionScreen::Started {
             selection_screen: SelectionScreen::new(
                 160.,
@@ -70,8 +73,8 @@ impl FrontendAnimation for ActionSelectionScreen {
                 ],
                 system_data,
             ),
-            p1_hp_bar: HealthBar::new(Team::P1, system_data),
-            p2_hp_bar: HealthBar::new(Team::P2, system_data),
+            p1_hp_bar: HealthBar::new(p1, Team::P1, system_data),
+            p2_hp_bar: HealthBar::new(p2, Team::P2, system_data),
         };
     }
 

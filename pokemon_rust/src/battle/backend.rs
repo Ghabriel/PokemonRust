@@ -498,6 +498,17 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         &self.pokemon_repository[&pokemon]
     }
 
+    pub fn get_active_pokemon(&self, team: Team) -> impl Iterator<Item = &Pokemon> + '_ {
+        let team_data = match team {
+            Team::P1 => &self.p1,
+            Team::P2 => &self.p2,
+        };
+
+        team_data.active_pokemon
+            .iter()
+            .map(move |pokemon| self.get_pokemon(*pokemon))
+    }
+
     fn get_attack_critical_hit(&self, pokemon: usize) -> usize {
         self.get_positive_critical_hit_stat(pokemon, Stat::Attack)
     }
