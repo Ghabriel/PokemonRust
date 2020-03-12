@@ -25,14 +25,23 @@ use super::super::BattleSystemData;
 const P1_BAR_X: f32 = 0.;
 const P2_BAR_X: f32 = WINDOW_WIDTH - HEALTH_BAR_WIDTH;
 
+const P1_BAR_CONTENT_X: f32 = HEALTH_BAR_HORIZONTAL_PADDING;
+const P2_BAR_CONTENT_X: f32 = WINDOW_WIDTH - HEALTH_BAR_SMALLER_WIDTH + HEALTH_BAR_HORIZONTAL_PADDING;
+
 const P1_BAR_BOTTOM_Y: f32 = HEALTH_BAR_MARGIN;
 const P2_BAR_BOTTOM_Y: f32 = WINDOW_HEIGHT - OPPONENT_HEALTH_BAR_HEIGHT - HEALTH_BAR_MARGIN;
 
 const P1_BAR_TOP_Y: f32 = P1_BAR_BOTTOM_Y + ALLY_HEALTH_BAR_HEIGHT;
 const P2_BAR_TOP_Y: f32 = P2_BAR_BOTTOM_Y + OPPONENT_HEALTH_BAR_HEIGHT;
 
-const P1_BAR_CONTENT_X: f32 = HEALTH_BAR_HORIZONTAL_PADDING;
-const P2_BAR_CONTENT_X: f32 = WINDOW_WIDTH - HEALTH_BAR_SMALLER_WIDTH + HEALTH_BAR_HORIZONTAL_PADDING;
+pub struct HealthBarProperties {
+    x: f32,
+    content_x: f32,
+    bottom_y: f32,
+    top_y: f32,
+    height: f32,
+    width: f32,
+}
 
 pub struct HealthBar {
     container_entity: Entity,
@@ -47,12 +56,14 @@ pub struct HealthBar {
 
 impl HealthBar {
     pub fn new(pokemon: &Pokemon, team: Team, system_data: &mut BattleSystemData) -> Self {
+        let properties = Self::get_properties(team);
+
         let container_entity = match team {
-            Team::P1 => Self::create_left_container(system_data),
-            Team::P2 => Self::create_right_container(system_data),
+            Team::P1 => Self::create_left_container(&properties, system_data),
+            Team::P2 => Self::create_right_container(&properties, system_data),
         };
 
-        let name_entity = Self::create_name_entity(pokemon, team, system_data);
+        let name_entity = Self::create_name_entity(pokemon, &properties, system_data);
         // let gender_entity = Self::create_gender_entity(pokemon, system_data);
         // let level_entity = Self::create_level_entity(pokemon, system_data);
         // let health_bar_entity = Self::create_health_bar_entity(pokemon, system_data);
@@ -77,31 +88,52 @@ impl HealthBar {
 }
 
 impl HealthBar {
-    fn create_left_container(system_data: &mut BattleSystemData) -> Entity {
+    fn get_properties(team: Team) -> HealthBarProperties {
+        match team {
+            Team::P1 => HealthBarProperties {
+                x: P1_BAR_X,
+                content_x: P1_BAR_CONTENT_X,
+                bottom_y: P1_BAR_BOTTOM_Y,
+                top_y: P1_BAR_TOP_Y,
+                height: ALLY_HEALTH_BAR_HEIGHT,
+                width: 220.,
+            },
+            Team::P2 => HealthBarProperties {
+                x: P2_BAR_X,
+                content_x: P2_BAR_CONTENT_X,
+                bottom_y: P2_BAR_BOTTOM_Y,
+                top_y: P2_BAR_TOP_Y,
+                height: OPPONENT_HEALTH_BAR_HEIGHT,
+                width: 220.,
+            },
+        }
+    }
+
+    fn create_left_container(
+        properties: &HealthBarProperties,
+        system_data: &mut BattleSystemData,
+    ) -> Entity {
         Self::create_container(
             system_data.resources.hp_bar_left.clone(),
-            P1_BAR_X,
-            P1_BAR_BOTTOM_Y,
-            ALLY_HEALTH_BAR_HEIGHT,
+            &properties,
             system_data,
         )
     }
 
-    fn create_right_container(system_data: &mut BattleSystemData) -> Entity {
+    fn create_right_container(
+        properties: &HealthBarProperties,
+        system_data: &mut BattleSystemData,
+    ) -> Entity {
         Self::create_container(
             system_data.resources.hp_bar_right.clone(),
-            P2_BAR_X,
-            P2_BAR_BOTTOM_Y,
-            OPPONENT_HEALTH_BAR_HEIGHT,
+            &properties,
             system_data,
         )
     }
 
     fn create_container(
         sprite_sheet: Handle<SpriteSheet>,
-        x: f32,
-        y: f32,
-        height: f32,
+        properties: &HealthBarProperties,
         system_data: &mut BattleSystemData,
     ) -> Entity {
         let BattleSystemData {
@@ -120,11 +152,11 @@ impl HealthBar {
             "Health bar".to_string(),
             Anchor::BottomLeft,
             Anchor::BottomLeft,
-            x,
-            y,
+            properties.x,
+            properties.bottom_y,
             2.,
-            220.,
-            height,
+            properties.width,
+            properties.height,
         );
 
         entities
@@ -138,7 +170,7 @@ impl HealthBar {
 impl HealthBar {
     fn create_name_entity(
         pokemon: &Pokemon,
-        team: Team,
+        properties: &HealthBarProperties,
         system_data: &mut BattleSystemData,
     ) -> Entity {
         let BattleSystemData {
@@ -162,17 +194,12 @@ impl HealthBar {
         );
         ui_text.align = Anchor::TopLeft;
 
-        let (x, y) = match team {
-            Team::P1 => (P1_BAR_CONTENT_X, P1_BAR_TOP_Y),
-            Team::P2 => (P2_BAR_CONTENT_X, P2_BAR_TOP_Y),
-        };
-
         let ui_transform = UiTransform::new(
             "Pokémon Display Name".to_string(),
             Anchor::BottomLeft,
             Anchor::BottomLeft,
-            x,
-            y - font_size,
+            properties.content_x,
+            properties.top_y - font_size,
             3.,
             200.,
             font_size,
