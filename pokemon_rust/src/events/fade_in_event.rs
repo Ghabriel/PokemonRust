@@ -18,7 +18,11 @@ use amethyst::{
     ui::UiTransform,
 };
 
-use crate::{config::GameConfig, events::fade_out_event::Fade};
+use crate::{
+    config::GameConfig,
+    constants::WINDOW_HEIGHT,
+    events::fade_out_event::Fade,
+};
 
 use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
@@ -72,12 +76,12 @@ impl GameEvent for FadeInEvent {
         ui_transforms
             .get_mut(*top_fade)
             .expect("Failed to retrieve UiTransform")
-            .height = 300. * (1. - self.elapsed_time / fade_duration);
+            .height = (WINDOW_HEIGHT / 2.) * (1. - self.elapsed_time / fade_duration);
 
         ui_transforms
             .get_mut(*bottom_fade)
             .expect("Failed to retrieve UiTransform")
-            .height = 300. * (1. - self.elapsed_time / fade_duration);
+            .height = (WINDOW_HEIGHT / 2.) * (1. - self.elapsed_time / fade_duration);
 
         if self.elapsed_time >= fade_duration {
             entities

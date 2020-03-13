@@ -17,6 +17,7 @@ use crate::{
         CommonResources,
     },
     config::GameConfig,
+    constants::{OPPONENT_HEALTH_BAR_HEIGHT, HEALTH_BAR_WIDTH, WINDOW_HEIGHT, WINDOW_WIDTH},
     entities::character::{initialise_player, PlayerEntity},
     events::EventQueue,
     map::{initialise_map, MapCoordinates},
@@ -33,7 +34,7 @@ pub fn initialise_camera(world: &mut World, player: Entity) -> Entity {
 
     world
         .create_entity()
-        .with(Camera::standard_2d(800., 600.))
+        .with(Camera::standard_2d(WINDOW_WIDTH, WINDOW_HEIGHT))
         .with(Parent { entity: player })
         .with(transform)
         .build()
@@ -92,14 +93,14 @@ pub fn initialise_resources(world: &mut World, progress_counter: &mut ProgressCo
     let hp_bar_left = load_full_texture_sprite_sheet(
         world,
         "sprites/healthbar_left.png",
-        &(200, 50),
+        &(HEALTH_BAR_WIDTH as u32, OPPONENT_HEALTH_BAR_HEIGHT as u32),
         &mut *progress_counter,
     );
 
     let hp_bar_right = load_full_texture_sprite_sheet(
         world,
         "sprites/healthbar_right.png",
-        &(200, 50),
+        &(HEALTH_BAR_WIDTH as u32, OPPONENT_HEALTH_BAR_HEIGHT as u32),
         &mut *progress_counter,
     );
 

@@ -29,15 +29,15 @@ use super::super::{BattleSystemData, FrontendAnimation, TickResult};
 // TODO: move to a better place
 const SWITCH_IN_ANIMATION_TIME: f32 = 0.5;
 const POKEMON_SPRITE_HEIGHT: f32 = 64.;
-const P1_SPRITE_SCALING: f32 = 2.;
-const P2_SPRITE_SCALING: f32 = 1.8;
+const P1_SPRITE_SCALING: f32 = 2.5;
+const P2_SPRITE_SCALING: f32 = 2.2;
 
 const P1_SPRITE_Y: f32
     = (BATTLE_CAMERA_POSITION.1 - WINDOW_HEIGHT / 2.)
     + HEALTH_BAR_MARGIN
     + ALLY_HEALTH_BAR_HEIGHT
     + (POKEMON_SPRITE_HEIGHT * P1_SPRITE_SCALING) / 2.
-    - 14.; // TODO: investigate why this offset is needed
+    - 18.; // TODO: investigate why this offset is needed
 const P2_SPRITE_Y: f32
     = (BATTLE_CAMERA_POSITION.1 + WINDOW_HEIGHT / 2.)
     - HEALTH_BAR_MARGIN

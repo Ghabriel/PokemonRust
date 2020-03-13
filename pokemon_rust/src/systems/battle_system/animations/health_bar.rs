@@ -9,8 +9,14 @@ use crate::{
     battle::backend::Team,
     constants::{
         ALLY_HEALTH_BAR_HEIGHT,
+        BAR_HEIGHT,
+        BAR_SPACING,
+        BAR_WIDTH,
         HEALTH_BAR_HORIZONTAL_PADDING,
         HEALTH_BAR_MARGIN,
+        HEALTH_BAR_POKEMON_HEALTH_TEXT_FONT_SIZE,
+        HEALTH_BAR_POKEMON_LEVEL_FONT_SIZE,
+        HEALTH_BAR_POKEMON_NAME_FONT_SIZE,
         HEALTH_BAR_SMALLER_WIDTH,
         HEALTH_BAR_WIDTH,
         OPPONENT_HEALTH_BAR_HEIGHT,
@@ -21,10 +27,6 @@ use crate::{
 };
 
 use super::super::BattleSystemData;
-
-const BAR_WIDTH: f32 = HEALTH_BAR_SMALLER_WIDTH - 2. * HEALTH_BAR_HORIZONTAL_PADDING;
-const BAR_HEIGHT: f32 = 10.;
-const BAR_SPACING: f32 = 2.;
 
 const P1_BAR_X: f32 = 0.;
 const P2_BAR_X: f32 = WINDOW_WIDTH - HEALTH_BAR_WIDTH;
@@ -40,10 +42,6 @@ const P2_BAR_BOTTOM_Y: f32 = WINDOW_HEIGHT - OPPONENT_HEALTH_BAR_HEIGHT - HEALTH
 
 const P1_BAR_TOP_Y: f32 = P1_BAR_BOTTOM_Y + ALLY_HEALTH_BAR_HEIGHT;
 const P2_BAR_TOP_Y: f32 = P2_BAR_BOTTOM_Y + OPPONENT_HEALTH_BAR_HEIGHT;
-
-const POKEMON_NAME_FONT_SIZE: f32 = 16.;
-const POKEMON_LEVEL_FONT_SIZE: f32 = 18.;
-const POKEMON_HEALTH_TEXT_FONT_SIZE: f32 = 18.;
 
 pub struct HealthBarProperties {
     x: f32,
@@ -114,7 +112,7 @@ impl HealthBar {
                 bottom_y: P1_BAR_BOTTOM_Y,
                 top_y: P1_BAR_TOP_Y,
                 height: ALLY_HEALTH_BAR_HEIGHT,
-                width: 220.,
+                width: HEALTH_BAR_WIDTH,
             },
             Team::P2 => HealthBarProperties {
                 x: P2_BAR_X,
@@ -123,7 +121,7 @@ impl HealthBar {
                 bottom_y: P2_BAR_BOTTOM_Y,
                 top_y: P2_BAR_TOP_Y,
                 height: OPPONENT_HEALTH_BAR_HEIGHT,
-                width: 220.,
+                width: HEALTH_BAR_WIDTH,
             },
         }
     }
@@ -196,9 +194,9 @@ impl HealthBar {
 
         Self::create_ui_text(
             get_pokemon_display_name(&pokemon, pokedex).to_string(),
-            POKEMON_NAME_FONT_SIZE,
+            HEALTH_BAR_POKEMON_NAME_FONT_SIZE,
             properties.content_x,
-            properties.top_y - POKEMON_NAME_FONT_SIZE,
+            properties.top_y - HEALTH_BAR_POKEMON_NAME_FONT_SIZE,
             system_data,
         )
     }
@@ -209,15 +207,16 @@ impl HealthBar {
         system_data: &mut BattleSystemData,
     ) -> Entity {
         let content = format!("Lv. {}", pokemon.level);
-        let content_width = Self::estimate_text_width(&content, POKEMON_LEVEL_FONT_SIZE);
+        let font_size = HEALTH_BAR_POKEMON_LEVEL_FONT_SIZE;
+        let content_width = Self::estimate_text_width(&content, font_size);
 
         let x = properties.content_end_x - content_width;
 
         Self::create_ui_text(
             content,
-            POKEMON_LEVEL_FONT_SIZE,
+            font_size,
             x,
-            properties.top_y - POKEMON_LEVEL_FONT_SIZE,
+            properties.top_y - font_size,
             system_data,
         )
     }
@@ -279,7 +278,7 @@ impl HealthBar {
             Anchor::BottomLeft,
             Anchor::BottomLeft,
             properties.content_x + delta_x,
-            properties.top_y - POKEMON_LEVEL_FONT_SIZE - BAR_HEIGHT - BAR_SPACING + delta_y,
+            properties.top_y - HEALTH_BAR_POKEMON_LEVEL_FONT_SIZE - BAR_HEIGHT - BAR_SPACING + delta_y,
             3. + delta_z,
             BAR_WIDTH + delta_width,
             BAR_HEIGHT + delta_height,
@@ -307,7 +306,7 @@ impl HealthBar {
 
         Some(Self::create_ui_text(
             content,
-            POKEMON_HEALTH_TEXT_FONT_SIZE,
+            HEALTH_BAR_POKEMON_HEALTH_TEXT_FONT_SIZE,
             properties.content_x,
             properties.bottom_y,
             system_data,

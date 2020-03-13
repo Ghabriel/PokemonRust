@@ -19,7 +19,11 @@ use amethyst::{
     ui::{Anchor, UiImage, UiTransform},
 };
 
-use crate::{common::CommonResources, config::GameConfig};
+use crate::{
+    common::CommonResources,
+    config::GameConfig,
+    constants::{WINDOW_HEIGHT, WINDOW_WIDTH},
+};
 
 use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
 
@@ -82,12 +86,12 @@ impl GameEvent for FadeOutEvent {
         ui_transforms
             .get_mut(*self.top_fade.as_mut().unwrap())
             .expect("Failed to retrieve UiTransform")
-            .height = 300. * (self.elapsed_time / fade_duration);
+            .height = (WINDOW_HEIGHT / 2.) * (self.elapsed_time / fade_duration);
 
         ui_transforms
             .get_mut(*self.bottom_fade.as_mut().unwrap())
             .expect("Failed to retrieve UiTransform")
-            .height = 300. * (self.elapsed_time / fade_duration);
+            .height = (WINDOW_HEIGHT / 2.) * (self.elapsed_time / fade_duration);
 
         self.completed = self.elapsed_time >= fade_duration;
     }
@@ -103,7 +107,16 @@ fn initialise_fade_entity(world: &mut World, anchor: Anchor, pivot: Anchor, id: 
         sprite_number: 0,
     };
 
-    let ui_transform = UiTransform::new("Fade".to_string(), anchor, pivot, 0., 0., 2., 800., 0.);
+    let ui_transform = UiTransform::new(
+        "Fade".to_string(),
+        anchor,
+        pivot,
+        0.,
+        0.,
+        2.,
+        WINDOW_WIDTH,
+        0.,
+    );
 
     world.register::<Fade>();
 

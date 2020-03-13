@@ -6,7 +6,7 @@ use amethyst::{
 };
 
 use crate::{
-    constants::BATTLE_CAMERA_POSITION,
+    constants::{BATTLE_CAMERA_POSITION, WINDOW_HEIGHT, WINDOW_WIDTH},
     systems::{AudioSystem, BattleSystem},
 };
 
@@ -18,7 +18,7 @@ pub fn initialise_camera(world: &mut World) -> Entity {
 
     world
         .create_entity()
-        .with(Camera::standard_2d(800., 600.))
+        .with(Camera::standard_2d(WINDOW_WIDTH, WINDOW_HEIGHT))
         .with(transform)
         .build()
 }
