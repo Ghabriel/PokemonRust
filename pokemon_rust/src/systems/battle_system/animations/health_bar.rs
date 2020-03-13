@@ -23,6 +23,8 @@ use crate::{
 use super::super::BattleSystemData;
 
 const BAR_WIDTH: f32 = HEALTH_BAR_SMALLER_WIDTH - 2. * HEALTH_BAR_HORIZONTAL_PADDING;
+const BAR_HEIGHT: f32 = 10.;
+const BAR_SPACING: f32 = 2.;
 
 const P1_BAR_X: f32 = 0.;
 const P2_BAR_X: f32 = WINDOW_WIDTH - HEALTH_BAR_WIDTH;
@@ -267,10 +269,6 @@ impl HealthBar {
             ..
         } = system_data;
 
-        // TODO: extract to constant
-        let bar_height = 10.;
-        let bar_spacing = 2.;
-
         let sprite_render = SpriteRender {
             sprite_sheet: resources.white.clone(),
             sprite_number: 0,
@@ -281,10 +279,10 @@ impl HealthBar {
             Anchor::BottomLeft,
             Anchor::BottomLeft,
             properties.content_x + delta_x,
-            properties.top_y - POKEMON_LEVEL_FONT_SIZE - bar_height - bar_spacing + delta_y,
+            properties.top_y - POKEMON_LEVEL_FONT_SIZE - BAR_HEIGHT - BAR_SPACING + delta_y,
             3. + delta_z,
             BAR_WIDTH + delta_width,
-            bar_height + delta_height,
+            BAR_HEIGHT + delta_height,
         );
 
         entities
