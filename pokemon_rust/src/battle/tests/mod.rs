@@ -86,6 +86,7 @@ mod pound;
 mod tackle;
 mod tailwhip;
 mod vise_grip;
+mod wing_attack;
 
 trait TestMethods {
     fn move_p1(&mut self, index: usize);

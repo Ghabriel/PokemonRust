@@ -261,6 +261,23 @@ lazy_static! {
             critical_hit: false,
         });
 
+        result.push(Move {
+            id: "WingAttack".to_string(),
+            display_name: "Wing Attack".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Flying,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(60),
+            power_modifier: None,
+            accuracy: Some(100),
+            pp: 35,
+            priority: 0,
+            target_type: TargetType::SingleTarget,
+            multi_hit: None,
+            secondary_effect: None,
+            critical_hit: false,
+        });
+
         MoveDex::new(
             result
                 .into_iter()

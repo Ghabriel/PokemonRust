@@ -154,7 +154,7 @@ lazy_static! {
                 // 21: "Twister",
                 // 25: "FeatherDance",
                 // 29: "Agility",
-                // 33: "WingAttack",
+                33: "WingAttack",
                 // 37: "Roost",
                 // 41: "TailWind",
                 // 45: "MirrorMove",
