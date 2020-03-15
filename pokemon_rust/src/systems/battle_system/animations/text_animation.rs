@@ -16,7 +16,7 @@ use super::super::{BattleSystemData, FrontendAnimation, TickResult};
 
 pub enum TextAnimation {
     PendingStart {
-        full_text: String,
+        text: String,
     },
     Started {
         text_box_entity: Entity,
@@ -29,7 +29,7 @@ impl FrontendAnimation for TextAnimation {
         _backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) {
-        if let TextAnimation::PendingStart { full_text } = self {
+        if let TextAnimation::PendingStart { text } = self {
             let BattleSystemData {
                 text_boxes,
                 ui_images,
@@ -41,7 +41,7 @@ impl FrontendAnimation for TextAnimation {
             } = system_data;
 
             let text_box = create_text_box(
-                full_text.clone(),
+                text.clone(),
                 ui_images,
                 ui_texts,
                 ui_transforms,

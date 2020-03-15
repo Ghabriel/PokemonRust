@@ -73,9 +73,9 @@ impl GameEvent for BattleStartEvent {
 
         let party = {
             let rattata = generate_pokemon(
-                &pokedex.get_species("Rattata").unwrap(),
+                &pokedex.get_species("Pidgey").unwrap(),
                 &movedex,
-                3,
+                9,
             );
 
             Party {
@@ -97,9 +97,9 @@ impl GameEvent for BattleStartEvent {
 
         let p2 = {
             let pidgey = generate_pokemon(
-                &pokedex.get_species("Pidgey").unwrap(),
+                &pokedex.get_species("Metapod").unwrap(),
                 &movedex,
-                3,
+                9,
             );
 
             BattleCharacterTeam {

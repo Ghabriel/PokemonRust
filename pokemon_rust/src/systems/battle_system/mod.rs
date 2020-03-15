@@ -38,6 +38,7 @@ use crate::{
             },
             FrontendEvent,
             Team,
+            TypeEffectiveness,
         },
         rng::StandardBattleRng,
         types::Battle,
@@ -160,9 +161,8 @@ impl BattleSystem {
                 self.handle_initial_switch_in(event_data);
             },
             BattleEvent::ChangeTurn(_) => { },
-            BattleEvent::Damage(_) => {
-                // TODO
-                // self.active_animation = Some(Animation::Damage { event_data });
+            BattleEvent::Damage(event_data) => {
+                self.handle_damage(event_data);
             },
             BattleEvent::Miss(_) => {
                 // TODO
@@ -251,7 +251,7 @@ impl BattleSystem {
                 let display_name = get_pokemon_display_name(&pokemon, &pokedex);
 
                 animations.push(Box::new(TextAnimation::PendingStart {
-                    full_text: format!("Go! {}!", display_name),
+                    text: format!("Go! {}!", display_name),
                 }));
 
                 animations.push(Box::new(InitialSwitchInAnimation::PendingStart {
@@ -266,9 +266,57 @@ impl BattleSystem {
                 }));
 
                 animations.push(Box::new(TextAnimation::PendingStart {
-                    full_text: format!("A wild {} appears!", species.display_name),
+                    text: format!("A wild {} appears!", species.display_name),
                 }));
             },
+        }
+
+        self.active_animation_sequence = Some(AnimationSequence {
+            animations: animations.into(),
+        });
+    }
+
+    fn handle_damage(&mut self, event_data: Damage) {
+        let mut animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = Vec::new();
+
+        let pokedex = get_all_pokemon_species();
+        let backend = self.backend.as_mut().unwrap();
+        let pokemon = backend.get_pokemon(event_data.target);
+        let display_name = get_pokemon_display_name(&pokemon, &pokedex);
+
+        animations.push(Box::new(TextAnimation::PendingStart {
+            text: format!("{} damage!", event_data.amount),
+        }));
+
+        {
+            let effectiveness_text = match event_data.effectiveness {
+                TypeEffectiveness::Immune => {
+                    Some(format!("It doesn't affect {}...", display_name))
+                },
+                TypeEffectiveness::BarelyEffective => {
+                    Some("It's barely effective...".to_string())
+                },
+                TypeEffectiveness::NotVeryEffective => {
+                    Some("It's not very effective...".to_string())
+                },
+                TypeEffectiveness::Normal => None,
+                TypeEffectiveness::SuperEffective => {
+                    Some("It's super effective!".to_string())
+                },
+                TypeEffectiveness::ExtremelyEffective => {
+                    Some("It's extremely effective!".to_string())
+                },
+            };
+
+            if let Some(text) = effectiveness_text {
+                animations.push(Box::new(TextAnimation::PendingStart { text }));
+            }
+        }
+
+        if event_data.is_critical_hit {
+            animations.push(Box::new(TextAnimation::PendingStart {
+                text: "Critical hit!".to_string()
+            }));
         }
 
         self.active_animation_sequence = Some(AnimationSequence {

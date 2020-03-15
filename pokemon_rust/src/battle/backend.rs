@@ -91,7 +91,7 @@ pub mod event {
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum TypeEffectiveness {
     Immune,
-    ReallyNotVeryEffective,
+    BarelyEffective,
     NotVeryEffective,
     Normal,
     SuperEffective,
@@ -104,7 +104,7 @@ impl TypeEffectiveness {
 
         match scaled_effectiveness {
             0 => Self::Immune,
-            1 => Self::ReallyNotVeryEffective,
+            1 => Self::BarelyEffective,
             2 => Self::NotVeryEffective,
             4 => Self::Normal,
             8 => Self::SuperEffective,
