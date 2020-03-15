@@ -509,6 +509,30 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
             .map(move |pokemon| self.get_pokemon(*pokemon))
     }
 
+    pub fn get_pokemon_team(&self, pokemon: usize) -> Team {
+        if let Some(index) = self.p1.active_pokemon {
+            if index == pokemon {
+                return Team::P1;
+            }
+        }
+
+        if let Some(index) = self.p2.active_pokemon {
+            if index == pokemon {
+                return Team::P2;
+            }
+        }
+
+        if self.p1.party.contains(&pokemon) {
+            return Team::P1;
+        }
+
+        if self.p2.party.contains(&pokemon) {
+            return Team::P2;
+        }
+
+        unreachable!();
+    }
+
     fn get_attack_critical_hit(&self, pokemon: usize) -> usize {
         self.get_positive_critical_hit_stat(pokemon, Stat::Attack)
     }

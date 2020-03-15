@@ -58,6 +58,7 @@ pub struct InfoCard {
     name_entity: Entity,
     // gender_entity: Entity,
     level_entity: Entity,
+    health_bar_support_entity: Entity,
     health_bar_entity: Entity,
     // caught_indicator_entity: Option<Entity>,
     health_values_entity: Option<Entity>,
@@ -76,7 +77,11 @@ impl InfoCard {
         let name_entity = Self::create_name_entity(&pokemon, &properties, system_data);
         // let gender_entity = Self::create_gender_entity(pokemon, system_data);
         let level_entity = Self::create_level_entity(&pokemon, &properties, system_data);
-        let health_bar_entity = Self::create_health_bar_entity(&pokemon, &properties, system_data);
+        let (health_bar_support_entity, health_bar_entity) = Self::create_health_bar_entities(
+            &pokemon,
+            &properties,
+            system_data,
+        );
         let health_values_entity = Self::create_health_values_entity(
             &pokemon,
             team,
@@ -90,6 +95,7 @@ impl InfoCard {
             name_entity,
             // gender_entity,
             level_entity,
+            health_bar_support_entity,
             health_bar_entity,
             health_values_entity,
             // experience_bar_entity,
@@ -105,6 +111,35 @@ impl InfoCard {
 
         if let Some(health_values_entity) = self.health_values_entity {
             entities.delete(health_values_entity).expect("Failed to delete health values container");
+        }
+    }
+
+    pub fn damage(
+        &mut self,
+        _amount: usize,
+        pokemon: &Pokemon,
+        system_data: &mut BattleSystemData,
+    ) {
+        let BattleSystemData {
+            ui_texts,
+            ui_transforms,
+            ..
+        } = system_data;
+
+        let health_rate = (pokemon.current_hp as f32) / (pokemon.stats[0] as f32);
+
+        ui_transforms
+            .get_mut(self.health_bar_entity)
+            .expect("Failed to retrieve UiTransform")
+            .width = (BAR_WIDTH - 2.) * health_rate;
+
+        if let Some(health_values_entity) = self.health_values_entity {
+            let content = format!("{} / {}", pokemon.current_hp, pokemon.stats[0]);
+
+            ui_texts
+                .get_mut(health_values_entity)
+                .expect("Failed to retrieve UiText")
+                .text = content;
         }
     }
 }
@@ -228,12 +263,12 @@ impl InfoCard {
         )
     }
 
-    fn create_health_bar_entity(
+    fn create_health_bar_entities(
         pokemon: &Pokemon,
         properties: &HealthBarProperties,
         system_data: &mut BattleSystemData,
-    ) -> Entity {
-        Self::create_generic_health_bar_entity(
+    ) -> (Entity, Entity) {
+        let support_bar = Self::create_generic_health_bar_entity(
             0.,
             0.,
             0.,
@@ -244,7 +279,7 @@ impl InfoCard {
             system_data,
         );
 
-        Self::create_generic_health_bar_entity(
+        let live_bar = Self::create_generic_health_bar_entity(
             1.,
             1.,
             1.,
@@ -253,7 +288,9 @@ impl InfoCard {
             Tint(Srgba::new(0.0, 1.0, 0.0, 1.0)),
             properties,
             system_data,
-        )
+        );
+
+        (support_bar, live_bar)
     }
 
     fn create_generic_health_bar_entity(

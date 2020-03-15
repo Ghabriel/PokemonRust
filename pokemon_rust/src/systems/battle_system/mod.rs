@@ -171,7 +171,7 @@ impl BattleSystem {
             },
             BattleEvent::ChangeTurn(_) => { },
             BattleEvent::Damage(event_data) => {
-                self.handle_damage(event_data);
+                self.handle_damage(event_data, system_data);
             },
             BattleEvent::Miss(_) => {
                 // TODO
@@ -285,13 +285,19 @@ impl BattleSystem {
         });
     }
 
-    fn handle_damage(&mut self, event_data: Damage) {
+    fn handle_damage(&mut self, event_data: Damage, system_data: &mut BattleSystemData<'_>) {
         let mut animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = Vec::new();
 
         let pokedex = get_all_pokemon_species();
         let backend = self.backend.as_mut().unwrap();
         let pokemon = backend.get_pokemon(event_data.target);
-        let display_name = get_pokemon_display_name(&pokemon, &pokedex);
+
+        let info_card = match backend.get_pokemon_team(event_data.target) {
+            Team::P1 => self.p1_info_card.as_mut().unwrap(),
+            Team::P2 => self.p2_info_card.as_mut().unwrap(),
+        };
+
+        info_card.damage(event_data.amount, &pokemon, system_data);
 
         animations.push(Box::new(TextAnimation::PendingStart {
             text: format!("{} damage!", event_data.amount),
@@ -300,6 +306,8 @@ impl BattleSystem {
         {
             let effectiveness_text = match event_data.effectiveness {
                 TypeEffectiveness::Immune => {
+                    let display_name = get_pokemon_display_name(&pokemon, &pokedex);
+
                     Some(format!("It doesn't affect {}...", display_name))
                 },
                 TypeEffectiveness::BarelyEffective => {
