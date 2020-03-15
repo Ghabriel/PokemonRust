@@ -53,7 +53,7 @@ pub struct HealthBarProperties {
     width: f32,
 }
 
-pub struct HealthBar {
+pub struct InfoCard {
     container_entity: Entity,
     name_entity: Entity,
     // gender_entity: Entity,
@@ -64,7 +64,7 @@ pub struct HealthBar {
     // experience_bar_entity: Option<Entity>,
 }
 
-impl HealthBar {
+impl InfoCard {
     pub fn new(pokemon: &Pokemon, team: Team, system_data: &mut BattleSystemData) -> Self {
         let properties = Self::get_properties(team);
 
@@ -102,7 +102,7 @@ impl HealthBar {
     }
 }
 
-impl HealthBar {
+impl InfoCard {
     fn get_properties(team: Team) -> HealthBarProperties {
         match team {
             Team::P1 => HealthBarProperties {
@@ -184,7 +184,7 @@ impl HealthBar {
     }
 }
 
-impl HealthBar {
+impl InfoCard {
     fn create_name_entity(
         pokemon: &Pokemon,
         properties: &HealthBarProperties,

@@ -1,12 +1,12 @@
 mod action_selection_screen;
-mod health_bar;
+mod info_card;
 mod initial_switch_in_animation;
 mod move_selection_screen;
 mod selection_screen;
 mod text_animation;
 
 pub use action_selection_screen::ActionSelectionScreen;
-pub use health_bar::HealthBar;
+pub use info_card::InfoCard;
 pub use initial_switch_in_animation::InitialSwitchInAnimation;
 pub use move_selection_screen::MoveSelectionScreen;
 pub use selection_screen::SelectionScreen;

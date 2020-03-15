@@ -11,14 +11,14 @@ use crate::{
 
 use super::super::{BattleSystemData, FrontendAnimation, TickResult};
 
-use super::{HealthBar, MoveSelectionScreen, SelectionScreen};
+use super::{InfoCard, MoveSelectionScreen, SelectionScreen};
 
 pub enum ActionSelectionScreen {
     PendingStart,
     Started {
         selection_screen: SelectionScreen,
-        p1_hp_bar: HealthBar,
-        p2_hp_bar: HealthBar,
+        p1_info_card: InfoCard,
+        p2_info_card: InfoCard,
     },
 }
 
@@ -36,10 +36,10 @@ impl ActionSelectionScreen {
     }
 
     fn select_fight_option(&mut self, system_data: &mut BattleSystemData) -> TickResult {
-        if let Self::Started { selection_screen, p1_hp_bar, p2_hp_bar } = self {
+        if let Self::Started { selection_screen, p1_info_card, p2_info_card } = self {
             selection_screen.remove(system_data);
-            p1_hp_bar.remove(system_data);
-            p2_hp_bar.remove(system_data);
+            p1_info_card.remove(system_data);
+            p2_info_card.remove(system_data);
         }
 
         TickResult::replace_by(vec![
@@ -73,8 +73,8 @@ impl FrontendAnimation for ActionSelectionScreen {
                 ],
                 system_data,
             ),
-            p1_hp_bar: HealthBar::new(p1, Team::P1, system_data),
-            p2_hp_bar: HealthBar::new(p2, Team::P2, system_data),
+            p1_info_card: InfoCard::new(p1, Team::P1, system_data),
+            p2_info_card: InfoCard::new(p2, Team::P2, system_data),
         };
     }
 
