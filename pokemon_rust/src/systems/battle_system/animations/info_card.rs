@@ -98,7 +98,14 @@ impl InfoCard {
 
     pub fn remove(&mut self, system_data: &mut BattleSystemData) {
         let entities = &system_data.entities;
-        entities.delete(self.container_entity).expect("Failed to delete health container");
+        entities.delete(self.container_entity).expect("Failed to delete info card container");
+        entities.delete(self.name_entity).expect("Failed to delete name container");
+        entities.delete(self.level_entity).expect("Failed to delete level container");
+        entities.delete(self.health_bar_entity).expect("Failed to delete health bar container");
+
+        if let Some(health_values_entity) = self.health_values_entity {
+            entities.delete(health_values_entity).expect("Failed to delete health values container");
+        }
     }
 }
 

@@ -51,7 +51,12 @@ use crate::{
     },
 };
 
-use self::animations::{ActionSelectionScreen, InitialSwitchInAnimation, TextAnimation};
+use self::animations::{
+    ActionSelectionScreen,
+    InfoCard,
+    InitialSwitchInAnimation,
+    TextAnimation,
+};
 
 use std::collections::VecDeque;
 
@@ -88,6 +93,8 @@ pub struct BattleSystem {
     backend: Option<BattleBackend<StandardBattleRng>>,
     event_queue: VecDeque<BattleEvent>,
     active_animation_sequence: Option<AnimationSequence>,
+    p1_info_card: Option<InfoCard>,
+    p2_info_card: Option<InfoCard>,
 }
 
 struct AnimationSequence {
@@ -149,6 +156,8 @@ impl BattleSystem {
             backend: None,
             event_queue: VecDeque::new(),
             active_animation_sequence: None,
+            p1_info_card: None,
+            p2_info_card: None,
         }
     }
 
@@ -324,14 +333,27 @@ impl BattleSystem {
         });
     }
 
-    fn push_action_selection_event(&mut self) {
-        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = vec![
+    fn push_action_selection_event(&mut self, system_data: &mut BattleSystemData<'_>) {
+        let mut animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = vec![
             Box::new(ActionSelectionScreen::PendingStart),
         ];
+
+        if self.p1_info_card.is_none() {
+            self.init_info_cards(system_data);
+        }
 
         self.active_animation_sequence = Some(AnimationSequence {
             animations: animations.into(),
         });
+    }
+
+    fn init_info_cards(&mut self, system_data: &mut BattleSystemData<'_>) {
+        let backend = self.backend.as_mut().unwrap();
+        let p1 = backend.get_active_pokemon(Team::P1).next().unwrap();
+        let p2 = backend.get_active_pokemon(Team::P2).next().unwrap();
+
+        self.p1_info_card = Some(InfoCard::new(p1, Team::P1, system_data));
+        self.p2_info_card = Some(InfoCard::new(p2, Team::P2, system_data));
     }
 }
 
@@ -343,7 +365,7 @@ impl<'a> System<'a> for BattleSystem {
             if self.event_queue.is_empty() {
                 match self.backend.as_mut() {
                     Some(_) => {
-                        self.push_action_selection_event();
+                        self.push_action_selection_event(&mut system_data);
                         self.start_animation(&mut system_data);
                     },
                     None => {

@@ -3,7 +3,7 @@ use amethyst::input::{InputEvent, StringBindings};
 use crate::{
     audio::Sound,
     battle::{
-        backend::{BattleBackend, Team},
+        backend::BattleBackend,
         rng::StandardBattleRng,
     },
     constants::AXIS_SENSITIVITY,
@@ -11,14 +11,12 @@ use crate::{
 
 use super::super::{BattleSystemData, FrontendAnimation, TickResult};
 
-use super::{InfoCard, MoveSelectionScreen, SelectionScreen};
+use super::{MoveSelectionScreen, SelectionScreen};
 
 pub enum ActionSelectionScreen {
     PendingStart,
     Started {
         selection_screen: SelectionScreen,
-        p1_info_card: InfoCard,
-        p2_info_card: InfoCard,
     },
 }
 
@@ -36,10 +34,8 @@ impl ActionSelectionScreen {
     }
 
     fn select_fight_option(&mut self, system_data: &mut BattleSystemData) -> TickResult {
-        if let Self::Started { selection_screen, p1_info_card, p2_info_card } = self {
+        if let Self::Started { selection_screen } = self {
             selection_screen.remove(system_data);
-            p1_info_card.remove(system_data);
-            p2_info_card.remove(system_data);
         }
 
         TickResult::replace_by(vec![
@@ -61,9 +57,6 @@ impl FrontendAnimation for ActionSelectionScreen {
         backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) {
-        let p1 = backend.get_active_pokemon(Team::P1).next().unwrap();
-        let p2 = backend.get_active_pokemon(Team::P2).next().unwrap();
-
         *self = ActionSelectionScreen::Started {
             selection_screen: SelectionScreen::new(
                 160.,
@@ -73,8 +66,6 @@ impl FrontendAnimation for ActionSelectionScreen {
                 ],
                 system_data,
             ),
-            p1_info_card: InfoCard::new(p1, Team::P1, system_data),
-            p2_info_card: InfoCard::new(p2, Team::P2, system_data),
         };
     }
 
