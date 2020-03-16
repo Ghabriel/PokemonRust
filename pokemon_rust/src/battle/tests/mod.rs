@@ -30,6 +30,7 @@ pub mod prelude {
             get_all_moves,
             get_all_pokemon_species,
             Nature,
+            Stat,
         },
     };
 
@@ -81,7 +82,9 @@ pub mod prelude {
 }
 
 mod bite;
+mod growl;
 mod gust;
+mod harden;
 mod karate_chop;
 mod mach_punch;
 mod mega_punch;

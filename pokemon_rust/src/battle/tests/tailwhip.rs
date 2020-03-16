@@ -10,5 +10,5 @@ fn tailwhip_reduces_defense() {
 
     let events = backend.process_turn("TailWhip", "Tackle");
 
-    assert_event!(events[0], StatChange { target: 1, kind: StatChangeKind::Fell });
+    assert_event!(events[0], StatChange { target: 1, kind: StatChangeKind::Fell, stat: Stat::Defense });
 }

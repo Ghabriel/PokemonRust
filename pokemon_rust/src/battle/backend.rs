@@ -48,7 +48,7 @@ pub enum BattleEvent {
 }
 
 pub mod event {
-    use super::{StatChangeKind, Team, TypeEffectiveness};
+    use super::{Stat, StatChangeKind, Team, TypeEffectiveness};
 
     /// Corresponds to the very first switch-in of a battle participant in a
     /// battle.
@@ -85,6 +85,7 @@ pub mod event {
     pub struct StatChange {
         pub target: usize,
         pub kind: StatChangeKind,
+        pub stat: Stat,
     }
 }
 
@@ -482,6 +483,7 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         self.event_queue.push(BattleEvent::StatChange(event::StatChange {
             target,
             kind: stat_change_kind,
+            stat,
         }));
     }
 }
