@@ -85,6 +85,7 @@ pub mod event {
 
     #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct Miss {
+        pub target: usize,
         pub move_user: usize,
     }
 
@@ -340,7 +341,8 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
 
         if self.check_miss(&used_move) {
             self.event_queue.push(BattleEvent::Miss(event::Miss {
-                move_user: used_move.user
+                target: used_move.target,
+                move_user: used_move.user,
             }));
             return;
         }

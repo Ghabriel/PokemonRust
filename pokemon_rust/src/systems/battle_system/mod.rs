@@ -177,9 +177,8 @@ impl BattleSystem {
             BattleEvent::Damage(event_data) => {
                 self.handle_damage(event_data, system_data);
             },
-            BattleEvent::Miss(_) => {
-                // TODO
-                // self.active_animation = Some(Animation::Miss);
+            BattleEvent::Miss(event_data) => {
+                self.handle_miss(event_data, system_data);
             },
             BattleEvent::StatChange(_) => {
                 // TODO
@@ -320,10 +319,6 @@ impl BattleSystem {
 
         info_card.damage(event_data.amount, &pokemon, system_data);
 
-        animations.push(Box::new(TextAnimation::PendingStart {
-            text: format!("{} damage!", event_data.amount),
-        }));
-
         {
             let effectiveness_text = match event_data.effectiveness {
                 TypeEffectiveness::Immune => {
@@ -337,7 +332,10 @@ impl BattleSystem {
                 TypeEffectiveness::NotVeryEffective => {
                     Some("It's not very effective...".to_string())
                 },
-                TypeEffectiveness::Normal => None,
+                TypeEffectiveness::Normal => {
+                    // TODO: remove this after health reduction becomes an animation
+                    Some(format!("{} damage!", event_data.amount))
+                },
                 TypeEffectiveness::SuperEffective => {
                     Some("It's super effective!".to_string())
                 },
@@ -356,6 +354,23 @@ impl BattleSystem {
                 text: "Critical hit!".to_string()
             }));
         }
+
+        self.active_animation_sequence = Some(AnimationSequence {
+            animations: animations.into(),
+        });
+    }
+
+    fn handle_miss(&mut self, event_data: Miss, system_data: &mut BattleSystemData<'_>) {
+        let pokedex = get_all_pokemon_species();
+        let backend = self.backend.as_mut().unwrap();
+        let pokemon = backend.get_pokemon(event_data.target);
+        let display_name = get_pokemon_display_name(&pokemon, &pokedex);
+
+        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = vec![
+            Box::new(TextAnimation::PendingStart {
+                text: format!("But {} avoided the attack!", display_name),
+            })
+        ];
 
         self.active_animation_sequence = Some(AnimationSequence {
             animations: animations.into(),
