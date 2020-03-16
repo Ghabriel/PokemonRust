@@ -38,6 +38,7 @@ use crate::{
                 UseMove,
             },
             FrontendEvent,
+            StatChangeKind,
             Team,
             TypeEffectiveness,
         },
@@ -47,7 +48,7 @@ use crate::{
     common::CommonResources,
     config::GameConfig,
     entities::{
-        pokemon::{get_all_pokemon_species, get_pokemon_display_name},
+        pokemon::{get_all_pokemon_species, get_pokemon_display_name, Stat},
         text_box::TextBox,
     },
 };
@@ -180,9 +181,8 @@ impl BattleSystem {
             BattleEvent::Miss(event_data) => {
                 self.handle_miss(event_data, system_data);
             },
-            BattleEvent::StatChange(_) => {
-                // TODO
-                // self.active_animation = Some(Animation::StatChange { event_data, time: 0 });
+            BattleEvent::StatChange(event_data) => {
+                self.handle_stat_change(event_data, system_data);
             },
         }
 
@@ -370,6 +370,59 @@ impl BattleSystem {
             Box::new(TextAnimation::PendingStart {
                 text: format!("But {} avoided the attack!", display_name),
             })
+        ];
+
+        self.active_animation_sequence = Some(AnimationSequence {
+            animations: animations.into(),
+        });
+    }
+
+    fn handle_stat_change(&mut self, event_data: StatChange, system_data: &mut BattleSystemData<'_>) {
+        let pokedex = get_all_pokemon_species();
+        let backend = self.backend.as_mut().unwrap();
+        let pokemon = backend.get_pokemon(event_data.target);
+        let display_name = get_pokemon_display_name(&pokemon, &pokedex);
+
+        let stat = match event_data.stat {
+            Stat::HP => unreachable!(),
+            Stat::Attack => "attack",
+            Stat::Defense => "defense",
+            Stat::SpecialAttack => "special attack",
+            Stat::SpecialDefense => "special defense",
+            Stat::Speed => "speed",
+            Stat::Accuracy => "accuracy",
+            Stat::Evasion => "evasion",
+        };
+
+        let text = match event_data.kind {
+            StatChangeKind::WontGoAnyLower => {
+                format!("{}'s {} won't go any lower!", display_name, stat)
+            },
+            StatChangeKind::SeverelyFell => {
+                format!("{}'s {} severely fell!", display_name, stat)
+            },
+            StatChangeKind::HarshlyFell => {
+                format!("{}'s {} harshly fell!", display_name, stat)
+            },
+            StatChangeKind::Fell => {
+                format!("{}'s {} fell!", display_name, stat)
+            },
+            StatChangeKind::Rose => {
+                format!("{}'s {} rose!", display_name, stat)
+            },
+            StatChangeKind::SharplyRose => {
+                format!("{}'s {} sharply rose!", display_name, stat)
+            },
+            StatChangeKind::DrasticallyRose => {
+                format!("{}'s {} drastically rose!", display_name, stat)
+            },
+            StatChangeKind::WontGoAnyHigher => {
+                format!("{}'s {} won't go any higher!", display_name, stat)
+            },
+        };
+
+        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = vec![
+            Box::new(TextAnimation::PendingStart { text }),
         ];
 
         self.active_animation_sequence = Some(AnimationSequence {
