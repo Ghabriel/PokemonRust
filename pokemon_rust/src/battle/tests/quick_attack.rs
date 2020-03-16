@@ -3,12 +3,12 @@ use crate::battle::backend::BattleEvent;
 use super::{prelude::*, TestMethods, TestRng};
 
 #[test]
-fn wing_attack_deals_deals_damage() {
+fn quick_attack_deals_damage_and_has_increased_priority() {
     let mut backend = battle! {
-        "Pidgey" 33 (max ivs, Serious) vs "Metapod" 33 (max ivs, Serious)
+        "Rattata" 6 (max ivs, Serious) vs "Hitmonchan" 100 (max ivs, Serious)
     };
 
-    let events = backend.process_turn("WingAttack", "Harden");
+    let events = backend.process_turn("QuickAttack", "MegaPunch");
 
     assert_event!(events[0], Damage { target: 1, is_critical_hit: false, .. });
 }

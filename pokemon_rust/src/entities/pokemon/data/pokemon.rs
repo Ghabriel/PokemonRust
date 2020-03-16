@@ -149,7 +149,7 @@ lazy_static! {
                 1: "Tackle",
                 // 5: "SandAttack",
                 9: "Gust",
-                // 13: "QuickAttack",
+                13: "QuickAttack",
                 // 17: "Whirlwind",
                 // 21: "Twister",
                 // 25: "FeatherDance",
@@ -179,7 +179,7 @@ lazy_static! {
             move_table: [
                 1: "Tackle",
                 3: "TailWhip",
-                // 6: "QuickAttack",
+                6: "QuickAttack",
                 // 9: "FocusEnergy",
                 12: "Bite",
                 // 15: "SuperFang",

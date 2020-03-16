@@ -83,6 +83,7 @@ pub mod prelude {
 mod karate_chop;
 mod mega_punch;
 mod pound;
+mod quick_attack;
 mod tackle;
 mod tailwhip;
 mod vise_grip;
