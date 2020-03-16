@@ -80,10 +80,15 @@ pub mod prelude {
     }
 }
 
+mod bite;
+mod gust;
 mod karate_chop;
+mod mach_punch;
 mod mega_punch;
 mod pound;
 mod quick_attack;
+mod scratch;
+mod slash;
 mod tackle;
 mod tailwhip;
 mod vise_grip;
