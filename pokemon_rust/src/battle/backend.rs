@@ -42,6 +42,7 @@ pub enum FrontendEventKind {
 pub enum BattleEvent {
     InitialSwitchIn(event::InitialSwitchIn),
     ChangeTurn(event::ChangeTurn),
+    UseMove(event::UseMove),
     Damage(event::Damage),
     Miss(event::Miss),
     StatChange(event::StatChange),
@@ -66,6 +67,12 @@ pub mod event {
     #[derive(Clone, Debug, Eq, PartialEq)]
     pub struct ChangeTurn {
         pub new_turn: usize,
+    }
+
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    pub struct UseMove {
+        pub move_user: usize,
+        pub move_name: String,
     }
 
     #[derive(Clone, Debug, Eq, PartialEq)]
@@ -326,6 +333,11 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
     }
 
     fn process_move(&mut self, used_move: UsedMove) {
+        self.event_queue.push(BattleEvent::UseMove(event::UseMove {
+            move_user: used_move.user,
+            move_name: used_move.movement.display_name.clone(),
+        }));
+
         if self.check_miss(&used_move) {
             self.event_queue.push(BattleEvent::Miss(event::Miss {
                 move_user: used_move.user

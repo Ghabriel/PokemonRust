@@ -10,5 +10,5 @@ fn quick_attack_deals_damage_and_has_increased_priority() {
 
     let events = backend.process_turn("QuickAttack", "MegaPunch");
 
-    assert_event!(events[0], Damage { target: 1, is_critical_hit: false, .. });
+    assert_event!(events[1], Damage { target: 1, is_critical_hit: false, .. });
 }

@@ -10,5 +10,5 @@ fn growl_reduces_attack() {
 
     let events = backend.process_turn("Growl", "Harden");
 
-    assert_event!(events[0], StatChange { target: 1, kind: StatChangeKind::Fell, stat: Stat::Attack });
+    assert_event!(events[1], StatChange { target: 1, kind: StatChangeKind::Fell, stat: Stat::Attack });
 }

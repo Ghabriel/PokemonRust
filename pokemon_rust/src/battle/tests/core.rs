@@ -45,13 +45,13 @@ fn applies_type_effectiveness() {
 
     let events = backend.process_turn("Gust", "Tackle");
 
-    assert_event!(events[0], Damage {
+    assert_event!(events[1], Damage {
         target: 0,
         amount: 10,
         effectiveness: TypeEffectiveness::Normal,
         is_critical_hit: false,
     });
-    assert_event!(events[1], Damage {
+    assert_event!(events[3], Damage {
         target: 1,
         amount: 12,
         effectiveness: TypeEffectiveness::SuperEffective,
@@ -68,7 +68,7 @@ fn applies_stab() {
     let turn1 = backend.process_turn("MachPunch", "Tackle");
     let turn2 = backend.process_turn("Tackle", "Tackle");
 
-    match (&turn1[0], &turn2[0]) {
+    match (&turn1[1], &turn2[1]) {
         (
             BattleEvent::Damage(Damage { amount: a1, .. }),
             BattleEvent::Damage(Damage { amount: a2, .. }),
@@ -88,10 +88,10 @@ fn applies_critical_hit() {
     let turn1 = backend.process_turn("Slash", "Tackle");
     let turn2 = backend.process_turn("Scratch", "Tackle");
 
-    assert_event!(turn1[0], Damage { is_critical_hit: true, .. });
-    assert_event!(turn1[1], Damage { is_critical_hit: false, .. });
-    assert_event!(turn2[0], Damage { is_critical_hit: false, .. });
+    assert_event!(turn1[1], Damage { is_critical_hit: true, .. });
+    assert_event!(turn1[3], Damage { is_critical_hit: false, .. });
     assert_event!(turn2[1], Damage { is_critical_hit: false, .. });
+    assert_event!(turn2[3], Damage { is_critical_hit: false, .. });
 }
 
 #[test]
@@ -103,7 +103,7 @@ fn ignores_attack_debuffs_on_critical_hit() {
     let turn1 = backend.process_turn("Slash", "Growl");
     let turn2 = backend.process_turn("Slash", "Growl");
 
-    match (&turn1[0], &turn2[0]) {
+    match (&turn1[1], &turn2[1]) {
         (
             BattleEvent::Damage(Damage { amount: a1, .. }),
             BattleEvent::Damage(Damage { amount: a2, .. }),
@@ -123,7 +123,7 @@ fn ignores_defense_buffs_on_critical_hit() {
     let turn1 = backend.process_turn("Slash", "Harden");
     let turn2 = backend.process_turn("Slash", "Harden");
 
-    match (&turn1[0], &turn2[0]) {
+    match (&turn1[1], &turn2[1]) {
         (
             BattleEvent::Damage(Damage { amount: a1, .. }),
             BattleEvent::Damage(Damage { amount: a2, .. }),
@@ -144,7 +144,7 @@ fn considers_stat_stages_on_damage_calculation() {
     backend.process_turn("TailWhip", "Tackle");
     let turn3 = backend.process_turn("Tackle", "Tackle");
 
-    match (&turn1[0], &turn3[0]) {
+    match (&turn1[1], &turn3[1]) {
         (
             BattleEvent::Damage(Damage { amount: a1, .. }),
             BattleEvent::Damage(Damage { amount: a2, .. }),

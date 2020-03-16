@@ -10,5 +10,5 @@ fn harden_raises_defense() {
 
     let events = backend.process_turn("Harden", "Pound");
 
-    assert_event!(events[0], StatChange { target: 0, kind: StatChangeKind::Rose, stat: Stat::Defense });
+    assert_event!(events[1], StatChange { target: 0, kind: StatChangeKind::Rose, stat: Stat::Defense });
 }

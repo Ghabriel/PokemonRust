@@ -35,6 +35,7 @@ use crate::{
                 InitialSwitchIn,
                 Miss,
                 StatChange,
+                UseMove,
             },
             FrontendEvent,
             Team,
@@ -170,6 +171,9 @@ impl BattleSystem {
                 self.handle_initial_switch_in(event_data);
             },
             BattleEvent::ChangeTurn(_) => { },
+            BattleEvent::UseMove(event_data) => {
+                self.handle_use_move(event_data, system_data);
+            },
             BattleEvent::Damage(event_data) => {
                 self.handle_damage(event_data, system_data);
             },
@@ -279,6 +283,23 @@ impl BattleSystem {
                 }));
             },
         }
+
+        self.active_animation_sequence = Some(AnimationSequence {
+            animations: animations.into(),
+        });
+    }
+
+    fn handle_use_move(&mut self, event_data: UseMove, system_data: &mut BattleSystemData<'_>) {
+        let pokedex = get_all_pokemon_species();
+        let backend = self.backend.as_mut().unwrap();
+        let pokemon = backend.get_pokemon(event_data.move_user);
+        let display_name = get_pokemon_display_name(&pokemon, &pokedex);
+
+        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = vec![
+            Box::new(TextAnimation::PendingStart {
+                text: format!("{} used {}!", display_name, event_data.move_name),
+            })
+        ];
 
         self.active_animation_sequence = Some(AnimationSequence {
             animations: animations.into(),

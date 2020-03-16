@@ -10,5 +10,5 @@ fn wing_attack_deals_damage() {
 
     let events = backend.process_turn("WingAttack", "Harden");
 
-    assert_event!(events[0], Damage { target: 1, is_critical_hit: false, .. });
+    assert_event!(events[1], Damage { target: 1, is_critical_hit: false, .. });
 }
