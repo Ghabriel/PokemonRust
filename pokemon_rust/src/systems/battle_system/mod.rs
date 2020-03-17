@@ -173,16 +173,16 @@ impl BattleSystem {
             },
             BattleEvent::ChangeTurn(_) => { },
             BattleEvent::UseMove(event_data) => {
-                self.handle_use_move(event_data, system_data);
+                self.handle_use_move(event_data);
             },
             BattleEvent::Damage(event_data) => {
                 self.handle_damage(event_data, system_data);
             },
             BattleEvent::Miss(event_data) => {
-                self.handle_miss(event_data, system_data);
+                self.handle_miss(event_data);
             },
             BattleEvent::StatChange(event_data) => {
-                self.handle_stat_change(event_data, system_data);
+                self.handle_stat_change(event_data);
             },
         }
 
@@ -288,7 +288,7 @@ impl BattleSystem {
         });
     }
 
-    fn handle_use_move(&mut self, event_data: UseMove, system_data: &mut BattleSystemData<'_>) {
+    fn handle_use_move(&mut self, event_data: UseMove) {
         let pokedex = get_all_pokemon_species();
         let backend = self.backend.as_mut().unwrap();
         let pokemon = backend.get_pokemon(event_data.move_user);
@@ -360,7 +360,7 @@ impl BattleSystem {
         });
     }
 
-    fn handle_miss(&mut self, event_data: Miss, system_data: &mut BattleSystemData<'_>) {
+    fn handle_miss(&mut self, event_data: Miss) {
         let pokedex = get_all_pokemon_species();
         let backend = self.backend.as_mut().unwrap();
         let pokemon = backend.get_pokemon(event_data.target);
@@ -377,7 +377,7 @@ impl BattleSystem {
         });
     }
 
-    fn handle_stat_change(&mut self, event_data: StatChange, system_data: &mut BattleSystemData<'_>) {
+    fn handle_stat_change(&mut self, event_data: StatChange) {
         let pokedex = get_all_pokemon_species();
         let backend = self.backend.as_mut().unwrap();
         let pokemon = backend.get_pokemon(event_data.target);
@@ -431,7 +431,7 @@ impl BattleSystem {
     }
 
     fn push_action_selection_event(&mut self, system_data: &mut BattleSystemData<'_>) {
-        let mut animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = vec![
+        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = vec![
             Box::new(ActionSelectionScreen::PendingStart),
         ];
 

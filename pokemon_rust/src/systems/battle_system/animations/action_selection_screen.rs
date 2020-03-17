@@ -54,7 +54,7 @@ impl ActionSelectionScreen {
 impl FrontendAnimation for ActionSelectionScreen {
     fn start(
         &mut self,
-        backend: &BattleBackend<StandardBattleRng>,
+        _backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) {
         *self = ActionSelectionScreen::Started {

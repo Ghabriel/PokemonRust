@@ -78,7 +78,6 @@ impl InfoCard {
         // let gender_entity = Self::create_gender_entity(pokemon, system_data);
         let level_entity = Self::create_level_entity(&pokemon, &properties, system_data);
         let (health_bar_support_entity, health_bar_entity) = Self::create_health_bar_entities(
-            &pokemon,
             &properties,
             system_data,
         );
@@ -264,7 +263,6 @@ impl InfoCard {
     }
 
     fn create_health_bar_entities(
-        pokemon: &Pokemon,
         properties: &HealthBarProperties,
         system_data: &mut BattleSystemData,
     ) -> (Entity, Entity) {
