@@ -46,6 +46,7 @@ pub enum BattleEvent {
     Damage(event::Damage),
     Miss(event::Miss),
     StatChange(event::StatChange),
+    Faint(event::Faint),
 }
 
 pub mod event {
@@ -94,6 +95,11 @@ pub mod event {
         pub target: usize,
         pub kind: StatChangeKind,
         pub stat: Stat,
+    }
+
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    pub struct Faint {
+        pub target: usize,
     }
 }
 
@@ -334,6 +340,10 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
     }
 
     fn process_move(&mut self, used_move: UsedMove) {
+        if self.is_fainted(used_move.user) {
+            return;
+        }
+
         self.event_queue.push(BattleEvent::UseMove(event::UseMove {
             move_user: used_move.user,
             move_name: used_move.movement.display_name.clone(),
@@ -459,6 +469,23 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         }));
 
         // TODO: trigger effects like Static
+
+        if target.current_hp == 0 {
+            match self.get_pokemon_team(used_move.target) {
+                Team::P1 => {
+                    self.p1.active_pokemon = None;
+                    self.p1.party.push_front(used_move.target);
+                },
+                Team::P2 => {
+                    self.p2.active_pokemon = None;
+                    self.p2.party.push_front(used_move.target);
+                },
+            }
+
+            self.event_queue.push(BattleEvent::Faint(event::Faint {
+                target: used_move.target,
+            }));
+        }
     }
 
     fn change_stat_stage(&mut self, target: usize, stat: Stat, delta: i8) {
@@ -746,5 +773,9 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         } else {
             false
         }
+    }
+
+    fn is_fainted(&self, pokemon: usize) -> bool {
+        self.get_pokemon(pokemon).current_hp == 0
     }
 }

@@ -30,8 +30,8 @@ use crate::{
             BattleBackend,
             BattleEvent,
             event::{
-                ChangeTurn,
                 Damage,
+                Faint,
                 InitialSwitchIn,
                 Miss,
                 StatChange,
@@ -183,6 +183,9 @@ impl BattleSystem {
             },
             BattleEvent::StatChange(event_data) => {
                 self.handle_stat_change(event_data);
+            },
+            BattleEvent::Faint(event_data) => {
+                self.handle_faint(event_data, system_data);
             },
         }
 
@@ -423,6 +426,23 @@ impl BattleSystem {
 
         let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = vec![
             Box::new(TextAnimation::PendingStart { text }),
+        ];
+
+        self.active_animation_sequence = Some(AnimationSequence {
+            animations: animations.into(),
+        });
+    }
+
+    fn handle_faint(&mut self, event_data: Faint, system_data: &mut BattleSystemData<'_>) {
+        let pokedex = get_all_pokemon_species();
+        let backend = self.backend.as_mut().unwrap();
+        let pokemon = backend.get_pokemon(event_data.target);
+        let display_name = get_pokemon_display_name(&pokemon, &pokedex);
+
+        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = vec![
+            Box::new(TextAnimation::PendingStart {
+                text: format!("{} fainted!", display_name),
+            })
         ];
 
         self.active_animation_sequence = Some(AnimationSequence {
