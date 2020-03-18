@@ -91,6 +91,7 @@ mod mega_punch;
 mod pound;
 mod quick_attack;
 mod scratch;
+mod slam;
 mod slash;
 mod tackle;
 mod tailwhip;

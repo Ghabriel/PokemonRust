@@ -205,6 +205,23 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "Slam".to_string(),
+            display_name: "Slam".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Normal,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(80),
+            power_modifier: None,
+            accuracy: Some(75),
+            pp: 20,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: None,
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "Slash".to_string(),
             display_name: "Slash".to_string(),
             description: "".to_string(), // TODO
