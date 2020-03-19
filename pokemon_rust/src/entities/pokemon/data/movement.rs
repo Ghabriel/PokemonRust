@@ -279,6 +279,23 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "VineWhip".to_string(),
+            display_name: "Vine Whip".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Grass,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(45),
+            power_modifier: None,
+            accuracy: Some(100),
+            pp: 25,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: None,
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "ViseGrip".to_string(),
             display_name: "Vise Grip".to_string(),
             description: "".to_string(), // TODO

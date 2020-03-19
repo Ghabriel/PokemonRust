@@ -95,6 +95,7 @@ mod slam;
 mod slash;
 mod tackle;
 mod tailwhip;
+mod vine_whip;
 mod vise_grip;
 mod wing_attack;
 

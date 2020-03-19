@@ -64,6 +64,38 @@ lazy_static! {
         let mut result = Vec::new();
 
         result.push(species! {
+            id: "Bulbasaur",
+            display_name: "Bulbasaur",
+            national_number: 1,
+            types: [PokemonType::Grass, PokemonType::Poison],
+            base_stats: [45, 49, 49, 65, 65, 45],
+            male_ratio: Some(87.5),
+            growth_rate: GrowthRate::MediumSlow,
+            base_exp_yield: 64,
+            ev_yield: [0, 0, 0, 1, 0, 0],
+            capture_rate: 45,
+            abilities: ["Overgrow"],
+            hidden_abilities: ["Chlorophyll"],
+            move_table: [
+                1: "Tackle",
+                1: "Growl",
+                3: "VineWhip",
+                // 6: "Growth",
+                // 9: "LeechSeed",
+                // 12: "RazorLeaf",
+                // 15: "PoisonPowder",
+                // 15: "SleepPowder",
+                // 18: "SeedBomb",
+                // 21: "TakeDown",
+                // 24: "SweetScent",
+                // 27: "Synthesis",
+                // 30: "WorrySeed",
+                // 33: "DoubleEdge",
+                // 36: "SolarBeam",
+            ],
+        });
+
+        result.push(species! {
             id: "Charmander",
             display_name: "Charmander",
             national_number: 4,
