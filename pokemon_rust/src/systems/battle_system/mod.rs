@@ -185,7 +185,7 @@ impl BattleSystem {
                 self.handle_stat_change(event_data);
             },
             BattleEvent::Faint(event_data) => {
-                self.handle_faint(event_data, system_data);
+                self.handle_faint(event_data);
             },
         }
 
@@ -433,7 +433,7 @@ impl BattleSystem {
         });
     }
 
-    fn handle_faint(&mut self, event_data: Faint, system_data: &mut BattleSystemData<'_>) {
+    fn handle_faint(&mut self, event_data: Faint) {
         let pokedex = get_all_pokemon_species();
         let backend = self.backend.as_mut().unwrap();
         let pokemon = backend.get_pokemon(event_data.target);

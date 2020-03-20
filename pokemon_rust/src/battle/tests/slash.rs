@@ -1,6 +1,6 @@
 use crate::battle::backend::BattleEvent;
 
-use super::{prelude::*, TestMethods, TestRng};
+use super::{prelude::*, TestMethods};
 
 #[test]
 fn slash_deals_damage_and_crits() {

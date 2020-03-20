@@ -1,6 +1,6 @@
 use crate::battle::backend::BattleEvent;
 
-use super::{prelude::*, TestMethods, TestRng};
+use super::{prelude::*, TestMethods};
 
 #[test]
 fn mega_punch_deals_damage() {

@@ -1,6 +1,6 @@
 use crate::battle::backend::{BattleEvent, StatChangeKind};
 
-use super::{prelude::*, TestMethods, TestRng};
+use super::{prelude::*, TestMethods};
 
 #[test]
 fn growl_reduces_attack() {
