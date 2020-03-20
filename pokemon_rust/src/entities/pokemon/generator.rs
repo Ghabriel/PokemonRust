@@ -218,7 +218,9 @@ pub fn pick_pps(dex: &MoveDex, moves: &[Option<String>; MOVE_LIMIT]) -> [usize; 
     moves
         .iter()
         .map(|mov| match mov {
-            Some(mov) => dex.get_move(mov).unwrap().pp,
+            Some(mov) => dex.get_move(mov).unwrap_or_else(|| {
+                panic!("Invalid move \"{}\"", mov);
+            }).pp,
             None => 0,
         })
         .enumerate()
