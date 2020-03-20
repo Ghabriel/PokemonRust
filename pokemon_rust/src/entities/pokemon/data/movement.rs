@@ -40,6 +40,23 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "CrabHammer".to_string(),
+            display_name: "Crab Hammer".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Water,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(100),
+            power_modifier: None,
+            accuracy: Some(90),
+            pp: 10,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: None,
+            critical_hit: true,
+        });
+
+        result.push(Move {
             id: "Growl".to_string(),
             display_name: "Growl".to_string(),
             description: "".to_string(), // TODO
