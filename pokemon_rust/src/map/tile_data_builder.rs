@@ -3,7 +3,7 @@ use amethyst::{
     ecs::{Entity, World, WorldExt},
 };
 
-use crate::entities::character::{CharacterId, PlayerEntity};
+use crate::overworld::entities::character::{CharacterId, PlayerEntity};
 
 use super::{MapHandler, PlayerCoordinates, TileData};
 

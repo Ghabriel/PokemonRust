@@ -25,7 +25,7 @@ pub mod prelude {
             },
             types::{Battle, BattleCharacterTeam, BattleType, Party},
         },
-        entities::pokemon::{
+        pokemon::{
             generator::PokemonBuilder,
             get_all_moves,
             get_all_pokemon_species,
@@ -36,10 +36,8 @@ pub mod prelude {
 
     use crate::{
         battle::tests::TestRng,
-        entities::{
-            character::CharacterId,
-            pokemon::Pokemon,
-        },
+        overworld::entities::character::CharacterId,
+        pokemon::Pokemon,
     };
 
     pub fn create_simple_wild_battle(p1: Pokemon, p2: Pokemon) -> BattleBackend<TestRng> {

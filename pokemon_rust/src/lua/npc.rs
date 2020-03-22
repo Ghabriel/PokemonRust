@@ -2,7 +2,8 @@ use amethyst::{core::Transform, ecs::WorldExt, renderer::SpriteRender};
 
 use crate::{
     common::{get_character_sprite_index_from_direction, Direction},
-    entities::character::{
+    map::{MapCoordinates, MapHandler, PlayerCoordinates},
+    overworld::entities::character::{
         initialise_npc,
         Character,
         CharacterId,
@@ -10,7 +11,6 @@ use crate::{
         NpcBuilder,
         PlayerEntity,
     },
-    map::{MapCoordinates, MapHandler, PlayerCoordinates},
 };
 
 use super::ExecutionContext;

@@ -10,8 +10,8 @@ use amethyst::{ecs::World, utils::application_root_dir};
 
 use crate::{
     common::{AssetTracker, Direction},
-    entities::character::CharacterId,
     map::{CoordinateSystem, GameScriptParameters},
+    overworld::entities::character::CharacterId,
 };
 
 use rlua::{Context, Error as LuaError, FromLua, Function, Lua, Result as LuaResult, Value};

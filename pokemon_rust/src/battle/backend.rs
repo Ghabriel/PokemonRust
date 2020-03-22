@@ -1,5 +1,5 @@
-use crate::entities::{
-    character::CharacterId,
+use crate::{
+    overworld::entities::character::CharacterId,
     pokemon::{
         get_all_moves,
         get_all_pokemon_species,

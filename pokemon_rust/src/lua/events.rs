@@ -7,19 +7,21 @@ use amethyst::{
 use crate::{
     audio::{AudioFileFormat, Music},
     common::Direction,
-    entities::character::CharacterId,
-    events::{
-        BgmChangeEvent,
-        ChainedEvents,
-        CharacterMoveEvent,
-        CharacterRotateEvent,
-        CyclicEvent,
-        EventQueue,
-        GameEvent,
-        TextEvent,
-        WarpEvent,
-    },
     map::MapCoordinates,
+    overworld::{
+        entities::character::CharacterId,
+        events::{
+            BgmChangeEvent,
+            ChainedEvents,
+            CharacterMoveEvent,
+            CharacterRotateEvent,
+            CyclicEvent,
+            EventQueue,
+            GameEvent,
+            TextEvent,
+            WarpEvent,
+        },
+    },
 };
 
 use super::ExecutionContext;

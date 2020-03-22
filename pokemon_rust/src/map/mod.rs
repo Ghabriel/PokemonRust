@@ -13,8 +13,10 @@ use amethyst::ecs::Entity;
 
 use crate::{
     common::Direction,
-    entities::character::{CharacterId, PendingInteraction},
-    events::ScriptEvent,
+    overworld::{
+        entities::character::{CharacterId, PendingInteraction},
+        events::ScriptEvent,
+    },
 };
 
 use self::map::Map;

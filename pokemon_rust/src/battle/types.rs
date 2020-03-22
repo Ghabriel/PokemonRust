@@ -1,7 +1,7 @@
 use amethyst::ecs::{Component, DenseVecStorage};
 
-use crate::entities::{
-    character::CharacterId,
+use crate::{
+    overworld::entities::character::CharacterId,
     pokemon::Pokemon,
 };
 

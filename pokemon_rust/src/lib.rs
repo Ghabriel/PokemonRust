@@ -14,17 +14,18 @@
     clippy::type_complexity
 )]
 
+pub mod animations;
 pub mod audio;
 pub mod battle;
 pub mod common;
 pub mod config;
 pub mod constants;
-pub mod entities;
-pub mod events;
+pub mod loading_state;
 pub mod lua;
 pub mod map;
-pub mod states;
-pub mod systems;
+pub mod overworld;
+pub mod pokemon;
+pub mod text;
 
 use amethyst::{
     audio::AudioBundle,
@@ -42,7 +43,7 @@ use amethyst::{
     Result as AmethystResult,
 };
 
-use crate::{config::GameConfig, states::LoadingState};
+use crate::{config::GameConfig, loading_state::LoadingState};
 
 use std::path::PathBuf;
 

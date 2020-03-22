@@ -8,8 +8,10 @@ use amethyst::{
 use crate::{
     common::{load_full_texture_sprite_sheet, AssetTracker},
     constants::{MAP_DECORATION_LAYER_Z, MAP_TERRAIN_LAYER_Z, TILE_SIZE},
-    entities::character::{CharacterId, PendingInteraction, PlayerEntity},
-    events::{EventQueue, MapChangeEvent, ScriptEvent},
+    overworld::{
+        entities::character::{CharacterId, PendingInteraction, PlayerEntity},
+        events::{EventQueue, MapChangeEvent, ScriptEvent},
+    },
 };
 
 use ron::de::from_reader;
@@ -89,7 +91,7 @@ pub fn change_player_tile(
     }
 
     // TODO: remove this after battles are properly connected to the overworld
-    use crate::events::BattleStartEvent;
+    use crate::overworld::events::BattleStartEvent;
     use crate::battle::types::BattleType;
     event_queue.push(BattleStartEvent::wild(BattleType::Single));
 
