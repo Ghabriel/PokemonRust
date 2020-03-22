@@ -14,14 +14,8 @@ pub mod prelude {
     pub use crate::{
         battle::{
             backend::{
+                event::{ChangeTurn, Damage, InitialSwitchIn, Miss, StatChange},
                 BattleBackend,
-                event::{
-                    InitialSwitchIn,
-                    ChangeTurn,
-                    Damage,
-                    Miss,
-                    StatChange,
-                },
             },
             types::{Battle, BattleCharacterTeam, BattleType, Party},
         },
@@ -46,12 +40,16 @@ pub mod prelude {
                 BattleType::Single,
                 BattleCharacterTeam {
                     active_pokemon: None,
-                    party: Party { pokemon: vec![p1].into() },
+                    party: Party {
+                        pokemon: vec![p1].into(),
+                    },
                     character_id: Some(CharacterId(1)),
                 },
                 BattleCharacterTeam {
                     active_pokemon: None,
-                    party: Party { pokemon: vec![p2].into() },
+                    party: Party {
+                        pokemon: vec![p2].into(),
+                    },
                     character_id: None,
                 },
             ),
@@ -65,12 +63,16 @@ pub mod prelude {
                 BattleType::Single,
                 BattleCharacterTeam {
                     active_pokemon: None,
-                    party: Party { pokemon: vec![p1].into() },
+                    party: Party {
+                        pokemon: vec![p1].into(),
+                    },
                     character_id: Some(CharacterId(1)),
                 },
                 BattleCharacterTeam {
                     active_pokemon: None,
-                    party: Party { pokemon: vec![p2].into() },
+                    party: Party {
+                        pokemon: vec![p2].into(),
+                    },
                     character_id: Some(CharacterId(2)),
                 },
             ),
@@ -124,8 +126,7 @@ impl<Rng: BattleRng> TestMethods for BattleBackend<Rng> {
         let p1_index = self.p1.active_pokemon.unwrap();
         let p2_index = self.p2.active_pokemon.unwrap();
 
-        let p1_move_index = self
-            .pokemon_repository[&p1_index]
+        let p1_move_index = self.pokemon_repository[&p1_index]
             .moves
             .iter()
             .enumerate()
@@ -137,8 +138,7 @@ impl<Rng: BattleRng> TestMethods for BattleBackend<Rng> {
             .map(|(i, _)| i)
             .unwrap_or_else(|| panic!("Move \"{}\" not found for player 1", p1_move));
 
-        let p2_move_index = self
-            .pokemon_repository[&p2_index]
+        let p2_move_index = self.pokemon_repository[&p2_index]
             .moves
             .iter()
             .enumerate()

@@ -92,20 +92,22 @@ impl PokemonBuilder {
         let nature = self.nature.unwrap_or_else(pick_nature);
         let evs = self.evs.unwrap_or([0, 0, 0, 0, 0, 0]);
         let ivs = self.natural_ivs.unwrap_or_else(pick_ivs);
-        let moves = self.moves.unwrap_or_else(|| {
-            pick_moves(&species_data.move_table, level)
-        });
+        let moves = self
+            .moves
+            .unwrap_or_else(|| pick_moves(&species_data.move_table, level));
         let pp = self.pp.unwrap_or_else(|| pick_pps(&move_dex, &moves));
-        let stats = self.stats.unwrap_or_else(|| {
-            pick_stats(&species_data.base_stats, &evs, &ivs, nature, level)
-        });
+        let stats = self
+            .stats
+            .unwrap_or_else(|| pick_stats(&species_data.base_stats, &evs, &ivs, nature, level));
 
         Pokemon {
             species_id: species_data.id.clone(),
             nature,
             held_item: self.held_item,
             experience_points: 0,
-            ability: self.ability.unwrap_or_else(|| pick_ability(&species_data.abilities)),
+            ability: self
+                .ability
+                .unwrap_or_else(|| pick_ability(&species_data.abilities)),
             evs,
             natural_ivs: ivs,
             obtained_ivs: [0, 0, 0, 0, 0, 0],
@@ -113,7 +115,9 @@ impl PokemonBuilder {
             pp,
             pp_ups: [0, 0, 0, 0],
             egg_steps_to_hatch: None,
-            gender: self.gender.unwrap_or_else(|| pick_gender(&species_data.male_ratio)),
+            gender: self
+                .gender
+                .unwrap_or_else(|| pick_gender(&species_data.male_ratio)),
             nickname: None,
             met_at_date: SystemTime::now(),
             met_at_location: String::default(),
@@ -218,9 +222,13 @@ pub fn pick_pps(dex: &MoveDex, moves: &[Option<String>; MOVE_LIMIT]) -> [usize; 
     moves
         .iter()
         .map(|mov| match mov {
-            Some(mov) => dex.get_move(mov).unwrap_or_else(|| {
-                panic!("Invalid move \"{}\"", mov);
-            }).pp,
+            Some(mov) => {
+                dex.get_move(mov)
+                    .unwrap_or_else(|| {
+                        panic!("Invalid move \"{}\"", mov);
+                    })
+                    .pp
+            },
             None => 0,
         })
         .enumerate()

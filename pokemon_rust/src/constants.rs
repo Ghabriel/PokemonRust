@@ -64,8 +64,7 @@ pub const BAR_HEIGHT: f32 = 10.;
 pub const BAR_SPACING: f32 = 2.;
 
 /// The height of the health bar of the player and their allies, in pixels.
-pub const ALLY_HEALTH_BAR_HEIGHT: f32 =
-    HEALTH_BAR_POKEMON_LEVEL_FONT_SIZE
+pub const ALLY_HEALTH_BAR_HEIGHT: f32 = HEALTH_BAR_POKEMON_LEVEL_FONT_SIZE
     + BAR_SPACING
     + BAR_HEIGHT
     + HEALTH_BAR_POKEMON_HEALTH_TEXT_FONT_SIZE;

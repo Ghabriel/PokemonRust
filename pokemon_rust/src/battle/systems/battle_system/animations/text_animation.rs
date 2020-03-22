@@ -5,22 +5,15 @@ use amethyst::{
 
 use crate::{
     audio::Sound,
-    battle::{
-        backend::BattleBackend,
-        rng::StandardBattleRng,
-    },
+    battle::{backend::BattleBackend, rng::StandardBattleRng},
     text::{advance_text, create_text_box, delete_text_box, TextState},
 };
 
 use super::super::{BattleSystemData, FrontendAnimation, TickResult};
 
 pub enum TextAnimation {
-    PendingStart {
-        text: String,
-    },
-    Started {
-        text_box_entity: Entity,
-    },
+    PendingStart { text: String },
+    Started { text_box_entity: Entity },
 }
 
 impl FrontendAnimation for TextAnimation {
@@ -49,10 +42,7 @@ impl FrontendAnimation for TextAnimation {
                 &resources,
             );
 
-            let text_box_entity = entities
-                .build_entity()
-                .with(text_box, text_boxes)
-                .build();
+            let text_box_entity = entities.build_entity().with(text_box, text_boxes).build();
 
             *self = TextAnimation::Started { text_box_entity };
         }
@@ -90,13 +80,7 @@ impl FrontendAnimation for TextAnimation {
                 .get_mut(*text_box_entity)
                 .expect("Failed to retrieve text box");
 
-            let state = advance_text(
-                pressed_action_key,
-                text_box,
-                &game_config,
-                &time,
-                ui_texts,
-            );
+            let state = advance_text(pressed_action_key, text_box, &game_config, &time, ui_texts);
 
             if state == TextState::Closed {
                 delete_text_box(*text_box_entity, text_box, &entities);

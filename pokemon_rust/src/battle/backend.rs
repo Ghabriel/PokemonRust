@@ -3,13 +3,7 @@ use crate::{
     pokemon::{
         get_all_moves,
         get_all_pokemon_species,
-        movement::{
-            Move,
-            MoveCategory,
-            MovePower,
-            SimpleEffect,
-            SimpleEffectTarget,
-        },
+        movement::{Move, MoveCategory, MovePower, SimpleEffect, SimpleEffectTarget},
         Pokemon,
         PokemonSpeciesData,
         PokemonType,
@@ -253,17 +247,19 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         self.p2.active_pokemon = self.p2.party.pop_front();
         assert!(self.p2.active_pokemon.is_some());
 
-        self.event_queue.push(BattleEvent::InitialSwitchIn(event::InitialSwitchIn {
-            team: Team::P2,
-            pokemon: self.p2.active_pokemon.as_ref().unwrap().clone(),
-            is_already_sent_out: self.p2.character_id.is_none(),
-        }));
+        self.event_queue
+            .push(BattleEvent::InitialSwitchIn(event::InitialSwitchIn {
+                team: Team::P2,
+                pokemon: self.p2.active_pokemon.as_ref().unwrap().clone(),
+                is_already_sent_out: self.p2.character_id.is_none(),
+            }));
 
-        self.event_queue.push(BattleEvent::InitialSwitchIn(event::InitialSwitchIn {
-            team: Team::P1,
-            pokemon: self.p1.active_pokemon.as_ref().unwrap().clone(),
-            is_already_sent_out: false,
-        }));
+        self.event_queue
+            .push(BattleEvent::InitialSwitchIn(event::InitialSwitchIn {
+                team: Team::P1,
+                pokemon: self.p1.active_pokemon.as_ref().unwrap().clone(),
+                is_already_sent_out: false,
+            }));
 
         // TODO: trigger things like Intimidate, entry hazards, Drought, etc.
         // The order is determined by speed.
@@ -279,7 +275,9 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
                 let p2 = self.p2.active_pokemon.unwrap();
 
                 let p1_move = {
-                    let p1_move_id = self.pokemon_repository[&p1].moves[p1_index].as_ref().unwrap();
+                    let p1_move_id = self.pokemon_repository[&p1].moves[p1_index]
+                        .as_ref()
+                        .unwrap();
                     let p1_move = movedex.get_move(&p1_move_id).unwrap();
 
                     UsedMove {
@@ -290,7 +288,9 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
                 };
 
                 let p2_move = {
-                    let p2_move_id = self.pokemon_repository[&p2].moves[p2_index].as_ref().unwrap();
+                    let p2_move_id = self.pokemon_repository[&p2].moves[p2_index]
+                        .as_ref()
+                        .unwrap();
                     let p2_move = movedex.get_move(&p2_move_id).unwrap();
 
                     UsedMove {
@@ -305,10 +305,7 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         }
     }
 
-    fn process_moves<'a>(
-        &mut self,
-        moves: impl Iterator<Item = UsedMove<'a>>,
-    ) {
+    fn process_moves<'a>(&mut self, moves: impl Iterator<Item = UsedMove<'a>>) {
         let moves = self.sort_moves(moves);
 
         for used_move in moves {
@@ -326,14 +323,12 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         self.rng.shuffle_moves(&mut result);
 
         result.sort_by(|a, b| {
-            b.movement.priority
-                .cmp(&a.movement.priority)
-                .then_with(|| {
-                    let a_speed = self.get_stat(a.user, Stat::Speed);
-                    let b_speed = self.get_stat(b.user, Stat::Speed);
+            b.movement.priority.cmp(&a.movement.priority).then_with(|| {
+                let a_speed = self.get_stat(a.user, Stat::Speed);
+                let b_speed = self.get_stat(b.user, Stat::Speed);
 
-                    b_speed.cmp(&a_speed)
-                })
+                b_speed.cmp(&a_speed)
+            })
         });
 
         result.into_iter()
@@ -419,14 +414,18 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
 
     fn next_turn(&mut self) {
         self.turn += 1;
-        self.event_queue.push(BattleEvent::ChangeTurn(event::ChangeTurn {
-            new_turn: self.turn
-        }));
+        self.event_queue
+            .push(BattleEvent::ChangeTurn(event::ChangeTurn {
+                new_turn: self.turn,
+            }));
     }
 
     fn decompose_input_events(&mut self) -> (FrontendEventKind, FrontendEventKind) {
         if self.input_events.len() != 2 {
-            panic!("Invalid number of input events: {}", self.input_events.len());
+            panic!(
+                "Invalid number of input events: {}",
+                self.input_events.len()
+            );
         }
 
         let mut input_events = self.input_events.drain(..);
@@ -450,13 +449,8 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         is_critical_hit: bool,
     ) {
         let effectiveness = self.get_type_effectiveness(&used_move.movement, used_move.target);
-        let damage = self.get_move_damage(
-            &used_move,
-            attack,
-            defense,
-            effectiveness,
-            is_critical_hit,
-        );
+        let damage =
+            self.get_move_damage(&used_move, attack, defense, effectiveness, is_critical_hit);
 
         let target = self.pokemon_repository.get_mut(&used_move.target).unwrap();
         target.current_hp = target.current_hp.saturating_sub(damage);
@@ -521,11 +515,12 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
             },
         }
 
-        self.event_queue.push(BattleEvent::StatChange(event::StatChange {
-            target,
-            kind: stat_change_kind,
-            stat,
-        }));
+        self.event_queue
+            .push(BattleEvent::StatChange(event::StatChange {
+                target,
+                kind: stat_change_kind,
+                stat,
+            }));
     }
 }
 
@@ -547,7 +542,8 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
             Team::P2 => &self.p2,
         };
 
-        team_data.active_pokemon
+        team_data
+            .active_pokemon
             .iter()
             .map(move |pokemon| self.get_pokemon(*pokemon))
     }
@@ -629,10 +625,7 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
     }
 
     fn get_stat_stage(&self, pokemon: usize, stat: Stat) -> i8 {
-        let hash_map = self
-            .pokemon_flags[&pokemon]
-            .flags
-            .get("stat_stages");
+        let hash_map = self.pokemon_flags[&pokemon].flags.get("stat_stages");
 
         if let Some(hash_map) = hash_map {
             if let Flag::StatStages(stages) = hash_map {
@@ -697,11 +690,7 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         let modifier = {
             let targets = 1.; // TODO: handle multi-target moves
             let weather = 1.; // TODO
-            let critical = if is_critical_hit {
-                1.25
-            } else {
-                1.
-            };
+            let critical = if is_critical_hit { 1.25 } else { 1. };
             let random = self.rng.get_damage_modifier();
             let stab = if self.check_stab(&used_move.movement, used_move.user) {
                 1.5

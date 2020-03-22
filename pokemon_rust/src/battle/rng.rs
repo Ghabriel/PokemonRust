@@ -28,8 +28,7 @@ pub struct StandardBattleRng;
 
 impl StandardBattleRng {
     fn rand(&mut self, lowest: isize, highest: isize) -> isize {
-        Uniform::new(lowest, highest + 1)
-            .sample(&mut thread_rng())
+        Uniform::new(lowest, highest + 1).sample(&mut thread_rng())
     }
 
     fn roll(&mut self, chance: usize) -> bool {

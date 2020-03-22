@@ -1,10 +1,4 @@
-use crate::pokemon::{
-    GrowthRate,
-    LearningCondition,
-    PokeDex,
-    PokemonSpeciesData,
-    PokemonType,
-};
+use crate::pokemon::{GrowthRate, LearningCondition, PokeDex, PokemonSpeciesData, PokemonType};
 
 use lazy_static::lazy_static;
 

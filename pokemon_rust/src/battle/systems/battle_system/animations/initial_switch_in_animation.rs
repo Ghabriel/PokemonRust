@@ -7,11 +7,7 @@ use amethyst::{
 
 use crate::{
     battle::{
-        backend::{
-            BattleBackend,
-            event::InitialSwitchIn,
-            Team,
-        },
+        backend::{event::InitialSwitchIn, BattleBackend, Team},
         rng::StandardBattleRng,
     },
     constants::{
@@ -32,14 +28,12 @@ const POKEMON_SPRITE_HEIGHT: f32 = 64.;
 const P1_SPRITE_SCALING: f32 = 2.5;
 const P2_SPRITE_SCALING: f32 = 2.2;
 
-const P1_SPRITE_Y: f32
-    = (BATTLE_CAMERA_POSITION.1 - WINDOW_HEIGHT / 2.)
+const P1_SPRITE_Y: f32 = (BATTLE_CAMERA_POSITION.1 - WINDOW_HEIGHT / 2.)
     + HEALTH_BAR_MARGIN
     + ALLY_HEALTH_BAR_HEIGHT
     + (POKEMON_SPRITE_HEIGHT * P1_SPRITE_SCALING) / 2.
     - 18.; // TODO: investigate why this offset is needed
-const P2_SPRITE_Y: f32
-    = (BATTLE_CAMERA_POSITION.1 + WINDOW_HEIGHT / 2.)
+const P2_SPRITE_Y: f32 = (BATTLE_CAMERA_POSITION.1 + WINDOW_HEIGHT / 2.)
     - HEALTH_BAR_MARGIN
     - OPPONENT_HEALTH_BAR_HEIGHT
     - (POKEMON_SPRITE_HEIGHT * P2_SPRITE_SCALING) / 2.;
@@ -54,7 +48,11 @@ const P2_SPRITE_FINAL_X: f32 = BATTLE_CAMERA_POSITION.0 + WINDOW_WIDTH / 3.;
 fn get_p1_sprite_transform() -> Transform {
     let mut transform = Transform::default();
     transform.set_translation_xyz(P1_SPRITE_INITIAL_X, P1_SPRITE_Y, 0.);
-    transform.set_scale(Vector3::new(P1_SPRITE_SCALING, P1_SPRITE_SCALING, P1_SPRITE_SCALING));
+    transform.set_scale(Vector3::new(
+        P1_SPRITE_SCALING,
+        P1_SPRITE_SCALING,
+        P1_SPRITE_SCALING,
+    ));
 
     transform
 }
@@ -62,7 +60,11 @@ fn get_p1_sprite_transform() -> Transform {
 fn get_p2_sprite_transform() -> Transform {
     let mut transform = Transform::default();
     transform.set_translation_xyz(P2_SPRITE_INITIAL_X, P2_SPRITE_Y, 0.);
-    transform.set_scale(Vector3::new(P2_SPRITE_SCALING, P2_SPRITE_SCALING, P2_SPRITE_SCALING));
+    transform.set_scale(Vector3::new(
+        P2_SPRITE_SCALING,
+        P2_SPRITE_SCALING,
+        P2_SPRITE_SCALING,
+    ));
 
     transform
 }
@@ -134,11 +136,13 @@ impl FrontendAnimation for InitialSwitchInAnimation {
         _backend: &BattleBackend<StandardBattleRng>,
         system_data: &mut BattleSystemData,
     ) -> TickResult {
-        if let InitialSwitchInAnimation::Started { event_data, pokemon_entity, elapsed_time } = self {
+        if let InitialSwitchInAnimation::Started {
+            event_data,
+            pokemon_entity,
+            elapsed_time,
+        } = self {
             let BattleSystemData {
-                transforms,
-                time,
-                ..
+                transforms, time, ..
             } = system_data;
 
             let transform = transforms

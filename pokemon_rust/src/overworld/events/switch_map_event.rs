@@ -18,10 +18,7 @@ use crate::{
         PlayerCoordinates,
         TileDataBuilder,
     },
-    overworld::{
-        entities::character::PlayerEntity,
-        events::EventQueue,
-    },
+    overworld::{entities::character::PlayerEntity, events::EventQueue},
 };
 
 use super::{BoxedGameEvent, ExecutionConditions, GameEvent};

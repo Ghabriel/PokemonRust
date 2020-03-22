@@ -9,7 +9,7 @@ use amethyst::{
 };
 
 use crate::{
-    audio::{AudioSystem, initialise_audio},
+    audio::{initialise_audio, AudioSystem},
     common::{
         load_full_texture_sprite_sheet,
         load_sprite_sheet_from_world,
@@ -17,7 +17,7 @@ use crate::{
         CommonResources,
     },
     config::GameConfig,
-    constants::{OPPONENT_HEALTH_BAR_HEIGHT, HEALTH_BAR_WIDTH, WINDOW_HEIGHT, WINDOW_WIDTH},
+    constants::{HEALTH_BAR_WIDTH, OPPONENT_HEALTH_BAR_HEIGHT, WINDOW_HEIGHT, WINDOW_WIDTH},
     map::{initialise_map, MapCoordinates},
     overworld::{
         entities::character::{initialise_player, PlayerEntity},
@@ -181,7 +181,9 @@ impl SimpleState for LoadingState<'_, '_> {
         );
         let camera = initialise_camera(world, player);
 
-        world.insert(ActiveCamera { entity: Some(camera) });
+        world.insert(ActiveCamera {
+            entity: Some(camera),
+        });
         world.insert(AssetTracker::new(progress_counter));
         world.insert(PlayerEntity(player));
     }

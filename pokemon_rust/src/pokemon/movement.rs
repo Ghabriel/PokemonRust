@@ -57,11 +57,7 @@ pub enum MovePower {
     Special,
 }
 
-pub type MoveCallback<T = ()> = fn(
-    user: &Pokemon,
-    target: &Pokemon,
-    movement: &Move,
-) -> T;
+pub type MoveCallback<T = ()> = fn(user: &Pokemon, target: &Pokemon, movement: &Move) -> T;
 
 pub enum TargetType {
     /// Affects everyone in the field, e.g Wonder Room

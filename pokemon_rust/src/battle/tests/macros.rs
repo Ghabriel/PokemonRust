@@ -26,7 +26,7 @@ macro_rules! assert_pattern {
                 stringify!($pattern),
             ),
         }
-    }
+    };
 }
 
 macro_rules! battle {

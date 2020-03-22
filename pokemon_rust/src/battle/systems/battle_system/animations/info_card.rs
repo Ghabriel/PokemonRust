@@ -32,7 +32,8 @@ const P1_BAR_X: f32 = 0.;
 const P2_BAR_X: f32 = WINDOW_WIDTH - HEALTH_BAR_WIDTH;
 
 const P1_BAR_CONTENT_X: f32 = HEALTH_BAR_HORIZONTAL_PADDING;
-const P2_BAR_CONTENT_X: f32 = WINDOW_WIDTH - HEALTH_BAR_SMALLER_WIDTH + HEALTH_BAR_HORIZONTAL_PADDING;
+const P2_BAR_CONTENT_X: f32 =
+    WINDOW_WIDTH - HEALTH_BAR_SMALLER_WIDTH + HEALTH_BAR_HORIZONTAL_PADDING;
 
 const P1_BAR_CONTENT_END_X: f32 = P1_BAR_CONTENT_X + BAR_WIDTH;
 const P2_BAR_CONTENT_END_X: f32 = P2_BAR_CONTENT_X + BAR_WIDTH;
@@ -77,16 +78,10 @@ impl InfoCard {
         let name_entity = Self::create_name_entity(&pokemon, &properties, system_data);
         // let gender_entity = Self::create_gender_entity(pokemon, system_data);
         let level_entity = Self::create_level_entity(&pokemon, &properties, system_data);
-        let (health_bar_support_entity, health_bar_entity) = Self::create_health_bar_entities(
-            &properties,
-            system_data,
-        );
-        let health_values_entity = Self::create_health_values_entity(
-            &pokemon,
-            team,
-            &properties,
-            system_data,
-        );
+        let (health_bar_support_entity, health_bar_entity) =
+            Self::create_health_bar_entities(&properties, system_data);
+        let health_values_entity =
+            Self::create_health_values_entity(&pokemon, team, &properties, system_data);
         // let experience_bar_entity = Self::create_experience_bar_entity(pokemon, team, system_data);
 
         Self {
@@ -103,13 +98,23 @@ impl InfoCard {
 
     pub fn remove(&mut self, system_data: &mut BattleSystemData) {
         let entities = &system_data.entities;
-        entities.delete(self.container_entity).expect("Failed to delete info card container");
-        entities.delete(self.name_entity).expect("Failed to delete name container");
-        entities.delete(self.level_entity).expect("Failed to delete level container");
-        entities.delete(self.health_bar_entity).expect("Failed to delete health bar container");
+        entities
+            .delete(self.container_entity)
+            .expect("Failed to delete info card container");
+        entities
+            .delete(self.name_entity)
+            .expect("Failed to delete name container");
+        entities
+            .delete(self.level_entity)
+            .expect("Failed to delete level container");
+        entities
+            .delete(self.health_bar_entity)
+            .expect("Failed to delete health bar container");
 
         if let Some(health_values_entity) = self.health_values_entity {
-            entities.delete(health_values_entity).expect("Failed to delete health values container");
+            entities
+                .delete(health_values_entity)
+                .expect("Failed to delete health values container");
         }
     }
 
@@ -320,7 +325,8 @@ impl InfoCard {
             Anchor::BottomLeft,
             Anchor::BottomLeft,
             properties.content_x + delta_x,
-            properties.top_y - HEALTH_BAR_POKEMON_LEVEL_FONT_SIZE - BAR_HEIGHT - BAR_SPACING + delta_y,
+            properties.top_y - HEALTH_BAR_POKEMON_LEVEL_FONT_SIZE - BAR_HEIGHT - BAR_SPACING
+                + delta_y,
             3. + delta_z,
             BAR_WIDTH + delta_width,
             BAR_HEIGHT + delta_height,
@@ -360,7 +366,7 @@ impl InfoCard {
         font_size: f32,
         x: f32,
         y: f32,
-        system_data: &mut BattleSystemData
+        system_data: &mut BattleSystemData,
     ) -> Entity {
         let BattleSystemData {
             ui_texts,
@@ -372,12 +378,7 @@ impl InfoCard {
 
         let content_width = Self::estimate_text_width(&content, font_size);
 
-        let mut ui_text = UiText::new(
-            resources.font.clone(),
-            content,
-            [0., 0., 0., 1.],
-            font_size,
-        );
+        let mut ui_text = UiText::new(resources.font.clone(), content, [0., 0., 0., 1.], font_size);
         ui_text.align = Anchor::TopLeft;
 
         let ui_transform = UiTransform::new(

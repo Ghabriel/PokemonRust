@@ -10,11 +10,7 @@ use crate::{
         entities::character::CharacterAnimation,
         events::{EventExecutor, EventQueue},
         overworld_state::OverworldState,
-        systems::{
-            CharacterMovementSystem,
-            MapChangeAnnouncementSystem,
-            NpcInteractionSystem,
-        },
+        systems::{CharacterMovementSystem, MapChangeAnnouncementSystem, NpcInteractionSystem},
     },
     text::TextSystem,
 };

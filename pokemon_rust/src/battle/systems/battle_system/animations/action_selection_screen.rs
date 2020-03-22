@@ -2,10 +2,7 @@ use amethyst::input::{InputEvent, StringBindings};
 
 use crate::{
     audio::Sound,
-    battle::{
-        backend::BattleBackend,
-        rng::StandardBattleRng,
-    },
+    battle::{backend::BattleBackend, rng::StandardBattleRng},
     constants::AXIS_SENSITIVITY,
 };
 
@@ -15,9 +12,7 @@ use super::{MoveSelectionScreen, SelectionScreen};
 
 pub enum ActionSelectionScreen {
     PendingStart,
-    Started {
-        selection_screen: SelectionScreen,
-    },
+    Started { selection_screen: SelectionScreen },
 }
 
 impl ActionSelectionScreen {
@@ -38,9 +33,7 @@ impl ActionSelectionScreen {
             selection_screen.remove(system_data);
         }
 
-        TickResult::replace_by(vec![
-            Box::new(MoveSelectionScreen::PendingStart)
-        ])
+        TickResult::replace_by(vec![Box::new(MoveSelectionScreen::PendingStart)])
     }
 
     fn select_run_option(&mut self, _system_data: &mut BattleSystemData) -> TickResult {
@@ -73,7 +66,7 @@ impl FrontendAnimation for ActionSelectionScreen {
         &mut self,
         input_events: Vec<InputEvent<StringBindings>>,
         _backend: &BattleBackend<StandardBattleRng>,
-        system_data: &mut BattleSystemData
+        system_data: &mut BattleSystemData,
     ) -> TickResult {
         for event in input_events {
             let BattleSystemData { sound_kit, .. } = system_data;
@@ -95,7 +88,7 @@ impl FrontendAnimation for ActionSelectionScreen {
 
                         sound_kit.play_sound(Sound::SelectOption);
                         selection_screen.move_selection(offset, system_data);
-                    }
+                    },
                     _ => {},
                 }
             } else {

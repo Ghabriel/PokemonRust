@@ -6,16 +6,14 @@ use amethyst::ecs::{World, WorldExt};
 
 use crate::{
     constants::TILE_SIZE,
-    overworld::entities::{
-        character::{
-            AllowedMovements,
-            Character,
-            CharacterId,
-            CharacterMovement,
-            PendingInteraction,
-        },
-    },
     map::{MapHandler, TileDataBuilder},
+    overworld::entities::character::{
+        AllowedMovements,
+        Character,
+        CharacterId,
+        CharacterMovement,
+        PendingInteraction,
+    },
     text::TextBox,
 };
 

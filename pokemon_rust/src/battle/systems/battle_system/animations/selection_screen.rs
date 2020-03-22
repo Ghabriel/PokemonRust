@@ -24,11 +24,8 @@ impl SelectionScreen {
         system_data: &mut BattleSystemData,
     ) -> Self {
         let num_options = sprite_sheets.len();
-        let selection_arrow_entity = Self::create_selection_arrow(
-            num_options,
-            button_width,
-            system_data,
-        );
+        let selection_arrow_entity =
+            Self::create_selection_arrow(num_options, button_width, system_data);
 
         let button_entities = sprite_sheets
             .into_iter()
@@ -59,7 +56,9 @@ impl SelectionScreen {
 
     pub fn remove(&mut self, system_data: &mut BattleSystemData) {
         let entities = &system_data.entities;
-        entities.delete(self.selection_arrow_entity).expect("Failed to delete selection arrow");
+        entities
+            .delete(self.selection_arrow_entity)
+            .expect("Failed to delete selection arrow");
 
         for button in &self.button_entities {
             entities.delete(*button).expect("Failed to delete button");
@@ -140,7 +139,8 @@ impl SelectionScreen {
     }
 
     fn update_selection_arrow(&self, system_data: &mut BattleSystemData) {
-        system_data.ui_transforms
+        system_data
+            .ui_transforms
             .get_mut(self.selection_arrow_entity)
             .expect("Failed to retrieve UiTransform")
             .local_y = Self::get_selection_arrow_y(self.button_entities.len(), self.focused_option);
@@ -157,6 +157,6 @@ impl SelectionScreen {
         let inverted_option = (num_options - 1 - option_index) as f32;
 
         (SELECTION_SCREEN_BUTTON_SCREEN_MARGIN + SELECTION_SCREEN_BUTTON_HEIGHT) * inverted_option
-        + SELECTION_SCREEN_BUTTON_SCREEN_MARGIN
+            + SELECTION_SCREEN_BUTTON_SCREEN_MARGIN
     }
 }

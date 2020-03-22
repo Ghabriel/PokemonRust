@@ -21,16 +21,14 @@ use crate::{
     common::get_direction_offset,
     map::{change_player_tile, CoordinateSystem, MapHandler},
     overworld::{
-        entities::{
-            character::{
-                AllowedMovements,
-                Character,
-                CharacterAnimation,
-                CharacterMovement,
-                MovementType,
-                PlayerEntity,
-                StepKind,
-            },
+        entities::character::{
+            AllowedMovements,
+            Character,
+            CharacterAnimation,
+            CharacterMovement,
+            MovementType,
+            PlayerEntity,
+            StepKind,
         },
         events::EventQueue,
     },

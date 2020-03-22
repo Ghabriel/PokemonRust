@@ -2,10 +2,7 @@ use amethyst::ecs::{Component, DenseVecStorage, Entity, World};
 
 use crate::{
     common::Direction,
-    overworld::{
-        entities::character::CharacterId,
-        events::ScriptEvent,
-    },
+    overworld::{entities::character::CharacterId, events::ScriptEvent},
 };
 
 use serde::{Deserialize, Serialize};

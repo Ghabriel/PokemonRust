@@ -9,10 +9,7 @@ use amethyst::{
     ui::{Anchor, LineMode, UiImage, UiText, UiTransform},
 };
 
-use crate::{
-    common::CommonResources,
-    config::GameConfig,
-};
+use crate::{common::CommonResources, config::GameConfig};
 
 pub use self::text_system::TextSystem;
 
@@ -65,24 +62,18 @@ pub fn create_text_box(
         displayed_text_end: 0,
         awaiting_keypress: false,
         cooldown: 0.,
-        box_entity: initialise_box_entity(
-            &entities,
-            ui_images,
-            ui_transforms,
-            &resources,
-        ),
-        text_entity: initialise_text_entity(
-            &entities,
-            ui_texts,
-            ui_transforms,
-            &resources,
-        ),
+        box_entity: initialise_box_entity(&entities, ui_images, ui_transforms, &resources),
+        text_entity: initialise_text_entity(&entities, ui_texts, ui_transforms, &resources),
     }
 }
 
 pub fn delete_text_box(entity: Entity, text_box: &mut TextBox, entities: &Entities) {
-    entities.delete(text_box.box_entity).expect("Failed to delete box");
-    entities.delete(text_box.text_entity).expect("Failed to delete text");
+    entities
+        .delete(text_box.box_entity)
+        .expect("Failed to delete box");
+    entities
+        .delete(text_box.text_entity)
+        .expect("Failed to delete text");
     entities.delete(entity).expect("Failed to delete text box");
 }
 
@@ -115,8 +106,7 @@ pub fn advance_text(
             while text_box.cooldown >= game_config.text_delay {
                 text_box.cooldown -= game_config.text_delay;
 
-                let displayed_length =
-                    text_box.displayed_text_end - text_box.displayed_text_start;
+                let displayed_length = text_box.displayed_text_end - text_box.displayed_text_start;
 
                 if text_box.displayed_text_end == full_text_length
                     || displayed_length == maximum_display_length
@@ -133,8 +123,8 @@ pub fn advance_text(
     ui_texts
         .get_mut(text_box.text_entity)
         .expect("Failed to retrieve UiText")
-        .text = text_box.full_text[text_box.displayed_text_start..text_box.displayed_text_end]
-        .to_string();
+        .text =
+        text_box.full_text[text_box.displayed_text_start..text_box.displayed_text_end].to_string();
 
     TextState::Running
 }

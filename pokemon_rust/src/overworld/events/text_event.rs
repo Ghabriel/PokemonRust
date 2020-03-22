@@ -3,15 +3,7 @@
 //! [`GameConfig::text_delay`](../config/struct.GameConfig.html#structfield.text_delay).
 
 use amethyst::{
-    ecs::{
-        world::Builder,
-        Entities,
-        ReadExpect,
-        SystemData,
-        World,
-        WorldExt,
-        WriteStorage,
-    },
+    ecs::{world::Builder, Entities, ReadExpect, SystemData, World, WorldExt, WriteStorage},
     ui::{UiImage, UiText, UiTransform},
 };
 

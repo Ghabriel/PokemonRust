@@ -15,14 +15,14 @@ use super::SelectionScreen;
 
 pub enum MoveSelectionScreen {
     PendingStart,
-    Started {
-        selection_screen: SelectionScreen,
-    },
+    Started { selection_screen: SelectionScreen },
 }
 
 impl MoveSelectionScreen {
     fn select_option(&mut self, system_data: &mut BattleSystemData) -> TickResult {
-        if let Self::Started { selection_screen, .. } = self {
+        if let Self::Started {
+            selection_screen, ..
+        } = self {
             let move_index = selection_screen.get_focused_option();
             selection_screen.remove(system_data);
 
@@ -52,7 +52,7 @@ impl FrontendAnimation for MoveSelectionScreen {
                     system_data.resources.fight_button.clone(),
                 ],
                 system_data,
-            )
+            ),
         };
     }
 
@@ -60,12 +60,14 @@ impl FrontendAnimation for MoveSelectionScreen {
         &mut self,
         input_events: Vec<InputEvent<StringBindings>>,
         _backend: &BattleBackend<StandardBattleRng>,
-        system_data: &mut BattleSystemData
+        system_data: &mut BattleSystemData,
     ) -> TickResult {
         for event in input_events {
             let BattleSystemData { sound_kit, .. } = system_data;
 
-            if let Self::Started { selection_screen, .. } = self {
+            if let Self::Started {
+                selection_screen, ..
+            } = self {
                 match event {
                     InputEvent::ActionPressed(action) if action == "action" => {
                         sound_kit.play_sound(Sound::SelectOption);
@@ -82,7 +84,7 @@ impl FrontendAnimation for MoveSelectionScreen {
 
                         sound_kit.play_sound(Sound::SelectOption);
                         selection_screen.move_selection(offset, system_data);
-                    }
+                    },
                     _ => {},
                 }
             } else {

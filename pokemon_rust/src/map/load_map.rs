@@ -91,8 +91,7 @@ pub fn change_player_tile(
     }
 
     // TODO: remove this after battles are properly connected to the overworld
-    use crate::overworld::events::BattleStartEvent;
-    use crate::battle::types::BattleType;
+    use crate::{battle::types::BattleType, overworld::events::BattleStartEvent};
     event_queue.push(BattleStartEvent::wild(BattleType::Single));
 
     map.get_map_scripts(&final_tile_data.map_id, MapScriptKind::OnTileChange)

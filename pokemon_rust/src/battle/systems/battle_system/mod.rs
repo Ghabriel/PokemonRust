@@ -7,8 +7,8 @@ use amethyst::{
     ecs::{
         Entities,
         Read,
-        ReaderId,
         ReadExpect,
+        ReaderId,
         System,
         SystemData,
         World,
@@ -27,16 +27,9 @@ use crate::{
     audio::SoundKit,
     battle::{
         backend::{
+            event::{Damage, Faint, InitialSwitchIn, Miss, StatChange, UseMove},
             BattleBackend,
             BattleEvent,
-            event::{
-                Damage,
-                Faint,
-                InitialSwitchIn,
-                Miss,
-                StatChange,
-                UseMove,
-            },
             FrontendEvent,
             StatChangeKind,
             Team,
@@ -51,12 +44,7 @@ use crate::{
     text::TextBox,
 };
 
-use self::animations::{
-    ActionSelectionScreen,
-    InfoCard,
-    InitialSwitchInAnimation,
-    TextAnimation,
-};
+use self::animations::{ActionSelectionScreen, InfoCard, InitialSwitchInAnimation, TextAnimation};
 
 use std::collections::VecDeque;
 
@@ -212,13 +200,12 @@ impl BattleSystem {
 
             let backend = self.backend.as_mut().unwrap();
 
-            let tick_result = animation.tick(
-                input_events,
-                backend,
-                system_data,
-            );
+            let tick_result = animation.tick(input_events, backend, system_data);
 
-            if let TickResult::Completed { new_animations, emitted_events } = tick_result {
+            if let TickResult::Completed {
+                new_animations,
+                emitted_events,
+            } = tick_result {
                 active_animation_sequence.animations.pop_front();
 
                 if !emitted_events.is_empty() {
@@ -295,11 +282,10 @@ impl BattleSystem {
         let pokemon = backend.get_pokemon(event_data.move_user);
         let display_name = get_pokemon_display_name(&pokemon, &pokedex);
 
-        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = vec![
-            Box::new(TextAnimation::PendingStart {
+        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> =
+            vec![Box::new(TextAnimation::PendingStart {
                 text: format!("{} used {}!", display_name, event_data.move_name),
-            })
-        ];
+            })];
 
         self.active_animation_sequence = Some(AnimationSequence {
             animations: animations.into(),
@@ -327,9 +313,7 @@ impl BattleSystem {
 
                     Some(format!("It doesn't affect {}...", display_name))
                 },
-                TypeEffectiveness::BarelyEffective => {
-                    Some("It's barely effective...".to_string())
-                },
+                TypeEffectiveness::BarelyEffective => Some("It's barely effective...".to_string()),
                 TypeEffectiveness::NotVeryEffective => {
                     Some("It's not very effective...".to_string())
                 },
@@ -337,9 +321,7 @@ impl BattleSystem {
                     // TODO: remove this after health reduction becomes an animation
                     Some(format!("{} damage!", event_data.amount))
                 },
-                TypeEffectiveness::SuperEffective => {
-                    Some("It's super effective!".to_string())
-                },
+                TypeEffectiveness::SuperEffective => Some("It's super effective!".to_string()),
                 TypeEffectiveness::ExtremelyEffective => {
                     Some("It's extremely effective!".to_string())
                 },
@@ -352,7 +334,7 @@ impl BattleSystem {
 
         if event_data.is_critical_hit {
             animations.push(Box::new(TextAnimation::PendingStart {
-                text: "Critical hit!".to_string()
+                text: "Critical hit!".to_string(),
             }));
         }
 
@@ -367,11 +349,10 @@ impl BattleSystem {
         let pokemon = backend.get_pokemon(event_data.target);
         let display_name = get_pokemon_display_name(&pokemon, &pokedex);
 
-        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = vec![
-            Box::new(TextAnimation::PendingStart {
+        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> =
+            vec![Box::new(TextAnimation::PendingStart {
                 text: format!("But {} avoided the attack!", display_name),
-            })
-        ];
+            })];
 
         self.active_animation_sequence = Some(AnimationSequence {
             animations: animations.into(),
@@ -399,21 +380,11 @@ impl BattleSystem {
             StatChangeKind::WontGoAnyLower => {
                 format!("{}'s {} won't go any lower!", display_name, stat)
             },
-            StatChangeKind::SeverelyFell => {
-                format!("{}'s {} severely fell!", display_name, stat)
-            },
-            StatChangeKind::HarshlyFell => {
-                format!("{}'s {} harshly fell!", display_name, stat)
-            },
-            StatChangeKind::Fell => {
-                format!("{}'s {} fell!", display_name, stat)
-            },
-            StatChangeKind::Rose => {
-                format!("{}'s {} rose!", display_name, stat)
-            },
-            StatChangeKind::SharplyRose => {
-                format!("{}'s {} sharply rose!", display_name, stat)
-            },
+            StatChangeKind::SeverelyFell => format!("{}'s {} severely fell!", display_name, stat),
+            StatChangeKind::HarshlyFell => format!("{}'s {} harshly fell!", display_name, stat),
+            StatChangeKind::Fell => format!("{}'s {} fell!", display_name, stat),
+            StatChangeKind::Rose => format!("{}'s {} rose!", display_name, stat),
+            StatChangeKind::SharplyRose => format!("{}'s {} sharply rose!", display_name, stat),
             StatChangeKind::DrasticallyRose => {
                 format!("{}'s {} drastically rose!", display_name, stat)
             },
@@ -422,9 +393,8 @@ impl BattleSystem {
             },
         };
 
-        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = vec![
-            Box::new(TextAnimation::PendingStart { text }),
-        ];
+        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> =
+            vec![Box::new(TextAnimation::PendingStart { text })];
 
         self.active_animation_sequence = Some(AnimationSequence {
             animations: animations.into(),
@@ -437,11 +407,10 @@ impl BattleSystem {
         let pokemon = backend.get_pokemon(event_data.target);
         let display_name = get_pokemon_display_name(&pokemon, &pokedex);
 
-        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = vec![
-            Box::new(TextAnimation::PendingStart {
+        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> =
+            vec![Box::new(TextAnimation::PendingStart {
                 text: format!("{} fainted!", display_name),
-            })
-        ];
+            })];
 
         self.active_animation_sequence = Some(AnimationSequence {
             animations: animations.into(),
@@ -449,9 +418,8 @@ impl BattleSystem {
     }
 
     fn push_action_selection_event(&mut self, system_data: &mut BattleSystemData<'_>) {
-        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = vec![
-            Box::new(ActionSelectionScreen::PendingStart),
-        ];
+        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> =
+            vec![Box::new(ActionSelectionScreen::PendingStart)];
 
         if self.p1_info_card.is_none() {
             self.init_info_cards(system_data);

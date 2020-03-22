@@ -1,9 +1,6 @@
 use amethyst::ecs::{Component, DenseVecStorage};
 
-use crate::{
-    overworld::entities::character::CharacterId,
-    pokemon::Pokemon,
-};
+use crate::{overworld::entities::character::CharacterId, pokemon::Pokemon};
 
 use std::collections::VecDeque;
 

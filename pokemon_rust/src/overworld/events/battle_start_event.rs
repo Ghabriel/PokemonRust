@@ -6,11 +6,7 @@ use crate::{
     battle::types::{Battle, BattleCharacterTeam, BattleType, Party},
     map::MapHandler,
     overworld::entities::character::{CharacterId, PlayerEntity},
-    pokemon::{
-        generator::generate_pokemon,
-        get_all_moves,
-        get_all_pokemon_species,
-    },
+    pokemon::{generator::generate_pokemon, get_all_moves, get_all_pokemon_species},
 };
 
 use super::{BoxedGameEvent, ExecutionConditions, GameEvent};
@@ -28,10 +24,7 @@ enum BattleOpponent {
 }
 
 impl BattleStartEvent {
-    pub fn against_trainer(
-        battle_type: BattleType,
-        character_id: CharacterId,
-    ) -> BattleStartEvent {
+    pub fn against_trainer(battle_type: BattleType, character_id: CharacterId) -> BattleStartEvent {
         BattleStartEvent {
             battle_type,
             opponent: BattleOpponent::Trainer(character_id),
@@ -70,11 +63,7 @@ impl GameEvent for BattleStartEvent {
         let battle_type = self.battle_type.clone();
 
         let party = {
-            let rattata = generate_pokemon(
-                &pokedex.get_species("Pidgey").unwrap(),
-                &movedex,
-                9,
-            );
+            let rattata = generate_pokemon(&pokedex.get_species("Pidgey").unwrap(), &movedex, 9);
 
             Party {
                 pokemon: vec![rattata].into(),
@@ -94,19 +83,17 @@ impl GameEvent for BattleStartEvent {
         };
 
         let p2 = {
-            let pidgey = generate_pokemon(
-                &pokedex.get_species("Metapod").unwrap(),
-                &movedex,
-                9,
-            );
+            let pidgey = generate_pokemon(&pokedex.get_species("Metapod").unwrap(), &movedex, 9);
 
             BattleCharacterTeam {
                 active_pokemon: None,
-                party: Party { pokemon: vec![pidgey].into() },
+                party: Party {
+                    pokemon: vec![pidgey].into(),
+                },
                 character_id: match self.opponent {
                     BattleOpponent::Trainer(character_id) => Some(character_id),
                     BattleOpponent::WildPokemon => None,
-                }
+                },
             }
         };
 

@@ -12,10 +12,7 @@ use std::{
     time::SystemTime,
 };
 
-pub use self::data::{
-    movement::get_all_moves,
-    pokemon::get_all_pokemon_species,
-};
+pub use self::data::{movement::get_all_moves, pokemon::get_all_pokemon_species};
 
 /// Type effectiveness table. Every number is doubled (e.g 0.5x effectiveness
 /// is stored as 1) so that we don't need to store floats.
@@ -211,7 +208,10 @@ pub enum StatusCondition {
 pub enum PokerusData {
     Unaffected,
     Cured,
-    HasPokerus { duration: usize, remaining_days: usize },
+    HasPokerus {
+        duration: usize,
+        remaining_days: usize,
+    },
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
