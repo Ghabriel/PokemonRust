@@ -57,6 +57,23 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "Cut".to_string(),
+            display_name: "Cut".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Normal,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(50),
+            power_modifier: None,
+            accuracy: Some(95),
+            pp: 30,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: None,
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "Growl".to_string(),
             display_name: "Growl".to_string(),
             description: "".to_string(), // TODO

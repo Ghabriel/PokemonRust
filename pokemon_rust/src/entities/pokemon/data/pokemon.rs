@@ -276,6 +276,38 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Farfetchd",
+            display_name: "Farfetch'd",
+            national_number: 83,
+            types: [PokemonType::Normal, PokemonType::Flying],
+            base_stats: [52, 90, 55, 58, 62, 60],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 132,
+            ev_yield: [0, 1, 0, 0, 0, 0],
+            capture_rate: 45,
+            abilities: ["KeenEye", "InnerFocus"],
+            hidden_abilities: ["Defiant"],
+            move_table: [
+                // 1: "Peck",
+                // 1: "SandAttack",
+                // 5: "Leer",
+                // 10: "FuryCutter",
+                15: "Cut",
+                // 20: "AerialAce",
+                // 25: "AirCutter",
+                // 30: "KnockOff",
+                // 35: "FalseSwipe",
+                // 40: "Slash",
+                // 45: "SwordsDance",
+                // 50: "AirSlash",
+                // 55: "LeafBlade",
+                // 60: "Agility",
+                // 65: "BraveBird",
+            ],
+        });
+
+        result.push(species! {
             id: "Krabby",
             display_name: "Krabby",
             national_number: 98,

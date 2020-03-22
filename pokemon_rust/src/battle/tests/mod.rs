@@ -83,6 +83,7 @@ pub mod prelude {
 
 mod bite;
 mod crab_hammer;
+mod cut;
 mod growl;
 mod gust;
 mod harden;
