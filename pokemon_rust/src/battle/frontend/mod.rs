@@ -28,6 +28,7 @@ use crate::{
     battle::{
         backend::{
             event::{Damage, Faint, InitialSwitchIn, Miss, StatChange, UseMove},
+            rng::StandardBattleRng,
             BattleBackend,
             BattleEvent,
             FrontendEvent,
@@ -35,7 +36,6 @@ use crate::{
             Team,
             TypeEffectiveness,
         },
-        rng::StandardBattleRng,
         types::Battle,
     },
     common::CommonResources,

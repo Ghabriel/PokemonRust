@@ -1,6 +1,11 @@
-use crate::battle::{
-    backend::{BattleBackend, BattleEvent, FrontendEvent, FrontendEventKind, Team, UsedMove},
+use crate::battle::backend::{
     rng::BattleRng,
+    BattleBackend,
+    BattleEvent,
+    FrontendEvent,
+    FrontendEventKind,
+    Team,
+    UsedMove,
 };
 
 // Must come first

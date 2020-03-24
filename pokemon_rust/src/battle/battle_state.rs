@@ -7,7 +7,7 @@ use amethyst::{
 
 use crate::{
     audio::AudioSystem,
-    battle::systems::battle_system::BattleSystem,
+    battle::frontend::BattleSystem,
     constants::{BATTLE_CAMERA_POSITION, WINDOW_HEIGHT, WINDOW_WIDTH},
 };
 

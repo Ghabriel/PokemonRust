@@ -6,7 +6,7 @@ use rand::{
 
 use std::fmt::Debug;
 
-use super::backend::UsedMove;
+use super::UsedMove;
 
 pub trait BattleRng: Debug {
     /// Returns a value in the range [0.85, 1].

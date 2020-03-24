@@ -1,3 +1,5 @@
+pub mod rng;
+
 use crate::{
     overworld::entities::character::CharacterId,
     pokemon::{
@@ -13,10 +15,9 @@ use crate::{
 
 use std::collections::{HashMap, VecDeque};
 
-use super::{
-    rng::BattleRng,
-    types::{Battle, BattleType},
-};
+use self::rng::BattleRng;
+
+use super::types::{Battle, BattleType};
 
 /// Represents an event that can be sent from the frontend to the backend.
 #[derive(Debug)]

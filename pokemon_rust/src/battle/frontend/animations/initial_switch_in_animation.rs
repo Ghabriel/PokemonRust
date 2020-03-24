@@ -6,9 +6,11 @@ use amethyst::{
 };
 
 use crate::{
-    battle::{
-        backend::{event::InitialSwitchIn, BattleBackend, Team},
+    battle::backend::{
+        event::InitialSwitchIn,
         rng::StandardBattleRng,
+        BattleBackend,
+        Team,
     },
     constants::{
         ALLY_HEALTH_BAR_HEIGHT,
