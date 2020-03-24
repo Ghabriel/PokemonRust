@@ -1,6 +1,6 @@
 use crate::battle::backend::{BattleEvent, StatChangeKind};
 
-use super::{prelude::*, TestMethods};
+use super::super::{prelude::*, TestMethods};
 
 #[test]
 fn tailwhip_reduces_defense() {

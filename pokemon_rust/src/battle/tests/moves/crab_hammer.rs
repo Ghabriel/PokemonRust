@@ -1,6 +1,6 @@
 use crate::battle::backend::BattleEvent;
 
-use super::{prelude::*, TestMethods};
+use super::super::{prelude::*, TestMethods};
 
 #[test]
 fn crab_hammer_deals_damage_and_crits() {

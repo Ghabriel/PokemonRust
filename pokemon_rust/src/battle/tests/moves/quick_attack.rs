@@ -1,6 +1,6 @@
 use crate::battle::backend::BattleEvent;
 
-use super::{prelude::*, TestMethods};
+use super::super::{prelude::*, TestMethods};
 
 #[test]
 fn quick_attack_deals_damage_and_has_increased_priority() {

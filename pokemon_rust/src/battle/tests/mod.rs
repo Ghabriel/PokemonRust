@@ -13,6 +13,7 @@ use crate::battle::backend::{
 mod macros;
 
 mod core;
+mod moves;
 
 pub mod prelude {
     // Modules required by the test macros
@@ -85,26 +86,6 @@ pub mod prelude {
         )
     }
 }
-
-mod bite;
-mod crab_hammer;
-mod cut;
-mod growl;
-mod gust;
-mod harden;
-mod karate_chop;
-mod mach_punch;
-mod mega_punch;
-mod pound;
-mod quick_attack;
-mod scratch;
-mod slam;
-mod slash;
-mod tackle;
-mod tailwhip;
-mod vine_whip;
-mod vise_grip;
-mod wing_attack;
 
 trait TestMethods {
     fn move_p1(&mut self, index: usize);
