@@ -171,6 +171,23 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "MegaKick".to_string(),
+            display_name: "Mega Kick".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Normal,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(120),
+            power_modifier: None,
+            accuracy: Some(75),
+            pp: 5,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: None,
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "MegaPunch".to_string(),
             display_name: "Mega Punch".to_string(),
             description: "".to_string(), // TODO

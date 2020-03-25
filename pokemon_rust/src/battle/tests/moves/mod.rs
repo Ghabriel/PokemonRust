@@ -6,6 +6,7 @@ mod gust;
 mod harden;
 mod karate_chop;
 mod mach_punch;
+mod mega_kick;
 mod mega_punch;
 mod pound;
 mod quick_attack;

@@ -334,6 +334,43 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Hitmonlee",
+            display_name: "Hitmonlee",
+            national_number: 106,
+            types: [PokemonType::Fight],
+            base_stats: [50, 120, 53, 35, 110, 87],
+            male_ratio: Some(100.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 159,
+            ev_yield: [0, 2, 0, 0, 0, 0],
+            capture_rate: 45,
+            abilities: ["Limber", "Reckless"],
+            hidden_abilities: ["Unburden"],
+            move_table: [
+                // 1: "BrickBreak",
+                // 1: "Feint",
+                // 1: "LowSweep",
+                1: "Tackle",
+                // 1: "HelpingHand",
+                // 1: "FakeOut",
+                // 1: "FocusEnergy",
+                // TODO: learns when evolving
+                // 1: "BrickBreak",
+                // 4: "DoubleKick",
+                // 8: "LowKick",
+                // 12: "Endure",
+                // 16: "Revenge",
+                // 21: "WideGuard",
+                // 24: "BlazeKick",
+                // 28: "MindReader",
+                32: "MegaKick",
+                // 36: "CloseCombat",
+                // 40: "Reversal",
+                // 44: "HighJumpKick",
+            ],
+        });
+
+        result.push(species! {
             id: "Hitmonchan",
             display_name: "Hitmonchan",
             national_number: 107,
