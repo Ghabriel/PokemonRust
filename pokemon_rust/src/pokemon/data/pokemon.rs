@@ -335,7 +335,7 @@ lazy_static! {
             abilities: ["KeenEye", "InnerFocus"],
             hidden_abilities: ["Defiant"],
             move_table: [
-                // 1: "Peck",
+                1: "Peck",
                 // 1: "SandAttack",
                 // 5: "Leer",
                 // 10: "FuryCutter",

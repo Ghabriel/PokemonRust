@@ -11,6 +11,7 @@ mod karate_chop;
 mod mach_punch;
 mod mega_kick;
 mod mega_punch;
+mod peck;
 mod pound;
 mod quick_attack;
 mod scratch;
