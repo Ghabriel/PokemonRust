@@ -76,7 +76,7 @@ lazy_static! {
                 3: "VineWhip",
                 // 6: "Growth",
                 // 9: "LeechSeed",
-                // 12: "RazorLeaf",
+                12: "RazorLeaf",
                 // 15: "PoisonPowder",
                 // 15: "SleepPowder",
                 // 18: "SeedBomb",

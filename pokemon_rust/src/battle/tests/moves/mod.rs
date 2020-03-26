@@ -15,6 +15,7 @@ mod mega_punch;
 mod peck;
 mod pound;
 mod quick_attack;
+mod razor_leaf;
 mod scratch;
 mod slam;
 mod slash;

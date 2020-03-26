@@ -335,6 +335,23 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "RazorLeaf".to_string(),
+            display_name: "Razor Leaf".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Grass,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(55),
+            power_modifier: None,
+            accuracy: Some(95),
+            pp: 25,
+            priority: 0,
+            target_type: TargetType::AllAdjacentFoes,
+            multi_hit: None,
+            secondary_effect: None,
+            critical_hit: true,
+        });
+
+        result.push(Move {
             id: "Scratch".to_string(),
             display_name: "Scratch".to_string(),
             description: "".to_string(), // TODO
