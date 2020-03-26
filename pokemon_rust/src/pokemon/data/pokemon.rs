@@ -337,7 +337,7 @@ lazy_static! {
             hidden_abilities: ["SheerForce"],
             move_table: [
                 1: "ViseGrip",
-                // 1: "WaterGun",
+                1: "WaterGun",
                 // 1: "Leer",
                 4: "Harden",
                 // 8: "MetalClaw",

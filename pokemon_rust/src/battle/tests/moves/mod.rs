@@ -19,4 +19,5 @@ mod tackle;
 mod tailwhip;
 mod vine_whip;
 mod vise_grip;
+mod water_gun;
 mod wing_attack;
