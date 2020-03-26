@@ -454,6 +454,23 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "Swift".to_string(),
+            display_name: "Swift".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Normal,
+            category: MoveCategory::Special,
+            base_power: MovePower::Constant(60),
+            power_modifier: None,
+            accuracy: None,
+            pp: 20,
+            priority: 0,
+            target_type: TargetType::AllAdjacentFoes,
+            multi_hit: None,
+            secondary_effect: None,
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "Tackle".to_string(),
             display_name: "Tackle".to_string(),
             description: "".to_string(), // TODO

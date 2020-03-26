@@ -22,6 +22,7 @@ mod scratch;
 mod slam;
 mod slash;
 mod strength;
+mod swift;
 mod tackle;
 mod tailwhip;
 mod vine_whip;

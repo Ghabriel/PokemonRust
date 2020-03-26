@@ -579,6 +579,39 @@ lazy_static! {
             ],
         });
 
+        result.push(species! {
+            id: "Eevee",
+            display_name: "Eevee",
+            national_number: 133,
+            types: [PokemonType::Normal],
+            base_stats: [55, 55, 50, 45, 65, 55],
+            male_ratio: Some(87.5),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 65,
+            ev_yield: [0, 0, 0, 0, 1, 0],
+            capture_rate: 45,
+            abilities: ["RunAway", "Adaptability"],
+            hidden_abilities: ["Anticipation"],
+            move_table: [
+                // 1: "Covet",
+                // 1: "HelpingHand",
+                1: "Tackle",
+                1: "Growl",
+                1: "TailWhip",
+                // 5: "SandAttack",
+                10: "QuickAttack",
+                // 15: "BabyDollEyes",
+                20: "Swift",
+                // 25: "Bite",
+                // 30: "Copycat",
+                // 35: "BatonPass",
+                // 40: "TakeDown",
+                // 45: "Charm",
+                // 50: "DoubleEdge",
+                // 55: "LastResort",
+            ],
+        });
+
         PokeDex::new(
             result
                 .into_iter()
