@@ -248,6 +248,32 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Spearow",
+            display_name: "Spearow",
+            national_number: 21,
+            types: [PokemonType::Normal, PokemonType::Flying],
+            base_stats: [40, 60, 30, 31, 31, 70],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 52,
+            ev_yield: [0, 0, 0, 0, 0, 1],
+            capture_rate: 255,
+            abilities: ["KeenEye"],
+            hidden_abilities: ["Sniper"],
+            move_table: [
+                1: "Peck",
+                3: "Growl",
+                // 8: "Leer",
+                // 11: "FocusEnergy",
+                // 16: "FuryAttack",
+                // 19: "MirrorMove",
+                // 24: "Roost",
+                // 27: "Agility",
+                32: "DrillPeck",
+            ],
+        });
+
+        result.push(species! {
             id: "Clefairy",
             display_name: "Clefairy",
             national_number: 35,

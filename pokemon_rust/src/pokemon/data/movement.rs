@@ -102,6 +102,23 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "DrillPeck".to_string(),
+            display_name: "Drill Peck".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Flying,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(80),
+            power_modifier: None,
+            accuracy: Some(100),
+            pp: 20,
+            priority: 0,
+            target_type: TargetType::SingleTarget,
+            multi_hit: None,
+            secondary_effect: None,
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "Growl".to_string(),
             display_name: "Growl".to_string(),
             description: "".to_string(), // TODO
