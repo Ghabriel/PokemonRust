@@ -446,6 +446,32 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Exeggcutor",
+            display_name: "Exeggcutor",
+            national_number: 103,
+            types: [PokemonType::Grass, PokemonType::Psychic],
+            base_stats: [95, 95, 85, 125, 75, 55],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::Slow,
+            base_exp_yield: 186,
+            ev_yield: [0, 0, 0, 2, 0, 0],
+            capture_rate: 45,
+            abilities: ["Chlorophyll"],
+            hidden_abilities: ["Harvest"],
+            move_table: [
+                // 1: "Stomp",
+                // 1: "PowerWhip",
+                1: "EggBomb",
+                // 1: "Barrage",
+                // 1: "Hypnosis",
+                // 1: "Confusion",
+                // 1: "StunSpore",
+                // // TODO: learns when evolving
+                // 1: "Stomp",
+            ],
+        });
+
+        result.push(species! {
             id: "Hitmonlee",
             display_name: "Hitmonlee",
             national_number: 106,

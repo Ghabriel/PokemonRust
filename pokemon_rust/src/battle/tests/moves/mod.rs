@@ -3,6 +3,7 @@ mod crab_hammer;
 mod cut;
 mod double_slap;
 mod drill_peck;
+mod egg_bomb;
 mod growl;
 mod gust;
 mod harden;
