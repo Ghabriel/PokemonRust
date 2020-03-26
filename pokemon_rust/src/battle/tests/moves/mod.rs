@@ -18,6 +18,7 @@ mod quick_attack;
 mod scratch;
 mod slam;
 mod slash;
+mod strength;
 mod tackle;
 mod tailwhip;
 mod vine_whip;
