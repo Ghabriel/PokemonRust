@@ -352,6 +352,23 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "RockThrow".to_string(),
+            display_name: "Rock Throw".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Rock,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(50),
+            power_modifier: None,
+            accuracy: Some(90),
+            pp: 15,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: None,
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "Scratch".to_string(),
             display_name: "Scratch".to_string(),
             description: "".to_string(), // TODO

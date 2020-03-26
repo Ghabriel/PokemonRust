@@ -379,6 +379,41 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Onix",
+            display_name: "Onix",
+            national_number: 95,
+            types: [PokemonType::Rock, PokemonType::Ground],
+            base_stats: [35, 45, 160, 30, 45, 70],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 77,
+            ev_yield: [0, 0, 1, 0, 0, 0],
+            capture_rate: 45,
+            abilities: ["RockHead", "Sturdy"],
+            hidden_abilities: ["WeakArmor"],
+            move_table: [
+                1: "Tackle",
+                1: "Harden",
+                // 1: "Bind",
+                1: "RockThrow",
+                // 4: "SmackDown",
+                // 8: "RockPolish",
+                // 12: "DragonBreath",
+                // 16: "Curse",
+                // 20: "RockSlide",
+                // 24: "Screech",
+                // 28: "SandTomb",
+                // 32: "StealthRock",
+                // 36: "Slam",
+                // 40: "Sandstorm",
+                // 44: "Dig",
+                // 48: "IronTail",
+                // 52: "StoneEdge",
+                // 56: "DoubleEdge",
+            ],
+        });
+
+        result.push(species! {
             id: "Krabby",
             display_name: "Krabby",
             national_number: 98,
