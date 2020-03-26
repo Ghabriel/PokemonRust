@@ -6,6 +6,7 @@ mod growl;
 mod gust;
 mod harden;
 mod horn_attack;
+mod hydro_pump;
 mod karate_chop;
 mod mach_punch;
 mod mega_kick;

@@ -119,6 +119,37 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Squirtle",
+            display_name: "Squirtle",
+            national_number: 7,
+            types: [PokemonType::Water],
+            base_stats: [44, 48, 65, 50, 64, 43],
+            male_ratio: Some(87.5),
+            growth_rate: GrowthRate::MediumSlow,
+            base_exp_yield: 63,
+            ev_yield: [0, 0, 1, 0, 0, 0],
+            capture_rate: 45,
+            abilities: ["Torrent"],
+            hidden_abilities: ["RainDish"],
+            move_table: [
+                1: "Tackle",
+                1: "TailWhip",
+                3: "WaterGun",
+                // 6: "Withdraw",
+                // 9: "RapidSpin",
+                // 12: "Bite",
+                // 15: "WaterPulse",
+                // 18: "Protect",
+                // 21: "RainDance",
+                // 24: "AquaTail",
+                // 27: "ShellSmash",
+                // 30: "IronDefense",
+                33: "HydroPump",
+                // 36: "SkullBash",
+            ],
+        });
+
+        result.push(species! {
             id: "Caterpie",
             display_name: "Caterpie",
             national_number: 10,
