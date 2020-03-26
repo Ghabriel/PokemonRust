@@ -21,13 +21,25 @@ pub trait BattleRng: Debug {
 
     /// Picks a number r in the range [1, 100] and returns r <= chance.
     fn check_secondary_effect(&mut self, chance: usize) -> bool;
+
+    /// Returns a number r in the range [lowest, highest] used to calculate the
+    /// number of hits of a uniform multi-hit move.
+    fn check_uniform_multi_hit(&mut self, lowest: usize, highest: usize) -> usize;
+
+    /// Returns a number r in the range [lowest, highest] used to calculate the
+    /// number of hits of a custom multi-hit move.
+    fn check_custom_multi_hit(&mut self, lowest: isize, highest: isize) -> isize;
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct StandardBattleRng;
 
 impl StandardBattleRng {
     fn rand(&mut self, lowest: isize, highest: isize) -> isize {
+        Uniform::new(lowest, highest + 1).sample(&mut thread_rng())
+    }
+
+    fn rand_unsigned(&mut self, lowest: usize, highest: usize) -> usize {
         Uniform::new(lowest, highest + 1).sample(&mut thread_rng())
     }
 
@@ -51,5 +63,13 @@ impl BattleRng for StandardBattleRng {
 
     fn check_secondary_effect(&mut self, chance: usize) -> bool {
         self.roll(chance)
+    }
+
+    fn check_uniform_multi_hit(&mut self, lowest: usize, highest: usize) -> usize {
+        self.rand_unsigned(lowest, highest)
+    }
+
+    fn check_custom_multi_hit(&mut self, lowest: isize, highest: isize) -> isize {
+        self.rand(lowest, highest)
     }
 }

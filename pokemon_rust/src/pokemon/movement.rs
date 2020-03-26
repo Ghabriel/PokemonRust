@@ -1,3 +1,5 @@
+use crate::battle::backend::rng::BattleRng;
+
 use std::collections::HashMap;
 
 use super::{Pokemon, PokemonType, Stat, StatusCondition};
@@ -86,9 +88,12 @@ pub enum TargetType {
     User,
 }
 
-pub struct MultiHit {
-    pub min_hits: usize,
-    pub max_hits: usize,
+pub enum MultiHit {
+    Uniform {
+        min_hits: usize,
+        max_hits: usize,
+    },
+    Custom(fn(rng: Box<dyn BattleRng>) -> usize),
 }
 
 pub struct SecondaryEffect {

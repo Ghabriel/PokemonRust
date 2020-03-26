@@ -5,7 +5,7 @@ use crate::{
     pokemon::{
         get_all_moves,
         get_all_pokemon_species,
-        movement::{Move, MoveCategory, MovePower, SimpleEffect, SimpleEffectTarget},
+        movement::{Move, MoveCategory, MovePower, MultiHit, SimpleEffect, SimpleEffectTarget},
         Pokemon,
         PokemonSpeciesData,
         PokemonType,
@@ -77,6 +77,8 @@ pub mod event {
         pub amount: usize,
         pub effectiveness: TypeEffectiveness,
         pub is_critical_hit: bool,
+        pub multi_hit_index: Option<usize>,
+        pub is_last_multi_hit_damage: bool,
     }
 
     #[derive(Clone, Debug, Eq, PartialEq)]
@@ -184,7 +186,12 @@ enum Flag {
     StatStages(HashMap<Stat, i8>),
 }
 
-impl<Rng: BattleRng> BattleBackend<Rng> {
+struct MultiHitData {
+    multi_hit_index: usize,
+    maximum_number_of_hits: usize,
+}
+
+impl<Rng: BattleRng + Clone + 'static> BattleBackend<Rng> {
     pub fn new(data: Battle, rng: Rng) -> BattleBackend<Rng> {
         let mut pokemon_repository = HashMap::new();
         let mut p1 = TeamData {
@@ -355,7 +362,25 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
 
         match used_move.movement.category {
             MoveCategory::Physical | MoveCategory::Special => {
-                self.process_damage_effect(&used_move);
+                if let Some(multi_hit) = &used_move.movement.multi_hit {
+                    let number_of_hits = match multi_hit {
+                        MultiHit::Uniform { min_hits, max_hits } => {
+                            self.rng.check_uniform_multi_hit(*min_hits, *max_hits)
+                        },
+                        MultiHit::Custom(callback) => {
+                            callback(Box::new(self.rng.clone()))
+                        },
+                    };
+
+                    for i in 0..number_of_hits {
+                        self.process_damage_effect(&used_move, Some(MultiHitData {
+                            multi_hit_index: i,
+                            maximum_number_of_hits: number_of_hits,
+                        }));
+                    }
+                } else {
+                    self.process_damage_effect(&used_move, None);
+                }
             },
             MoveCategory::Status => {
                 // TODO
@@ -365,7 +390,11 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         self.process_secondary_effect(&used_move);
     }
 
-    fn process_damage_effect(&mut self, used_move: &UsedMove) {
+    fn process_damage_effect(
+        &mut self,
+        used_move: &UsedMove,
+        multi_hit_data: Option<MultiHitData>,
+    ) {
         let is_critical_hit = used_move.movement.critical_hit;
 
         let (attack, defense) = match (is_critical_hit, used_move.movement.category) {
@@ -388,7 +417,7 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
             _ => unreachable!(),
         };
 
-        self.inflict_damage(&used_move, attack, defense, is_critical_hit);
+        self.inflict_damage(&used_move, attack, defense, is_critical_hit, multi_hit_data);
     }
 
     fn process_secondary_effect(&mut self, used_move: &UsedMove) {
@@ -448,6 +477,7 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         attack: usize,
         defense: usize,
         is_critical_hit: bool,
+        multi_hit_data: Option<MultiHitData>,
     ) {
         let effectiveness = self.get_type_effectiveness(&used_move.movement, used_move.target);
         let damage =
@@ -456,11 +486,24 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         let target = self.pokemon_repository.get_mut(&used_move.target).unwrap();
         target.current_hp = target.current_hp.saturating_sub(damage);
 
+        let (multi_hit_index, is_last_multi_hit_damage) = match multi_hit_data {
+            Some(data) => {
+                let is_last_multi_hit_damage =
+                    data.multi_hit_index == data.maximum_number_of_hits - 1
+                    || target.current_hp == 0;
+
+                (Some(data.multi_hit_index), is_last_multi_hit_damage)
+            },
+            None => (None, true),
+        };
+
         self.event_queue.push(BattleEvent::Damage(event::Damage {
             target: used_move.target,
             amount: damage,
             effectiveness: TypeEffectiveness::from(effectiveness),
             is_critical_hit,
+            multi_hit_index,
+            is_last_multi_hit_damage,
         }));
 
         // TODO: trigger effects like Static

@@ -63,7 +63,7 @@ impl GameEvent for BattleStartEvent {
         let battle_type = self.battle_type.clone();
 
         let party = {
-            let rattata = generate_pokemon(&pokedex.get_species("Pidgey").unwrap(), &movedex, 9);
+            let rattata = generate_pokemon(&pokedex.get_species("Clefairy").unwrap(), &movedex, 10);
 
             Party {
                 pokemon: vec![rattata].into(),

@@ -338,6 +338,14 @@ impl BattleSystem {
             }));
         }
 
+        if event_data.is_last_multi_hit_damage {
+            if let Some(index) = event_data.multi_hit_index {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("Hit {} times!", index + 1),
+                }));
+            }
+        }
+
         self.active_animation_sequence = Some(AnimationSequence {
             animations: animations.into(),
         });

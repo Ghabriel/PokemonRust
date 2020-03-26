@@ -93,7 +93,7 @@ trait TestMethods {
     fn process_turn(&mut self, p1_move: &str, p2_move: &str) -> Vec<BattleEvent>;
 }
 
-impl<Rng: BattleRng> TestMethods for BattleBackend<Rng> {
+impl<Rng: BattleRng + Clone + 'static> TestMethods for BattleBackend<Rng> {
     fn move_p1(&mut self, index: usize) {
         self.push_frontend_event(FrontendEvent {
             team: Team::P1,
@@ -143,11 +143,13 @@ impl<Rng: BattleRng> TestMethods for BattleBackend<Rng> {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct TestRng {
     miss_counter: usize,
     last_miss_check_chance: Option<usize>,
     last_secondary_effect_check_chance: Option<usize>,
+    uniform_multi_hit_value: Option<usize>,
+    custom_multi_hit_value: Option<isize>,
 }
 
 impl TestRng {
@@ -157,6 +159,14 @@ impl TestRng {
 
     pub fn get_last_miss_check_chance(&self) -> Option<usize> {
         self.last_miss_check_chance
+    }
+
+    pub fn force_uniform_multi_hit_value(&mut self, value: usize) {
+        self.uniform_multi_hit_value = Some(value);
+    }
+
+    pub fn force_custom_multi_hit_value(&mut self, value: isize) {
+        self.custom_multi_hit_value = Some(value);
     }
 }
 
@@ -182,5 +192,19 @@ impl BattleRng for TestRng {
         self.last_secondary_effect_check_chance = Some(chance);
 
         chance == 100
+    }
+
+    fn check_uniform_multi_hit(&mut self, lowest: usize, highest: usize) -> usize {
+        match self.uniform_multi_hit_value {
+            Some(value) => value,
+            None => highest,
+        }
+    }
+
+    fn check_custom_multi_hit(&mut self, lowest: isize, highest: isize) -> isize {
+        match self.custom_multi_hit_value {
+            Some(value) => value,
+            None => highest,
+        }
     }
 }

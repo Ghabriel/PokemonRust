@@ -1,6 +1,7 @@
 mod bite;
 mod crab_hammer;
 mod cut;
+mod double_slap;
 mod growl;
 mod gust;
 mod harden;

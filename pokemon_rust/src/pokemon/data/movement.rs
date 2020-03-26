@@ -4,6 +4,7 @@ use crate::pokemon::{
         MoveCategory,
         MoveDex,
         MovePower,
+        MultiHit,
         SecondaryEffect,
         SimpleEffect,
         SimpleEffectTarget,
@@ -69,6 +70,33 @@ lazy_static! {
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
             multi_hit: None,
+            secondary_effect: None,
+            critical_hit: false,
+        });
+
+        result.push(Move {
+            id: "DoubleSlap".to_string(),
+            display_name: "Double Slap".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Normal,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(15),
+            power_modifier: None,
+            accuracy: Some(85),
+            pp: 10,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: Some(MultiHit::Custom(|mut rng| {
+                let value = rng.check_custom_multi_hit(1, 6);
+
+                match value {
+                    1 | 2 => 2,
+                    3 | 4 => 3,
+                    5 => 4,
+                    6 => 5,
+                    _ => unreachable!(),
+                }
+            })),
             secondary_effect: None,
             critical_hit: false,
         });
