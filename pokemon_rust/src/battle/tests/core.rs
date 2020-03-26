@@ -50,12 +50,14 @@ fn applies_type_effectiveness() {
         amount: 10,
         effectiveness: TypeEffectiveness::Normal,
         is_critical_hit: false,
+        ..
     });
     assert_event!(events[3], Damage {
         target: 1,
         amount: 12,
         effectiveness: TypeEffectiveness::SuperEffective,
         is_critical_hit: false,
+        ..
     });
 }
 

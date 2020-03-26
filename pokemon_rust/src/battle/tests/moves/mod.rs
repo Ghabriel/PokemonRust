@@ -5,6 +5,7 @@ mod double_slap;
 mod growl;
 mod gust;
 mod harden;
+mod horn_attack;
 mod karate_chop;
 mod mach_punch;
 mod mega_kick;

@@ -165,6 +165,23 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "HornAttack".to_string(),
+            display_name: "Horn Attack".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Normal,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(65),
+            power_modifier: None,
+            accuracy: Some(100),
+            pp: 25,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: None,
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "KarateChop".to_string(),
             display_name: "Karate Chop".to_string(),
             description: "".to_string(), // TODO

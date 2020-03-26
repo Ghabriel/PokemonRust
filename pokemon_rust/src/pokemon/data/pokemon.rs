@@ -431,6 +431,37 @@ lazy_static! {
             ],
         });
 
+        result.push(species! {
+            id: "Rhyhorn",
+            display_name: "Rhyhorn",
+            national_number: 111,
+            types: [PokemonType::Ground, PokemonType::Rock],
+            base_stats: [80, 85, 95, 30, 30, 25],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::Slow,
+            base_exp_yield: 69,
+            ev_yield: [0, 0, 1, 0, 0, 0],
+            capture_rate: 120,
+            abilities: ["LightningRod", "RockHead"],
+            hidden_abilities: ["Reckless"],
+            move_table: [
+                1: "Tackle",
+                1: "TailWhip",
+                // 5: "SmackDown",
+                // 10: "Bulldoze",
+                15: "HornAttack",
+                // 20: "ScaryFace",
+                // 25: "Stomp",
+                // 30: "RockBlast",
+                // 35: "Drillrun",
+                // 40: "TakeDown",
+                // 45: "Earthquake",
+                // 50: "StoneEdge",
+                // 55: "Megahorn",
+                // 60: "HornDrill",
+            ],
+        });
+
         PokeDex::new(
             result
                 .into_iter()
