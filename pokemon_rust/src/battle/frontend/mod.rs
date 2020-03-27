@@ -346,6 +346,12 @@ impl BattleSystem {
             }
         }
 
+        if event_data.is_ohko {
+            animations.push(Box::new(TextAnimation::PendingStart {
+                text: "It's a one-hit KO!".to_string(),
+            }));
+        }
+
         self.active_animation_sequence = Some(AnimationSequence {
             animations: animations.into(),
         });

@@ -1,6 +1,6 @@
 use crate::battle::backend::rng::BattleRng;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use super::{Pokemon, PokemonType, Stat, StatusCondition};
 
@@ -29,6 +29,8 @@ pub struct Move {
     /// The accuracy of this move. This is None for moves that never miss,
     /// e.g Swift.
     pub accuracy: Option<usize>,
+    pub accuracy_modifier: Option<MoveCallback<ModifiedAccuracy>>,
+    pub flags: HashSet<MoveFlag>,
     pub pp: usize,
     pub priority: i8,
     pub target_type: TargetType,
@@ -60,6 +62,17 @@ pub enum MovePower {
 }
 
 pub type MoveCallback<T = ()> = fn(user: &Pokemon, target: &Pokemon, movement: &Move) -> T;
+
+pub enum ModifiedAccuracy {
+    Miss,
+    Hit,
+    NewValue(usize),
+}
+
+#[derive(Clone, Copy, Eq, Hash, PartialEq)]
+pub enum MoveFlag {
+    OneHitKO,
+}
 
 pub enum TargetType {
     /// Affects everyone in the field, e.g Wonder Room

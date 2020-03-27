@@ -5,7 +5,16 @@ use crate::{
     pokemon::{
         get_all_moves,
         get_all_pokemon_species,
-        movement::{Move, MoveCategory, MovePower, MultiHit, SimpleEffect, SimpleEffectTarget},
+        movement::{
+            ModifiedAccuracy,
+            Move,
+            MoveCategory,
+            MoveFlag,
+            MovePower,
+            MultiHit,
+            SimpleEffect,
+            SimpleEffectTarget,
+        },
         Pokemon,
         PokemonSpeciesData,
         PokemonType,
@@ -79,6 +88,7 @@ pub mod event {
         pub is_critical_hit: bool,
         pub multi_hit_index: Option<usize>,
         pub is_last_multi_hit_damage: bool,
+        pub is_ohko: bool,
     }
 
     #[derive(Clone, Debug, Eq, PartialEq)]
@@ -480,10 +490,18 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         multi_hit_data: Option<MultiHitData>,
     ) {
         let effectiveness = self.get_type_effectiveness(&used_move.movement, used_move.target);
-        let damage =
-            self.get_move_damage(&used_move, attack, defense, effectiveness, is_critical_hit);
+
+        let (damage, is_ohko) = if used_move.movement.flags.contains(&MoveFlag::OneHitKO) {
+            (None, true)
+        } else {
+            let damage =
+                self.get_move_damage(&used_move, attack, defense, effectiveness, is_critical_hit);
+
+            (Some(damage), false)
+        };
 
         let target = self.pokemon_repository.get_mut(&used_move.target).unwrap();
+        let damage = damage.unwrap_or(target.current_hp);
         target.current_hp = target.current_hp.saturating_sub(damage);
 
         let (multi_hit_index, is_last_multi_hit_damage) = match multi_hit_data {
@@ -504,6 +522,7 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
             is_critical_hit,
             multi_hit_index,
             is_last_multi_hit_damage,
+            is_ohko,
         }));
 
         // TODO: trigger effects like Static
@@ -790,21 +809,37 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
     }
 
     fn check_miss(&mut self, used_move: &UsedMove) -> bool {
-        if let Some(accuracy) = used_move.movement.accuracy {
-            let accuracy = accuracy as f32;
+        let mov = used_move.movement;
 
-            let adjusted_stages = {
-                let user_accuracy = self.get_stat_stage(used_move.user, Stat::Accuracy);
-                let target_evasion = self.get_stat_stage(used_move.target, Stat::Evasion);
+        let accuracy = match mov.accuracy_modifier {
+            Some(modifier) => {
+                let user = &self.pokemon_repository[&used_move.user];
+                let target = &self.pokemon_repository[&used_move.target];
+                modifier(user, target, mov)
+            },
+            None => match mov.accuracy {
+                Some(accuracy) => ModifiedAccuracy::NewValue(accuracy),
+                None => ModifiedAccuracy::Hit,
+            }
+        };
 
-                self.get_accuracy_multiplier(user_accuracy - target_evasion)
-            };
+        match accuracy {
+            ModifiedAccuracy::Miss => true,
+            ModifiedAccuracy::Hit => false,
+            ModifiedAccuracy::NewValue(accuracy) => {
+                let accuracy = accuracy as f32;
 
-            let chance = accuracy * adjusted_stages;
+                let adjusted_stages = {
+                    let user_accuracy = self.get_stat_stage(used_move.user, Stat::Accuracy);
+                    let target_evasion = self.get_stat_stage(used_move.target, Stat::Evasion);
 
-            self.rng.check_miss(chance as usize)
-        } else {
-            false
+                    self.get_accuracy_multiplier(user_accuracy - target_evasion)
+                };
+
+                let chance = accuracy * adjusted_stages;
+
+                self.rng.check_miss(chance as usize)
+            },
         }
     }
 

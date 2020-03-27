@@ -14,6 +14,9 @@ macro_rules! assert_event {
     ($value:expr, StatChange { $($args:tt)* }) => {
         assert_pattern!($value, BattleEvent::StatChange(StatChange { $($args)* }));
     };
+    ($value:expr, Faint { $($args:tt)* }) => {
+        assert_pattern!($value, BattleEvent::Faint(Faint { $($args)* }));
+    };
 }
 
 macro_rules! assert_pattern {

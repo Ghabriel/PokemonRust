@@ -5,6 +5,7 @@ mod double_slap;
 mod drill_peck;
 mod egg_bomb;
 mod growl;
+mod guillotine;
 mod gust;
 mod harden;
 mod horn_attack;

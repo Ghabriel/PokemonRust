@@ -441,7 +441,7 @@ lazy_static! {
                 36: "Slam",
                 // 40: "SwordsDance",
                 44: "CrabHammer",
-                // 48: "Guillotine",
+                48: "Guillotine",
             ],
         });
 

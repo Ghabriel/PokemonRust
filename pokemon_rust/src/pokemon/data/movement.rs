@@ -1,8 +1,10 @@
 use crate::pokemon::{
     movement::{
+        ModifiedAccuracy,
         Move,
         MoveCategory,
         MoveDex,
+        MoveFlag,
         MovePower,
         MultiHit,
         SecondaryEffect,
@@ -16,7 +18,19 @@ use crate::pokemon::{
 
 use lazy_static::lazy_static;
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
+
+macro_rules! flags {
+    [$($value:expr),*] => {
+        {
+            let mut set = HashSet::new();
+
+            $(set.insert($value);)*
+
+            set
+        }
+    }
+}
 
 lazy_static! {
     static ref MOVEDEX: MoveDex = {
@@ -31,6 +45,8 @@ lazy_static! {
             base_power: MovePower::Constant(60),
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 25,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -49,6 +65,8 @@ lazy_static! {
             base_power: MovePower::Constant(100),
             power_modifier: None,
             accuracy: Some(90),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 10,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -66,6 +84,8 @@ lazy_static! {
             base_power: MovePower::Constant(50),
             power_modifier: None,
             accuracy: Some(95),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 30,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -83,6 +103,8 @@ lazy_static! {
             base_power: MovePower::Constant(15),
             power_modifier: None,
             accuracy: Some(85),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 10,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -110,6 +132,8 @@ lazy_static! {
             base_power: MovePower::Constant(80),
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 20,
             priority: 0,
             target_type: TargetType::SingleTarget,
@@ -127,6 +151,8 @@ lazy_static! {
             base_power: MovePower::Constant(100),
             power_modifier: None,
             accuracy: Some(75),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 10,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -144,6 +170,8 @@ lazy_static! {
             base_power: MovePower::Special,
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 40,
             priority: 0,
             target_type: TargetType::AllAdjacentFoes,
@@ -159,6 +187,31 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "Guillotine".to_string(),
+            display_name: "Guillotine".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Normal,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Special,
+            power_modifier: None,
+            accuracy: Some(30),
+            accuracy_modifier: Some(|user, target, _mov| {
+                if target.level > user.level {
+                    return ModifiedAccuracy::Miss;
+                }
+
+                return ModifiedAccuracy::NewValue(user.level - target.level + 30);
+            }),
+            flags: flags![MoveFlag::OneHitKO],
+            pp: 5,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: None,
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "Gust".to_string(),
             display_name: "Gust".to_string(),
             description: "".to_string(), // TODO
@@ -167,6 +220,8 @@ lazy_static! {
             base_power: MovePower::Constant(40),
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 35,
             priority: 0,
             target_type: TargetType::SingleTarget,
@@ -184,6 +239,8 @@ lazy_static! {
             base_power: MovePower::Special,
             power_modifier: None,
             accuracy: None,
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 30,
             priority: 0,
             target_type: TargetType::User,
@@ -207,6 +264,8 @@ lazy_static! {
             base_power: MovePower::Constant(65),
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 25,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -224,6 +283,8 @@ lazy_static! {
             base_power: MovePower::Constant(110),
             power_modifier: None,
             accuracy: Some(80),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 5,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -241,6 +302,8 @@ lazy_static! {
             base_power: MovePower::Constant(50),
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 25,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -258,6 +321,8 @@ lazy_static! {
             base_power: MovePower::Constant(40),
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 30,
             priority: 1,
             target_type: TargetType::SingleAdjacentTarget,
@@ -275,6 +340,8 @@ lazy_static! {
             base_power: MovePower::Constant(120),
             power_modifier: None,
             accuracy: Some(75),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 5,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -292,6 +359,8 @@ lazy_static! {
             base_power: MovePower::Constant(80),
             power_modifier: None,
             accuracy: Some(85),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 20,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -309,6 +378,8 @@ lazy_static! {
             base_power: MovePower::Constant(35),
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 35,
             priority: 0,
             target_type: TargetType::SingleTarget,
@@ -326,6 +397,8 @@ lazy_static! {
             base_power: MovePower::Constant(40),
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 35,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -343,6 +416,8 @@ lazy_static! {
             base_power: MovePower::Constant(40),
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 30,
             priority: 1,
             target_type: TargetType::SingleAdjacentTarget,
@@ -360,6 +435,8 @@ lazy_static! {
             base_power: MovePower::Constant(55),
             power_modifier: None,
             accuracy: Some(95),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 25,
             priority: 0,
             target_type: TargetType::AllAdjacentFoes,
@@ -377,6 +454,8 @@ lazy_static! {
             base_power: MovePower::Constant(50),
             power_modifier: None,
             accuracy: Some(90),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 15,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -394,6 +473,8 @@ lazy_static! {
             base_power: MovePower::Constant(40),
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 35,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -411,6 +492,8 @@ lazy_static! {
             base_power: MovePower::Constant(80),
             power_modifier: None,
             accuracy: Some(75),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 20,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -428,6 +511,8 @@ lazy_static! {
             base_power: MovePower::Constant(70),
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 20,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -445,6 +530,8 @@ lazy_static! {
             base_power: MovePower::Constant(80),
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 15,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -462,6 +549,8 @@ lazy_static! {
             base_power: MovePower::Constant(60),
             power_modifier: None,
             accuracy: None,
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 20,
             priority: 0,
             target_type: TargetType::AllAdjacentFoes,
@@ -479,6 +568,8 @@ lazy_static! {
             base_power: MovePower::Constant(40),
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 35,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -496,6 +587,8 @@ lazy_static! {
             base_power: MovePower::Special,
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 30,
             priority: 0,
             target_type: TargetType::AllAdjacentFoes,
@@ -519,6 +612,8 @@ lazy_static! {
             base_power: MovePower::Constant(45),
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 25,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -536,6 +631,8 @@ lazy_static! {
             base_power: MovePower::Constant(55),
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 30,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -553,6 +650,8 @@ lazy_static! {
             base_power: MovePower::Constant(40),
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 25,
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
@@ -570,6 +669,8 @@ lazy_static! {
             base_power: MovePower::Constant(60),
             power_modifier: None,
             accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
             pp: 35,
             priority: 0,
             target_type: TargetType::SingleTarget,

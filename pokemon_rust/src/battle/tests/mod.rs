@@ -20,7 +20,7 @@ pub mod prelude {
     pub use crate::{
         battle::{
             backend::{
-                event::{ChangeTurn, Damage, InitialSwitchIn, Miss, StatChange},
+                event::{ChangeTurn, Damage, Faint, InitialSwitchIn, Miss, StatChange},
                 BattleBackend,
             },
             types::{Battle, BattleCharacterTeam, BattleType, Party},
