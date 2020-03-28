@@ -4,6 +4,7 @@ mod cut;
 mod double_slap;
 mod drill_peck;
 mod egg_bomb;
+mod fissure;
 mod growl;
 mod guillotine;
 mod gust;

@@ -314,6 +314,36 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Diglett",
+            display_name: "Diglett",
+            national_number: 50,
+            types: [PokemonType::Ground],
+            base_stats: [10, 55, 25, 35, 45, 95],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 53,
+            ev_yield: [0, 0, 0, 0, 0, 1],
+            capture_rate: 255,
+            abilities: ["SandVeil", "ArenaTrap"],
+            hidden_abilities: ["SandForce"],
+            move_table: [
+                // 1: "SandAttack",
+                1: "Scratch",
+                4: "Growl",
+                // 8: "Astonish",
+                // 12: "MudSlap",
+                // 16: "Bulldoze",
+                // 20: "SuckerPunch",
+                // 24: "Slash",
+                // 28: "Sandstorm",
+                // 32: "Dig",
+                // 36: "EarthPower",
+                // 40: "Earthquake",
+                44: "Fissure",
+            ],
+        });
+
+        result.push(species! {
             id: "Machop",
             display_name: "Machop",
             national_number: 66,

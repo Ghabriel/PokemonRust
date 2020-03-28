@@ -162,6 +162,31 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "Fissure".to_string(),
+            display_name: "Fissure".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Ground,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Special,
+            power_modifier: None,
+            accuracy: Some(30),
+            accuracy_modifier: Some(|user, target, _mov| {
+                if target.level > user.level {
+                    return ModifiedAccuracy::Miss;
+                }
+
+                return ModifiedAccuracy::NewValue(user.level - target.level + 30);
+            }),
+            flags: flags![MoveFlag::OneHitKO],
+            pp: 5,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: None,
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "Growl".to_string(),
             display_name: "Growl".to_string(),
             description: "".to_string(), // TODO
