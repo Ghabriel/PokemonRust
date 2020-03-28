@@ -9,6 +9,7 @@ mod guillotine;
 mod gust;
 mod harden;
 mod horn_attack;
+mod horn_drill;
 mod hydro_pump;
 mod karate_chop;
 mod mach_punch;

@@ -575,7 +575,7 @@ lazy_static! {
                 // 45: "Earthquake",
                 // 50: "StoneEdge",
                 // 55: "Megahorn",
-                // 60: "HornDrill",
+                60: "HornDrill",
             ],
         });
 
