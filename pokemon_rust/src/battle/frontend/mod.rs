@@ -27,10 +27,20 @@ use crate::{
     audio::SoundKit,
     battle::{
         backend::{
-            event::{Damage, Faint, InitialSwitchIn, Miss, StatChange, UseMove},
+            event::{
+                Damage,
+                FailedMove,
+                Faint,
+                InitialSwitchIn,
+                Miss,
+                StatChange,
+                UseMove,
+                VolatileStatusCondition,
+            },
             rng::StandardBattleRng,
             BattleBackend,
             BattleEvent,
+            Flag,
             FrontendEvent,
             StatChangeKind,
             Team,
@@ -169,6 +179,12 @@ impl BattleSystem {
             },
             BattleEvent::StatChange(event_data) => {
                 self.handle_stat_change(event_data);
+            },
+            BattleEvent::VolatileStatusCondition(event_data) => {
+                self.handle_volatile_status_condition(event_data);
+            },
+            BattleEvent::FailedMove(event_data) => {
+                self.handle_failed_move(event_data);
             },
             BattleEvent::Faint(event_data) => {
                 self.handle_faint(event_data);
@@ -409,6 +425,38 @@ impl BattleSystem {
 
         let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> =
             vec![Box::new(TextAnimation::PendingStart { text })];
+
+        self.active_animation_sequence = Some(AnimationSequence {
+            animations: animations.into(),
+        });
+    }
+
+    fn handle_volatile_status_condition(&mut self, event_data: VolatileStatusCondition) {
+        let pokedex = get_all_pokemon_species();
+        let backend = self.backend.as_mut().unwrap();
+        let pokemon = backend.get_pokemon(event_data.target);
+        let display_name = get_pokemon_display_name(&pokemon, &pokedex);
+        let mut animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = Vec::new();
+
+        match event_data.added_flag {
+            Flag::Confusion => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} is confused!", display_name),
+                }));
+            },
+            Flag::StatStages(_) => unreachable!(),
+        }
+
+        self.active_animation_sequence = Some(AnimationSequence {
+            animations: animations.into(),
+        });
+    }
+
+    fn handle_failed_move(&mut self, event_data: FailedMove) {
+        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> =
+            vec![Box::new(TextAnimation::PendingStart {
+                text: "But it failed!".to_string(),
+            })];
 
         self.active_animation_sequence = Some(AnimationSequence {
             animations: animations.into(),

@@ -83,7 +83,7 @@ impl GameEvent for BattleStartEvent {
         };
 
         let p2 = {
-            let pidgey = generate_pokemon(&pokedex.get_species("Metapod").unwrap(), &movedex, 9);
+            let pidgey = generate_pokemon(&pokedex.get_species("Butterfree").unwrap(), &movedex, 9);
 
             BattleCharacterTeam {
                 active_pokemon: None,

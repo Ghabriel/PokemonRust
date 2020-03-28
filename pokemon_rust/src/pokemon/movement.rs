@@ -1,4 +1,4 @@
-use crate::battle::backend::rng::BattleRng;
+use crate::battle::backend::{rng::BattleRng, BattleBackend};
 
 use std::collections::{HashMap, HashSet};
 
@@ -31,6 +31,7 @@ pub struct Move {
     pub accuracy: Option<usize>,
     pub accuracy_modifier: Option<MoveCallback<ModifiedAccuracy>>,
     pub flags: HashSet<MoveFlag>,
+    pub on_usage_attempt: Option<ExtendedMoveCallback<ModifiedUsageAttempt>>,
     pub pp: usize,
     pub priority: i8,
     pub target_type: TargetType,
@@ -62,6 +63,7 @@ pub enum MovePower {
 }
 
 pub type MoveCallback<T = ()> = fn(user: &Pokemon, target: &Pokemon, movement: &Move) -> T;
+pub type ExtendedMoveCallback<T = ()> = fn(backend: &BattleBackend, user: usize, target: usize, movement: &Move) -> T;
 
 pub enum ModifiedAccuracy {
     Miss,
@@ -72,6 +74,11 @@ pub enum ModifiedAccuracy {
 #[derive(Clone, Copy, Eq, Hash, PartialEq)]
 pub enum MoveFlag {
     OneHitKO,
+}
+
+pub enum ModifiedUsageAttempt {
+    Fail,
+    Continue,
 }
 
 pub enum TargetType {

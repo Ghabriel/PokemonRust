@@ -50,11 +50,13 @@ pub enum BattleEvent {
     Damage(event::Damage),
     Miss(event::Miss),
     StatChange(event::StatChange),
+    VolatileStatusCondition(event::VolatileStatusCondition),
+    FailedMove(event::FailedMove),
     Faint(event::Faint),
 }
 
 pub mod event {
-    use super::{Stat, StatChangeKind, Team, TypeEffectiveness};
+    use super::{Flag, Stat, StatChangeKind, Team, TypeEffectiveness};
 
     /// Corresponds to the very first switch-in of a battle participant in a
     /// battle.
@@ -102,6 +104,17 @@ pub mod event {
         pub target: usize,
         pub kind: StatChangeKind,
         pub stat: Stat,
+    }
+
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    pub struct VolatileStatusCondition {
+        pub target: usize,
+        pub added_flag: Flag,
+    }
+
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    pub struct FailedMove {
+        pub move_user: usize,
     }
 
     #[derive(Clone, Debug, Eq, PartialEq)]
@@ -191,8 +204,9 @@ struct FlagContainer {
     flags: HashMap<&'static str, Flag>,
 }
 
-#[derive(Debug)]
-enum Flag {
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum Flag {
+    Confusion,
     StatStages(HashMap<Stat, i8>),
 }
 
@@ -437,6 +451,9 @@ impl<Rng: BattleRng + Clone + 'static> BattleBackend<Rng> {
             }
 
             match &effect.effect {
+                SimpleEffect::Confusion => {
+                    self.add_volatile_status_condition(used_move.target, Flag::Confusion)
+                },
                 SimpleEffect::StatChange { changes, target } => {
                     let target = match target {
                         SimpleEffectTarget::MoveTarget => used_move.target,
@@ -545,6 +562,30 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         }
     }
 
+
+    fn add_volatile_status_condition(&mut self, target: usize, flag: Flag) {
+        self.add_flag(target, flag.clone());
+
+        self.event_queue
+            .push(BattleEvent::VolatileStatusCondition(event::VolatileStatusCondition {
+                target,
+                added_flag: flag,
+            }));
+    }
+
+    fn add_flag(&mut self, target: usize, flag: Flag) {
+        let key = match flag {
+            Flag::Confusion => "confusion",
+            Flag::StatStages(_) => unreachable!(),
+        };
+
+        self.pokemon_flags
+            .get_mut(&target)
+            .unwrap()
+            .flags
+            .insert(key, flag);
+    }
+
     fn change_stat_stage(&mut self, target: usize, stat: Stat, delta: i8) {
         let stat_stages = self
             .pokemon_flags
@@ -576,6 +617,7 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
                     *value = (*value + delta).max(-6).min(6);
                 }
             },
+            _ => unreachable!(),
         }
 
         self.event_queue
@@ -633,6 +675,14 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         }
 
         unreachable!();
+    }
+
+    pub fn has_flag(&self, pokemon: usize, flag_id: &str) -> bool {
+        self.pokemon_flags
+            .get(&pokemon)
+            .unwrap()
+            .flags
+            .contains_key(flag_id)
     }
 
     fn get_attack_critical_hit(&self, pokemon: usize) -> usize {
