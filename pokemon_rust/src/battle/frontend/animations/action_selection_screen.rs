@@ -47,7 +47,7 @@ impl ActionSelectionScreen {
 impl FrontendAnimation for ActionSelectionScreen {
     fn start(
         &mut self,
-        _backend: &BattleBackend<StandardBattleRng>,
+        _backend: &BattleBackend,
         system_data: &mut BattleSystemData,
     ) {
         *self = ActionSelectionScreen::Started {
@@ -65,7 +65,7 @@ impl FrontendAnimation for ActionSelectionScreen {
     fn tick(
         &mut self,
         input_events: Vec<InputEvent<StringBindings>>,
-        _backend: &BattleBackend<StandardBattleRng>,
+        _backend: &BattleBackend,
         system_data: &mut BattleSystemData,
     ) -> TickResult {
         for event in input_events {

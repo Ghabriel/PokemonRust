@@ -7,6 +7,7 @@ use crate::{
         get_all_pokemon_species,
         movement::{
             ModifiedAccuracy,
+            ModifiedUsageAttempt,
             Move,
             MoveCategory,
             MoveFlag,
@@ -174,7 +175,7 @@ pub struct UsedMove<'a> {
 }
 
 #[derive(Debug)]
-pub struct BattleBackend<Rng: BattleRng> {
+pub struct BattleBackend {
     /// The type of battle that is happening.
     battle_type: BattleType,
     /// The current turn.
@@ -189,7 +190,7 @@ pub struct BattleBackend<Rng: BattleRng> {
     event_queue: Vec<BattleEvent>,
     pub(super) pokemon_repository: HashMap<usize, Pokemon>,
     /// The RNG that this battle is using.
-    pub(super) rng: Rng,
+    pub(super) rng: Box<dyn BattleRng + Sync + Send>,
 }
 
 #[derive(Debug)]
@@ -215,8 +216,8 @@ struct MultiHitData {
     maximum_number_of_hits: usize,
 }
 
-impl<Rng: BattleRng + Clone + 'static> BattleBackend<Rng> {
-    pub fn new(data: Battle, rng: Rng) -> BattleBackend<Rng> {
+impl BattleBackend {
+    pub fn new(data: Battle, rng: Box<dyn BattleRng + Sync + Send>) -> BattleBackend {
         let mut pokemon_repository = HashMap::new();
         let mut p1 = TeamData {
             active_pokemon: None,
@@ -376,6 +377,16 @@ impl<Rng: BattleRng + Clone + 'static> BattleBackend<Rng> {
             move_name: used_move.movement.display_name.clone(),
         }));
 
+        if let Some(handler) = used_move.movement.on_usage_attempt {
+            let result = handler(self, used_move.user, used_move.target, &used_move.movement);
+            if result == ModifiedUsageAttempt::Fail {
+                self.event_queue.push(BattleEvent::FailedMove(event::FailedMove {
+                    move_user: used_move.user,
+                }));
+                return;
+            }
+        }
+
         if self.check_miss(&used_move) {
             self.event_queue.push(BattleEvent::Miss(event::Miss {
                 target: used_move.target,
@@ -392,7 +403,7 @@ impl<Rng: BattleRng + Clone + 'static> BattleBackend<Rng> {
                             self.rng.check_uniform_multi_hit(*min_hits, *max_hits)
                         },
                         MultiHit::Custom(callback) => {
-                            callback(Box::new(self.rng.clone()))
+                            callback(self.rng.boxed_clone())
                         },
                     };
 
@@ -497,7 +508,7 @@ impl<Rng: BattleRng + Clone + 'static> BattleBackend<Rng> {
     }
 }
 
-impl<Rng: BattleRng> BattleBackend<Rng> {
+impl BattleBackend {
     fn inflict_damage(
         &mut self,
         used_move: &UsedMove,
@@ -629,7 +640,7 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
     }
 }
 
-impl<Rng: BattleRng> BattleBackend<Rng> {
+impl BattleBackend {
     pub fn get_species(&self, pokemon: usize) -> &PokemonSpeciesData {
         let pokedex = get_all_pokemon_species();
         let species_id = &self.get_pokemon(pokemon).species_id;

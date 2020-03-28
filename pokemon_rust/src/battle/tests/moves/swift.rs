@@ -8,9 +8,9 @@ fn swift_deals_damage_and_never_misses() {
         "Eevee" 20 (max ivs, Serious) vs "Metapod" 20 (max ivs, Serious)
     };
 
-    backend.rng.force_miss(1);
+    test_rng_mut(&mut backend.rng).force_miss(1);
     let events = backend.process_turn("Swift", "Harden");
 
     assert_event!(events[1], Damage { target: 1, is_critical_hit: false, .. });
-    assert_eq!(backend.rng.get_last_miss_check_chance(), None);
+    assert_eq!(test_rng_mut(&mut backend.rng).get_last_miss_check_chance(), None);
 }

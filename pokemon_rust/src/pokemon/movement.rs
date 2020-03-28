@@ -76,6 +76,7 @@ pub enum MoveFlag {
     OneHitKO,
 }
 
+#[derive(Eq, PartialEq)]
 pub enum ModifiedUsageAttempt {
     Fail,
     Continue,

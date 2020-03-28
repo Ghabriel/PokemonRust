@@ -1,5 +1,5 @@
 use crate::battle::backend::{
-    rng::BattleRng,
+    rng::{BattleRng, downcast_mut, downcast_ref},
     BattleBackend,
     BattleEvent,
     FrontendEvent,
@@ -33,6 +33,7 @@ pub mod prelude {
                 BattleBackend,
                 Flag,
             },
+            tests::{test_rng, test_rng_mut, TestRng},
             types::{Battle, BattleCharacterTeam, BattleType, Party},
         },
         pokemon::{
@@ -45,12 +46,11 @@ pub mod prelude {
     };
 
     use crate::{
-        battle::tests::TestRng,
         overworld::entities::character::CharacterId,
         pokemon::Pokemon,
     };
 
-    pub fn create_simple_wild_battle(p1: Pokemon, p2: Pokemon) -> BattleBackend<TestRng> {
+    pub fn create_simple_wild_battle(p1: Pokemon, p2: Pokemon) -> BattleBackend {
         BattleBackend::new(
             Battle::new(
                 BattleType::Single,
@@ -69,11 +69,11 @@ pub mod prelude {
                     character_id: None,
                 },
             ),
-            TestRng::default(),
+            Box::new(TestRng::default()),
         )
     }
 
-    pub fn create_simple_trainer_battle(p1: Pokemon, p2: Pokemon) -> BattleBackend<TestRng> {
+    pub fn create_simple_trainer_battle(p1: Pokemon, p2: Pokemon) -> BattleBackend {
         BattleBackend::new(
             Battle::new(
                 BattleType::Single,
@@ -92,7 +92,7 @@ pub mod prelude {
                     character_id: Some(CharacterId(2)),
                 },
             ),
-            TestRng::default(),
+            Box::new(TestRng::default()),
         )
     }
 }
@@ -103,7 +103,7 @@ trait TestMethods {
     fn process_turn(&mut self, p1_move: &str, p2_move: &str) -> Vec<BattleEvent>;
 }
 
-impl<Rng: BattleRng + Clone + 'static> TestMethods for BattleBackend<Rng> {
+impl TestMethods for BattleBackend {
     fn move_p1(&mut self, index: usize) {
         self.push_frontend_event(FrontendEvent {
             team: Team::P1,
@@ -181,6 +181,10 @@ impl TestRng {
 }
 
 impl BattleRng for TestRng {
+    fn boxed_clone(&self) -> Box<dyn BattleRng + Sync + Send> {
+        Box::new(self.clone())
+    }
+
     fn get_damage_modifier(&mut self) -> f32 {
         1.
     }
@@ -217,4 +221,12 @@ impl BattleRng for TestRng {
             None => highest,
         }
     }
+}
+
+pub fn test_rng(value: &Box<dyn BattleRng>) -> &TestRng {
+    downcast_ref::<TestRng, _>(value)
+}
+
+pub fn test_rng_mut(value: &mut Box<dyn BattleRng + Sync + Send>) -> &mut TestRng {
+    downcast_mut::<TestRng, _>(value)
 }

@@ -88,7 +88,7 @@ pub struct BattleSystemData<'a> {
 /// sending signals to the backend whenever an action is taken.
 pub struct BattleSystem {
     event_reader: ReaderId<InputEvent<StringBindings>>,
-    backend: Option<BattleBackend<StandardBattleRng>>,
+    backend: Option<BattleBackend>,
     event_queue: VecDeque<BattleEvent>,
     active_animation_sequence: Option<AnimationSequence>,
     p1_info_card: Option<InfoCard>,
@@ -133,14 +133,14 @@ impl TickResult {
 trait FrontendAnimation {
     fn start(
         &mut self,
-        backend: &BattleBackend<StandardBattleRng>,
+        backend: &BattleBackend,
         system_data: &mut BattleSystemData,
     );
 
     fn tick(
         &mut self,
         input_events: Vec<InputEvent<StringBindings>>,
-        backend: &BattleBackend<StandardBattleRng>,
+        backend: &BattleBackend,
         system_data: &mut BattleSystemData,
     ) -> TickResult;
 }
@@ -516,7 +516,7 @@ impl<'a> System<'a> for BattleSystem {
                     None => {
                         let mut backend = BattleBackend::new(
                             system_data.battle.clone(),
-                            StandardBattleRng::default(),
+                            Box::new(StandardBattleRng::default()),
                         );
 
                         self.event_queue.extend(backend.tick());

@@ -4,11 +4,36 @@ use rand::{
     thread_rng,
 };
 
-use std::fmt::Debug;
+use std::{any::Any, fmt::Debug};
 
 use super::UsedMove;
 
-pub trait BattleRng: Debug {
+pub trait Downcast: Any {
+    fn as_any(&self) -> &dyn Any;
+    fn as_any_mut(&mut self) -> &mut dyn Any;
+}
+
+impl<T: Any> Downcast for T {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+
+    fn as_any_mut(&mut self) -> &mut dyn Any {
+        self
+    }
+}
+
+pub fn downcast_ref<'a, T: 'static, V: Downcast>(value: &'a V) -> &'a T {
+    value.as_any().downcast_ref::<T>().unwrap()
+}
+
+pub fn downcast_mut<'a, T: 'static, V: Downcast>(value: &'a mut V) -> &'a mut T {
+    value.as_any_mut().downcast_mut::<T>().unwrap()
+}
+
+pub trait BattleRng: Debug + Downcast {
+    fn boxed_clone(&self) -> Box<dyn BattleRng + Sync + Send>;
+
     /// Returns a value in the range [0.85, 1].
     fn get_damage_modifier(&mut self) -> f32;
 
@@ -49,6 +74,10 @@ impl StandardBattleRng {
 }
 
 impl BattleRng for StandardBattleRng {
+    fn boxed_clone(&self) -> Box<dyn BattleRng + Sync + Send> {
+        Box::new(self.clone())
+    }
+
     fn get_damage_modifier(&mut self) -> f32 {
         self.rand(85, 100) as f32 / 100.
     }
