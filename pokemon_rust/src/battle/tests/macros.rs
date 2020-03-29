@@ -1,3 +1,15 @@
+macro_rules! test_rng {
+    ($rng:expr) => {
+        $rng.as_any().downcast_ref::<TestRng>().unwrap()
+    }
+}
+
+macro_rules! test_rng_mut {
+    ($rng:expr) => {
+        $rng.as_any_mut().downcast_mut::<TestRng>().unwrap()
+    }
+}
+
 macro_rules! assert_event {
     ($value:expr, InitialSwitchIn { $($args:tt)* }) => {
         assert_pattern!($value, BattleEvent::InitialSwitchIn(InitialSwitchIn { $($args)* }));

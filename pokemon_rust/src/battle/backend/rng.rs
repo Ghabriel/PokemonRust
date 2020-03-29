@@ -23,14 +23,6 @@ impl<T: Any> Downcast for T {
     }
 }
 
-pub fn downcast_ref<'a, T: 'static, V: Downcast>(value: &'a V) -> &'a T {
-    value.as_any().downcast_ref::<T>().unwrap()
-}
-
-pub fn downcast_mut<'a, T: 'static, V: Downcast>(value: &'a mut V) -> &'a mut T {
-    value.as_any_mut().downcast_mut::<T>().unwrap()
-}
-
 pub trait BattleRng: Debug + Downcast {
     fn boxed_clone(&self) -> Box<dyn BattleRng + Sync + Send>;
 

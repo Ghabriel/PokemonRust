@@ -10,7 +10,7 @@ fn double_slap_deals_damage_two_to_five_times() {
                 "Clefairy" 10 (max ivs, Serious) vs "Metapod" 10 (max ivs, Serious)
             };
 
-            test_rng_mut(&mut backend.rng).force_custom_multi_hit_value($value);
+            test_rng_mut!(backend.rng).force_custom_multi_hit_value($value);
             let events = backend.process_turn("DoubleSlap", "Harden");
 
             for i in 0..$expected_number_of_hits {

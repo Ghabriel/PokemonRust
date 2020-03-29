@@ -1,5 +1,5 @@
 use crate::battle::backend::{
-    rng::{BattleRng, downcast_mut, downcast_ref},
+    rng::BattleRng,
     BattleBackend,
     BattleEvent,
     FrontendEvent,
@@ -33,7 +33,7 @@ pub mod prelude {
                 BattleBackend,
                 Flag,
             },
-            tests::{test_rng, test_rng_mut, TestRng},
+            tests::TestRng,
             types::{Battle, BattleCharacterTeam, BattleType, Party},
         },
         pokemon::{
@@ -221,12 +221,4 @@ impl BattleRng for TestRng {
             None => highest,
         }
     }
-}
-
-pub fn test_rng(value: &Box<dyn BattleRng>) -> &TestRng {
-    downcast_ref::<TestRng, _>(value)
-}
-
-pub fn test_rng_mut(value: &mut Box<dyn BattleRng + Sync + Send>) -> &mut TestRng {
-    downcast_mut::<TestRng, _>(value)
 }
