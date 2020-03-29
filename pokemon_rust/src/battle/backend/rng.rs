@@ -24,6 +24,7 @@ impl<T: Any> Downcast for T {
 }
 
 pub trait BattleRng: Debug + Downcast {
+    /// Trait object-safe version of `Clone` for this trait.
     fn boxed_clone(&self) -> Box<dyn BattleRng + Sync + Send>;
 
     /// Returns a value in the range [0.85, 1].
@@ -33,8 +34,8 @@ pub trait BattleRng: Debug + Downcast {
     /// priority and speed are equal.
     fn shuffle_moves<'a>(&mut self, moves: &mut Vec<UsedMove<'a>>);
 
-    /// Picks a number r in the range [1, 100] and returns r <= chance.
-    fn check_miss(&mut self, chance: usize) -> bool;
+    /// Picks a number r in the range [1, 100] and returns r <= 100 - accuracy.
+    fn check_miss(&mut self, accuracy: usize) -> bool;
 
     /// Picks a number r in the range [1, 100] and returns r <= chance.
     fn check_secondary_effect(&mut self, chance: usize) -> bool;
@@ -46,6 +47,9 @@ pub trait BattleRng: Debug + Downcast {
     /// Returns a number r in the range [lowest, highest] used to calculate the
     /// number of hits of a custom multi-hit move.
     fn check_custom_multi_hit(&mut self, lowest: isize, highest: isize) -> isize;
+
+    /// Tests for a confusion miss (50% chance).
+    fn check_confusion_miss(&mut self) -> bool;
 }
 
 #[derive(Clone, Debug, Default)]
@@ -92,5 +96,9 @@ impl BattleRng for StandardBattleRng {
 
     fn check_custom_multi_hit(&mut self, lowest: isize, highest: isize) -> isize {
         self.rand(lowest, highest)
+    }
+
+    fn check_confusion_miss(&mut self) -> bool {
+        self.roll(50)
     }
 }

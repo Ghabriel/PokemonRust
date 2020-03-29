@@ -5,7 +5,7 @@ use amethyst::{
 
 use crate::{
     audio::Sound,
-    battle::backend::{BattleBackend, rng::StandardBattleRng},
+    battle::backend::BattleBackend,
     text::{advance_text, create_text_box, delete_text_box, TextState},
 };
 

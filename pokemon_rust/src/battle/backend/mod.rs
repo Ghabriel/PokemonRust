@@ -98,6 +98,7 @@ pub mod event {
     pub struct Miss {
         pub target: usize,
         pub move_user: usize,
+        pub caused_by_confusion: bool,
     }
 
     #[derive(Clone, Debug, Eq, PartialEq)]
@@ -387,10 +388,22 @@ impl BattleBackend {
             }
         }
 
+        if self.has_flag(used_move.user, "confusion") {
+            if self.rng.check_confusion_miss() {
+                self.event_queue.push(BattleEvent::Miss(event::Miss {
+                    target: used_move.target,
+                    move_user: used_move.user,
+                    caused_by_confusion: true,
+                }));
+                return;
+            }
+        }
+
         if self.check_miss(&used_move) {
             self.event_queue.push(BattleEvent::Miss(event::Miss {
                 target: used_move.target,
                 move_user: used_move.user,
+                caused_by_confusion: false,
             }));
             return;
         }

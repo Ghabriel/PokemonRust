@@ -160,6 +160,7 @@ pub struct TestRng {
     last_secondary_effect_check_chance: Option<usize>,
     uniform_multi_hit_value: Option<usize>,
     custom_multi_hit_value: Option<isize>,
+    confusion_miss_counter: usize,
 }
 
 impl TestRng {
@@ -177,6 +178,10 @@ impl TestRng {
 
     pub fn force_custom_multi_hit_value(&mut self, value: isize) {
         self.custom_multi_hit_value = Some(value);
+    }
+
+    pub fn force_confusion_miss(&mut self, times: usize) {
+        self.confusion_miss_counter = times;
     }
 }
 
@@ -219,6 +224,15 @@ impl BattleRng for TestRng {
         match self.custom_multi_hit_value {
             Some(value) => value,
             None => highest,
+        }
+    }
+
+    fn check_confusion_miss(&mut self) -> bool {
+        if self.confusion_miss_counter > 0 {
+            self.confusion_miss_counter -= 1;
+            true
+        } else {
+            false
         }
     }
 }

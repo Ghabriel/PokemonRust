@@ -3,7 +3,6 @@ use amethyst::input::{InputEvent, StringBindings};
 use crate::{
     audio::Sound,
     battle::backend::{
-        rng::StandardBattleRng,
         BattleBackend,
         FrontendEvent,
         FrontendEventKind,

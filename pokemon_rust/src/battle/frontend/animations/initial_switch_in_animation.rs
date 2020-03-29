@@ -8,7 +8,6 @@ use amethyst::{
 use crate::{
     battle::backend::{
         event::InitialSwitchIn,
-        rng::StandardBattleRng,
         BattleBackend,
         Team,
     },

@@ -34,9 +34,9 @@ fn tackle_does_accuracy_checks() {
     let turn1 = backend.process_turn("Tackle", "Tackle");
     let turn2 = backend.process_turn("Tackle", "Tackle");
 
-    assert_event!(turn1[1], Miss { target: 1, move_user: 0 });
-    assert_event!(turn1[3], Miss { target: 0, move_user: 1 });
-    assert_event!(turn2[1], Miss { target: 1, move_user: 0 });
+    assert_event!(turn1[1], Miss { target: 1, move_user: 0, .. });
+    assert_event!(turn1[3], Miss { target: 0, move_user: 1, .. });
+    assert_event!(turn2[1], Miss { target: 1, move_user: 0, .. });
     assert_event!(turn2[3], Damage { target: 0, .. });
     assert_eq!(test_rng!(backend.rng).get_last_miss_check_chance(), Some(100));
 }

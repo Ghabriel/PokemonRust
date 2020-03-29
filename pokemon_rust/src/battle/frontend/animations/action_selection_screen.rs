@@ -2,7 +2,7 @@ use amethyst::input::{InputEvent, StringBindings};
 
 use crate::{
     audio::Sound,
-    battle::backend::{rng::StandardBattleRng, BattleBackend},
+    battle::backend::BattleBackend,
     constants::AXIS_SENSITIVITY,
 };
 
