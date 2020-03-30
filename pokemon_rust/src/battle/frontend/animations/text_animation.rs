@@ -5,7 +5,7 @@ use amethyst::{
 
 use crate::{
     audio::Sound,
-    battle::backend::{BattleBackend, rng::StandardBattleRng},
+    battle::backend::BattleBackend,
     text::{advance_text, create_text_box, delete_text_box, TextState},
 };
 
@@ -19,7 +19,7 @@ pub enum TextAnimation {
 impl FrontendAnimation for TextAnimation {
     fn start(
         &mut self,
-        _backend: &BattleBackend<StandardBattleRng>,
+        _backend: &BattleBackend,
         system_data: &mut BattleSystemData,
     ) {
         if let TextAnimation::PendingStart { text } = self {
@@ -51,7 +51,7 @@ impl FrontendAnimation for TextAnimation {
     fn tick(
         &mut self,
         input_events: Vec<InputEvent<StringBindings>>,
-        _backend: &BattleBackend<StandardBattleRng>,
+        _backend: &BattleBackend,
         system_data: &mut BattleSystemData,
     ) -> TickResult {
         if let TextAnimation::Started { text_box_entity } = self {

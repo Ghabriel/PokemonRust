@@ -25,6 +25,7 @@ mod scratch;
 mod slam;
 mod slash;
 mod strength;
+mod supersonic;
 mod swift;
 mod tackle;
 mod tailwhip;

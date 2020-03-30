@@ -20,9 +20,21 @@ pub mod prelude {
     pub use crate::{
         battle::{
             backend::{
-                event::{ChangeTurn, Damage, Faint, InitialSwitchIn, Miss, StatChange},
+                event::{
+                    ChangeTurn,
+                    Damage,
+                    ExpiredVolatileStatusCondition,
+                    FailedMove,
+                    Faint,
+                    InitialSwitchIn,
+                    Miss,
+                    StatChange,
+                    VolatileStatusCondition,
+                },
                 BattleBackend,
+                Flag,
             },
+            tests::TestRng,
             types::{Battle, BattleCharacterTeam, BattleType, Party},
         },
         pokemon::{
@@ -35,12 +47,11 @@ pub mod prelude {
     };
 
     use crate::{
-        battle::tests::TestRng,
         overworld::entities::character::CharacterId,
         pokemon::Pokemon,
     };
 
-    pub fn create_simple_wild_battle(p1: Pokemon, p2: Pokemon) -> BattleBackend<TestRng> {
+    pub fn create_simple_wild_battle(p1: Pokemon, p2: Pokemon) -> BattleBackend {
         BattleBackend::new(
             Battle::new(
                 BattleType::Single,
@@ -59,11 +70,11 @@ pub mod prelude {
                     character_id: None,
                 },
             ),
-            TestRng::default(),
+            Box::new(TestRng::default()),
         )
     }
 
-    pub fn create_simple_trainer_battle(p1: Pokemon, p2: Pokemon) -> BattleBackend<TestRng> {
+    pub fn create_simple_trainer_battle(p1: Pokemon, p2: Pokemon) -> BattleBackend {
         BattleBackend::new(
             Battle::new(
                 BattleType::Single,
@@ -82,7 +93,7 @@ pub mod prelude {
                     character_id: Some(CharacterId(2)),
                 },
             ),
-            TestRng::default(),
+            Box::new(TestRng::default()),
         )
     }
 }
@@ -93,7 +104,7 @@ trait TestMethods {
     fn process_turn(&mut self, p1_move: &str, p2_move: &str) -> Vec<BattleEvent>;
 }
 
-impl<Rng: BattleRng + Clone + 'static> TestMethods for BattleBackend<Rng> {
+impl TestMethods for BattleBackend {
     fn move_p1(&mut self, index: usize) {
         self.push_frontend_event(FrontendEvent {
             team: Team::P1,
@@ -150,6 +161,8 @@ pub struct TestRng {
     last_secondary_effect_check_chance: Option<usize>,
     uniform_multi_hit_value: Option<usize>,
     custom_multi_hit_value: Option<isize>,
+    confusion_duration: Option<usize>,
+    confusion_miss_counter: usize,
 }
 
 impl TestRng {
@@ -168,9 +181,21 @@ impl TestRng {
     pub fn force_custom_multi_hit_value(&mut self, value: isize) {
         self.custom_multi_hit_value = Some(value);
     }
+
+    pub fn force_confusion_duration(&mut self, duration: usize) {
+        self.confusion_duration = Some(duration);
+    }
+
+    pub fn force_confusion_miss(&mut self, times: usize) {
+        self.confusion_miss_counter = times;
+    }
 }
 
 impl BattleRng for TestRng {
+    fn boxed_clone(&self) -> Box<dyn BattleRng + Sync + Send> {
+        Box::new(self.clone())
+    }
+
     fn get_damage_modifier(&mut self) -> f32 {
         1.
     }
@@ -205,6 +230,19 @@ impl BattleRng for TestRng {
         match self.custom_multi_hit_value {
             Some(value) => value,
             None => highest,
+        }
+    }
+
+    fn get_confusion_duration(&mut self) -> usize {
+        self.confusion_duration.unwrap_or(4)
+    }
+
+    fn check_confusion_miss(&mut self) -> bool {
+        if self.confusion_miss_counter > 0 {
+            self.confusion_miss_counter -= 1;
+            true
+        } else {
+            false
         }
     }
 }

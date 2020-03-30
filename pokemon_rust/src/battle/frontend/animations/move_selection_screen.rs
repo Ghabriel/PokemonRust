@@ -3,7 +3,6 @@ use amethyst::input::{InputEvent, StringBindings};
 use crate::{
     audio::Sound,
     battle::backend::{
-        rng::StandardBattleRng,
         BattleBackend,
         FrontendEvent,
         FrontendEventKind,
@@ -42,7 +41,7 @@ impl MoveSelectionScreen {
 impl FrontendAnimation for MoveSelectionScreen {
     fn start(
         &mut self,
-        _backend: &BattleBackend<StandardBattleRng>,
+        _backend: &BattleBackend,
         system_data: &mut BattleSystemData,
     ) {
         *self = MoveSelectionScreen::Started {
@@ -62,7 +61,7 @@ impl FrontendAnimation for MoveSelectionScreen {
     fn tick(
         &mut self,
         input_events: Vec<InputEvent<StringBindings>>,
-        _backend: &BattleBackend<StandardBattleRng>,
+        _backend: &BattleBackend,
         system_data: &mut BattleSystemData,
     ) -> TickResult {
         for event in input_events {

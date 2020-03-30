@@ -8,7 +8,6 @@ use amethyst::{
 use crate::{
     battle::backend::{
         event::InitialSwitchIn,
-        rng::StandardBattleRng,
         BattleBackend,
         Team,
     },
@@ -85,7 +84,7 @@ pub enum InitialSwitchInAnimation {
 impl FrontendAnimation for InitialSwitchInAnimation {
     fn start(
         &mut self,
-        backend: &BattleBackend<StandardBattleRng>,
+        backend: &BattleBackend,
         system_data: &mut BattleSystemData,
     ) {
         if let InitialSwitchInAnimation::PendingStart { event_data } = self {
@@ -135,7 +134,7 @@ impl FrontendAnimation for InitialSwitchInAnimation {
     fn tick(
         &mut self,
         _input_events: Vec<InputEvent<StringBindings>>,
-        _backend: &BattleBackend<StandardBattleRng>,
+        _backend: &BattleBackend,
         system_data: &mut BattleSystemData,
     ) -> TickResult {
         if let InitialSwitchInAnimation::Started {

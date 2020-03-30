@@ -156,3 +156,36 @@ fn considers_stat_stages_on_damage_calculation() {
         _ => panic!("Pattern mismatch"),
     }
 }
+
+#[test]
+fn causes_random_misses_when_confused() {
+    let mut backend = battle! {
+        "Butterfree" 4 (max ivs, Serious) vs "Caterpie" 4 (max ivs, Serious)
+    };
+
+    test_rng_mut!(backend.rng).force_confusion_miss(2);
+    let turn1 = backend.process_turn("Supersonic", "Tackle");
+    let turn2 = backend.process_turn("Harden", "Tackle");
+    let turn3 = backend.process_turn("Harden", "Tackle");
+
+    assert_event!(turn1[3], Miss { target: 0, move_user: 1, caused_by_confusion: true, .. });
+    assert_event!(turn2[3], Miss { target: 0, move_user: 1, caused_by_confusion: true, .. });
+    assert_event!(turn3[3], Damage { target: 0, .. });
+}
+
+#[test]
+fn makes_confusion_expire() {
+    let mut backend = battle! {
+        "Butterfree" 4 (max ivs, Serious) vs "Caterpie" 4 (max ivs, Serious)
+    };
+
+    test_rng_mut!(backend.rng).force_confusion_duration(1);
+    backend.process_turn("Supersonic", "Tackle");
+    let events = backend.process_turn("Harden", "Tackle");
+
+    assert_event!(events[2], ExpiredVolatileStatusCondition {
+        target: 1,
+        flag: Flag::Confusion { remaining_move_attempts: 0 },
+        ..
+    });
+}

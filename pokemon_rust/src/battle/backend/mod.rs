@@ -7,6 +7,7 @@ use crate::{
         get_all_pokemon_species,
         movement::{
             ModifiedAccuracy,
+            ModifiedUsageAttempt,
             Move,
             MoveCategory,
             MoveFlag,
@@ -50,11 +51,14 @@ pub enum BattleEvent {
     Damage(event::Damage),
     Miss(event::Miss),
     StatChange(event::StatChange),
+    VolatileStatusCondition(event::VolatileStatusCondition),
+    ExpiredVolatileStatusCondition(event::ExpiredVolatileStatusCondition),
+    FailedMove(event::FailedMove),
     Faint(event::Faint),
 }
 
 pub mod event {
-    use super::{Stat, StatChangeKind, Team, TypeEffectiveness};
+    use super::{Flag, Stat, StatChangeKind, Team, TypeEffectiveness};
 
     /// Corresponds to the very first switch-in of a battle participant in a
     /// battle.
@@ -95,6 +99,7 @@ pub mod event {
     pub struct Miss {
         pub target: usize,
         pub move_user: usize,
+        pub caused_by_confusion: bool,
     }
 
     #[derive(Clone, Debug, Eq, PartialEq)]
@@ -102,6 +107,23 @@ pub mod event {
         pub target: usize,
         pub kind: StatChangeKind,
         pub stat: Stat,
+    }
+
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    pub struct VolatileStatusCondition {
+        pub target: usize,
+        pub added_flag: Flag,
+    }
+
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    pub struct ExpiredVolatileStatusCondition {
+        pub target: usize,
+        pub flag: Flag,
+    }
+
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    pub struct FailedMove {
+        pub move_user: usize,
     }
 
     #[derive(Clone, Debug, Eq, PartialEq)]
@@ -161,7 +183,7 @@ pub struct UsedMove<'a> {
 }
 
 #[derive(Debug)]
-pub struct BattleBackend<Rng: BattleRng> {
+pub struct BattleBackend {
     /// The type of battle that is happening.
     battle_type: BattleType,
     /// The current turn.
@@ -176,7 +198,7 @@ pub struct BattleBackend<Rng: BattleRng> {
     event_queue: Vec<BattleEvent>,
     pub(super) pokemon_repository: HashMap<usize, Pokemon>,
     /// The RNG that this battle is using.
-    pub(super) rng: Rng,
+    pub(super) rng: Box<dyn BattleRng + Sync + Send>,
 }
 
 #[derive(Debug)]
@@ -191,8 +213,9 @@ struct FlagContainer {
     flags: HashMap<&'static str, Flag>,
 }
 
-#[derive(Debug)]
-enum Flag {
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum Flag {
+    Confusion { remaining_move_attempts: usize },
     StatStages(HashMap<Stat, i8>),
 }
 
@@ -201,8 +224,8 @@ struct MultiHitData {
     maximum_number_of_hits: usize,
 }
 
-impl<Rng: BattleRng + Clone + 'static> BattleBackend<Rng> {
-    pub fn new(data: Battle, rng: Rng) -> BattleBackend<Rng> {
+impl BattleBackend {
+    pub fn new(data: Battle, rng: Box<dyn BattleRng + Sync + Send>) -> BattleBackend {
         let mut pokemon_repository = HashMap::new();
         let mut p1 = TeamData {
             active_pokemon: None,
@@ -357,15 +380,59 @@ impl<Rng: BattleRng + Clone + 'static> BattleBackend<Rng> {
             return;
         }
 
+        if let Some(flag) = self.get_flag_mut(used_move.user, "confusion") {
+            let remaining_move_attempts = match flag {
+                Flag::Confusion { remaining_move_attempts } => remaining_move_attempts,
+                _ => unreachable!(),
+            };
+
+            if *remaining_move_attempts > 0 {
+                *remaining_move_attempts -= 1;
+            } else {
+                let flag = flag.clone();
+
+                self.event_queue.push(BattleEvent::ExpiredVolatileStatusCondition(
+                    event::ExpiredVolatileStatusCondition {
+                        target: used_move.user,
+                        flag,
+                    }
+                ));
+
+                self.remove_flag(used_move.user, "confusion");
+            }
+        }
+
         self.event_queue.push(BattleEvent::UseMove(event::UseMove {
             move_user: used_move.user,
             move_name: used_move.movement.display_name.clone(),
         }));
 
+        if let Some(handler) = used_move.movement.on_usage_attempt {
+            let result = handler(self, used_move.user, used_move.target, &used_move.movement);
+            if result == ModifiedUsageAttempt::Fail {
+                self.event_queue.push(BattleEvent::FailedMove(event::FailedMove {
+                    move_user: used_move.user,
+                }));
+                return;
+            }
+        }
+
+        if self.has_flag(used_move.user, "confusion") {
+            if self.rng.check_confusion_miss() {
+                self.event_queue.push(BattleEvent::Miss(event::Miss {
+                    target: used_move.target,
+                    move_user: used_move.user,
+                    caused_by_confusion: true,
+                }));
+                return;
+            }
+        }
+
         if self.check_miss(&used_move) {
             self.event_queue.push(BattleEvent::Miss(event::Miss {
                 target: used_move.target,
                 move_user: used_move.user,
+                caused_by_confusion: false,
             }));
             return;
         }
@@ -378,7 +445,7 @@ impl<Rng: BattleRng + Clone + 'static> BattleBackend<Rng> {
                             self.rng.check_uniform_multi_hit(*min_hits, *max_hits)
                         },
                         MultiHit::Custom(callback) => {
-                            callback(Box::new(self.rng.clone()))
+                            callback(self.rng.boxed_clone())
                         },
                     };
 
@@ -437,6 +504,13 @@ impl<Rng: BattleRng + Clone + 'static> BattleBackend<Rng> {
             }
 
             match &effect.effect {
+                SimpleEffect::Confusion => {
+                    let duration = self.rng.get_confusion_duration();
+
+                    self.add_volatile_status_condition(used_move.target, Flag::Confusion {
+                        remaining_move_attempts: duration,
+                    });
+                },
                 SimpleEffect::StatChange { changes, target } => {
                     let target = match target {
                         SimpleEffectTarget::MoveTarget => used_move.target,
@@ -480,7 +554,7 @@ impl<Rng: BattleRng + Clone + 'static> BattleBackend<Rng> {
     }
 }
 
-impl<Rng: BattleRng> BattleBackend<Rng> {
+impl BattleBackend {
     fn inflict_damage(
         &mut self,
         used_move: &UsedMove,
@@ -545,6 +619,38 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         }
     }
 
+
+    fn add_volatile_status_condition(&mut self, target: usize, flag: Flag) {
+        self.add_flag(target, flag.clone());
+
+        self.event_queue
+            .push(BattleEvent::VolatileStatusCondition(event::VolatileStatusCondition {
+                target,
+                added_flag: flag,
+            }));
+    }
+
+    fn add_flag(&mut self, target: usize, flag: Flag) {
+        let key = match flag {
+            Flag::Confusion { .. } => "confusion",
+            Flag::StatStages(_) => unreachable!(),
+        };
+
+        self.pokemon_flags
+            .get_mut(&target)
+            .unwrap()
+            .flags
+            .insert(key, flag);
+    }
+
+    fn remove_flag(&mut self, target: usize, flag_id: &str) {
+        self.pokemon_flags
+            .get_mut(&target)
+            .unwrap()
+            .flags
+            .remove(flag_id);
+    }
+
     fn change_stat_stage(&mut self, target: usize, stat: Stat, delta: i8) {
         let stat_stages = self
             .pokemon_flags
@@ -576,6 +682,7 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
                     *value = (*value + delta).max(-6).min(6);
                 }
             },
+            _ => unreachable!(),
         }
 
         self.event_queue
@@ -587,7 +694,7 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
     }
 }
 
-impl<Rng: BattleRng> BattleBackend<Rng> {
+impl BattleBackend {
     pub fn get_species(&self, pokemon: usize) -> &PokemonSpeciesData {
         let pokedex = get_all_pokemon_species();
         let species_id = &self.get_pokemon(pokemon).species_id;
@@ -633,6 +740,22 @@ impl<Rng: BattleRng> BattleBackend<Rng> {
         }
 
         unreachable!();
+    }
+
+    pub fn get_flag_mut(&mut self, pokemon: usize, flag_id: &str) -> Option<&mut Flag> {
+        self.pokemon_flags
+            .get_mut(&pokemon)
+            .unwrap()
+            .flags
+            .get_mut(flag_id)
+    }
+
+    pub fn has_flag(&self, pokemon: usize, flag_id: &str) -> bool {
+        self.pokemon_flags
+            .get(&pokemon)
+            .unwrap()
+            .flags
+            .contains_key(flag_id)
     }
 
     fn get_attack_critical_hit(&self, pokemon: usize) -> usize {

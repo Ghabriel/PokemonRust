@@ -1,3 +1,15 @@
+macro_rules! test_rng {
+    ($rng:expr) => {
+        $rng.as_any().downcast_ref::<TestRng>().unwrap()
+    }
+}
+
+macro_rules! test_rng_mut {
+    ($rng:expr) => {
+        $rng.as_any_mut().downcast_mut::<TestRng>().unwrap()
+    }
+}
+
 macro_rules! assert_event {
     ($value:expr, InitialSwitchIn { $($args:tt)* }) => {
         assert_pattern!($value, BattleEvent::InitialSwitchIn(InitialSwitchIn { $($args)* }));
@@ -13,6 +25,23 @@ macro_rules! assert_event {
     };
     ($value:expr, StatChange { $($args:tt)* }) => {
         assert_pattern!($value, BattleEvent::StatChange(StatChange { $($args)* }));
+    };
+    ($value:expr, VolatileStatusCondition { $($args:tt)* }) => {
+        assert_pattern!(
+            $value,
+            BattleEvent::VolatileStatusCondition(VolatileStatusCondition { $($args)* })
+        );
+    };
+    ($value:expr, ExpiredVolatileStatusCondition { $($args:tt)* }) => {
+        assert_pattern!(
+            $value,
+            BattleEvent::ExpiredVolatileStatusCondition(ExpiredVolatileStatusCondition {
+                $($args)*
+            })
+        );
+    };
+    ($value:expr, FailedMove { $($args:tt)* }) => {
+        assert_pattern!($value, BattleEvent::FailedMove(FailedMove { $($args)* }));
     };
     ($value:expr, Faint { $($args:tt)* }) => {
         assert_pattern!($value, BattleEvent::Faint(Faint { $($args)* }));

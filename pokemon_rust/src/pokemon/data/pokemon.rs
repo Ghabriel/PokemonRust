@@ -164,8 +164,8 @@ lazy_static! {
             hidden_abilities: ["RunAway"],
             move_table: [
                 1: "Tackle",
-                1: "StringShot",
-                9: "BugBite",
+                // 1: "StringShot",
+                // 9: "BugBite",
             ],
         });
 
@@ -186,6 +186,43 @@ lazy_static! {
                 1: "Harden",
                 // TODO: learns when evolving
                 // 1: "Harden",
+            ],
+        });
+
+        result.push(species! {
+            id: "Butterfree",
+            display_name: "Butterfree",
+            national_number: 12,
+            types: [PokemonType::Bug, PokemonType::Flying],
+            base_stats: [60, 45, 50, 90, 80, 70],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 178,
+            ev_yield: [0, 0, 0, 2, 1, 0],
+            capture_rate: 45,
+            abilities: ["CompoundEyes"],
+            hidden_abilities: ["TintedLens"],
+            move_table: [
+                1: "Gust",
+                1: "Harden",
+                1: "Tackle",
+                // 1: "StringShot",
+                // 1: "BugBite",
+                // // TODO: learns when evolving
+                // 1: "Gust",
+                4: "Supersonic",
+                // 8: "Confusion",
+                // 12: "PoisonPowder",
+                // 12: "StunSpore",
+                // 12: "SleepPowder",
+                // 16: "Psybeam",
+                // 20: "Whirlwind",
+                // 24: "AirSlash",
+                // 28: "Safeguard",
+                // 32: "BugBuzz",
+                // 36: "TailWind",
+                // 40: "RagePowder",
+                // 44: "QuiverDance",
             ],
         });
 

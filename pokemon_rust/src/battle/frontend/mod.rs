@@ -27,10 +27,20 @@ use crate::{
     audio::SoundKit,
     battle::{
         backend::{
-            event::{Damage, Faint, InitialSwitchIn, Miss, StatChange, UseMove},
+            event::{
+                Damage,
+                ExpiredVolatileStatusCondition,
+                Faint,
+                InitialSwitchIn,
+                Miss,
+                StatChange,
+                UseMove,
+                VolatileStatusCondition,
+            },
             rng::StandardBattleRng,
             BattleBackend,
             BattleEvent,
+            Flag,
             FrontendEvent,
             StatChangeKind,
             Team,
@@ -78,7 +88,7 @@ pub struct BattleSystemData<'a> {
 /// sending signals to the backend whenever an action is taken.
 pub struct BattleSystem {
     event_reader: ReaderId<InputEvent<StringBindings>>,
-    backend: Option<BattleBackend<StandardBattleRng>>,
+    backend: Option<BattleBackend>,
     event_queue: VecDeque<BattleEvent>,
     active_animation_sequence: Option<AnimationSequence>,
     p1_info_card: Option<InfoCard>,
@@ -123,14 +133,14 @@ impl TickResult {
 trait FrontendAnimation {
     fn start(
         &mut self,
-        backend: &BattleBackend<StandardBattleRng>,
+        backend: &BattleBackend,
         system_data: &mut BattleSystemData,
     );
 
     fn tick(
         &mut self,
         input_events: Vec<InputEvent<StringBindings>>,
-        backend: &BattleBackend<StandardBattleRng>,
+        backend: &BattleBackend,
         system_data: &mut BattleSystemData,
     ) -> TickResult;
 }
@@ -169,6 +179,15 @@ impl BattleSystem {
             },
             BattleEvent::StatChange(event_data) => {
                 self.handle_stat_change(event_data);
+            },
+            BattleEvent::VolatileStatusCondition(event_data) => {
+                self.handle_volatile_status_condition(event_data);
+            },
+            BattleEvent::ExpiredVolatileStatusCondition(event_data) => {
+                self.handle_expired_volatile_status_condition(event_data);
+            },
+            BattleEvent::FailedMove(_) => {
+                self.handle_failed_move();
             },
             BattleEvent::Faint(event_data) => {
                 self.handle_faint(event_data);
@@ -282,10 +301,17 @@ impl BattleSystem {
         let pokemon = backend.get_pokemon(event_data.move_user);
         let display_name = get_pokemon_display_name(&pokemon, &pokedex);
 
-        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> =
-            vec![Box::new(TextAnimation::PendingStart {
-                text: format!("{} used {}!", display_name, event_data.move_name),
-            })];
+        let mut animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = Vec::new();
+
+        if backend.has_flag(event_data.move_user, "confusion") {
+            animations.push(Box::new(TextAnimation::PendingStart {
+                text: format!("{} is confused!", display_name),
+            }));
+        }
+
+        animations.push(Box::new(TextAnimation::PendingStart {
+            text: format!("{} used {}!", display_name, event_data.move_name),
+        }));
 
         self.active_animation_sequence = Some(AnimationSequence {
             animations: animations.into(),
@@ -363,10 +389,17 @@ impl BattleSystem {
         let pokemon = backend.get_pokemon(event_data.target);
         let display_name = get_pokemon_display_name(&pokemon, &pokedex);
 
-        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> =
-            vec![Box::new(TextAnimation::PendingStart {
+        let mut animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = Vec::new();
+
+        if event_data.caused_by_confusion {
+            animations.push(Box::new(TextAnimation::PendingStart {
+                text: format!("But its confusion caused it to miss!"),
+            }));
+        } else {
+            animations.push(Box::new(TextAnimation::PendingStart {
                 text: format!("But {} avoided the attack!", display_name),
-            })];
+            }));
+        }
 
         self.active_animation_sequence = Some(AnimationSequence {
             animations: animations.into(),
@@ -409,6 +442,62 @@ impl BattleSystem {
 
         let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> =
             vec![Box::new(TextAnimation::PendingStart { text })];
+
+        self.active_animation_sequence = Some(AnimationSequence {
+            animations: animations.into(),
+        });
+    }
+
+    fn handle_volatile_status_condition(&mut self, event_data: VolatileStatusCondition) {
+        let pokedex = get_all_pokemon_species();
+        let backend = self.backend.as_mut().unwrap();
+        let pokemon = backend.get_pokemon(event_data.target);
+        let display_name = get_pokemon_display_name(&pokemon, &pokedex);
+        let mut animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = Vec::new();
+
+        match event_data.added_flag {
+            Flag::Confusion { .. } => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} became confused!", display_name),
+                }));
+            },
+            Flag::StatStages(_) => unreachable!(),
+        }
+
+        self.active_animation_sequence = Some(AnimationSequence {
+            animations: animations.into(),
+        });
+    }
+
+    fn handle_expired_volatile_status_condition(
+        &mut self,
+        event_data: ExpiredVolatileStatusCondition,
+    ) {
+        let pokedex = get_all_pokemon_species();
+        let backend = self.backend.as_mut().unwrap();
+        let pokemon = backend.get_pokemon(event_data.target);
+        let display_name = get_pokemon_display_name(&pokemon, &pokedex);
+        let mut animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = Vec::new();
+
+        match event_data.flag {
+            Flag::Confusion { .. } => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} snapped out of its confusion!", display_name),
+                }));
+            },
+            Flag::StatStages(_) => unreachable!(),
+        }
+
+        self.active_animation_sequence = Some(AnimationSequence {
+            animations: animations.into(),
+        });
+    }
+
+    fn handle_failed_move(&mut self) {
+        let animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> =
+            vec![Box::new(TextAnimation::PendingStart {
+                text: "But it failed!".to_string(),
+            })];
 
         self.active_animation_sequence = Some(AnimationSequence {
             animations: animations.into(),
@@ -468,7 +557,7 @@ impl<'a> System<'a> for BattleSystem {
                     None => {
                         let mut backend = BattleBackend::new(
                             system_data.battle.clone(),
-                            StandardBattleRng::default(),
+                            Box::new(StandardBattleRng::default()),
                         );
 
                         self.event_queue.extend(backend.tick());
