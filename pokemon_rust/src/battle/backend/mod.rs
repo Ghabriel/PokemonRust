@@ -52,6 +52,7 @@ pub enum BattleEvent {
     Miss(event::Miss),
     StatChange(event::StatChange),
     VolatileStatusCondition(event::VolatileStatusCondition),
+    ExpiredVolatileStatusCondition(event::ExpiredVolatileStatusCondition),
     FailedMove(event::FailedMove),
     Faint(event::Faint),
 }
@@ -112,6 +113,12 @@ pub mod event {
     pub struct VolatileStatusCondition {
         pub target: usize,
         pub added_flag: Flag,
+    }
+
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    pub struct ExpiredVolatileStatusCondition {
+        pub target: usize,
+        pub flag: Flag,
     }
 
     #[derive(Clone, Debug, Eq, PartialEq)]
@@ -208,7 +215,7 @@ struct FlagContainer {
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Flag {
-    Confusion,
+    Confusion { remaining_move_attempts: usize },
     StatStages(HashMap<Stat, i8>),
 }
 
@@ -373,6 +380,28 @@ impl BattleBackend {
             return;
         }
 
+        if let Some(flag) = self.get_flag_mut(used_move.user, "confusion") {
+            let remaining_move_attempts = match flag {
+                Flag::Confusion { remaining_move_attempts } => remaining_move_attempts,
+                _ => unreachable!(),
+            };
+
+            if *remaining_move_attempts > 0 {
+                *remaining_move_attempts -= 1;
+            } else {
+                let flag = flag.clone();
+
+                self.event_queue.push(BattleEvent::ExpiredVolatileStatusCondition(
+                    event::ExpiredVolatileStatusCondition {
+                        target: used_move.user,
+                        flag,
+                    }
+                ));
+
+                self.remove_flag(used_move.user, "confusion");
+            }
+        }
+
         self.event_queue.push(BattleEvent::UseMove(event::UseMove {
             move_user: used_move.user,
             move_name: used_move.movement.display_name.clone(),
@@ -476,7 +505,11 @@ impl BattleBackend {
 
             match &effect.effect {
                 SimpleEffect::Confusion => {
-                    self.add_volatile_status_condition(used_move.target, Flag::Confusion)
+                    let duration = self.rng.get_confusion_duration();
+
+                    self.add_volatile_status_condition(used_move.target, Flag::Confusion {
+                        remaining_move_attempts: duration,
+                    });
                 },
                 SimpleEffect::StatChange { changes, target } => {
                     let target = match target {
@@ -599,7 +632,7 @@ impl BattleBackend {
 
     fn add_flag(&mut self, target: usize, flag: Flag) {
         let key = match flag {
-            Flag::Confusion => "confusion",
+            Flag::Confusion { .. } => "confusion",
             Flag::StatStages(_) => unreachable!(),
         };
 
@@ -608,6 +641,14 @@ impl BattleBackend {
             .unwrap()
             .flags
             .insert(key, flag);
+    }
+
+    fn remove_flag(&mut self, target: usize, flag_id: &str) {
+        self.pokemon_flags
+            .get_mut(&target)
+            .unwrap()
+            .flags
+            .remove(flag_id);
     }
 
     fn change_stat_stage(&mut self, target: usize, stat: Stat, delta: i8) {
@@ -699,6 +740,14 @@ impl BattleBackend {
         }
 
         unreachable!();
+    }
+
+    pub fn get_flag_mut(&mut self, pokemon: usize, flag_id: &str) -> Option<&mut Flag> {
+        self.pokemon_flags
+            .get_mut(&pokemon)
+            .unwrap()
+            .flags
+            .get_mut(flag_id)
     }
 
     pub fn has_flag(&self, pokemon: usize, flag_id: &str) -> bool {

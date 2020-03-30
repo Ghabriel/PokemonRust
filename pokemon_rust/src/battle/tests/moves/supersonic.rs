@@ -10,7 +10,7 @@ fn supersonic_causes_confusion() {
 
     let events = backend.process_turn("Supersonic", "Harden");
 
-    assert_event!(events[1], VolatileStatusCondition { target: 1, added_flag: Flag::Confusion });
+    assert_event!(events[1], VolatileStatusCondition { target: 1, added_flag: Flag::Confusion { .. } });
     assert!(backend.has_flag(1, "confusion"));
 }
 

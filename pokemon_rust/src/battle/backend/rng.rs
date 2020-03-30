@@ -48,6 +48,9 @@ pub trait BattleRng: Debug + Downcast {
     /// number of hits of a custom multi-hit move.
     fn check_custom_multi_hit(&mut self, lowest: isize, highest: isize) -> isize;
 
+    /// Returns the number of turns that a confusion will last.
+    fn get_confusion_duration(&mut self) -> usize;
+
     /// Tests for a confusion miss (50% chance).
     fn check_confusion_miss(&mut self) -> bool;
 }
@@ -96,6 +99,10 @@ impl BattleRng for StandardBattleRng {
 
     fn check_custom_multi_hit(&mut self, lowest: isize, highest: isize) -> isize {
         self.rand(lowest, highest)
+    }
+
+    fn get_confusion_duration(&mut self) -> usize {
+        self.rand_unsigned(1, 4)
     }
 
     fn check_confusion_miss(&mut self) -> bool {

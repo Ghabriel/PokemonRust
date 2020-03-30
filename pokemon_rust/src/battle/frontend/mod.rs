@@ -29,6 +29,7 @@ use crate::{
         backend::{
             event::{
                 Damage,
+                ExpiredVolatileStatusCondition,
                 Faint,
                 InitialSwitchIn,
                 Miss,
@@ -181,6 +182,9 @@ impl BattleSystem {
             },
             BattleEvent::VolatileStatusCondition(event_data) => {
                 self.handle_volatile_status_condition(event_data);
+            },
+            BattleEvent::ExpiredVolatileStatusCondition(event_data) => {
+                self.handle_expired_volatile_status_condition(event_data);
             },
             BattleEvent::FailedMove(_) => {
                 self.handle_failed_move();
@@ -452,9 +456,33 @@ impl BattleSystem {
         let mut animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = Vec::new();
 
         match event_data.added_flag {
-            Flag::Confusion => {
+            Flag::Confusion { .. } => {
                 animations.push(Box::new(TextAnimation::PendingStart {
-                    text: format!("{} is confused!", display_name),
+                    text: format!("{} became confused!", display_name),
+                }));
+            },
+            Flag::StatStages(_) => unreachable!(),
+        }
+
+        self.active_animation_sequence = Some(AnimationSequence {
+            animations: animations.into(),
+        });
+    }
+
+    fn handle_expired_volatile_status_condition(
+        &mut self,
+        event_data: ExpiredVolatileStatusCondition,
+    ) {
+        let pokedex = get_all_pokemon_species();
+        let backend = self.backend.as_mut().unwrap();
+        let pokemon = backend.get_pokemon(event_data.target);
+        let display_name = get_pokemon_display_name(&pokemon, &pokedex);
+        let mut animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = Vec::new();
+
+        match event_data.flag {
+            Flag::Confusion { .. } => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} snapped out of its confusion!", display_name),
                 }));
             },
             Flag::StatStages(_) => unreachable!(),

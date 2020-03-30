@@ -23,6 +23,7 @@ pub mod prelude {
                 event::{
                     ChangeTurn,
                     Damage,
+                    ExpiredVolatileStatusCondition,
                     FailedMove,
                     Faint,
                     InitialSwitchIn,
@@ -160,6 +161,7 @@ pub struct TestRng {
     last_secondary_effect_check_chance: Option<usize>,
     uniform_multi_hit_value: Option<usize>,
     custom_multi_hit_value: Option<isize>,
+    confusion_duration: Option<usize>,
     confusion_miss_counter: usize,
 }
 
@@ -178,6 +180,10 @@ impl TestRng {
 
     pub fn force_custom_multi_hit_value(&mut self, value: isize) {
         self.custom_multi_hit_value = Some(value);
+    }
+
+    pub fn force_confusion_duration(&mut self, duration: usize) {
+        self.confusion_duration = Some(duration);
     }
 
     pub fn force_confusion_miss(&mut self, times: usize) {
@@ -225,6 +231,10 @@ impl BattleRng for TestRng {
             Some(value) => value,
             None => highest,
         }
+    }
+
+    fn get_confusion_duration(&mut self) -> usize {
+        self.confusion_duration.unwrap_or(4)
     }
 
     fn check_confusion_miss(&mut self) -> bool {
