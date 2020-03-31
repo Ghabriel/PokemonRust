@@ -2,6 +2,7 @@ mod bite;
 mod comet_punch;
 mod crab_hammer;
 mod cut;
+mod double_kick;
 mod double_slap;
 mod drill_peck;
 mod egg_bomb;
