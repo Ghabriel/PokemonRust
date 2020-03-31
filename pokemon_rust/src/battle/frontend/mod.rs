@@ -461,6 +461,11 @@ impl BattleSystem {
                     text: format!("{} became confused!", display_name),
                 }));
             },
+            Flag::Flinch => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} flinched!", display_name),
+                }));
+            },
             Flag::StatStages(_) => unreachable!(),
         }
 
@@ -485,6 +490,7 @@ impl BattleSystem {
                     text: format!("{} snapped out of its confusion!", display_name),
                 }));
             },
+            Flag::Flinch => unreachable!(),
             Flag::StatStages(_) => unreachable!(),
         }
 

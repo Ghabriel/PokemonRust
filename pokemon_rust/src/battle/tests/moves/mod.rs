@@ -22,6 +22,7 @@ mod peck;
 mod pound;
 mod quick_attack;
 mod razor_leaf;
+mod rock_slide;
 mod rock_throw;
 mod scratch;
 mod slam;

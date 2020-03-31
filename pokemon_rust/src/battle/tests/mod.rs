@@ -29,6 +29,7 @@ pub mod prelude {
                     InitialSwitchIn,
                     Miss,
                     StatChange,
+                    UseMove,
                     VolatileStatusCondition,
                 },
                 BattleBackend,
@@ -159,6 +160,7 @@ pub struct TestRng {
     miss_counter: usize,
     last_miss_check_chance: Option<usize>,
     last_secondary_effect_check_chance: Option<usize>,
+    secondary_effect_counter: usize,
     uniform_multi_hit_value: Option<usize>,
     custom_multi_hit_value: Option<isize>,
     confusion_duration: Option<usize>,
@@ -172,6 +174,14 @@ impl TestRng {
 
     pub fn get_last_miss_check_chance(&self) -> Option<usize> {
         self.last_miss_check_chance
+    }
+
+    pub fn get_last_secondary_effect_check_chance(&self) -> Option<usize> {
+        self.last_secondary_effect_check_chance
+    }
+
+    pub fn force_secondary_effect(&mut self, times: usize) {
+        self.secondary_effect_counter = times;
     }
 
     pub fn force_uniform_multi_hit_value(&mut self, value: usize) {
@@ -216,7 +226,12 @@ impl BattleRng for TestRng {
     fn check_secondary_effect(&mut self, chance: usize) -> bool {
         self.last_secondary_effect_check_chance = Some(chance);
 
-        chance == 100
+        if self.secondary_effect_counter > 0 {
+            self.secondary_effect_counter -= 1;
+            true
+        } else {
+            chance == 100
+        }
     }
 
     fn check_uniform_multi_hit(&mut self, lowest: usize, highest: usize) -> usize {

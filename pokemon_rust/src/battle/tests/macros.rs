@@ -17,6 +17,9 @@ macro_rules! assert_event {
     ($value:expr, ChangeTurn { $($args:tt)* }) => {
         assert_pattern!($value, BattleEvent::ChangeTurn(ChangeTurn { $($args)* }));
     };
+    ($value:expr, UseMove { $($args:tt)* }) => {
+        assert_pattern!($value, BattleEvent::UseMove(UseMove { $($args)* }));
+    };
     ($value:expr, Damage { $($args:tt)* }) => {
         assert_pattern!($value, BattleEvent::Damage(Damage { $($args)* }));
     };

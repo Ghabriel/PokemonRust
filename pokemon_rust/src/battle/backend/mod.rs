@@ -216,6 +216,7 @@ struct FlagContainer {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub enum Flag {
     Confusion { remaining_move_attempts: usize },
+    Flinch,
     StatStages(HashMap<Stat, i8>),
 }
 
@@ -380,6 +381,10 @@ impl BattleBackend {
             return;
         }
 
+        if self.has_flag(used_move.user, "flinch") {
+            return;
+        }
+
         if let Some(flag) = self.get_flag_mut(used_move.user, "confusion") {
             let remaining_move_attempts = match flag {
                 Flag::Confusion { remaining_move_attempts } => remaining_move_attempts,
@@ -511,6 +516,9 @@ impl BattleBackend {
                         remaining_move_attempts: duration,
                     });
                 },
+                SimpleEffect::Flinch => {
+                    self.add_volatile_status_condition(used_move.target, Flag::Flinch);
+                },
                 SimpleEffect::StatChange { changes, target } => {
                     let target = match target {
                         SimpleEffectTarget::MoveTarget => used_move.target,
@@ -527,11 +535,23 @@ impl BattleBackend {
     }
 
     fn next_turn(&mut self) {
+        self.process_turn_end_events();
+
         self.turn += 1;
         self.event_queue
             .push(BattleEvent::ChangeTurn(event::ChangeTurn {
                 new_turn: self.turn,
             }));
+    }
+
+    fn process_turn_end_events(&mut self) {
+        if let Some(index) = self.p1.active_pokemon {
+            self.remove_flag(index, "flinch");
+        }
+
+        if let Some(index) = self.p2.active_pokemon {
+            self.remove_flag(index, "flinch");
+        }
     }
 
     fn decompose_input_events(&mut self) -> (FrontendEventKind, FrontendEventKind) {
@@ -633,6 +653,7 @@ impl BattleBackend {
     fn add_flag(&mut self, target: usize, flag: Flag) {
         let key = match flag {
             Flag::Confusion { .. } => "confusion",
+            Flag::Flinch => "flinch",
             Flag::StatStages(_) => unreachable!(),
         };
 

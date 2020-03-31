@@ -467,7 +467,7 @@ lazy_static! {
                 // 8: "RockPolish",
                 // 12: "DragonBreath",
                 // 16: "Curse",
-                // 20: "RockSlide",
+                20: "RockSlide",
                 // 24: "Screech",
                 // 28: "SandTomb",
                 // 32: "StealthRock",

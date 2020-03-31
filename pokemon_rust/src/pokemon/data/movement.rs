@@ -572,6 +572,29 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "RockSlide".to_string(),
+            display_name: "Rock Slide".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Rock,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(75),
+            power_modifier: None,
+            accuracy: Some(90),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 10,
+            priority: 0,
+            target_type: TargetType::AllAdjacentFoes,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 30,
+                effect: SimpleEffect::Flinch,
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "RockThrow".to_string(),
             display_name: "Rock Throw".to_string(),
             description: "".to_string(), // TODO
