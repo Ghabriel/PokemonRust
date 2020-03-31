@@ -589,6 +589,7 @@ lazy_static! {
             abilities: ["KeenEye", "IronFist"],
             hidden_abilities: ["InnerFocus"],
             move_table: [
+                1: "CometPunch",
                 // 1: "DrainPunch",
                 // 1: "Feint",
                 // 1: "VacuumWave",
