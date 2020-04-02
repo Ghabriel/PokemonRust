@@ -1,4 +1,5 @@
 mod bite;
+mod bubble;
 mod comet_punch;
 mod crab_hammer;
 mod cut;

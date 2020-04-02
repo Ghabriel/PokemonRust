@@ -851,7 +851,7 @@ impl BattleBackend {
         if stage >= 0. {
             (2. + stage) / 2.
         } else {
-            2. / (2. + stage)
+            2. / (2. - stage)
         }
     }
 
@@ -861,7 +861,7 @@ impl BattleBackend {
         if stage >= 0. {
             (3. + stage) / 3.
         } else {
-            3. / (3. + stage)
+            3. / (3. - stage)
         }
     }
 

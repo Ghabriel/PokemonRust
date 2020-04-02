@@ -138,6 +138,7 @@ lazy_static! {
                 // 6: "Withdraw",
                 // 9: "RapidSpin",
                 // 12: "Bite",
+                13: "Bubble",
                 // 15: "WaterPulse",
                 // 18: "Protect",
                 // 21: "RainDance",

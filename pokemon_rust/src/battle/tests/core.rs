@@ -151,7 +151,7 @@ fn considers_stat_stages_on_damage_calculation() {
             BattleEvent::Damage(Damage { amount: a1, .. }),
             BattleEvent::Damage(Damage { amount: a2, .. }),
         ) => {
-            assert_eq!(*a2, ((*a1 as f32) * 2. / 3.) as usize);
+            assert_eq!(*a1, ((*a2 as f32) * 2. / 3.) as usize);
         },
         _ => panic!("Pattern mismatch"),
     }
