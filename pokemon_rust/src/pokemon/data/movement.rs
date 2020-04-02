@@ -53,8 +53,10 @@ lazy_static! {
             priority: 0,
             target_type: TargetType::SingleAdjacentTarget,
             multi_hit: None,
-            // TODO: 30% flinch
-            secondary_effect: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 30,
+                effect: SimpleEffect::Flinch,
+            }),
             critical_hit: false,
         });
 
