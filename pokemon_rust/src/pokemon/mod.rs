@@ -12,7 +12,11 @@ use std::{
     time::SystemTime,
 };
 
-pub use self::data::{movement::get_all_moves, pokemon::get_all_pokemon_species};
+pub use self::data::{
+    movement::get_all_moves,
+    pokemon::get_all_pokemon_species,
+    status_conditions::{get_status_condition_effect, StatusConditionEffect},
+};
 
 /// Type effectiveness table. Every number is doubled (e.g 0.5x effectiveness
 /// is stored as 1) so that we don't need to store floats.
@@ -202,6 +206,16 @@ pub enum StatusCondition {
     Poison,
     Toxic { counter: usize },
     Sleep { remaining_turns: usize },
+}
+
+#[derive(Eq, Hash, PartialEq)]
+pub enum SimpleStatusCondition {
+    Burn,
+    Freeze,
+    Paralysis,
+    Poison,
+    Toxic,
+    Sleep,
 }
 
 #[derive(Clone, Debug)]
