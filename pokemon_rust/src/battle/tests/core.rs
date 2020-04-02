@@ -189,3 +189,14 @@ fn makes_confusion_expire() {
         ..
     });
 }
+
+#[test]
+fn deals_damage_to_burned_pokemon() {
+    let mut backend = battle! {
+        "Hitmonchan" 24 (max ivs, Serious) vs "Krabby" 24 (max ivs, Serious)
+    };
+
+    test_rng_mut!(backend.rng).force_secondary_effect(1);
+    let events = backend.process_turn("FirePunch", "Harden");
+    assert_event!(events[5], Damage { target: 1, .. });
+}

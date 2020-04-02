@@ -607,7 +607,7 @@ lazy_static! {
                 // 21: "QuickGuard",
                 // 24: "ThunderPunch",
                 // 24: "IcePunch",
-                // 24: "FirePunch",
+                24: "FirePunch",
                 // 28: "Agility",
                 32: "MegaPunch",
                 // 36: "CloseCombat",

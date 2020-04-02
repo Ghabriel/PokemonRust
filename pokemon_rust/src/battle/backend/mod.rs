@@ -20,6 +20,7 @@ use crate::{
         PokemonSpeciesData,
         PokemonType,
         Stat,
+        StatusCondition,
     },
 };
 
@@ -53,12 +54,13 @@ pub enum BattleEvent {
     StatChange(event::StatChange),
     VolatileStatusCondition(event::VolatileStatusCondition),
     ExpiredVolatileStatusCondition(event::ExpiredVolatileStatusCondition),
+    NonVolatileStatusCondition(event::NonVolatileStatusCondition),
     FailedMove(event::FailedMove),
     Faint(event::Faint),
 }
 
 pub mod event {
-    use super::{Flag, Stat, StatChangeKind, Team, TypeEffectiveness};
+    use super::{Flag, Stat, StatChangeKind, StatusCondition, Team, TypeEffectiveness};
 
     /// Corresponds to the very first switch-in of a battle participant in a
     /// battle.
@@ -119,6 +121,12 @@ pub mod event {
     pub struct ExpiredVolatileStatusCondition {
         pub target: usize,
         pub flag: Flag,
+    }
+
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    pub struct NonVolatileStatusCondition {
+        pub target: usize,
+        pub condition: StatusCondition,
     }
 
     #[derive(Clone, Debug, Eq, PartialEq)]
@@ -529,6 +537,9 @@ impl BattleBackend {
                         self.change_stat_stage(target, *stat, *delta);
                     }
                 },
+                SimpleEffect::StatusCondition(status_condition) => {
+                    self.add_non_volatile_status_condition(used_move.target, *status_condition);
+                },
                 _ => todo!(),
             }
         }
@@ -547,6 +558,9 @@ impl BattleBackend {
     fn process_turn_end_events(&mut self) {
         if let Some(index) = self.p1.active_pokemon {
             self.remove_flag(index, "flinch");
+
+            let pokemon = self.get_pokemon_mut(index);
+            // if
         }
 
         if let Some(index) = self.p2.active_pokemon {
@@ -650,6 +664,22 @@ impl BattleBackend {
             }));
     }
 
+    fn add_non_volatile_status_condition(&mut self, target: usize, condition: StatusCondition) {
+        let target_pokemon = self.get_pokemon_mut(target);
+
+        if target_pokemon.status_condition == None {
+            target_pokemon.status_condition = Some(condition);
+
+            self.event_queue
+                .push(BattleEvent::NonVolatileStatusCondition(
+                    event::NonVolatileStatusCondition {
+                        target,
+                        condition,
+                    },
+                ));
+        }
+    }
+
     fn add_flag(&mut self, target: usize, flag: Flag) {
         let key = match flag {
             Flag::Confusion { .. } => "confusion",
@@ -725,6 +755,10 @@ impl BattleBackend {
 
     pub fn get_pokemon(&self, pokemon: usize) -> &Pokemon {
         &self.pokemon_repository[&pokemon]
+    }
+
+    pub fn get_pokemon_mut(&mut self, pokemon: usize) -> &mut Pokemon {
+        self.pokemon_repository.get_mut(&pokemon).unwrap()
     }
 
     pub fn get_active_pokemon(&self, team: Team) -> impl Iterator<Item = &Pokemon> + '_ {

@@ -194,7 +194,7 @@ pub enum Gender {
     Genderless,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum StatusCondition {
     Burn,
     Freeze,
