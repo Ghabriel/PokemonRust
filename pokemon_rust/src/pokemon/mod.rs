@@ -218,6 +218,19 @@ pub enum SimpleStatusCondition {
     Sleep,
 }
 
+impl From<StatusCondition> for SimpleStatusCondition {
+    fn from(condition: StatusCondition) -> SimpleStatusCondition {
+        match condition {
+            StatusCondition::Burn => SimpleStatusCondition::Burn,
+            StatusCondition::Freeze => SimpleStatusCondition::Freeze,
+            StatusCondition::Paralysis => SimpleStatusCondition::Paralysis,
+            StatusCondition::Poison => SimpleStatusCondition::Poison,
+            StatusCondition::Toxic { .. } => SimpleStatusCondition::Toxic,
+            StatusCondition::Sleep { .. } => SimpleStatusCondition::Sleep,
+        }
+    }
+}
+
 #[derive(Clone, Debug)]
 pub enum PokerusData {
     Unaffected,

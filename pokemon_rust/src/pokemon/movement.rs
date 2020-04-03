@@ -46,7 +46,7 @@ pub struct Move {
     pub critical_hit: bool,
 }
 
-#[derive(Clone, Copy, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum MoveCategory {
     Physical,
     Special,

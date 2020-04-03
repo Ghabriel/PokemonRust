@@ -10,13 +10,11 @@ use crate::{
     },
 };
 
-use std::{
-    collections::HashMap,
-    fmt::{Debug, Error, Formatter},
-};
+use std::fmt::{Debug, Error, Formatter};
 
+#[derive(Clone)]
 pub struct StatusConditionEffect {
-    on_try_deal_damage: fn(
+    pub on_try_deal_damage: fn(
         backend: &BattleBackend,
         user: usize,
         target: usize,
@@ -24,7 +22,7 @@ pub struct StatusConditionEffect {
         damage_dealt: usize,
     ) -> usize,
 
-    on_turn_end: fn(backend: &mut BattleBackend, target: usize),
+    pub on_turn_end: fn(backend: &mut BattleBackend, target: usize),
 }
 
 impl Debug for StatusConditionEffect {
@@ -38,7 +36,7 @@ pub fn get_status_condition_effect(
 ) -> StatusConditionEffect {
     match status_condition {
         SimpleStatusCondition::Burn => StatusConditionEffect {
-            on_try_deal_damage: |backend, _user, _target, mov, damage_dealt| {
+            on_try_deal_damage: |_backend, _user, _target, mov, damage_dealt| {
                 if mov.category == MoveCategory::Physical {
                     damage_dealt / 2
                 } else {

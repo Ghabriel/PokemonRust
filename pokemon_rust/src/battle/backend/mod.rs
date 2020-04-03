@@ -562,10 +562,28 @@ impl BattleBackend {
     fn process_turn_end_events(&mut self) {
         if let Some(index) = self.p1.active_pokemon {
             self.remove_flag(index, "flinch");
+
+            self.active_effects
+                .get(&index)
+                .unwrap_or(&Vec::new())
+                .clone()
+                .iter()
+                .for_each(|effect| {
+                    (effect.on_turn_end)(self, index);
+                });
         }
 
         if let Some(index) = self.p2.active_pokemon {
             self.remove_flag(index, "flinch");
+
+            self.active_effects
+                .get(&index)
+                .unwrap_or(&Vec::new())
+                .clone()
+                .iter()
+                .for_each(|effect| {
+                    (effect.on_turn_end)(self, index);
+                });
         }
     }
 
@@ -610,7 +628,21 @@ impl BattleBackend {
         };
 
         let target = self.pokemon_repository.get_mut(&used_move.target).unwrap();
-        let damage = damage.unwrap_or(target.current_hp);
+        let mut damage = damage.unwrap_or(target.current_hp);
+
+        self.active_effects
+            .get(&used_move.user)
+            .unwrap_or(&Vec::new())
+            .iter()
+            .for_each(|effect| {
+                damage = (effect.on_try_deal_damage)(
+                    &self,
+                    used_move.user,
+                    used_move.target,
+                    &used_move.movement,
+                    damage
+                );
+            });
 
         self.inflict_calculated_damage(
             used_move.target,
@@ -690,6 +722,15 @@ impl BattleBackend {
 
         if target_pokemon.status_condition == None {
             target_pokemon.status_condition = Some(condition);
+
+            if !self.active_effects.contains_key(&target) {
+                self.active_effects.insert(target, Vec::new());
+            }
+
+            self.active_effects
+                .get_mut(&target)
+                .unwrap()
+                .push(get_status_condition_effect(condition.into()));
 
             self.event_queue
                 .push(BattleEvent::NonVolatileStatusCondition(

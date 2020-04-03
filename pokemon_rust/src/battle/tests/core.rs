@@ -200,3 +200,24 @@ fn deals_damage_to_burned_pokemon() {
     let events = backend.process_turn("FirePunch", "Harden");
     assert_event!(events[5], Damage { target: 1, .. });
 }
+
+#[test]
+fn halves_physical_damage_of_burned_pokemon() {
+    let mut backend = battle! {
+        "Hitmonchan" 36 (max ivs, Serious) vs "Krabby" 36 (max ivs, Serious)
+    };
+
+    let turn1 = backend.process_turn("FirePunch", "Slam");
+    test_rng_mut!(backend.rng).force_secondary_effect(1);
+    let turn2 = backend.process_turn("FirePunch", "Slam");
+
+    match (&turn1[3], &turn2[4]) {
+        (
+            BattleEvent::Damage(Damage { amount: a1, .. }),
+            BattleEvent::Damage(Damage { amount: a2, .. }),
+        ) => {
+            assert_eq!(*a2, *a1 / 2);
+        },
+        _ => panic!("Pattern mismatch"),
+    }
+}
