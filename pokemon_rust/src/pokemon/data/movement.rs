@@ -15,6 +15,7 @@ use crate::pokemon::{
     },
     PokemonType,
     Stat,
+    StatusCondition,
 };
 
 use lazy_static::lazy_static;
@@ -246,6 +247,29 @@ lazy_static! {
             target_type: TargetType::SingleAdjacentTarget,
             multi_hit: None,
             secondary_effect: None,
+            critical_hit: false,
+        });
+
+        result.push(Move {
+            id: "FirePunch".to_string(),
+            display_name: "Fire Punch".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Fire,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(75),
+            power_modifier: None,
+            accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 15,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 10,
+                effect: SimpleEffect::StatusCondition(StatusCondition::Burn),
+            }),
             critical_hit: false,
         });
 

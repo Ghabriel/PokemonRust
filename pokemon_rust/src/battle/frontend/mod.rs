@@ -33,6 +33,7 @@ use crate::{
                 Faint,
                 InitialSwitchIn,
                 Miss,
+                NonVolatileStatusCondition,
                 StatChange,
                 UseMove,
                 VolatileStatusCondition,
@@ -50,7 +51,7 @@ use crate::{
     },
     common::CommonResources,
     config::GameConfig,
-    pokemon::{get_all_pokemon_species, get_pokemon_display_name, Stat},
+    pokemon::{get_all_pokemon_species, get_pokemon_display_name, Stat, StatusCondition},
     text::TextBox,
 };
 
@@ -185,6 +186,9 @@ impl BattleSystem {
             },
             BattleEvent::ExpiredVolatileStatusCondition(event_data) => {
                 self.handle_expired_volatile_status_condition(event_data);
+            },
+            BattleEvent::NonVolatileStatusCondition(event_data) => {
+                self.handle_non_volatile_status_condition(event_data);
             },
             BattleEvent::FailedMove(_) => {
                 self.handle_failed_move();
@@ -492,6 +496,27 @@ impl BattleSystem {
             },
             Flag::Flinch => unreachable!(),
             Flag::StatStages(_) => unreachable!(),
+        }
+
+        self.active_animation_sequence = Some(AnimationSequence {
+            animations: animations.into(),
+        });
+    }
+
+    fn handle_non_volatile_status_condition(&mut self, event_data: NonVolatileStatusCondition) {
+        let pokedex = get_all_pokemon_species();
+        let backend = self.backend.as_mut().unwrap();
+        let pokemon = backend.get_pokemon(event_data.target);
+        let display_name = get_pokemon_display_name(&pokemon, &pokedex);
+        let mut animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = Vec::new();
+
+        match event_data.condition {
+            StatusCondition::Burn => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} got a burn!", display_name),
+                }));
+            },
+            _ => todo!(),
         }
 
         self.active_animation_sequence = Some(AnimationSequence {

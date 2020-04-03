@@ -5,6 +5,7 @@ use crate::{
     pokemon::{
         get_all_moves,
         get_all_pokemon_species,
+        get_status_condition_effect,
         movement::{
             ModifiedAccuracy,
             ModifiedUsageAttempt,
@@ -20,6 +21,8 @@ use crate::{
         PokemonSpeciesData,
         PokemonType,
         Stat,
+        StatusCondition,
+        StatusConditionEffect,
     },
 };
 
@@ -53,12 +56,13 @@ pub enum BattleEvent {
     StatChange(event::StatChange),
     VolatileStatusCondition(event::VolatileStatusCondition),
     ExpiredVolatileStatusCondition(event::ExpiredVolatileStatusCondition),
+    NonVolatileStatusCondition(event::NonVolatileStatusCondition),
     FailedMove(event::FailedMove),
     Faint(event::Faint),
 }
 
 pub mod event {
-    use super::{Flag, Stat, StatChangeKind, Team, TypeEffectiveness};
+    use super::{Flag, Stat, StatChangeKind, StatusCondition, Team, TypeEffectiveness};
 
     /// Corresponds to the very first switch-in of a battle participant in a
     /// battle.
@@ -119,6 +123,12 @@ pub mod event {
     pub struct ExpiredVolatileStatusCondition {
         pub target: usize,
         pub flag: Flag,
+    }
+
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    pub struct NonVolatileStatusCondition {
+        pub target: usize,
+        pub condition: StatusCondition,
     }
 
     #[derive(Clone, Debug, Eq, PartialEq)]
@@ -194,6 +204,7 @@ pub struct BattleBackend {
     /// The Pokémon that make up the second team.
     pub(super) p2: TeamData,
     pokemon_flags: HashMap<usize, FlagContainer>,
+    active_effects: HashMap<usize, Vec<StatusConditionEffect>>,
     input_events: VecDeque<FrontendEvent>,
     event_queue: Vec<BattleEvent>,
     pub(super) pokemon_repository: HashMap<usize, Pokemon>,
@@ -220,7 +231,7 @@ pub enum Flag {
     StatStages(HashMap<Stat, i8>),
 }
 
-struct MultiHitData {
+pub struct MultiHitData {
     multi_hit_index: usize,
     maximum_number_of_hits: usize,
 }
@@ -259,6 +270,7 @@ impl BattleBackend {
             turn: 0,
             p1,
             p2,
+            active_effects: HashMap::new(),
             input_events: VecDeque::new(),
             event_queue: Vec::new(),
             pokemon_repository,
@@ -529,6 +541,9 @@ impl BattleBackend {
                         self.change_stat_stage(target, *stat, *delta);
                     }
                 },
+                SimpleEffect::StatusCondition(status_condition) => {
+                    self.add_non_volatile_status_condition(used_move.target, *status_condition);
+                },
                 _ => todo!(),
             }
         }
@@ -547,10 +562,28 @@ impl BattleBackend {
     fn process_turn_end_events(&mut self) {
         if let Some(index) = self.p1.active_pokemon {
             self.remove_flag(index, "flinch");
+
+            self.active_effects
+                .get(&index)
+                .unwrap_or(&Vec::new())
+                .clone()
+                .iter()
+                .for_each(|effect| {
+                    (effect.on_turn_end)(self, index);
+                });
         }
 
         if let Some(index) = self.p2.active_pokemon {
             self.remove_flag(index, "flinch");
+
+            self.active_effects
+                .get(&index)
+                .unwrap_or(&Vec::new())
+                .clone()
+                .iter()
+                .for_each(|effect| {
+                    (effect.on_turn_end)(self, index);
+                });
         }
     }
 
@@ -595,14 +628,49 @@ impl BattleBackend {
         };
 
         let target = self.pokemon_repository.get_mut(&used_move.target).unwrap();
-        let damage = damage.unwrap_or(target.current_hp);
-        target.current_hp = target.current_hp.saturating_sub(damage);
+        let mut damage = damage.unwrap_or(target.current_hp);
+
+        self.active_effects
+            .get(&used_move.user)
+            .unwrap_or(&Vec::new())
+            .iter()
+            .for_each(|effect| {
+                damage = (effect.on_try_deal_damage)(
+                    &self,
+                    used_move.user,
+                    used_move.target,
+                    &used_move.movement,
+                    damage
+                );
+            });
+
+        self.inflict_calculated_damage(
+            used_move.target,
+            damage,
+            TypeEffectiveness::from(effectiveness),
+            is_critical_hit,
+            multi_hit_data,
+            is_ohko,
+        )
+    }
+
+    pub fn inflict_calculated_damage(
+        &mut self,
+        target: usize,
+        damage: usize,
+        effectiveness: TypeEffectiveness,
+        is_critical_hit: bool,
+        multi_hit_data: Option<MultiHitData>,
+        is_ohko: bool,
+    ) {
+        let target_pokemon = self.pokemon_repository.get_mut(&target).unwrap();
+        target_pokemon.current_hp = target_pokemon.current_hp.saturating_sub(damage);
 
         let (multi_hit_index, is_last_multi_hit_damage) = match multi_hit_data {
             Some(data) => {
                 let is_last_multi_hit_damage =
                     data.multi_hit_index == data.maximum_number_of_hits - 1
-                    || target.current_hp == 0;
+                    || target_pokemon.current_hp == 0;
 
                 (Some(data.multi_hit_index), is_last_multi_hit_damage)
             },
@@ -610,9 +678,9 @@ impl BattleBackend {
         };
 
         self.event_queue.push(BattleEvent::Damage(event::Damage {
-            target: used_move.target,
+            target,
             amount: damage,
-            effectiveness: TypeEffectiveness::from(effectiveness),
+            effectiveness,
             is_critical_hit,
             multi_hit_index,
             is_last_multi_hit_damage,
@@ -621,24 +689,23 @@ impl BattleBackend {
 
         // TODO: trigger effects like Static
 
-        if target.current_hp == 0 {
-            match self.get_pokemon_team(used_move.target) {
+        if target_pokemon.current_hp == 0 {
+            match self.get_pokemon_team(target) {
                 Team::P1 => {
                     self.p1.active_pokemon = None;
-                    self.p1.party.push_front(used_move.target);
+                    self.p1.party.push_front(target);
                 },
                 Team::P2 => {
                     self.p2.active_pokemon = None;
-                    self.p2.party.push_front(used_move.target);
+                    self.p2.party.push_front(target);
                 },
             }
 
             self.event_queue.push(BattleEvent::Faint(event::Faint {
-                target: used_move.target,
+                target,
             }));
         }
     }
-
 
     fn add_volatile_status_condition(&mut self, target: usize, flag: Flag) {
         self.add_flag(target, flag.clone());
@@ -648,6 +715,31 @@ impl BattleBackend {
                 target,
                 added_flag: flag,
             }));
+    }
+
+    fn add_non_volatile_status_condition(&mut self, target: usize, condition: StatusCondition) {
+        let target_pokemon = self.get_pokemon_mut(target);
+
+        if target_pokemon.status_condition == None {
+            target_pokemon.status_condition = Some(condition);
+
+            if !self.active_effects.contains_key(&target) {
+                self.active_effects.insert(target, Vec::new());
+            }
+
+            self.active_effects
+                .get_mut(&target)
+                .unwrap()
+                .push(get_status_condition_effect(condition.into()));
+
+            self.event_queue
+                .push(BattleEvent::NonVolatileStatusCondition(
+                    event::NonVolatileStatusCondition {
+                        target,
+                        condition,
+                    },
+                ));
+        }
     }
 
     fn add_flag(&mut self, target: usize, flag: Flag) {
@@ -725,6 +817,10 @@ impl BattleBackend {
 
     pub fn get_pokemon(&self, pokemon: usize) -> &Pokemon {
         &self.pokemon_repository[&pokemon]
+    }
+
+    pub fn get_pokemon_mut(&mut self, pokemon: usize) -> &mut Pokemon {
+        self.pokemon_repository.get_mut(&pokemon).unwrap()
     }
 
     pub fn get_active_pokemon(&self, team: Team) -> impl Iterator<Item = &Pokemon> + '_ {
@@ -816,7 +912,7 @@ impl BattleBackend {
     }
 
     /// Returns the effective value of a stat.
-    fn get_stat(&self, pokemon: usize, stat: Stat) -> usize {
+    pub fn get_stat(&self, pokemon: usize, stat: Stat) -> usize {
         // TODO: take other factors into account
         let stat_stage = self.get_stat_stage(pokemon, stat);
         let multiplier = self.get_stat_stage_multiplier(stat_stage);
