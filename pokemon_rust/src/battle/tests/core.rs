@@ -221,3 +221,14 @@ fn halves_physical_damage_of_burned_pokemon() {
         _ => panic!("Pattern mismatch"),
     }
 }
+
+#[test]
+fn deals_damage_to_poisoned_pokemon() {
+    let mut backend = battle! {
+        "Weedle" 5 (max ivs, Serious) vs "Metapod" 5 (max ivs, Serious)
+    };
+
+    test_rng_mut!(backend.rng).force_secondary_effect(1);
+    let events = backend.process_turn("PoisonSting", "Harden");
+    assert_event!(events[5], Damage { target: 1, .. });
+}

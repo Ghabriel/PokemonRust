@@ -14,15 +14,15 @@ use std::fmt::{Debug, Error, Formatter};
 
 #[derive(Clone)]
 pub struct StatusConditionEffect {
-    pub on_try_deal_damage: fn(
+    pub on_try_deal_damage: Option<fn(
         backend: &BattleBackend,
         user: usize,
         target: usize,
         mov: &Move,
         damage_dealt: usize,
-    ) -> usize,
+    ) -> usize>,
 
-    pub on_turn_end: fn(backend: &mut BattleBackend, target: usize),
+    pub on_turn_end: Option<fn(backend: &mut BattleBackend, target: usize)>,
 }
 
 impl Debug for StatusConditionEffect {
@@ -36,14 +36,14 @@ pub fn get_status_condition_effect(
 ) -> StatusConditionEffect {
     match status_condition {
         SimpleStatusCondition::Burn => StatusConditionEffect {
-            on_try_deal_damage: |_backend, _user, _target, mov, damage_dealt| {
+            on_try_deal_damage: Some(|_backend, _user, _target, mov, damage_dealt| {
                 if mov.category == MoveCategory::Physical {
                     damage_dealt / 2
                 } else {
                     damage_dealt
                 }
-            },
-            on_turn_end: |backend, target| {
+            }),
+            on_turn_end: Some(|backend, target| {
                 let max_hp = backend.get_stat(target, Stat::HP) as f32;
                 let damage = (max_hp / 16.).ceil() as usize;
 
@@ -55,7 +55,23 @@ pub fn get_status_condition_effect(
                     None,
                     false,
                 );
-            }
+            }),
+        },
+        SimpleStatusCondition::Poison => StatusConditionEffect {
+            on_try_deal_damage: None,
+            on_turn_end: Some(|backend, target| {
+                let max_hp = backend.get_stat(target, Stat::HP) as f32;
+                let damage = (max_hp / 8.).ceil() as usize;
+
+                backend.inflict_calculated_damage(
+                    target,
+                    damage,
+                    TypeEffectiveness::Normal,
+                    false,
+                    None,
+                    false,
+                );
+            }),
         },
         _ => todo!(),
     }

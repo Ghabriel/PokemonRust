@@ -564,6 +564,29 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "PoisonSting".to_string(),
+            display_name: "Poison Sting".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Poison,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(15),
+            power_modifier: None,
+            accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 35,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 30,
+                effect: SimpleEffect::StatusCondition(StatusCondition::Poison),
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "Pound".to_string(),
             display_name: "Pound".to_string(),
             description: "".to_string(), // TODO

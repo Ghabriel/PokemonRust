@@ -21,6 +21,7 @@ mod mach_punch;
 mod mega_kick;
 mod mega_punch;
 mod peck;
+mod poison_sting;
 mod pound;
 mod quick_attack;
 mod razor_leaf;

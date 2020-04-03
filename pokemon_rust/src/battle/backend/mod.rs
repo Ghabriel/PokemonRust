@@ -568,8 +568,9 @@ impl BattleBackend {
                 .unwrap_or(&Vec::new())
                 .clone()
                 .iter()
+                .filter_map(|effect| effect.on_turn_end)
                 .for_each(|effect| {
-                    (effect.on_turn_end)(self, index);
+                    effect(self, index);
                 });
         }
 
@@ -581,8 +582,9 @@ impl BattleBackend {
                 .unwrap_or(&Vec::new())
                 .clone()
                 .iter()
+                .filter_map(|effect| effect.on_turn_end)
                 .for_each(|effect| {
-                    (effect.on_turn_end)(self, index);
+                    effect(self, index);
                 });
         }
     }
@@ -634,8 +636,9 @@ impl BattleBackend {
             .get(&used_move.user)
             .unwrap_or(&Vec::new())
             .iter()
+            .filter_map(|effect| effect.on_try_deal_damage)
             .for_each(|effect| {
-                damage = (effect.on_try_deal_damage)(
+                damage = effect(
                     &self,
                     used_move.user,
                     used_move.target,

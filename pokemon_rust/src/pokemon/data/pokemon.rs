@@ -228,6 +228,25 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Weedle",
+            display_name: "Weedle",
+            national_number: 13,
+            types: [PokemonType::Bug, PokemonType::Poison],
+            base_stats: [40, 35, 30, 20, 20, 50],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 39,
+            ev_yield: [0, 0, 0, 0, 0, 1],
+            capture_rate: 255,
+            abilities: ["ShieldDust"],
+            hidden_abilities: ["RunAway"],
+            move_table: [
+                1: "PoisonSting",
+                // 1: "StringShot",
+            ],
+        });
+
+        result.push(species! {
             id: "Pidgey",
             display_name: "Pidgey",
             national_number: 16,
