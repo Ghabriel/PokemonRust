@@ -53,6 +53,9 @@ pub trait BattleRng: Debug + Downcast {
 
     /// Tests for a confusion miss (50% chance).
     fn check_confusion_miss(&mut self) -> bool;
+
+    /// Tests for a paralysis move prevention (25% chance).
+    fn check_paralysis_move_prevention(&mut self) -> bool;
 }
 
 #[derive(Clone, Debug, Default)]
@@ -107,5 +110,9 @@ impl BattleRng for StandardBattleRng {
 
     fn check_confusion_miss(&mut self) -> bool {
         self.roll(50)
+    }
+
+    fn check_paralysis_move_prevention(&mut self) -> bool {
+        self.roll(25)
     }
 }

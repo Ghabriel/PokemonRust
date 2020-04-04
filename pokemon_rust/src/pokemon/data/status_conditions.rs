@@ -2,6 +2,7 @@ use crate::{
     battle::backend::{BattleBackend, TypeEffectiveness},
     pokemon::{
         movement::{
+            ModifiedUsageAttempt,
             Move,
             MoveCategory,
         },
@@ -14,6 +15,23 @@ use std::fmt::{Debug, Error, Formatter};
 
 #[derive(Clone)]
 pub struct StatusConditionEffect {
+    /// Called when backend.get_stat() is called, receiving the value that it
+    /// is about to return.
+    pub on_stat_calculation: Option<fn(
+        backend: &BattleBackend,
+        target: usize,
+        stat: Stat,
+        value: usize,
+    ) -> usize>,
+
+    /// Called when the target tries to use a move.
+    pub on_try_use_move: Option<fn(
+        backend: &mut BattleBackend,
+        target: usize,
+        mov: &Move,
+    ) -> ModifiedUsageAttempt>,
+
+    /// Called when a move is used and its damage is about to be dealt.
     pub on_try_deal_damage: Option<fn(
         backend: &BattleBackend,
         user: usize,
@@ -22,6 +40,7 @@ pub struct StatusConditionEffect {
         damage_dealt: usize,
     ) -> usize>,
 
+    /// Called when the turn ends.
     pub on_turn_end: Option<fn(backend: &mut BattleBackend, target: usize)>,
 }
 
@@ -36,6 +55,8 @@ pub fn get_status_condition_effect(
 ) -> StatusConditionEffect {
     match status_condition {
         SimpleStatusCondition::Burn => StatusConditionEffect {
+            on_stat_calculation: None,
+            on_try_use_move: None,
             on_try_deal_damage: Some(|_backend, _user, _target, mov, damage_dealt| {
                 if mov.category == MoveCategory::Physical {
                     damage_dealt / 2
@@ -58,6 +79,8 @@ pub fn get_status_condition_effect(
             }),
         },
         SimpleStatusCondition::Poison => StatusConditionEffect {
+            on_stat_calculation: None,
+            on_try_use_move: None,
             on_try_deal_damage: None,
             on_turn_end: Some(|backend, target| {
                 let max_hp = backend.get_stat(target, Stat::HP) as f32;
@@ -72,6 +95,24 @@ pub fn get_status_condition_effect(
                     false,
                 );
             }),
+        },
+        SimpleStatusCondition::Paralysis => StatusConditionEffect {
+            on_stat_calculation: Some(|_backend, _target, stat, value| {
+                if stat == Stat::Speed {
+                    value / 2
+                } else {
+                    value
+                }
+            }),
+            on_try_use_move: Some(|backend, _target, _mov| {
+                if backend.check_paralysis_move_prevention() {
+                    ModifiedUsageAttempt::Fail
+                } else {
+                    ModifiedUsageAttempt::Continue
+                }
+            }),
+            on_try_deal_damage: None,
+            on_turn_end: None,
         },
         _ => todo!(),
     }

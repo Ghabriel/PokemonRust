@@ -424,6 +424,20 @@ impl BattleBackend {
             move_name: used_move.movement.display_name.clone(),
         }));
 
+        let active_effects = self.active_effects
+            .get(&used_move.user)
+            .unwrap_or(&Vec::new())
+            .clone();
+
+        for effect in active_effects.iter().filter_map(|effect| effect.on_try_use_move) {
+            if effect(self, used_move.user, &used_move.movement) == ModifiedUsageAttempt::Fail {
+                self.event_queue.push(BattleEvent::FailedMove(event::FailedMove {
+                    move_user: used_move.user,
+                }));
+                return;
+            }
+        }
+
         if let Some(handler) = used_move.movement.on_usage_attempt {
             let result = handler(self, used_move.user, used_move.target, &used_move.movement);
             if result == ModifiedUsageAttempt::Fail {
@@ -916,12 +930,23 @@ impl BattleBackend {
 
     /// Returns the effective value of a stat.
     pub fn get_stat(&self, pokemon: usize, stat: Stat) -> usize {
-        // TODO: take other factors into account
         let stat_stage = self.get_stat_stage(pokemon, stat);
         let multiplier = self.get_stat_stage_multiplier(stat_stage);
         let pure_stat = self.get_pure_stat(pokemon, stat);
 
-        (multiplier * pure_stat as f32) as usize
+        let mut result = (multiplier * pure_stat as f32) as usize;
+
+        self.active_effects
+            .get(&pokemon)
+            .unwrap_or(&Vec::new())
+            .clone()
+            .iter()
+            .filter_map(|effect| effect.on_stat_calculation)
+            .for_each(|effect| {
+                result = effect(self, pokemon, stat, result);
+            });
+
+        result
     }
 
     /// Returns the value of a stat without considering stat stages and other
@@ -1084,6 +1109,10 @@ impl BattleBackend {
                 self.rng.check_miss(chance as usize)
             },
         }
+    }
+
+    pub fn check_paralysis_move_prevention(&mut self) -> bool {
+        self.rng.check_paralysis_move_prevention()
     }
 
     fn is_fainted(&self, pokemon: usize) -> bool {

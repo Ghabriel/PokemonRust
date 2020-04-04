@@ -1,4 +1,4 @@
-use crate::battle::backend::{BattleEvent, Team, TypeEffectiveness};
+use crate::battle::backend::{BattleEvent, StatChangeKind, Team, TypeEffectiveness};
 
 use super::{prelude::*, TestMethods};
 
@@ -231,4 +231,35 @@ fn deals_damage_to_poisoned_pokemon() {
     test_rng_mut!(backend.rng).force_secondary_effect(1);
     let events = backend.process_turn("PoisonSting", "Harden");
     assert_event!(events[5], Damage { target: 1, .. });
+}
+
+#[test]
+fn might_prevent_moves_of_paralyzed_pokemon() {
+    let mut backend = battle! {
+        "Hitmonchan" 24 (max ivs, Serious) vs "Metapod" 24 (max ivs, Serious)
+    };
+
+    test_rng_mut!(backend.rng).force_secondary_effect(1);
+    test_rng_mut!(backend.rng).force_paralysis_move_prevention(1);
+    let turn1 = backend.process_turn("ThunderPunch", "Harden");
+    assert_event!(turn1[4], FailedMove { move_user: 1, .. });
+
+    let turn2 = backend.process_turn("ThunderPunch", "Harden");
+    assert_event!(turn2[3], StatChange { target: 1, kind: StatChangeKind::Rose, stat: Stat::Defense });
+}
+
+#[test]
+fn halves_speed_of_paralyzed_pokemon() {
+    let mut backend = battle! {
+        "Hitmonchan" 24 (max ivs, Serious) vs "Metapod" 24 (max ivs, Serious)
+    };
+
+    let base_speed = backend.get_stat(1, Stat::Speed);
+
+    test_rng_mut!(backend.rng).force_secondary_effect(1);
+    backend.process_turn("ThunderPunch", "Harden");
+
+    let new_speed = backend.get_stat(1, Stat::Speed);
+
+    assert_eq!(new_speed, base_speed / 2);
 }

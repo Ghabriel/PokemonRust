@@ -165,6 +165,7 @@ pub struct TestRng {
     custom_multi_hit_value: Option<isize>,
     confusion_duration: Option<usize>,
     confusion_miss_counter: usize,
+    paralysis_move_prevention_counter: usize,
 }
 
 impl TestRng {
@@ -198,6 +199,10 @@ impl TestRng {
 
     pub fn force_confusion_miss(&mut self, times: usize) {
         self.confusion_miss_counter = times;
+    }
+
+    pub fn force_paralysis_move_prevention(&mut self, times: usize) {
+        self.paralysis_move_prevention_counter = times;
     }
 }
 
@@ -255,6 +260,15 @@ impl BattleRng for TestRng {
     fn check_confusion_miss(&mut self) -> bool {
         if self.confusion_miss_counter > 0 {
             self.confusion_miss_counter -= 1;
+            true
+        } else {
+            false
+        }
+    }
+
+    fn check_paralysis_move_prevention(&mut self) -> bool {
+        if self.paralysis_move_prevention_counter > 0 {
+            self.paralysis_move_prevention_counter -= 1;
             true
         } else {
             false

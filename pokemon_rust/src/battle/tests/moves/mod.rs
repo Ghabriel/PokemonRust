@@ -35,6 +35,7 @@ mod supersonic;
 mod swift;
 mod tackle;
 mod tailwhip;
+mod thunder_punch;
 mod vine_whip;
 mod vise_grip;
 mod water_gun;
