@@ -434,6 +434,40 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Slowpoke",
+            display_name: "Slowpoke",
+            national_number: 79,
+            types: [PokemonType::Water, PokemonType::Psychic],
+            base_stats: [90, 65, 65, 40, 40, 15],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 63,
+            ev_yield: [1, 0, 0, 0, 0, 0],
+            capture_rate: 190,
+            abilities: ["Oblivious", "OwnTempo"],
+            hidden_abilities: ["Regenerator"],
+            move_table: [
+                1: "Tackle",
+                // 1: "Curse",
+                3: "Growl",
+                6: "WaterGun",
+                // 9: "Yawn",
+                // 12: "Confusion",
+                // 15: "Disable",
+                // 18: "WaterPulse",
+                21: "Headbutt",
+                // 24: "ZenHeadbutt",
+                // 27: "Amnesia",
+                // 30: "Surf",
+                // 33: "SlackOff",
+                // 36: "Psychic",
+                // 39: "PsychUp",
+                // 42: "RainDance",
+                // 45: "HealPulse",
+            ],
+        });
+
+        result.push(species! {
             id: "Farfetchd",
             display_name: "Farfetch'd",
             national_number: 83,
