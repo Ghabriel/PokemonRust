@@ -331,6 +331,43 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Pikachu",
+            display_name: "Pikachu",
+            national_number: 25,
+            types: [PokemonType::Electric],
+            base_stats: [35, 55, 40, 50, 50, 90],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 112,
+            ev_yield: [0, 0, 0, 0, 0, 2],
+            capture_rate: 190,
+            abilities: ["Static"],
+            hidden_abilities: ["LightningRod"],
+            move_table: [
+                // 1: "PlayNice",
+                // 1: "SweetKiss",
+                // 1: "Nuzzle",
+                // 1: "NastyPlot",
+                // 1: "Charm",
+                // 1: "ThunderShock",
+                1: "TailWhip",
+                1: "Growl",
+                1: "QuickAttack",
+                // 4: "ThunderWave",
+                // 8: "DoubleTeam",
+                // 12: "ElectroBall",
+                // 16: "Feint",
+                // 20: "Spark",
+                // 24: "Agility",
+                // 28: "Slam",
+                // 32: "Discharge",
+                36: "Thunderbolt",
+                // 40: "LightScreen",
+                // 44: "Thunder",
+            ],
+        });
+
+        result.push(species! {
             id: "Clefairy",
             display_name: "Clefairy",
             national_number: 35,

@@ -888,6 +888,29 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "Thunderbolt".to_string(),
+            display_name: "Thunderbolt".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Electric,
+            category: MoveCategory::Special,
+            base_power: MovePower::Constant(90),
+            power_modifier: None,
+            accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 15,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 10,
+                effect: SimpleEffect::StatusCondition(StatusCondition::Paralysis),
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "ThunderPunch".to_string(),
             display_name: "Thunder Punch".to_string(),
             description: "".to_string(), // TODO
