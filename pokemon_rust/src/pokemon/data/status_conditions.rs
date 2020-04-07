@@ -1,5 +1,5 @@
 use crate::{
-    battle::backend::{BattleBackend, TypeEffectiveness},
+    battle::backend::{BattleBackend, DamageCause, TypeEffectiveness},
     pokemon::{
         movement::{
             ModifiedUsageAttempt,
@@ -75,6 +75,7 @@ pub fn get_status_condition_effect(
                     false,
                     None,
                     false,
+                    DamageCause::Burn,
                 );
             }),
         },
@@ -93,6 +94,7 @@ pub fn get_status_condition_effect(
                     false,
                     None,
                     false,
+                    DamageCause::Poison,
                 );
             }),
         },

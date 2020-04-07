@@ -62,7 +62,7 @@ pub enum BattleEvent {
 }
 
 pub mod event {
-    use super::{Flag, Stat, StatChangeKind, StatusCondition, Team, TypeEffectiveness};
+    use super::{DamageCause, Flag, Stat, StatChangeKind, StatusCondition, Team, TypeEffectiveness};
 
     /// Corresponds to the very first switch-in of a battle participant in a
     /// battle.
@@ -97,6 +97,7 @@ pub mod event {
         pub multi_hit_index: Option<usize>,
         pub is_last_multi_hit_damage: bool,
         pub is_ohko: bool,
+        pub cause: DamageCause,
     }
 
     #[derive(Clone, Debug, Eq, PartialEq)]
@@ -140,6 +141,13 @@ pub mod event {
     pub struct Faint {
         pub target: usize,
     }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub enum DamageCause {
+    Move,
+    Burn,
+    Poison,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
@@ -668,6 +676,7 @@ impl BattleBackend {
             is_critical_hit,
             multi_hit_data,
             is_ohko,
+            DamageCause::Move,
         )
     }
 
@@ -679,6 +688,7 @@ impl BattleBackend {
         is_critical_hit: bool,
         multi_hit_data: Option<MultiHitData>,
         is_ohko: bool,
+        cause: DamageCause,
     ) {
         let target_pokemon = self.pokemon_repository.get_mut(&target).unwrap();
         target_pokemon.current_hp = target_pokemon.current_hp.saturating_sub(damage);
@@ -702,6 +712,7 @@ impl BattleBackend {
             multi_hit_index,
             is_last_multi_hit_damage,
             is_ohko,
+            cause,
         }));
 
         // TODO: trigger effects like Static

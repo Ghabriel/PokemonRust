@@ -41,6 +41,7 @@ use crate::{
             rng::StandardBattleRng,
             BattleBackend,
             BattleEvent,
+            DamageCause,
             Flag,
             FrontendEvent,
             StatChangeKind,
@@ -328,6 +329,21 @@ impl BattleSystem {
         let pokedex = get_all_pokemon_species();
         let backend = self.backend.as_mut().unwrap();
         let pokemon = backend.get_pokemon(event_data.target);
+        let display_name = get_pokemon_display_name(&pokemon, &pokedex);
+
+        match event_data.cause {
+            DamageCause::Move => {},
+            DamageCause::Burn => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} is hurt by its burn!", display_name),
+                }));
+            },
+            DamageCause::Poison => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} is hurt by its poison!", display_name),
+                }));
+            },
+        }
 
         let info_card = match backend.get_pokemon_team(event_data.target) {
             Team::P1 => self.p1_info_card.as_mut().unwrap(),
@@ -339,8 +355,6 @@ impl BattleSystem {
         {
             let effectiveness_text = match event_data.effectiveness {
                 TypeEffectiveness::Immune => {
-                    let display_name = get_pokemon_display_name(&pokemon, &pokedex);
-
                     Some(format!("It doesn't affect {}...", display_name))
                 },
                 TypeEffectiveness::BarelyEffective => Some("It's barely effective...".to_string()),
