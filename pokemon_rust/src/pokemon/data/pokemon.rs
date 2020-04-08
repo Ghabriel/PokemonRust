@@ -349,7 +349,7 @@ lazy_static! {
                 // 1: "Nuzzle",
                 // 1: "NastyPlot",
                 // 1: "Charm",
-                // 1: "ThunderShock",
+                1: "ThunderShock",
                 1: "TailWhip",
                 1: "Growl",
                 1: "QuickAttack",

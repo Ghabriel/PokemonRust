@@ -38,6 +38,7 @@ mod tackle;
 mod tailwhip;
 mod thunderbolt;
 mod thunder_punch;
+mod thunder_shock;
 mod vine_whip;
 mod vise_grip;
 mod water_gun;
