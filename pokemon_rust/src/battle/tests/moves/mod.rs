@@ -18,6 +18,7 @@ mod headbutt;
 mod horn_attack;
 mod horn_drill;
 mod hydro_pump;
+mod ice_punch;
 mod karate_chop;
 mod mach_punch;
 mod mega_kick;

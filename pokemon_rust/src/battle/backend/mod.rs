@@ -20,6 +20,7 @@ use crate::{
         Pokemon,
         PokemonSpeciesData,
         PokemonType,
+        SimpleStatusCondition,
         Stat,
         StatusCondition,
         StatusConditionEffect,
@@ -57,12 +58,22 @@ pub enum BattleEvent {
     VolatileStatusCondition(event::VolatileStatusCondition),
     ExpiredVolatileStatusCondition(event::ExpiredVolatileStatusCondition),
     NonVolatileStatusCondition(event::NonVolatileStatusCondition),
+    ExpiredNonVolatileStatusCondition(event::ExpiredNonVolatileStatusCondition),
     FailedMove(event::FailedMove),
     Faint(event::Faint),
 }
 
 pub mod event {
-    use super::{DamageCause, Flag, Stat, StatChangeKind, StatusCondition, Team, TypeEffectiveness};
+    use super::{
+        DamageCause,
+        Flag,
+        SimpleStatusCondition,
+        Stat,
+        StatChangeKind,
+        StatusCondition,
+        Team,
+        TypeEffectiveness,
+    };
 
     /// Corresponds to the very first switch-in of a battle participant in a
     /// battle.
@@ -130,6 +141,12 @@ pub mod event {
     pub struct NonVolatileStatusCondition {
         pub target: usize,
         pub condition: StatusCondition,
+    }
+
+    #[derive(Clone, Debug, Eq, PartialEq)]
+    pub struct ExpiredNonVolatileStatusCondition {
+        pub target: usize,
+        pub condition: SimpleStatusCondition,
     }
 
     #[derive(Clone, Debug, Eq, PartialEq)]
@@ -427,15 +444,24 @@ impl BattleBackend {
             }
         }
 
-        self.event_queue.push(BattleEvent::UseMove(event::UseMove {
-            move_user: used_move.user,
-            move_name: used_move.movement.display_name.clone(),
-        }));
-
         let active_effects = self.active_effects
             .get(&used_move.user)
             .unwrap_or(&Vec::new())
             .clone();
+
+        for effect in active_effects.iter().filter_map(|effect| effect.on_before_use_move) {
+            if effect(self, used_move.user, &used_move.movement) == ModifiedUsageAttempt::Fail {
+                self.event_queue.push(BattleEvent::FailedMove(event::FailedMove {
+                    move_user: used_move.user,
+                }));
+                return;
+            }
+        }
+
+        self.event_queue.push(BattleEvent::UseMove(event::UseMove {
+            move_user: used_move.user,
+            move_name: used_move.movement.display_name.clone(),
+        }));
 
         for effect in active_effects.iter().filter_map(|effect| effect.on_try_use_move) {
             if effect(self, used_move.user, &used_move.movement) == ModifiedUsageAttempt::Fail {
@@ -768,6 +794,18 @@ impl BattleBackend {
                     },
                 ));
         }
+    }
+
+    pub fn remove_non_volatile_status_condition(&mut self, target: usize) {
+        let target_pokemon = self.get_pokemon_mut(target);
+        let condition = target_pokemon.status_condition.take().unwrap();
+
+        self.event_queue.push(BattleEvent::ExpiredNonVolatileStatusCondition(
+            event::ExpiredNonVolatileStatusCondition {
+                target,
+                condition: condition.into(),
+            },
+        ));
     }
 
     fn add_flag(&mut self, target: usize, flag: Flag) {
@@ -1124,6 +1162,10 @@ impl BattleBackend {
 
     pub fn check_paralysis_move_prevention(&mut self) -> bool {
         self.rng.check_paralysis_move_prevention()
+    }
+
+    pub fn check_freeze_thaw(&mut self) -> bool {
+        self.rng.check_freeze_thaw()
     }
 
     fn is_fainted(&self, pokemon: usize) -> bool {

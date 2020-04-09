@@ -29,6 +29,7 @@ use crate::{
         backend::{
             event::{
                 Damage,
+                ExpiredNonVolatileStatusCondition,
                 ExpiredVolatileStatusCondition,
                 Faint,
                 InitialSwitchIn,
@@ -52,7 +53,13 @@ use crate::{
     },
     common::CommonResources,
     config::GameConfig,
-    pokemon::{get_all_pokemon_species, get_pokemon_display_name, Stat, StatusCondition},
+    pokemon::{
+        get_all_pokemon_species,
+        get_pokemon_display_name,
+        SimpleStatusCondition,
+        Stat,
+        StatusCondition,
+    },
     text::TextBox,
 };
 
@@ -190,6 +197,9 @@ impl BattleSystem {
             },
             BattleEvent::NonVolatileStatusCondition(event_data) => {
                 self.handle_non_volatile_status_condition(event_data);
+            },
+            BattleEvent::ExpiredNonVolatileStatusCondition(event_data) => {
+                self.handle_expired_non_volatile_status_condition(event_data);
             },
             BattleEvent::FailedMove(_) => {
                 self.handle_failed_move();
@@ -530,7 +540,79 @@ impl BattleSystem {
                     text: format!("{} got a burn!", display_name),
                 }));
             },
-            _ => todo!(),
+            StatusCondition::Poison => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} was poisoned!", display_name),
+                }));
+            },
+            StatusCondition::Paralysis => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} has become paralyzed!", display_name),
+                }));
+            },
+            StatusCondition::Freeze => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} was frozen solid!", display_name),
+                }));
+            },
+            StatusCondition::Toxic { .. } => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} was badly poisoned!", display_name),
+                }));
+            },
+            StatusCondition::Sleep { .. } => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} fell asleep!", display_name),
+                }));
+            },
+        }
+
+        self.active_animation_sequence = Some(AnimationSequence {
+            animations: animations.into(),
+        });
+    }
+
+    fn handle_expired_non_volatile_status_condition(
+        &mut self,
+        event_data: ExpiredNonVolatileStatusCondition,
+    ) {
+        let pokedex = get_all_pokemon_species();
+        let backend = self.backend.as_mut().unwrap();
+        let pokemon = backend.get_pokemon(event_data.target);
+        let display_name = get_pokemon_display_name(&pokemon, &pokedex);
+        let mut animations: Vec<Box<dyn FrontendAnimation + Sync + Send>> = Vec::new();
+
+        match event_data.condition {
+            SimpleStatusCondition::Burn => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} recovered from its burn!", display_name),
+                }));
+            },
+            SimpleStatusCondition::Freeze => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} thawed out!", display_name),
+                }));
+            },
+            SimpleStatusCondition::Paralysis => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} recovered from its paralysis!", display_name),
+                }));
+            },
+            SimpleStatusCondition::Poison => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} recovered from its poison!", display_name),
+                }));
+            },
+            SimpleStatusCondition::Toxic => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} recovered from its bad poison!", display_name),
+                }));
+            },
+            SimpleStatusCondition::Sleep => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} woke up!", display_name),
+                }));
+            },
         }
 
         self.active_animation_sequence = Some(AnimationSequence {

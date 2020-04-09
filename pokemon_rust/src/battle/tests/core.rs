@@ -1,4 +1,7 @@
-use crate::battle::backend::{BattleEvent, StatChangeKind, Team, TypeEffectiveness};
+use crate::{
+    battle::backend::{BattleEvent, StatChangeKind, Team, TypeEffectiveness},
+    pokemon::SimpleStatusCondition,
+};
 
 use super::{prelude::*, TestMethods};
 
@@ -262,4 +265,37 @@ fn halves_speed_of_paralyzed_pokemon() {
     let new_speed = backend.get_stat(1, Stat::Speed);
 
     assert_eq!(new_speed, base_speed / 2);
+}
+
+#[test]
+fn prevents_moves_of_frozen_pokemon() {
+    let mut backend = battle! {
+        "Hitmonchan" 24 (max ivs, Serious) vs "Metapod" 24 (max ivs, Serious)
+    };
+
+    test_rng_mut!(backend.rng).force_secondary_effect(1);
+    test_rng_mut!(backend.rng).force_freeze_duration(1);
+    let turn1 = backend.process_turn("IcePunch", "Harden");
+    assert_event!(turn1[3], FailedMove { move_user: 1, .. });
+
+    let turn2 = backend.process_turn("IcePunch", "Harden");
+    assert_event!(turn2[4], StatChange { target: 1, kind: StatChangeKind::Rose, stat: Stat::Defense });
+}
+
+#[test]
+fn makes_freeze_expire() {
+    let mut backend = battle! {
+        "Hitmonchan" 24 (max ivs, Serious) vs "Metapod" 24 (max ivs, Serious)
+    };
+
+    test_rng_mut!(backend.rng).force_secondary_effect(1);
+    test_rng_mut!(backend.rng).force_freeze_duration(1);
+    backend.process_turn("IcePunch", "Harden");
+    let events = backend.process_turn("IcePunch", "Harden");
+
+    assert_event!(events[2], ExpiredNonVolatileStatusCondition {
+        target: 1,
+        condition: SimpleStatusCondition::Freeze,
+        ..
+    });
 }

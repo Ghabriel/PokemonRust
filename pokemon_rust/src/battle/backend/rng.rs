@@ -56,6 +56,9 @@ pub trait BattleRng: Debug + Downcast {
 
     /// Tests for a paralysis move prevention (25% chance).
     fn check_paralysis_move_prevention(&mut self) -> bool;
+
+    /// Tests for a freeze thawing (20% chance).
+    fn check_freeze_thaw(&mut self) -> bool;
 }
 
 #[derive(Clone, Debug, Default)]
@@ -114,5 +117,9 @@ impl BattleRng for StandardBattleRng {
 
     fn check_paralysis_move_prevention(&mut self) -> bool {
         self.roll(25)
+    }
+
+    fn check_freeze_thaw(&mut self) -> bool {
+        self.roll(20)
     }
 }

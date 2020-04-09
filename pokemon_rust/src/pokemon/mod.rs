@@ -208,7 +208,7 @@ pub enum StatusCondition {
     Sleep { remaining_turns: usize },
 }
 
-#[derive(Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum SimpleStatusCondition {
     Burn,
     Freeze,

@@ -23,6 +23,7 @@ pub mod prelude {
                 event::{
                     ChangeTurn,
                     Damage,
+                    ExpiredNonVolatileStatusCondition,
                     ExpiredVolatileStatusCondition,
                     FailedMove,
                     Faint,
@@ -166,6 +167,7 @@ pub struct TestRng {
     confusion_duration: Option<usize>,
     confusion_miss_counter: usize,
     paralysis_move_prevention_counter: usize,
+    freeze_duration: usize,
 }
 
 impl TestRng {
@@ -203,6 +205,10 @@ impl TestRng {
 
     pub fn force_paralysis_move_prevention(&mut self, times: usize) {
         self.paralysis_move_prevention_counter = times;
+    }
+
+    pub fn force_freeze_duration(&mut self, duration: usize) {
+        self.freeze_duration = duration;
     }
 }
 
@@ -272,6 +278,15 @@ impl BattleRng for TestRng {
             true
         } else {
             false
+        }
+    }
+
+    fn check_freeze_thaw(&mut self) -> bool {
+        if self.freeze_duration > 0 {
+            self.freeze_duration -= 1;
+            false
+        } else {
+            true
         }
     }
 }

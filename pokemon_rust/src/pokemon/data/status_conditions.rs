@@ -24,6 +24,13 @@ pub struct StatusConditionEffect {
         value: usize,
     ) -> usize>,
 
+    /// Called when the target is about to use a move, _before_ displaying "X used Y!".
+    pub on_before_use_move: Option<fn(
+        backend: &mut BattleBackend,
+        target: usize,
+        mov: &Move,
+    ) -> ModifiedUsageAttempt>,
+
     /// Called when the target tries to use a move.
     pub on_try_use_move: Option<fn(
         backend: &mut BattleBackend,
@@ -56,6 +63,7 @@ pub fn get_status_condition_effect(
     match status_condition {
         SimpleStatusCondition::Burn => StatusConditionEffect {
             on_stat_calculation: None,
+            on_before_use_move: None,
             on_try_use_move: None,
             on_try_deal_damage: Some(|_backend, _user, _target, mov, damage_dealt| {
                 if mov.category == MoveCategory::Physical {
@@ -81,6 +89,7 @@ pub fn get_status_condition_effect(
         },
         SimpleStatusCondition::Poison => StatusConditionEffect {
             on_stat_calculation: None,
+            on_before_use_move: None,
             on_try_use_move: None,
             on_try_deal_damage: None,
             on_turn_end: Some(|backend, target| {
@@ -106,6 +115,7 @@ pub fn get_status_condition_effect(
                     value
                 }
             }),
+            on_before_use_move: None,
             on_try_use_move: Some(|backend, _target, _mov| {
                 if backend.check_paralysis_move_prevention() {
                     ModifiedUsageAttempt::Fail
@@ -113,6 +123,20 @@ pub fn get_status_condition_effect(
                     ModifiedUsageAttempt::Continue
                 }
             }),
+            on_try_deal_damage: None,
+            on_turn_end: None,
+        },
+        SimpleStatusCondition::Freeze => StatusConditionEffect {
+            on_stat_calculation: None,
+            on_before_use_move: Some(|backend, target, _mov| {
+                if backend.check_freeze_thaw() {
+                    backend.remove_non_volatile_status_condition(target);
+                    ModifiedUsageAttempt::Continue
+                } else {
+                    ModifiedUsageAttempt::Fail
+                }
+            }),
+            on_try_use_move: None,
             on_try_deal_damage: None,
             on_turn_end: None,
         },
