@@ -251,6 +251,29 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "Ember".to_string(),
+            display_name: "Ember".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Fire,
+            category: MoveCategory::Special,
+            base_power: MovePower::Constant(40),
+            power_modifier: None,
+            accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 25,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 10,
+                effect: SimpleEffect::StatusCondition(StatusCondition::Burn),
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "FirePunch".to_string(),
             display_name: "Fire Punch".to_string(),
             description: "".to_string(), // TODO

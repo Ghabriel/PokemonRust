@@ -105,7 +105,7 @@ lazy_static! {
             move_table: [
                 1: "Scratch",
                 1: "Growl",
-                // 4: "Ember",
+                4: "Ember",
                 // 8: "Smokescreen",
                 // 12: "DragonBreath",
                 // 17: "FireFang",
