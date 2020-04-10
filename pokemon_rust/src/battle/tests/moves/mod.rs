@@ -11,6 +11,7 @@ mod egg_bomb;
 mod ember;
 mod fire_punch;
 mod fissure;
+mod flamethrower;
 mod growl;
 mod guillotine;
 mod gust;

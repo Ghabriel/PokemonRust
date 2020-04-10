@@ -110,7 +110,7 @@ lazy_static! {
                 // 12: "DragonBreath",
                 // 17: "FireFang",
                 20: "Slash",
-                // 24: "Flamethrower",
+                24: "Flamethrower",
                 // 28: "ScaryFace",
                 // 32: "FireSpin",
                 // 36: "Inferno",
