@@ -585,7 +585,7 @@ impl BattleSystem {
         match event_data.condition {
             SimpleStatusCondition::Burn => {
                 animations.push(Box::new(TextAnimation::PendingStart {
-                    text: format!("{} recovered from its burn!", display_name),
+                    text: format!("{} is no longer burned!", display_name),
                 }));
             },
             SimpleStatusCondition::Freeze => {
@@ -595,17 +595,12 @@ impl BattleSystem {
             },
             SimpleStatusCondition::Paralysis => {
                 animations.push(Box::new(TextAnimation::PendingStart {
-                    text: format!("{} recovered from its paralysis!", display_name),
+                    text: format!("{} is no longer paralyzed!", display_name),
                 }));
             },
-            SimpleStatusCondition::Poison => {
+            SimpleStatusCondition::Poison | SimpleStatusCondition::Toxic => {
                 animations.push(Box::new(TextAnimation::PendingStart {
-                    text: format!("{} recovered from its poison!", display_name),
-                }));
-            },
-            SimpleStatusCondition::Toxic => {
-                animations.push(Box::new(TextAnimation::PendingStart {
-                    text: format!("{} recovered from its bad poison!", display_name),
+                    text: format!("{} is no longer poisoned!", display_name),
                 }));
             },
             SimpleStatusCondition::Sleep => {

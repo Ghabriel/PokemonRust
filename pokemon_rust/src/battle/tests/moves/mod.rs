@@ -30,6 +30,7 @@ mod quick_attack;
 mod razor_leaf;
 mod rock_slide;
 mod rock_throw;
+mod rolling_kick;
 mod scratch;
 mod slam;
 mod slash;

@@ -759,6 +759,29 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "RollingKick".to_string(),
+            display_name: "Rolling Kick".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Fight,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(60),
+            power_modifier: None,
+            accuracy: Some(85),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 15,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 30,
+                effect: SimpleEffect::Flinch,
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "Scratch".to_string(),
             display_name: "Scratch".to_string(),
             description: "".to_string(), // TODO

@@ -654,6 +654,7 @@ lazy_static! {
                 // 1: "BrickBreak",
                 4: "DoubleKick",
                 // 8: "LowKick",
+                9: "RollingKick",
                 // 12: "Endure",
                 // 16: "Revenge",
                 // 21: "WideGuard",
