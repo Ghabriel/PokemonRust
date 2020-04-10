@@ -700,6 +700,29 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "Lick".to_string(),
+            display_name: "Lick".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Ghost,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(30),
+            power_modifier: None,
+            accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 30,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 30,
+                effect: SimpleEffect::StatusCondition(StatusCondition::Paralysis),
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "MachPunch".to_string(),
             display_name: "Mach Punch".to_string(),
             description: "".to_string(), // TODO

@@ -740,6 +740,33 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Lickitung",
+            display_name: "Lickitung",
+            national_number: 108,
+            types: [PokemonType::Normal],
+            base_stats: [90, 55, 75, 60, 75, 30],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 77,
+            ev_yield: [2, 0, 0, 0, 0, 0],
+            capture_rate: 45,
+            abilities: ["OwnTempo", "Oblivious"],
+            hidden_abilities: ["CloudNine"],
+            move_table: [
+                1: "Lick",
+                // 5: "Wrap",
+                10: "Acid",
+                // 15: "Stomp",
+                // 20: "Disable",
+                // 25: "Bind",
+                // 30: "Slam",
+                // 35: "Screech",
+                // 40: "Thrash",
+                // 45: "PowerWhip",
+            ],
+        });
+
+        result.push(species! {
             id: "Rhyhorn",
             display_name: "Rhyhorn",
             national_number: 111,

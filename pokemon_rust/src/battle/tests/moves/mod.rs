@@ -26,6 +26,7 @@ mod hydro_pump;
 mod ice_beam;
 mod ice_punch;
 mod karate_chop;
+mod lick;
 mod mach_punch;
 mod mega_kick;
 mod mega_punch;
