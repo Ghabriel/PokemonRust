@@ -5,20 +5,20 @@ use super::super::{prelude::*, TestMethods};
 #[test]
 fn tackle_deals_damage() {
     let mut backend = battle! {
-        "Rattata" 50 (max ivs, Adamant) vs "Pidgey" 50 (max ivs, Adamant)
+        "Rattata" 5 (max ivs, Adamant) vs "Pidgey" 5 (max ivs, Adamant)
     };
 
     let events = backend.process_turn("Tackle", "Tackle");
 
     assert_event!(events[1], Damage {
         target: 1,
-        amount: 39,
+        amount: 9,
         is_critical_hit: false,
         ..
     });
     assert_event!(events[3], Damage {
         target: 0,
-        amount: 36,
+        amount: 7,
         is_critical_hit: false,
         ..
     });

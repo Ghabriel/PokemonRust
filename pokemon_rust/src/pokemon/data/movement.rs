@@ -729,6 +729,29 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "HyperFang".to_string(),
+            display_name: "Hyper Fang".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Normal,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(80),
+            power_modifier: None,
+            accuracy: Some(90),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 15,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 10,
+                effect: SimpleEffect::Flinch,
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "IceBeam".to_string(),
             display_name: "Ice Beam".to_string(),
             description: "".to_string(), // TODO

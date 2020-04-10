@@ -298,7 +298,7 @@ lazy_static! {
                 12: "Bite",
                 // 15: "SuperFang",
                 // 18 "Crunch",
-                // 21: "HyperFang",
+                21: "HyperFang",
                 // 24: "SuckerPunch",
                 // 27: "Double-Edge",
             ],
