@@ -57,5 +57,6 @@ mod thunder_punch;
 mod thunder_shock;
 mod vine_whip;
 mod vise_grip;
+mod waterfall;
 mod water_gun;
 mod wing_attack;

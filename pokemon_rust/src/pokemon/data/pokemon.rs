@@ -890,6 +890,44 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Gyarados",
+            display_name: "Gyarados",
+            national_number: 130,
+            types: [PokemonType::Water, PokemonType::Flying],
+            base_stats: [95, 125, 79, 60, 100, 81],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::Slow,
+            base_exp_yield: 189,
+            ev_yield: [0, 2, 0, 0, 0, 0],
+            capture_rate: 45,
+            abilities: ["Intimidate"],
+            hidden_abilities: ["Moxie"],
+            move_table: [
+                1: "Bite",
+                // 1: "Flail",
+                // 1: "Splash",
+                1: "Tackle",
+                // 1: "Leer",
+                // 1: "Twister",
+                // TODO: Learns when evolving
+                // 1: "Bite",
+                // 4: "Whirlpool",
+                // 8: "IceFang",
+                // 12: "Brine",
+                // 16: "ScaryFace",
+                21: "Waterfall",
+                // 24: "Crunch",
+                // 28: "RainDance",
+                // 32: "AquaTail",
+                // 36: "DragonDance",
+                40: "HydroPump",
+                // 44: "Hurricane",
+                // 48: "Thrash",
+                // 52: "HyperBeam",
+            ],
+        });
+
+        result.push(species! {
             id: "Lapras",
             display_name: "Lapras",
             national_number: 131,

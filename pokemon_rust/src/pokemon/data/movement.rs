@@ -1377,6 +1377,29 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "Waterfall".to_string(),
+            display_name: "Waterfall".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Water,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(80),
+            power_modifier: None,
+            accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 15,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 20,
+                effect: SimpleEffect::Flinch,
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "WaterGun".to_string(),
             display_name: "Water Gun".to_string(),
             description: "".to_string(), // TODO
