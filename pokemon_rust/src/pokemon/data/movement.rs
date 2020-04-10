@@ -196,6 +196,29 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "Confusion".to_string(),
+            display_name: "Confusion".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Psychic,
+            category: MoveCategory::Special,
+            base_power: MovePower::Constant(50),
+            power_modifier: None,
+            accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 25,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 10,
+                effect: SimpleEffect::Confusion,
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "CrabHammer".to_string(),
             display_name: "Crab Hammer".to_string(),
             description: "".to_string(), // TODO

@@ -212,7 +212,7 @@ lazy_static! {
                 // // TODO: learns when evolving
                 // 1: "Gust",
                 4: "Supersonic",
-                // 8: "Confusion",
+                8: "Confusion",
                 // 12: "PoisonPowder",
                 // 12: "StunSpore",
                 // 12: "SleepPowder",

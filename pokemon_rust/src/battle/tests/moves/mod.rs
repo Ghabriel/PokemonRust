@@ -4,6 +4,7 @@ mod bite;
 mod bubble;
 mod bubble_beam;
 mod comet_punch;
+mod confusion;
 mod crab_hammer;
 mod cut;
 mod double_kick;
