@@ -835,6 +835,49 @@ lazy_static! {
             ],
         });
 
+        result.push(species! {
+            id: "Vaporeon",
+            display_name: "Vaporeon",
+            national_number: 134,
+            types: [PokemonType::Water],
+            base_stats: [130, 65, 60, 110, 95, 65],
+            male_ratio: Some(87.5),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 184,
+            ev_yield: [2, 0, 0, 0, 0, 0],
+            capture_rate: 45,
+            abilities: ["WaterAbsorb"],
+            hidden_abilities: ["Hydration"],
+            move_table: [
+                1: "WaterGun",
+                // 1: "Covet",
+                // 1: "Swift",
+                // 1: "Bite",
+                // 1: "Copycat",
+                // 1: "BatonPass",
+                // 1: "TakeDown",
+                // 1: "Charm",
+                // 1: "DoubleEdge",
+                // 1: "HelpingHand",
+                1: "Tackle",
+                1: "Growl",
+                1: "TailWhip",
+                // TODO: learns by evolving
+                1: "WaterGun",
+                // 5: "SandAttack",
+                10: "QuickAttack",
+                // 15: "BabyDollEyes",
+                // 20: "Haze",
+                // 25: "WaterPulse",
+                30: "AuroraBeam",
+                // 35: "AquaRing",
+                // 40: "MuddyWater",
+                // 45: "AcidArmor",
+                50: "HydroPump",
+                // 55: "LastResort",
+            ],
+        });
+
         PokeDex::new(
             result
                 .into_iter()

@@ -1,4 +1,5 @@
 mod acid;
+mod aurora_beam;
 mod bite;
 mod bubble;
 mod bubble_beam;
