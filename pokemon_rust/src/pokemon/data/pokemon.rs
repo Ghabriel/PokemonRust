@@ -819,6 +819,7 @@ lazy_static! {
                 24: "ThunderPunch",
                 24: "IcePunch",
                 24: "FirePunch",
+                25: "DizzyPunch",
                 // 28: "Agility",
                 32: "MegaPunch",
                 // 36: "CloseCombat",

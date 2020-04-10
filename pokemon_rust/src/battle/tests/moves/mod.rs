@@ -9,6 +9,7 @@ mod confusion;
 mod constrict;
 mod crab_hammer;
 mod cut;
+mod dizzy_punch;
 mod double_kick;
 mod double_slap;
 mod drill_peck;

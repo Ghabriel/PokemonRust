@@ -308,6 +308,29 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "DizzyPunch".to_string(),
+            display_name: "Dizzy Punch".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Normal,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(70),
+            power_modifier: None,
+            accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 10,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 20,
+                effect: SimpleEffect::Confusion,
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "DoubleKick".to_string(),
             display_name: "Double Kick".to_string(),
             description: "".to_string(), // TODO
