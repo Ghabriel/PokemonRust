@@ -535,6 +535,34 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Tentacool",
+            display_name: "Tentacool",
+            national_number: 72,
+            types: [PokemonType::Water, PokemonType::Poison],
+            base_stats: [40, 40, 35, 50, 100, 70],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::Slow,
+            base_exp_yield: 67,
+            ev_yield: [0, 0, 0, 0, 1, 0],
+            capture_rate: 190,
+            abilities: ["ClearBody", "LiquidOoze"],
+            hidden_abilities: ["RainDish"],
+            move_table: [
+                1: "PoisonSting",
+                4: "Constrict",
+                9: "Supersonic",
+                13: "Acid",
+                18: "BubbleBeam",
+                // 22: "Wrap",
+                27: "Surf",
+                // 31: "Barrier",
+                // 36: "PoisonJab",
+                // 40: "Screech",
+                45: "HydroPump",
+            ],
+        });
+
+        result.push(species! {
             id: "Slowpoke",
             display_name: "Slowpoke",
             national_number: 79,

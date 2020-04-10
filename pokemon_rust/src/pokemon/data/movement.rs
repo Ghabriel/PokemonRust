@@ -242,6 +242,32 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "Constrict".to_string(),
+            display_name: "Constrict".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Normal,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(10),
+            power_modifier: None,
+            accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 35,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 10,
+                effect: SimpleEffect::StatChange {
+                    changes: vec![(Stat::Speed, -1)],
+                    target: SimpleEffectTarget::MoveTarget,
+                }
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "CrabHammer".to_string(),
             display_name: "Crab Hammer".to_string(),
             description: "".to_string(), // TODO
