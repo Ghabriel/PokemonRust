@@ -528,7 +528,7 @@ lazy_static! {
                 // 27: "Amnesia",
                 // 30: "Surf",
                 // 33: "SlackOff",
-                // 36: "Psychic",
+                36: "Psychic",
                 // 39: "PsychUp",
                 // 42: "RainDance",
                 // 45: "HealPulse",
