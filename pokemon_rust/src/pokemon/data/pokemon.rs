@@ -623,7 +623,7 @@ lazy_static! {
                 // 8: "MetalClaw",
                 // 12: "MudShot",
                 // 16: "Protect",
-                // 20: "BubbleBeam",
+                20: "BubbleBeam",
                 // 24: "Stomp",
                 // 29: "Flail",
                 // 32: "RazorShell",

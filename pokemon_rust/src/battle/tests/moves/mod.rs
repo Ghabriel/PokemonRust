@@ -1,6 +1,7 @@
 mod acid;
 mod bite;
 mod bubble;
+mod bubble_beam;
 mod comet_punch;
 mod crab_hammer;
 mod cut;
