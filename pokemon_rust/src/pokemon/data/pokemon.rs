@@ -767,6 +767,38 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Koffing",
+            display_name: "Koffing",
+            national_number: 109,
+            types: [PokemonType::Poison],
+            base_stats: [40, 65, 95, 60, 45, 35],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 68,
+            ev_yield: [0, 0, 1, 0, 0, 0],
+            capture_rate: 190,
+            abilities: ["Levitate", "NeutralizingGas"],
+            hidden_abilities: ["Stench"],
+            move_table: [
+                // 1: "PoisonGas",
+                1: "Tackle",
+                4: "Smog",
+                // 8: "Smokescreen",
+                // 12: "ClearSmog",
+                // 16: "Assurance",
+                // 20: "Sludge",
+                // 24: "Haze",
+                // 28: "SelfDestruct",,
+                // 32: "SludgeBomb",
+                // 36: "Toxic",
+                // 40: "Belch",
+                // 44: "Explosion",
+                // 48: "Memento",
+                // 52: "DestinyBond",
+            ],
+        });
+
+        result.push(species! {
             id: "Rhyhorn",
             display_name: "Rhyhorn",
             national_number: 111,

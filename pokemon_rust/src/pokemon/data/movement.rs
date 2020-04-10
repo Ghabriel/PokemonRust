@@ -1061,6 +1061,29 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "Smog".to_string(),
+            display_name: "Smog".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Poison,
+            category: MoveCategory::Special,
+            base_power: MovePower::Constant(30),
+            power_modifier: None,
+            accuracy: Some(70),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 20,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 40,
+                effect: SimpleEffect::StatusCondition(StatusCondition::Poison),
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "Strength".to_string(),
             display_name: "Strength".to_string(),
             description: "".to_string(), // TODO
