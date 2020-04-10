@@ -29,6 +29,7 @@ mod mega_punch;
 mod peck;
 mod poison_sting;
 mod pound;
+mod psybeam;
 mod quick_attack;
 mod razor_leaf;
 mod rock_slide;

@@ -748,6 +748,29 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "Psybeam".to_string(),
+            display_name: "Psybeam".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Psychic,
+            category: MoveCategory::Special,
+            base_power: MovePower::Constant(65),
+            power_modifier: None,
+            accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 20,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 10,
+                effect: SimpleEffect::Confusion,
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "QuickAttack".to_string(),
             display_name: "Quick Attack".to_string(),
             description: "".to_string(), // TODO

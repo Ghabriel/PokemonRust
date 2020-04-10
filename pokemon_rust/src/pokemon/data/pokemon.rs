@@ -216,7 +216,7 @@ lazy_static! {
                 // 12: "PoisonPowder",
                 // 12: "StunSpore",
                 // 12: "SleepPowder",
-                // 16: "Psybeam",
+                16: "Psybeam",
                 // 20: "Whirlwind",
                 // 24: "AirSlash",
                 // 28: "Safeguard",
