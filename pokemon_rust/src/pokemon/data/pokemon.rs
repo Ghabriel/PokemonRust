@@ -786,7 +786,7 @@ lazy_static! {
                 // 8: "Smokescreen",
                 // 12: "ClearSmog",
                 // 16: "Assurance",
-                // 20: "Sludge",
+                20: "Sludge",
                 // 24: "Haze",
                 // 28: "SelfDestruct",,
                 // 32: "SludgeBomb",

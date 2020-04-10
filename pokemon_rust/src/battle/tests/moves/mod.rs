@@ -43,6 +43,7 @@ mod rolling_kick;
 mod scratch;
 mod slam;
 mod slash;
+mod sludge;
 mod smog;
 mod strength;
 mod supersonic;
