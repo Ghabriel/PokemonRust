@@ -661,6 +661,33 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Cubone",
+            display_name: "Cubone",
+            national_number: 104,
+            types: [PokemonType::Ground],
+            base_stats: [50, 50, 95, 40, 50, 35],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 64,
+            ev_yield: [0, 0, 1, 0, 0, 0],
+            capture_rate: 190,
+            abilities: ["RockHead", "LightningRod"],
+            hidden_abilities: ["BattleArmor"],
+            move_table: [
+                1: "Growl",
+                2: "TailWhip",
+                // 6: "Leer",
+                12: "BoneClub",
+                14: "Headbutt",
+                // 18: "Rage",
+                // 24: "FocusEnergy",
+                // 26: "Bonemerang",
+                // 30: "Thrash",
+                // 36: "DoubleEdge",
+            ],
+        });
+
+        result.push(species! {
             id: "Hitmonlee",
             display_name: "Hitmonlee",
             national_number: 106,

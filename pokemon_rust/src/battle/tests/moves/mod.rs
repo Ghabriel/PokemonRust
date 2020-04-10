@@ -1,6 +1,7 @@
 mod acid;
 mod aurora_beam;
 mod bite;
+mod bone_club;
 mod bubble;
 mod bubble_beam;
 mod comet_punch;

@@ -114,6 +114,29 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "BoneClub".to_string(),
+            display_name: "Bone Club".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Ground,
+            category: MoveCategory::Physical,
+            base_power: MovePower::Constant(65),
+            power_modifier: None,
+            accuracy: Some(85),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 20,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 10,
+                effect: SimpleEffect::Flinch,
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "Bubble".to_string(),
             display_name: "Bubble".to_string(),
             description: "".to_string(), // TODO
