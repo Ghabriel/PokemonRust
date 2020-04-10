@@ -1,3 +1,4 @@
+mod acid;
 mod bite;
 mod bubble;
 mod comet_punch;

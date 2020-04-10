@@ -39,6 +39,32 @@ lazy_static! {
         let mut result = Vec::new();
 
         result.push(Move {
+            id: "Acid".to_string(),
+            display_name: "Acid".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Poison,
+            category: MoveCategory::Special,
+            base_power: MovePower::Constant(40),
+            power_modifier: None,
+            accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 30,
+            priority: 0,
+            target_type: TargetType::AllAdjacentFoes,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 10,
+                effect: SimpleEffect::StatChange {
+                    changes: vec![(Stat::SpecialDefense, -1)],
+                    target: SimpleEffectTarget::MoveTarget,
+                }
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "Bite".to_string(),
             display_name: "Bite".to_string(),
             description: "".to_string(), // TODO

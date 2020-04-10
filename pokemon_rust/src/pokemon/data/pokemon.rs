@@ -408,6 +408,37 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Oddish",
+            display_name: "Oddish",
+            national_number: 43,
+            types: [PokemonType::Grass, PokemonType::Poison],
+            base_stats: [45, 50, 55, 75, 65, 30],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumSlow,
+            base_exp_yield: 64,
+            ev_yield: [0, 0, 0, 1, 0, 0],
+            capture_rate: 255,
+            abilities: ["Chlorophyll"],
+            hidden_abilities: ["RunAway"],
+            move_table: [
+                // 1: "Absorb",
+                // 1: "Growth",
+                4: "Acid",
+                // 8: "SweetScent",
+                // 12: "MegaDrain",
+                // 14: "PoisonPowder",
+                // 16: "StunSpore",
+                // 18: "SleepPowder",
+                // 20: "GigaDrain",
+                // 24: "Toxic",
+                // 28: "MoonBlast",
+                // 32: "GrassyTerrain",
+                // 36: "Moonlight",
+                // 40: "PetalDance",
+            ],
+        });
+
+        result.push(species! {
             id: "Diglett",
             display_name: "Diglett",
             national_number: 50,
