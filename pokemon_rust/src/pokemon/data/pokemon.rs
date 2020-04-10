@@ -771,6 +771,38 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Lapras",
+            display_name: "Lapras",
+            national_number: 131,
+            types: [PokemonType::Water, PokemonType::Ice],
+            base_stats: [130, 85, 80, 85, 95, 60],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::Slow,
+            base_exp_yield: 187,
+            ev_yield: [2, 0, 0, 0, 0, 0],
+            capture_rate: 45,
+            abilities: ["WaterAbsorb", "ShellArmor"],
+            hidden_abilities: ["Hydration"],
+            move_table: [
+                1: "Growl",
+                1: "WaterGun",
+                // 5: "Sing",
+                // 10: "Mist",
+                // 15: "LifeDew",
+                // 20: "IceShard",
+                // 25: "ConfuseRay",
+                // 30: "WaterPulse",
+                // 35: "Brine",
+                // 40: "BodySlam",
+                45: "IceBeam",
+                // 50: "RainDance",
+                55: "HydroPump",
+                // 60: "PerishSong",
+                // 65: "SheerCold",
+            ],
+        });
+
+        result.push(species! {
             id: "Eevee",
             display_name: "Eevee",
             national_number: 133,
