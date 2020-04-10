@@ -408,6 +408,39 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Vulpix",
+            display_name: "Vulpix",
+            national_number: 37,
+            types: [PokemonType::Fire],
+            base_stats: [38, 41, 40, 50, 65, 65],
+            male_ratio: Some(25.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 113,
+            ev_yield: [0, 0, 0, 0, 0, 1],
+            capture_rate: 190,
+            abilities: ["FlashFire"],
+            hidden_abilities: ["Drought"],
+            move_table: [
+                1: "Ember",
+                1: "TailWhip",
+                // 4: "Disable",
+                8: "QuickAttack",
+                // 12: "Spite",
+                // 16: "Incinerate",
+                // 20: "ConfuseRay",
+                // 24: "WillOWisp",
+                // 28: "ExtraSensory",
+                // 32: "Flamethrower",
+                // 36: "Imprison",
+                // 40: "FireSpin",
+                // 44: "Safeguard",
+                // 48: "Inferno",
+                // 52: "Grudge",
+                56: "FireBlast",
+            ],
+        });
+
+        result.push(species! {
             id: "Oddish",
             display_name: "Oddish",
             national_number: 43,

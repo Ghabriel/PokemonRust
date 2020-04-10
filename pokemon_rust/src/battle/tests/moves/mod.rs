@@ -13,6 +13,7 @@ mod double_slap;
 mod drill_peck;
 mod egg_bomb;
 mod ember;
+mod fire_blast;
 mod fire_punch;
 mod fissure;
 mod flamethrower;
