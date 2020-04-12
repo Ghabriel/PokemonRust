@@ -1360,6 +1360,35 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "StunSpore".to_string(),
+            display_name: "Stun Spore".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Grass,
+            category: MoveCategory::Status,
+            base_power: MovePower::Special,
+            power_modifier: None,
+            accuracy: Some(75),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: Some(|backend, _user, target, _mov| {
+                if backend.has_non_volatile_status_condition(target) {
+                    return ModifiedUsageAttempt::Fail;
+                }
+
+                ModifiedUsageAttempt::Continue
+            }),
+            pp: 30,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 100,
+                effect: SimpleEffect::StatusCondition(StatusCondition::Paralysis),
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "Supersonic".to_string(),
             display_name: "Supersonic".to_string(),
             description: "".to_string(), // TODO

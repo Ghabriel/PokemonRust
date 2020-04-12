@@ -55,6 +55,7 @@ mod slash;
 mod sludge;
 mod smog;
 mod strength;
+mod stun_spore;
 mod supersonic;
 mod swift;
 mod swords_dance;
