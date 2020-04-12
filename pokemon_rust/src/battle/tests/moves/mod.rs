@@ -52,6 +52,7 @@ mod scratch;
 mod sing;
 mod slam;
 mod slash;
+mod sleep_powder;
 mod sludge;
 mod smog;
 mod strength;

@@ -1294,6 +1294,38 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "SleepPowder".to_string(),
+            display_name: "Sleep Powder".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Grass,
+            category: MoveCategory::Status,
+            base_power: MovePower::Special,
+            power_modifier: None,
+            accuracy: Some(75),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: Some(|backend, _user, target, _mov| {
+                if backend.has_non_volatile_status_condition(target) {
+                    return ModifiedUsageAttempt::Fail;
+                }
+
+                ModifiedUsageAttempt::Continue
+            }),
+            pp: 15,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 100,
+                effect: SimpleEffect::StatusCondition(StatusCondition::Sleep {
+                    // TODO: randomize duration
+                    remaining_turns: 1,
+                }),
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "Sludge".to_string(),
             display_name: "Sludge".to_string(),
             description: "".to_string(), // TODO
