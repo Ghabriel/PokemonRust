@@ -320,7 +320,7 @@ lazy_static! {
             move_table: [
                 1: "Peck",
                 3: "Growl",
-                // 8: "Leer",
+                8: "Leer",
                 // 11: "FocusEnergy",
                 // 16: "FuryAttack",
                 // 19: "MirrorMove",
@@ -516,7 +516,7 @@ lazy_static! {
             hidden_abilities: ["Steadfast"],
             move_table: [
                 // 1: "LowKick",
-                // 1: "Leer",
+                1: "Leer",
                 // 4: "FocusEnergy",
                 7: "KarateChop",
                 // 8: "Revenge",
@@ -612,7 +612,7 @@ lazy_static! {
             move_table: [
                 1: "Peck",
                 // 1: "SandAttack",
-                // 5: "Leer",
+                5: "Leer",
                 // 10: "FuryCutter",
                 15: "Cut",
                 // 20: "AerialAce",
@@ -679,7 +679,7 @@ lazy_static! {
             move_table: [
                 1: "ViseGrip",
                 1: "WaterGun",
-                // 1: "Leer",
+                1: "Leer",
                 4: "Harden",
                 // 8: "MetalClaw",
                 // 12: "MudShot",
@@ -737,7 +737,7 @@ lazy_static! {
             move_table: [
                 1: "Growl",
                 2: "TailWhip",
-                // 6: "Leer",
+                6: "Leer",
                 12: "BoneClub",
                 14: "Headbutt",
                 // 18: "Rage",
@@ -936,7 +936,7 @@ lazy_static! {
                 // 1: "Flail",
                 // 1: "Splash",
                 1: "Tackle",
-                // 1: "Leer",
+                1: "Leer",
                 // 1: "Twister",
                 // TODO: Learns when evolving
                 // 1: "Bite",

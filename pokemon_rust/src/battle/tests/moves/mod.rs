@@ -31,6 +31,7 @@ mod hyper_fang;
 mod ice_beam;
 mod ice_punch;
 mod karate_chop;
+mod leer;
 mod lick;
 mod mach_punch;
 mod mega_kick;

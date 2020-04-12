@@ -818,6 +818,32 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "Leer".to_string(),
+            display_name: "Leer".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Normal,
+            category: MoveCategory::Status,
+            base_power: MovePower::Special,
+            power_modifier: None,
+            accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 30,
+            priority: 0,
+            target_type: TargetType::AllAdjacentFoes,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 100,
+                effect: SimpleEffect::StatChange {
+                    changes: vec![(Stat::Defense, -1)],
+                    target: SimpleEffectTarget::MoveTarget,
+                }
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "Lick".to_string(),
             display_name: "Lick".to_string(),
             description: "".to_string(), // TODO
