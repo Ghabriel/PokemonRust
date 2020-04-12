@@ -35,6 +35,7 @@ mod karate_chop;
 mod leer;
 mod lick;
 mod mach_punch;
+mod meditate;
 mod mega_kick;
 mod mega_punch;
 mod peck;

@@ -772,6 +772,7 @@ lazy_static! {
                 // TODO: learns when evolving
                 // 1: "BrickBreak",
                 4: "DoubleKick",
+                5: "Meditate",
                 // 8: "LowKick",
                 9: "RollingKick",
                 // 12: "Endure",
