@@ -56,6 +56,7 @@ mod sleep_powder;
 mod sludge;
 mod smog;
 mod strength;
+mod string_shot;
 mod stun_spore;
 mod supersonic;
 mod swift;

@@ -165,7 +165,7 @@ lazy_static! {
             hidden_abilities: ["RunAway"],
             move_table: [
                 1: "Tackle",
-                // 1: "StringShot",
+                1: "StringShot",
                 // 9: "BugBite",
             ],
         });
@@ -207,7 +207,7 @@ lazy_static! {
                 1: "Gust",
                 1: "Harden",
                 1: "Tackle",
-                // 1: "StringShot",
+                1: "StringShot",
                 // 1: "BugBite",
                 // // TODO: learns when evolving
                 // 1: "Gust",
@@ -242,7 +242,7 @@ lazy_static! {
             hidden_abilities: ["RunAway"],
             move_table: [
                 1: "PoisonSting",
-                // 1: "StringShot",
+                1: "StringShot",
             ],
         });
 
