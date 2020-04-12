@@ -261,7 +261,7 @@ lazy_static! {
             hidden_abilities: ["BigPecks"],
             move_table: [
                 1: "Tackle",
-                // 5: "SandAttack",
+                5: "SandAttack",
                 9: "Gust",
                 13: "QuickAttack",
                 // 17: "Whirlwind",
@@ -485,7 +485,7 @@ lazy_static! {
             abilities: ["SandVeil", "ArenaTrap"],
             hidden_abilities: ["SandForce"],
             move_table: [
-                // 1: "SandAttack",
+                1: "SandAttack",
                 1: "Scratch",
                 4: "Growl",
                 // 8: "Astonish",
@@ -1007,7 +1007,7 @@ lazy_static! {
                 1: "Tackle",
                 1: "Growl",
                 1: "TailWhip",
-                // 5: "SandAttack",
+                5: "SandAttack",
                 10: "QuickAttack",
                 // 15: "BabyDollEyes",
                 20: "Swift",
@@ -1050,7 +1050,7 @@ lazy_static! {
                 1: "TailWhip",
                 // TODO: learns by evolving
                 1: "WaterGun",
-                // 5: "SandAttack",
+                5: "SandAttack",
                 10: "QuickAttack",
                 // 15: "BabyDollEyes",
                 // 20: "Haze",
