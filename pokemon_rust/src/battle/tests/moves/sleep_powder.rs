@@ -6,7 +6,7 @@ use crate::{
 use super::super::{prelude::*, TestMethods};
 
 #[test]
-fn sleep_powder_causes_poison() {
+fn sleep_powder_causes_sleep() {
     let mut backend = battle! {
         "Butterfree" 12 (max ivs, Serious) vs "Metapod" 12 (max ivs, Serious)
     };

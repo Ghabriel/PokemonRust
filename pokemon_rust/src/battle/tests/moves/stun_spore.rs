@@ -6,7 +6,7 @@ use crate::{
 use super::super::{prelude::*, TestMethods};
 
 #[test]
-fn stun_spore_causes_poison() {
+fn stun_spore_causes_paralysis() {
     let mut backend = battle! {
         "Butterfree" 12 (max ivs, Serious) vs "Metapod" 12 (max ivs, Serious)
     };
