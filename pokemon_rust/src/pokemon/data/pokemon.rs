@@ -689,7 +689,7 @@ lazy_static! {
                 // 29: "Flail",
                 // 32: "RazorShell",
                 36: "Slam",
-                // 40: "SwordsDance",
+                40: "SwordsDance",
                 44: "CrabHammer",
                 48: "Guillotine",
             ],
