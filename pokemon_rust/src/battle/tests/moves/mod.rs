@@ -37,6 +37,7 @@ mod mach_punch;
 mod mega_kick;
 mod mega_punch;
 mod peck;
+mod poison_powder;
 mod poison_sting;
 mod pound;
 mod psychic;
