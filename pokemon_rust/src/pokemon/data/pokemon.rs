@@ -713,7 +713,7 @@ lazy_static! {
                 // 1: "PowerWhip",
                 1: "EggBomb",
                 // 1: "Barrage",
-                // 1: "Hypnosis",
+                1: "Hypnosis",
                 // 1: "Confusion",
                 1: "StunSpore",
                 // // TODO: learns when evolving
