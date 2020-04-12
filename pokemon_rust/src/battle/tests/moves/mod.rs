@@ -48,6 +48,7 @@ mod rock_throw;
 mod rolling_kick;
 mod sand_attack;
 mod scratch;
+mod sing;
 mod slam;
 mod slash;
 mod sludge;

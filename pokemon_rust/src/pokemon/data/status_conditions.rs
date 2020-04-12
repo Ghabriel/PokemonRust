@@ -8,6 +8,7 @@ use crate::{
         },
         SimpleStatusCondition,
         Stat,
+        StatusCondition,
     },
 };
 
@@ -134,6 +135,26 @@ pub fn get_status_condition_effect(
                     ModifiedUsageAttempt::Continue
                 } else {
                     ModifiedUsageAttempt::Fail
+                }
+            }),
+            on_try_use_move: None,
+            on_try_deal_damage: None,
+            on_turn_end: None,
+        },
+        SimpleStatusCondition::Sleep => StatusConditionEffect {
+            on_stat_calculation: None,
+            on_before_use_move: Some(|backend, target, _mov| {
+                match backend.get_non_volatile_status_condition_mut(target) {
+                    Some(StatusCondition::Sleep { remaining_turns }) => {
+                        if *remaining_turns == 0 {
+                            backend.remove_non_volatile_status_condition(target);
+                            ModifiedUsageAttempt::Continue
+                        } else {
+                            *remaining_turns -= 1;
+                            ModifiedUsageAttempt::Fail
+                        }
+                    },
+                    _ => unreachable!(),
                 }
             }),
             on_try_use_move: None,

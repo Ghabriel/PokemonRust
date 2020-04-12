@@ -941,6 +941,17 @@ impl BattleBackend {
             .contains_key(flag_id)
     }
 
+    pub fn get_non_volatile_status_condition_mut(
+        &mut self,
+        pokemon: usize,
+    ) -> Option<&mut StatusCondition> {
+        self.get_pokemon_mut(pokemon).status_condition.as_mut()
+    }
+
+    pub fn has_non_volatile_status_condition(&self, pokemon: usize) -> bool {
+        self.get_pokemon(pokemon).status_condition.is_some()
+    }
+
     fn get_attack_critical_hit(&self, pokemon: usize) -> usize {
         self.get_positive_critical_hit_stat(pokemon, Stat::Attack)
     }

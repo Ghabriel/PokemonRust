@@ -381,7 +381,7 @@ lazy_static! {
             abilities: ["CuteCharm", "MagicGuard"],
             hidden_abilities: ["FriendGuard"],
             move_table: [
-                // 1: "Sing",
+                1: "Sing",
                 // 1: "SweetKiss",
                 // 1: "DisarmingVoice",
                 // 1: "Encore",
@@ -972,7 +972,7 @@ lazy_static! {
             move_table: [
                 1: "Growl",
                 1: "WaterGun",
-                // 5: "Sing",
+                5: "Sing",
                 // 10: "Mist",
                 // 15: "LifeDew",
                 // 20: "IceShard",

@@ -29,6 +29,7 @@ pub mod prelude {
                     Faint,
                     InitialSwitchIn,
                     Miss,
+                    NonVolatileStatusCondition,
                     StatChange,
                     UseMove,
                     VolatileStatusCondition,

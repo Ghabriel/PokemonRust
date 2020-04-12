@@ -43,6 +43,12 @@ macro_rules! assert_event {
             })
         );
     };
+    ($value:expr, NonVolatileStatusCondition { $($args:tt)* }) => {
+        assert_pattern!(
+            $value,
+            BattleEvent::NonVolatileStatusCondition(NonVolatileStatusCondition { $($args)* })
+        );
+    };
     ($value:expr, ExpiredNonVolatileStatusCondition { $($args:tt)* }) => {
         assert_pattern!(
             $value,
