@@ -53,6 +53,7 @@ mod smog;
 mod strength;
 mod supersonic;
 mod swift;
+mod swords_dance;
 mod tackle;
 mod tailwhip;
 mod thunderbolt;
