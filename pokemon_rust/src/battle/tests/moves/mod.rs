@@ -1,4 +1,5 @@
 mod acid;
+mod agility;
 mod aurora_beam;
 mod bite;
 mod bone_club;
