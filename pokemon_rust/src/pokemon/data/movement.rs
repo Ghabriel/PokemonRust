@@ -410,6 +410,32 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "DoubleTeam".to_string(),
+            display_name: "Double Team".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Normal,
+            category: MoveCategory::Status,
+            base_power: MovePower::Special,
+            power_modifier: None,
+            accuracy: None,
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 15,
+            priority: 0,
+            target_type: TargetType::User,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 100,
+                effect: SimpleEffect::StatChange {
+                    changes: vec![(Stat::Evasion, 1)],
+                    target: SimpleEffectTarget::MoveUser,
+                }
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "DrillPeck".to_string(),
             display_name: "Drill Peck".to_string(),
             description: "".to_string(), // TODO

@@ -3,7 +3,7 @@ use crate::battle::backend::{BattleEvent, StatChangeKind};
 use super::super::{prelude::*, TestMethods};
 
 #[test]
-fn screech_reduces_attack() {
+fn screech_reduces_defense() {
     let mut backend = battle! {
         "Onix" 24 (max ivs, Serious) vs "Metapod" 24 (max ivs, Serious)
     };

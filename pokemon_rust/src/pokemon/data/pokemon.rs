@@ -354,7 +354,7 @@ lazy_static! {
                 1: "Growl",
                 1: "QuickAttack",
                 4: "ThunderWave",
-                // 8: "DoubleTeam",
+                8: "DoubleTeam",
                 // 12: "ElectroBall",
                 // 16: "Feint",
                 // 20: "Spark",

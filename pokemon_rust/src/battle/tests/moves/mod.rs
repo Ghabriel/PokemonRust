@@ -13,6 +13,7 @@ mod cut;
 mod dizzy_punch;
 mod double_kick;
 mod double_slap;
+mod double_team;
 mod drill_peck;
 mod egg_bomb;
 mod ember;
