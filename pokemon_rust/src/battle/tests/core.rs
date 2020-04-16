@@ -91,7 +91,7 @@ fn applies_critical_hit() {
     };
 
     let turn1 = backend.process_turn("Slash", "Tackle");
-    let turn2 = backend.process_turn("Scratch", "Tackle");
+    let turn2 = backend.process_turn("Ember", "Tackle");
 
     assert_event!(turn1[1], Damage { is_critical_hit: true, .. });
     assert_event!(turn1[3], Damage { is_critical_hit: false, .. });
