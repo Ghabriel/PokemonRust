@@ -245,6 +245,35 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "ConfuseRay".to_string(),
+            display_name: "Confuse Ray".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Ghost,
+            category: MoveCategory::Status,
+            base_power: MovePower::Special,
+            power_modifier: None,
+            accuracy: Some(100),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: Some(|backend, _user, target, _mov| {
+                if backend.has_flag(target, "confusion") {
+                    return ModifiedUsageAttempt::Fail;
+                }
+
+                ModifiedUsageAttempt::Continue
+            }),
+            pp: 10,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 100,
+                effect: SimpleEffect::Confusion,
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "Confusion".to_string(),
             display_name: "Confusion".to_string(),
             description: "".to_string(), // TODO

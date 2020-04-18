@@ -6,6 +6,7 @@ mod bone_club;
 mod bubble;
 mod bubble_beam;
 mod comet_punch;
+mod confuse_ray;
 mod confusion;
 mod constrict;
 mod crab_hammer;
