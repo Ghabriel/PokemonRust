@@ -135,7 +135,7 @@ lazy_static! {
                 1: "Tackle",
                 1: "TailWhip",
                 3: "WaterGun",
-                // 6: "Withdraw",
+                6: "Withdraw",
                 // 9: "RapidSpin",
                 // 12: "Bite",
                 13: "Bubble",
