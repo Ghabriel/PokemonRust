@@ -1,6 +1,7 @@
 mod acid;
 mod agility;
 mod aurora_beam;
+mod barrier;
 mod bite;
 mod bone_club;
 mod bubble;
