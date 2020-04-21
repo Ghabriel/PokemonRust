@@ -1,5 +1,6 @@
 mod acid;
 mod agility;
+mod amnesia;
 mod aurora_beam;
 mod barrier;
 mod bite;

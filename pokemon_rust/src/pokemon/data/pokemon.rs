@@ -586,7 +586,7 @@ lazy_static! {
                 // 18: "WaterPulse",
                 21: "Headbutt",
                 // 24: "ZenHeadbutt",
-                // 27: "Amnesia",
+                27: "Amnesia",
                 // 30: "Surf",
                 // 33: "SlackOff",
                 36: "Psychic",

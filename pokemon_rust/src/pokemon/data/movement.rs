@@ -91,6 +91,32 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "Amnesia".to_string(),
+            display_name: "Amnesia".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Psychic,
+            category: MoveCategory::Status,
+            base_power: MovePower::Special,
+            power_modifier: None,
+            accuracy: None,
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 20,
+            priority: 0,
+            target_type: TargetType::User,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 100,
+                effect: SimpleEffect::StatChange {
+                    changes: vec![(Stat::SpecialDefense, 2)],
+                    target: SimpleEffectTarget::MoveUser,
+                }
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "AuroraBeam".to_string(),
             display_name: "Aurora Beam".to_string(),
             description: "".to_string(), // TODO
