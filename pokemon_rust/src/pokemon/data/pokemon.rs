@@ -502,6 +502,40 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Kadabra",
+            display_name: "Kadabra",
+            national_number: 64,
+            types: [PokemonType::Psychic],
+            base_stats: [40, 35, 30, 120, 70, 105],
+            male_ratio: Some(75.),
+            growth_rate: GrowthRate::MediumSlow,
+            base_exp_yield: 140,
+            ev_yield: [0, 0, 0, 1, 0, 0],
+            capture_rate: 100,
+            abilities: ["Synchronize", "InnerFocus"],
+            hidden_abilities: ["MagicGuard"],
+            move_table: [
+                // TODO: learns by evolving
+                // 1: "Kinesis",
+                // TODO: learns by evolving
+                // 1: "Psybeam",
+                1: "Kinesis",
+                // 1: "Psybeam",
+                // 1: "Confusion",
+                // 1: "Teleport",
+                // 1: "Disable",
+                // 1: "Flash",
+                // 6: "Disable",
+                // 13: "Flash",
+                // 19: "NightShade",
+                // 26: "Substitute",
+                // 32: "Reflect",
+                // 39: "Recover",
+                45: "Psychic",
+            ],
+        });
+
+        result.push(species! {
             id: "Machop",
             display_name: "Machop",
             national_number: 66,
