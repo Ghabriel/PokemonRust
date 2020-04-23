@@ -331,6 +331,34 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Ekans",
+            display_name: "Ekans",
+            national_number: 23,
+            types: [PokemonType::Poison],
+            base_stats: [35, 60, 44, 40, 54, 55],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 58,
+            ev_yield: [0, 1, 0, 0, 0, 0],
+            capture_rate: 255,
+            abilities: ["Intimidate", "ShedSkin"],
+            hidden_abilities: ["Unnerve"],
+            move_table: [
+                // 1: "Wrap",
+                // 1: "PoisonSting",
+                // 4: "Leer",
+                // 8: "Acid",
+                // 12: "Bite",
+                // 16: "Haze",
+                20: "Glare",
+                // 24: "PoisonJab",
+                28: "Slam",
+                32: "Screech",
+                // 36: "Toxic",
+            ],
+        });
+
+        result.push(species! {
             id: "Pikachu",
             display_name: "Pikachu",
             national_number: 25,
