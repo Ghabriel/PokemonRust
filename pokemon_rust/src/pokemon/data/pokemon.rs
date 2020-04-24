@@ -932,7 +932,7 @@ lazy_static! {
             abilities: ["Levitate", "NeutralizingGas"],
             hidden_abilities: ["Stench"],
             move_table: [
-                // 1: "PoisonGas",
+                1: "PoisonGas",
                 1: "Tackle",
                 4: "Smog",
                 8: "Smokescreen",

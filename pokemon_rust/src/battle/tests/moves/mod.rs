@@ -46,6 +46,7 @@ mod meditate;
 mod mega_kick;
 mod mega_punch;
 mod peck;
+mod poison_gas;
 mod poison_powder;
 mod poison_sting;
 mod pound;
