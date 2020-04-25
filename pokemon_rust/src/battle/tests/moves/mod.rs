@@ -41,6 +41,7 @@ mod karate_chop;
 mod kinesis;
 mod leer;
 mod lick;
+mod lovely_kiss;
 mod mach_punch;
 mod meditate;
 mod mega_kick;

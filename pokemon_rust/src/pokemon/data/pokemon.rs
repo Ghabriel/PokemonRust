@@ -982,6 +982,33 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Jynx",
+            display_name: "Jynx",
+            national_number: 124,
+            types: [PokemonType::Ice, PokemonType::Psychic],
+            base_stats: [65, 50, 35, 115, 95, 95],
+            male_ratio: Some(0.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 159,
+            ev_yield: [0, 0, 0, 2, 0, 0],
+            capture_rate: 120,
+            abilities: ["Oblivious", "Forewarn"],
+            hidden_abilities: ["DrySkin"],
+            move_table: [
+                1: "Pound",
+                6: "Lick",
+                // 12: "Confusion",
+                // 18: "Screech",
+                // 22: "DoubleSlap",
+                // 26: "IcePunch",
+                // 30: "BodySlam",
+                35: "LovelyKiss",
+                40: "Psychic",
+                // 45: "Blizzard",
+            ],
+        });
+
+        result.push(species! {
             id: "Gyarados",
             display_name: "Gyarados",
             national_number: 130,
