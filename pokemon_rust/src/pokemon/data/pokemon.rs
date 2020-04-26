@@ -500,6 +500,34 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Paras",
+            display_name: "Paras",
+            national_number: 46,
+            types: [PokemonType::Bug, PokemonType::Grass],
+            base_stats: [35, 70, 55, 45, 55, 25],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 57,
+            ev_yield: [0, 1, 0, 0, 0, 0],
+            capture_rate: 190,
+            abilities: ["EffectSpore", "DrySkin"],
+            hidden_abilities: ["Damp"],
+            move_table: [
+                1: "Scratch",
+                2: "SleepPowder",
+                4: "StunSpore",
+                6: "PoisonPowder",
+                // 9: "Absorb",
+                // 12: "Growth",
+                // 15: "FurySwipes",
+                19: "Slash",
+                // 23: "LeechLife",
+                27: "Spore",
+                // 31: "XScissor",
+            ],
+        });
+
+        result.push(species! {
             id: "Diglett",
             display_name: "Diglett",
             national_number: 50,
