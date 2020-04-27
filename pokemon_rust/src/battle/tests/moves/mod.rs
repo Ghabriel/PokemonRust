@@ -1,4 +1,5 @@
 mod acid;
+mod acid_armor;
 mod agility;
 mod amnesia;
 mod aurora_beam;

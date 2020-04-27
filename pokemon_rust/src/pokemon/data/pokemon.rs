@@ -1176,7 +1176,7 @@ lazy_static! {
                 30: "AuroraBeam",
                 // 35: "AquaRing",
                 // 40: "MuddyWater",
-                // 45: "AcidArmor",
+                45: "AcidArmor",
                 50: "HydroPump",
                 // 55: "LastResort",
             ],
