@@ -62,6 +62,7 @@ mod rolling_kick;
 mod sand_attack;
 mod scratch;
 mod screech;
+mod sharpen;
 mod sing;
 mod slam;
 mod slash;

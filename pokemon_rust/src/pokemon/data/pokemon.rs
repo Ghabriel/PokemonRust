@@ -1182,6 +1182,33 @@ lazy_static! {
             ],
         });
 
+        result.push(species! {
+            id: "Porygon",
+            display_name: "Porygon",
+            national_number: 137,
+            types: [PokemonType::Normal],
+            base_stats: [65, 60, 70, 85, 75, 40],
+            male_ratio: None,
+            growth_rate: GrowthRate::MediumFast,
+            base_exp_yield: 79,
+            ev_yield: [0, 0, 0, 1, 0, 0],
+            capture_rate: 45,
+            abilities: ["Trace", "Download"],
+            hidden_abilities: ["Analytic"],
+            move_table: [
+                1: "Tackle",
+                4: "Sharpen",
+                // 9: "Psybeam",
+                13: "Agility",
+                // 18: "Barrier",
+                // 22: "TriAttack",
+                // 27: "ThunderWave",
+                // 31: "Conversion",
+                // 36: "Recover",
+                // 40: "HyperBeam",
+            ],
+        });
+
         PokeDex::new(
             result
                 .into_iter()
