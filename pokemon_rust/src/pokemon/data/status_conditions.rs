@@ -96,7 +96,12 @@ pub fn get_status_condition_effect(
             }),
         },
         SimpleStatusCondition::Poison => StatusConditionEffect {
-            can_affect: None,
+            can_affect: Some(|backend, target| {
+                let has_poison_type = backend.has_type(target, PokemonType::Poison);
+                let has_steel_type = backend.has_type(target, PokemonType::Steel);
+
+                !has_poison_type && !has_steel_type
+            }),
             on_stat_calculation: None,
             on_before_use_move: None,
             on_try_use_move: None,
