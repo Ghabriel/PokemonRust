@@ -30,3 +30,5 @@ The documentation covers the most important parts of the code and is a work in p
 ```
 cargo +nightly doc --no-deps --open
 ```
+
+An online version of it can also be found [here](https://ghabriel.github.io/PokemonRust/pokemon_rust/).
