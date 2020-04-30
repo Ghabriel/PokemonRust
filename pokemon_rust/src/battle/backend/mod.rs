@@ -772,9 +772,19 @@ impl BattleBackend {
     }
 
     fn add_non_volatile_status_condition(&mut self, target: usize, condition: StatusCondition) {
+        let status_condition_effect = get_status_condition_effect(condition.into());
+
+        let target_is_not_immune = {
+            let can_affect = status_condition_effect
+                .can_affect
+                .unwrap_or(|_, _| true);
+
+            can_affect(self, target)
+        };
+
         let target_pokemon = self.get_pokemon_mut(target);
 
-        if target_pokemon.status_condition == None {
+        if target_pokemon.status_condition == None && target_is_not_immune {
             target_pokemon.status_condition = Some(condition);
 
             if !self.active_effects.contains_key(&target) {
@@ -784,7 +794,7 @@ impl BattleBackend {
             self.active_effects
                 .get_mut(&target)
                 .unwrap()
-                .push(get_status_condition_effect(condition.into()));
+                .push(status_condition_effect);
 
             self.event_queue
                 .push(BattleEvent::NonVolatileStatusCondition(
@@ -1107,32 +1117,32 @@ impl BattleBackend {
     }
 
     fn get_type_effectiveness(&self, mov: &Move, target: usize) -> f32 {
-        // TODO: handle Pokémon that currently have a different type than their
-        // original ones (e.g after Soak or Roost)
         // TODO: handle moves without types (e.g Struggle)
 
-        self.get_species(target)
-            .types
-            .iter()
+        self.get_pokemon_current_types(target)
             .map(|t| PokemonType::get_effectiveness(mov.move_type, *t))
             .product()
     }
 
     fn check_stab(&self, mov: &Move, user: usize) -> bool {
-        // TODO: handle Pokémon that currently have a different type than their
-        // original ones (e.g after Soak or Roost)
         // TODO: handle moves without types (e.g Struggle)
 
-        let pokedex = get_all_pokemon_species();
-        let user_species_id = &self.pokemon_repository[&user].species_id;
+        self.has_type(user, mov.move_type)
+    }
 
-        pokedex
-            .get_species(user_species_id)
-            .unwrap()
+    pub fn has_type(&self, target: usize, tested_type: PokemonType) -> bool {
+        self.get_pokemon_current_types(target)
+            .find(|t| **t == tested_type)
+            .is_some()
+    }
+
+    fn get_pokemon_current_types(&self, target: usize) -> impl Iterator<Item = &PokemonType> {
+        // TODO: handle Pokémon that currently have a different type than their
+        // original ones (e.g after Soak or Roost)
+
+        self.get_species(target)
             .types
             .iter()
-            .find(|t| **t == mov.move_type)
-            .is_some()
     }
 
     fn check_miss(&mut self, used_move: &UsedMove) -> bool {

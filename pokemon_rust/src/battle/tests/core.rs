@@ -226,6 +226,18 @@ fn halves_physical_damage_of_burned_pokemon() {
 }
 
 #[test]
+fn fire_types_cannot_be_burned() {
+    let mut backend = battle! {
+        "Hitmonchan" 24 (max ivs, Serious) vs "Charmander" 24 (max ivs, Serious)
+    };
+
+    test_rng_mut!(backend.rng).force_secondary_effect(1);
+    let events = backend.process_turn("FirePunch", "Slash");
+    assert_event!(events[1], Damage { target: 1, .. });
+    assert_eq!(backend.get_pokemon(1).status_condition, None);
+}
+
+#[test]
 fn deals_damage_to_poisoned_pokemon() {
     let mut backend = battle! {
         "Weedle" 5 (max ivs, Serious) vs "Metapod" 5 (max ivs, Serious)

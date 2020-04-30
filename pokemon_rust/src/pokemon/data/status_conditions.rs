@@ -6,6 +6,7 @@ use crate::{
             Move,
             MoveCategory,
         },
+        PokemonType,
         SimpleStatusCondition,
         Stat,
         StatusCondition,
@@ -16,6 +17,9 @@ use std::fmt::{Debug, Error, Formatter};
 
 #[derive(Clone)]
 pub struct StatusConditionEffect {
+    /// Determines if this status condition can affect a given Pokémon.
+    pub can_affect: Option<fn(backend: &BattleBackend, target: usize) -> bool>,
+
     /// Called when backend.get_stat() is called, receiving the value that it
     /// is about to return.
     pub on_stat_calculation: Option<fn(
@@ -63,6 +67,9 @@ pub fn get_status_condition_effect(
 ) -> StatusConditionEffect {
     match status_condition {
         SimpleStatusCondition::Burn => StatusConditionEffect {
+            can_affect: Some(|backend, target| {
+                !backend.has_type(target, PokemonType::Fire)
+            }),
             on_stat_calculation: None,
             on_before_use_move: None,
             on_try_use_move: None,
@@ -89,6 +96,7 @@ pub fn get_status_condition_effect(
             }),
         },
         SimpleStatusCondition::Poison => StatusConditionEffect {
+            can_affect: None,
             on_stat_calculation: None,
             on_before_use_move: None,
             on_try_use_move: None,
@@ -109,6 +117,7 @@ pub fn get_status_condition_effect(
             }),
         },
         SimpleStatusCondition::Paralysis => StatusConditionEffect {
+            can_affect: None,
             on_stat_calculation: Some(|_backend, _target, stat, value| {
                 if stat == Stat::Speed {
                     value / 2
@@ -128,6 +137,7 @@ pub fn get_status_condition_effect(
             on_turn_end: None,
         },
         SimpleStatusCondition::Freeze => StatusConditionEffect {
+            can_affect: None,
             on_stat_calculation: None,
             on_before_use_move: Some(|backend, target, _mov| {
                 if backend.check_freeze_thaw() {
@@ -142,6 +152,7 @@ pub fn get_status_condition_effect(
             on_turn_end: None,
         },
         SimpleStatusCondition::Sleep => StatusConditionEffect {
+            can_affect: None,
             on_stat_calculation: None,
             on_before_use_move: Some(|backend, target, _mov| {
                 match backend.get_non_volatile_status_condition_mut(target) {
