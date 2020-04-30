@@ -14,6 +14,7 @@ use crate::pokemon::{
         TargetType,
     },
     PokemonType,
+    SimpleStatusCondition,
     Stat,
     StatusCondition,
 };
@@ -738,7 +739,7 @@ lazy_static! {
             accuracy_modifier: None,
             flags: HashSet::new(),
             on_usage_attempt: Some(|backend, _user, target, _mov| {
-                if backend.has_non_volatile_status_condition(target) {
+                if !backend.can_inflict_non_volatile_status_condition_to(target, SimpleStatusCondition::Paralysis) {
                     return ModifiedUsageAttempt::Fail;
                 }
 
@@ -977,7 +978,7 @@ lazy_static! {
             accuracy_modifier: None,
             flags: HashSet::new(),
             on_usage_attempt: Some(|backend, _user, target, _mov| {
-                if backend.has_non_volatile_status_condition(target) {
+                if !backend.can_inflict_non_volatile_status_condition_to(target, SimpleStatusCondition::Sleep) {
                     return ModifiedUsageAttempt::Fail;
                 }
 
@@ -1150,7 +1151,7 @@ lazy_static! {
             accuracy_modifier: None,
             flags: HashSet::new(),
             on_usage_attempt: Some(|backend, _user, target, _mov| {
-                if backend.has_non_volatile_status_condition(target) {
+                if !backend.can_inflict_non_volatile_status_condition_to(target, SimpleStatusCondition::Sleep) {
                     return ModifiedUsageAttempt::Fail;
                 }
 
@@ -1288,7 +1289,7 @@ lazy_static! {
             accuracy_modifier: None,
             flags: HashSet::new(),
             on_usage_attempt: Some(|backend, _user, target, _mov| {
-                if backend.has_non_volatile_status_condition(target) {
+                if !backend.can_inflict_non_volatile_status_condition_to(target, SimpleStatusCondition::Poison) {
                     return ModifiedUsageAttempt::Fail;
                 }
 
@@ -1317,7 +1318,7 @@ lazy_static! {
             accuracy_modifier: None,
             flags: HashSet::new(),
             on_usage_attempt: Some(|backend, _user, target, _mov| {
-                if backend.has_non_volatile_status_condition(target) {
+                if !backend.can_inflict_non_volatile_status_condition_to(target, SimpleStatusCondition::Poison) {
                     return ModifiedUsageAttempt::Fail;
                 }
 
@@ -1644,7 +1645,7 @@ lazy_static! {
             accuracy_modifier: None,
             flags: HashSet::new(),
             on_usage_attempt: Some(|backend, _user, target, _mov| {
-                if backend.has_non_volatile_status_condition(target) {
+                if !backend.can_inflict_non_volatile_status_condition_to(target, SimpleStatusCondition::Sleep) {
                     return ModifiedUsageAttempt::Fail;
                 }
 
@@ -1716,7 +1717,7 @@ lazy_static! {
             accuracy_modifier: None,
             flags: HashSet::new(),
             on_usage_attempt: Some(|backend, _user, target, _mov| {
-                if backend.has_non_volatile_status_condition(target) {
+                if !backend.can_inflict_non_volatile_status_condition_to(target, SimpleStatusCondition::Sleep) {
                     return ModifiedUsageAttempt::Fail;
                 }
 
@@ -1820,7 +1821,7 @@ lazy_static! {
             accuracy_modifier: None,
             flags: HashSet::new(),
             on_usage_attempt: Some(|backend, _user, target, _mov| {
-                if backend.has_non_volatile_status_condition(target) {
+                if !backend.can_inflict_non_volatile_status_condition_to(target, SimpleStatusCondition::Sleep) {
                     return ModifiedUsageAttempt::Fail;
                 }
 
@@ -1898,7 +1899,7 @@ lazy_static! {
             accuracy_modifier: None,
             flags: HashSet::new(),
             on_usage_attempt: Some(|backend, _user, target, _mov| {
-                if backend.has_non_volatile_status_condition(target) {
+                if !backend.can_inflict_non_volatile_status_condition_to(target, SimpleStatusCondition::Paralysis) {
                     return ModifiedUsageAttempt::Fail;
                 }
 
@@ -2117,7 +2118,7 @@ lazy_static! {
             accuracy_modifier: None,
             flags: HashSet::new(),
             on_usage_attempt: Some(|backend, _user, target, _mov| {
-                if backend.has_non_volatile_status_condition(target) {
+                if !backend.can_inflict_non_volatile_status_condition_to(target, SimpleStatusCondition::Paralysis) {
                     return ModifiedUsageAttempt::Fail;
                 }
 

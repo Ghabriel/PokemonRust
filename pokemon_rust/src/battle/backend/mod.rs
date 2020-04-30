@@ -772,19 +772,9 @@ impl BattleBackend {
     }
 
     fn add_non_volatile_status_condition(&mut self, target: usize, condition: StatusCondition) {
-        let status_condition_effect = get_status_condition_effect(condition.into());
+        if self.can_inflict_non_volatile_status_condition_to(target, condition.into()) {
+            let target_pokemon = self.get_pokemon_mut(target);
 
-        let target_is_not_immune = {
-            let can_affect = status_condition_effect
-                .can_affect
-                .unwrap_or(|_, _| true);
-
-            can_affect(self, target)
-        };
-
-        let target_pokemon = self.get_pokemon_mut(target);
-
-        if target_pokemon.status_condition == None && target_is_not_immune {
             target_pokemon.status_condition = Some(condition);
 
             if !self.active_effects.contains_key(&target) {
@@ -794,7 +784,7 @@ impl BattleBackend {
             self.active_effects
                 .get_mut(&target)
                 .unwrap()
-                .push(status_condition_effect);
+                .push(get_status_condition_effect(condition.into()));
 
             self.event_queue
                 .push(BattleEvent::NonVolatileStatusCondition(
@@ -960,6 +950,22 @@ impl BattleBackend {
 
     pub fn has_non_volatile_status_condition(&self, pokemon: usize) -> bool {
         self.get_pokemon(pokemon).status_condition.is_some()
+    }
+
+    pub fn can_inflict_non_volatile_status_condition_to(
+        &self,
+        target: usize,
+        condition: SimpleStatusCondition,
+    ) -> bool {
+        let target_is_not_immune = {
+            let can_affect = get_status_condition_effect(condition)
+                .can_affect
+                .unwrap_or(|_, _| true);
+
+            can_affect(self, target)
+        };
+
+        !self.has_non_volatile_status_condition(target) && target_is_not_immune
     }
 
     fn get_attack_critical_hit(&self, pokemon: usize) -> usize {

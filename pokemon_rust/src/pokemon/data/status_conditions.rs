@@ -117,7 +117,9 @@ pub fn get_status_condition_effect(
             }),
         },
         SimpleStatusCondition::Paralysis => StatusConditionEffect {
-            can_affect: None,
+            can_affect: Some(|backend, target| {
+                !backend.has_type(target, PokemonType::Electric)
+            }),
             on_stat_calculation: Some(|_backend, _target, stat, value| {
                 if stat == Stat::Speed {
                     value / 2

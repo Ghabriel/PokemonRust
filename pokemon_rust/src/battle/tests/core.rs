@@ -280,6 +280,23 @@ fn halves_speed_of_paralyzed_pokemon() {
 }
 
 #[test]
+fn electric_types_cannot_be_paralyzed() {
+    let mut backend = battle! {
+        "Pikachu" 4 (max ivs, Serious) vs "Pikachu" 3 (max ivs, Serious)
+    };
+
+    test_rng_mut!(backend.rng).force_secondary_effect(1);
+    let turn1 = backend.process_turn("Growl", "ThunderShock");
+    assert_event!(turn1[3], Damage { target: 0, .. });
+    assert_eq!(backend.get_pokemon(0).status_condition, None);
+
+    test_rng_mut!(backend.rng).force_secondary_effect(1);
+    let turn2 = backend.process_turn("ThunderWave", "Growl");
+    assert_event!(turn2[1], FailedMove { move_user: 0, .. });
+    assert_eq!(backend.get_pokemon(1).status_condition, None);
+}
+
+#[test]
 fn prevents_moves_of_frozen_pokemon() {
     let mut backend = battle! {
         "Hitmonchan" 24 (max ivs, Serious) vs "Metapod" 24 (max ivs, Serious)
