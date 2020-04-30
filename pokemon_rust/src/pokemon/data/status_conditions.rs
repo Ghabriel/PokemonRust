@@ -137,7 +137,9 @@ pub fn get_status_condition_effect(
             on_turn_end: None,
         },
         SimpleStatusCondition::Freeze => StatusConditionEffect {
-            can_affect: None,
+            can_affect: Some(|backend, target| {
+                !backend.has_type(target, PokemonType::Ice)
+            }),
             on_stat_calculation: None,
             on_before_use_move: Some(|backend, target, _mov| {
                 if backend.check_freeze_thaw() {

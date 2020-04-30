@@ -311,3 +311,17 @@ fn makes_freeze_expire() {
         ..
     });
 }
+
+#[test]
+fn ice_types_cannot_be_frozen() {
+    let mut backend = battle! {
+        "Lapras" 45 (max ivs, Serious) vs "Jynx" 45 (max ivs, Serious)
+
+    };
+    backend.get_pokemon_mut(1).stats[5] = 0;
+
+    test_rng_mut!(backend.rng).force_secondary_effect(1);
+    let events = backend.process_turn("IceBeam", "Psychic");
+    assert_event!(events[1], Damage { target: 1, .. });
+    assert_eq!(backend.get_pokemon(1).status_condition, None);
+}
