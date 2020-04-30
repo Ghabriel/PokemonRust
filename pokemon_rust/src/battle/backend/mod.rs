@@ -1088,10 +1088,9 @@ impl BattleBackend {
             } else {
                 1.
             };
-            let burn = 1.; // TODO
             let other = 1.; // TODO
 
-            targets * weather * critical * random * stab * effectiveness * burn * other
+            targets * weather * critical * random * stab * effectiveness * other
         };
 
         let power_stat_ratio = (power * stat_ratio).floor();
