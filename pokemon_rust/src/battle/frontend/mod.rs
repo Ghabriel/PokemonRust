@@ -353,6 +353,11 @@ impl BattleSystem {
                     text: format!("{} is hurt by its poison!", display_name),
                 }));
             },
+            DamageCause::Toxic => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: format!("{} is hurt by its poison!", display_name),
+                }));
+            },
         }
 
         let info_card = match backend.get_pokemon_team(event_data.target) {

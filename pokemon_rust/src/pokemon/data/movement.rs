@@ -2136,6 +2136,35 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "Toxic".to_string(),
+            display_name: "Toxic".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Poison,
+            category: MoveCategory::Status,
+            base_power: MovePower::Special,
+            power_modifier: None,
+            accuracy: Some(90),
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: Some(|backend, _user, target, _mov| {
+                if !backend.can_inflict_non_volatile_status_condition_to(target, SimpleStatusCondition::Toxic) {
+                    return ModifiedUsageAttempt::Fail;
+                }
+
+                ModifiedUsageAttempt::Continue
+            }),
+            pp: 10,
+            priority: 0,
+            target_type: TargetType::SingleAdjacentTarget,
+            multi_hit: None,
+            secondary_effect: Some(SecondaryEffect {
+                chance: 100,
+                effect: SimpleEffect::StatusCondition(StatusCondition::Toxic { counter: 1 }),
+            }),
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "VineWhip".to_string(),
             display_name: "Vine Whip".to_string(),
             description: "".to_string(), // TODO

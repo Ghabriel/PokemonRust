@@ -266,6 +266,46 @@ fn poison_types_cannot_be_poisoned() {
 }
 
 #[test]
+fn deals_escalating_damage_to_badly_poisoned_pokemon() {
+    let mut backend = battle! {
+        "Koffing" 36 (max ivs, Serious) vs "Metapod" 36 (max ivs, Serious)
+    };
+
+    test_rng_mut!(backend.rng).force_secondary_effect(1);
+    let turn1 = backend.process_turn("Toxic", "Harden");
+    let turn2 = backend.process_turn("Sludge", "Harden");
+    let turn3 = backend.process_turn("Toxic", "Harden");
+
+    match (&turn1[4], &turn2[4], &turn3[4]) {
+        (
+            BattleEvent::Damage(Damage { target: 1, amount: a1, .. }),
+            BattleEvent::Damage(Damage { target: 1, amount: a2, .. }),
+            BattleEvent::Damage(Damage { target: 1, amount: a3, .. }),
+        ) => {
+            let max_hp = backend.get_stat(1, Stat::HP);
+            let base_fraction = max_hp as f32 / 16.;
+
+            assert_eq!(*a1, base_fraction.floor() as usize);
+            assert_eq!(*a2, (2. * base_fraction).floor() as usize);
+            assert_eq!(*a3, (3. * base_fraction).floor() as usize);
+        },
+        _ => panic!("Pattern mismatch"),
+    }
+}
+
+#[test]
+fn poison_types_cannot_be_badly_poisoned() {
+    let mut backend = battle! {
+        "Koffing" 36 (max ivs, Serious) vs "Bulbasaur" 30 (max ivs, Serious)
+    };
+
+    test_rng_mut!(backend.rng).force_secondary_effect(1);
+    let events = backend.process_turn("Toxic", "RazorLeaf");
+    assert_event!(events[1], FailedMove { move_user: 0, .. });
+    assert_eq!(backend.get_pokemon(1).status_condition, None);
+}
+
+#[test]
 fn might_prevent_moves_of_paralyzed_pokemon() {
     let mut backend = battle! {
         "Hitmonchan" 24 (max ivs, Serious) vs "Metapod" 24 (max ivs, Serious)

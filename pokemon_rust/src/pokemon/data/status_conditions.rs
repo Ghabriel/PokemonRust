@@ -121,6 +121,40 @@ pub fn get_status_condition_effect(
                 );
             }),
         },
+        SimpleStatusCondition::Toxic => StatusConditionEffect {
+            can_affect: Some(|backend, target| {
+                let has_poison_type = backend.has_type(target, PokemonType::Poison);
+                let has_steel_type = backend.has_type(target, PokemonType::Steel);
+
+                !has_poison_type && !has_steel_type
+            }),
+            on_stat_calculation: None,
+            on_before_use_move: None,
+            on_try_use_move: None,
+            on_try_deal_damage: None,
+            on_turn_end: Some(|backend, target| {
+                let max_hp = backend.get_stat(target, Stat::HP) as f32;
+
+                match backend.get_non_volatile_status_condition_mut(target) {
+                    Some(StatusCondition::Toxic { counter }) => {
+                        let damage = (max_hp * (*counter as f32) / 16.).floor().max(1.) as usize;
+
+                        *counter += 1;
+
+                        backend.inflict_calculated_damage(
+                            target,
+                            damage,
+                            TypeEffectiveness::Normal,
+                            false,
+                            None,
+                            false,
+                            DamageCause::Toxic,
+                        );
+                    },
+                    _ => unreachable!(),
+                }
+            }),
+        },
         SimpleStatusCondition::Paralysis => StatusConditionEffect {
             can_affect: Some(|backend, target| {
                 !backend.has_type(target, PokemonType::Electric)

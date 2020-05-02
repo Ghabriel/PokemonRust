@@ -84,6 +84,7 @@ mod thunderbolt;
 mod thunder_punch;
 mod thunder_shock;
 mod thunder_wave;
+mod toxic;
 mod vine_whip;
 mod vise_grip;
 mod waterfall;

@@ -165,6 +165,7 @@ pub enum DamageCause {
     Move,
     Burn,
     Poison,
+    Toxic,
 }
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
