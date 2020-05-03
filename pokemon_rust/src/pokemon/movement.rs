@@ -29,7 +29,7 @@ pub struct Move {
     /// The accuracy of this move. This is None for moves that never miss,
     /// e.g Swift.
     pub accuracy: Option<usize>,
-    pub accuracy_modifier: Option<MoveCallback<ModifiedAccuracy>>,
+    pub accuracy_modifier: Option<ExtendedMoveCallback<ModifiedAccuracy>>,
     pub flags: HashSet<MoveFlag>,
     pub on_usage_attempt: Option<ExtendedMoveCallback<ModifiedUsageAttempt>>,
     pub pp: usize,
@@ -65,9 +65,11 @@ pub enum MovePower {
 pub type MoveCallback<T = ()> = fn(user: &Pokemon, target: &Pokemon, movement: &Move) -> T;
 pub type ExtendedMoveCallback<T = ()> = fn(backend: &BattleBackend, user: usize, target: usize, movement: &Move) -> T;
 
+#[derive(Eq, PartialEq)]
 pub enum ModifiedAccuracy {
     Miss,
     Hit,
+    OriginalValue,
     NewValue(usize),
 }
 

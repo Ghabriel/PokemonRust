@@ -1155,21 +1155,24 @@ impl BattleBackend {
     fn check_miss(&mut self, used_move: &UsedMove) -> bool {
         let mov = used_move.movement;
 
-        let accuracy = match mov.accuracy_modifier {
+        let mut accuracy = match mov.accuracy_modifier {
             Some(modifier) => {
-                let user = &self.pokemon_repository[&used_move.user];
-                let target = &self.pokemon_repository[&used_move.target];
-                modifier(user, target, mov)
+                modifier(self, used_move.user, used_move.target, mov)
             },
-            None => match mov.accuracy {
+            None => ModifiedAccuracy::OriginalValue,
+        };
+
+        if accuracy == ModifiedAccuracy::OriginalValue {
+            accuracy = match mov.accuracy {
                 Some(accuracy) => ModifiedAccuracy::NewValue(accuracy),
                 None => ModifiedAccuracy::Hit,
-            }
-        };
+            };
+        }
 
         match accuracy {
             ModifiedAccuracy::Miss => true,
             ModifiedAccuracy::Hit => false,
+            ModifiedAccuracy::OriginalValue => unreachable!(),
             ModifiedAccuracy::NewValue(accuracy) => {
                 let accuracy = accuracy as f32;
 

@@ -661,12 +661,15 @@ lazy_static! {
             base_power: MovePower::Special,
             power_modifier: None,
             accuracy: Some(30),
-            accuracy_modifier: Some(|user, target, _mov| {
-                if target.level > user.level {
+            accuracy_modifier: Some(|backend, user, target, _mov| {
+                let user_level = backend.get_pokemon(user).level;
+                let target_level = backend.get_pokemon(target).level;
+
+                if target_level > user_level {
                     return ModifiedAccuracy::Miss;
                 }
 
-                return ModifiedAccuracy::NewValue(user.level - target.level + 30);
+                return ModifiedAccuracy::NewValue(user_level - target_level + 30);
             }),
             flags: flags![MoveFlag::OneHitKO],
             on_usage_attempt: None,
@@ -791,12 +794,15 @@ lazy_static! {
             base_power: MovePower::Special,
             power_modifier: None,
             accuracy: Some(30),
-            accuracy_modifier: Some(|user, target, _mov| {
-                if target.level > user.level {
+            accuracy_modifier: Some(|backend, user, target, _mov| {
+                let user_level = backend.get_pokemon(user).level;
+                let target_level = backend.get_pokemon(target).level;
+
+                if target_level > user_level {
                     return ModifiedAccuracy::Miss;
                 }
 
-                return ModifiedAccuracy::NewValue(user.level - target.level + 30);
+                return ModifiedAccuracy::NewValue(user_level - target_level + 30);
             }),
             flags: flags![MoveFlag::OneHitKO],
             on_usage_attempt: None,
@@ -906,12 +912,15 @@ lazy_static! {
             base_power: MovePower::Special,
             power_modifier: None,
             accuracy: Some(30),
-            accuracy_modifier: Some(|user, target, _mov| {
-                if target.level > user.level {
+            accuracy_modifier: Some(|backend, user, target, _mov| {
+                let user_level = backend.get_pokemon(user).level;
+                let target_level = backend.get_pokemon(target).level;
+
+                if target_level > user_level {
                     return ModifiedAccuracy::Miss;
                 }
 
-                return ModifiedAccuracy::NewValue(user.level - target.level + 30);
+                return ModifiedAccuracy::NewValue(user_level - target_level + 30);
             }),
             flags: flags![MoveFlag::OneHitKO],
             on_usage_attempt: None,
@@ -2144,7 +2153,13 @@ lazy_static! {
             base_power: MovePower::Special,
             power_modifier: None,
             accuracy: Some(90),
-            accuracy_modifier: None,
+            accuracy_modifier: Some(|backend, user, _target, _mov| {
+                if backend.has_type(user, PokemonType::Poison) {
+                    return ModifiedAccuracy::Hit;
+                }
+
+                ModifiedAccuracy::OriginalValue
+            }),
             flags: HashSet::new(),
             on_usage_attempt: Some(|backend, _user, target, _mov| {
                 if !backend.can_inflict_non_volatile_status_condition_to(target, SimpleStatusCondition::Toxic) {

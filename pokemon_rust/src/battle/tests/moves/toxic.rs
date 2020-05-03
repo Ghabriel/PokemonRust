@@ -30,3 +30,14 @@ fn toxic_fails_if_the_target_already_has_non_volatile_condition() {
 
     assert_event!(events[1], FailedMove { move_user: 0 });
 }
+
+#[test]
+fn toxic_never_misses_when_used_by_a_poison_type() {
+    let mut backend = battle! {
+        "Koffing" 36 (max ivs, Serious) vs "Metapod" 36 (max ivs, Serious)
+    };
+
+    let events = backend.process_turn("Toxic", "Harden");
+
+    assert_eq!(test_rng!(backend.rng).get_last_miss_check_chance(), None);
+}
