@@ -1037,6 +1037,26 @@ lazy_static! {
         });
 
         result.push(species! {
+            id: "Magikarp",
+            display_name: "Magikarp",
+            national_number: 129,
+            types: [PokemonType::Water],
+            base_stats: [20, 10, 55, 15, 20, 80],
+            male_ratio: Some(50.),
+            growth_rate: GrowthRate::Slow,
+            base_exp_yield: 40,
+            ev_yield: [0, 0, 0, 0, 0, 1],
+            capture_rate: 255,
+            abilities: ["SwiftSwim"],
+            hidden_abilities: ["Rattled"],
+            move_table: [
+                1: "Splash",
+                15: "Tackle",
+                25: "Flail",
+            ],
+        });
+
+        result.push(species! {
             id: "Gyarados",
             display_name: "Gyarados",
             national_number: 130,

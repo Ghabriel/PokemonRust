@@ -1819,6 +1819,26 @@ lazy_static! {
         });
 
         result.push(Move {
+            id: "Splash".to_string(),
+            display_name: "Splash".to_string(),
+            description: "".to_string(), // TODO
+            move_type: PokemonType::Normal,
+            category: MoveCategory::Status,
+            base_power: MovePower::Special,
+            power_modifier: None,
+            accuracy: None,
+            accuracy_modifier: None,
+            flags: HashSet::new(),
+            on_usage_attempt: None,
+            pp: 40,
+            priority: 0,
+            target_type: TargetType::User,
+            multi_hit: None,
+            secondary_effect: None,
+            critical_hit: false,
+        });
+
+        result.push(Move {
             id: "Spore".to_string(),
             display_name: "Spore".to_string(),
             description: "".to_string(), // TODO

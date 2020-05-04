@@ -71,6 +71,7 @@ mod sleep_powder;
 mod sludge;
 mod smog;
 mod smokescreen;
+mod splash;
 mod spore;
 mod strength;
 mod string_shot;

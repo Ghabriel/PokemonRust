@@ -328,6 +328,15 @@ impl BattleSystem {
             text: format!("{} used {}!", display_name, event_data.move_name),
         }));
 
+        match self.event_queue.front() {
+            Some(BattleEvent::UseMove(_)) | Some(BattleEvent::ChangeTurn(_)) => {
+                animations.push(Box::new(TextAnimation::PendingStart {
+                    text: "But nothing happened!".to_string(),
+                }));
+            },
+            _ => { },
+        }
+
         self.active_animation_sequence = Some(AnimationSequence {
             animations: animations.into(),
         });
