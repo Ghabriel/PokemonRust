@@ -215,6 +215,5 @@ pub fn get_status_condition_effect(
             on_try_deal_damage: None,
             on_turn_end: None,
         },
-        _ => todo!(),
     }
 }

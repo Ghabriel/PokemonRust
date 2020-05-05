@@ -246,14 +246,14 @@ impl BattleRng for TestRng {
         }
     }
 
-    fn check_uniform_multi_hit(&mut self, lowest: usize, highest: usize) -> usize {
+    fn check_uniform_multi_hit(&mut self, _lowest: usize, highest: usize) -> usize {
         match self.uniform_multi_hit_value {
             Some(value) => value,
             None => highest,
         }
     }
 
-    fn check_custom_multi_hit(&mut self, lowest: isize, highest: isize) -> isize {
+    fn check_custom_multi_hit(&mut self, _lowest: isize, highest: isize) -> isize {
         match self.custom_multi_hit_value {
             Some(value) => value,
             None => highest,

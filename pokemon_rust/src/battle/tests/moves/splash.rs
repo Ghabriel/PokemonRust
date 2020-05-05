@@ -1,5 +1,3 @@
-use crate::battle::backend::{BattleEvent, StatChangeKind};
-
 use super::super::{prelude::*, TestMethods};
 
 #[test]

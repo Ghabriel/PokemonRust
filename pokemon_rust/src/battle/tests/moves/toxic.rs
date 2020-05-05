@@ -37,7 +37,7 @@ fn toxic_never_misses_when_used_by_a_poison_type() {
         "Koffing" 36 (max ivs, Serious) vs "Metapod" 36 (max ivs, Serious)
     };
 
-    let events = backend.process_turn("Toxic", "Harden");
+    backend.process_turn("Toxic", "Harden");
 
     assert_eq!(test_rng!(backend.rng).get_last_miss_check_chance(), None);
 }
