@@ -322,7 +322,7 @@ lazy_static! {
                 3: "Growl",
                 8: "Leer",
                 // 11: "FocusEnergy",
-                // 16: "FuryAttack",
+                16: "FuryAttack",
                 // 19: "MirrorMove",
                 // 24: "Roost",
                 27: "Agility",

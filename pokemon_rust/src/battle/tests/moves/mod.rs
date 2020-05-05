@@ -26,6 +26,7 @@ mod fire_punch;
 mod fissure;
 mod flamethrower;
 mod flash;
+mod fury_attack;
 mod glare;
 mod growl;
 mod guillotine;
